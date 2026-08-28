@@ -1,0 +1,20 @@
+{
+  "max_output": 50,
+  "candidate_limit": 100,
+  "test_url": "https://www.gstatic.com/generate_204",
+  "connect_timeout": 6,
+  "request_timeout": 10,
+  "min_successes": 1,
+  "max_parallel": 6,
+  "history_file": "output/history.json",
+  "sources": [
+    {
+      "name": "radikal-top100",
+      "url": "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/top100.txt"
+    },
+    {
+      "name": "radikal-fast",
+      "url": "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/fast/configs.txt"
+    }
+  ]
+}

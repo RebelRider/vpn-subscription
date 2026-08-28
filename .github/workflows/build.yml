@@ -1,0 +1,59 @@
+name: Build Best50
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install sing-box
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="1.13.19"
+          curl -fsSL \
+            "https://github.com/SagerNet/sing-box/releases/download/v${VERSION}/sing-box-${VERSION}-linux-amd64.tar.gz" \
+            -o /tmp/sing-box.tgz
+          tar -xzf /tmp/sing-box.tgz -C /tmp
+          sudo install "/tmp/sing-box-${VERSION}-linux-amd64/sing-box" /usr/local/bin/sing-box
+          sing-box version
+
+      - name: Build Best50
+        run: python scripts/build.py
+
+      - name: Publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "best50-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add output/best50.txt output/status.json output/history.json
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "chore: update Best50"
+          git push

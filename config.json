@@ -1,11 +1,15 @@
 {
   "max_output": 50,
   "candidate_limit": 100,
+  "finalist_limit": 50,
   "test_url": "https://www.gstatic.com/generate_204",
   "connect_timeout": 6,
   "request_timeout": 10,
   "min_successes": 1,
   "max_parallel": 6,
+  "max_parallel_final": 5,
+  "final_test_attempts": 3,
+  "minimum_final_successes": 2,
   "history_file": "output/history.json",
   "sources": [
     {

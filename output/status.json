@@ -1,309 +1,518 @@
 {
-  "generated_at": 1787903499,
-  "candidates": 100,
-  "working": 78,
-  "published": 50,
+  "generated_at": 1787956495,
+  "candidates_discovered": 935,
+  "candidates_tested": 100,
+  "first_pass_working": 86,
+  "finalists": 50,
+  "final_stable": 50,
+  "published": {
+    "best20": 20,
+    "best50": 50,
+    "best100": 50
+  },
   "test_url": "https://www.gstatic.com/generate_204",
+  "final_attempts": 3,
+  "minimum_final_successes": 2,
   "top": [
     {
       "rank": 1,
-      "latency_ms": 62.7,
-      "successes": 1,
-      "fingerprint": "725f4692103872567981f32a3867e95a5763249765c46723785d753fd7a8c1de"
+      "score": 0.9746,
+      "median_latency_ms": 49.5,
+      "best_latency_ms": 48.6,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "f64d55cce84813dc7a0818ae45b5357996e34154a110aecfa6ff101fe00a34d6"
     },
     {
       "rank": 2,
-      "latency_ms": 65.5,
-      "successes": 1,
-      "fingerprint": "e6f4f538533c1321df6b3f89c850add2710b37f29330fb678750055cede23792"
+      "score": 0.9711,
+      "median_latency_ms": 51.8,
+      "best_latency_ms": 49.5,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "fe1fe7306a30d213c5f8b2b600de001fd92e6a61b56a48998c0b65e1219ed508"
     },
     {
       "rank": 3,
-      "latency_ms": 65.5,
-      "successes": 1,
-      "fingerprint": "327f4e81ec1b0fb8c6d16caf089d8360dc43f497ca35723519c9c8edb8a34292"
+      "score": 0.9695,
+      "median_latency_ms": 63.2,
+      "best_latency_ms": 61.5,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "780a0177b607b1325321b21a8867825b77781f196a2fb32a0834a246f3bf70f9"
     },
     {
       "rank": 4,
-      "latency_ms": 66.6,
-      "successes": 1,
-      "fingerprint": "7259890646e397da79820359bab6453bbaf2983eb45fc9f221e2a84dd228340f"
+      "score": 0.9657,
+      "median_latency_ms": 70.5,
+      "best_latency_ms": 69.0,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "ec886bdbb39aea01af779e500822415385e372fe29faa4af468593ff20246bb1"
     },
     {
       "rank": 5,
-      "latency_ms": 67.1,
-      "successes": 1,
-      "fingerprint": "51e4c17acbdaa5695e998a1ac6cec3a06cb7f2b0fad4311eeb087b167a459d90"
+      "score": 0.9617,
+      "median_latency_ms": 63.5,
+      "best_latency_ms": 60.4,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "fa504d69001f651daebcd64a028cb6be98c144101f043e25109771586b4143b9"
     },
     {
       "rank": 6,
-      "latency_ms": 68.6,
-      "successes": 1,
-      "fingerprint": "b1cd824bd60227adbadb5ccb9d57b8da3288a5057a3d6e4399edf6512cd6b9e2"
+      "score": 0.9587,
+      "median_latency_ms": 52.2,
+      "best_latency_ms": 50.9,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "1994be9dff8151d02d3068d247aac54e34d200e67ade00373eda224604b5bf2a"
     },
     {
       "rank": 7,
-      "latency_ms": 69.1,
-      "successes": 1,
-      "fingerprint": "ddcf5814157c53b16c9ad7450e640129de414d7169daef02c9fd84e20d39076a"
-    },
-    {
-      "rank": 8,
-      "latency_ms": 69.7,
-      "successes": 1,
-      "fingerprint": "a45605f10110cd0e945374563f0feebcf582648537dcce3d19d21276dbf28eec"
-    },
-    {
-      "rank": 9,
-      "latency_ms": 69.7,
-      "successes": 1,
-      "fingerprint": "b54cbdde774c6cf758ecdac86b3ed3e38435ffa6c172a0e74565c3e082ae64ae"
-    },
-    {
-      "rank": 10,
-      "latency_ms": 70.1,
-      "successes": 1,
-      "fingerprint": "9a424795181c49e423ce692129968ad4ccbe1f67f5e36ae6de041ba45162bf0c"
-    },
-    {
-      "rank": 11,
-      "latency_ms": 70.3,
-      "successes": 1,
-      "fingerprint": "83a906cafe1cc77acdf3bd52f24c79da053259325924425e632078af7b16c855"
-    },
-    {
-      "rank": 12,
-      "latency_ms": 70.7,
-      "successes": 1,
-      "fingerprint": "28cf8277c1ac8e1ba5bcc02b29cc9f3265efcafac1da89865be731da536834a1"
-    },
-    {
-      "rank": 13,
-      "latency_ms": 71.7,
-      "successes": 1,
-      "fingerprint": "8c69c7a46d21737f31aa05563cb5337e47064beba31ca71fbec2b72dc297d9b8"
-    },
-    {
-      "rank": 14,
-      "latency_ms": 72.0,
-      "successes": 1,
-      "fingerprint": "8a8dc1810043e7d3b8ea7b210c3881a5165efe9e23c8c287e0d67f52dadf162b"
-    },
-    {
-      "rank": 15,
-      "latency_ms": 72.9,
-      "successes": 1,
-      "fingerprint": "251304305fe5e97787928df77a7ab10f3bd146a927ea1969e6130096eec90302"
-    },
-    {
-      "rank": 16,
-      "latency_ms": 75.8,
-      "successes": 1,
-      "fingerprint": "5ccdaffbb24221d962fdb2ca6b5581b59561a79197457ba9ebe6780922d29eb9"
-    },
-    {
-      "rank": 17,
-      "latency_ms": 84.0,
-      "successes": 1,
-      "fingerprint": "663a0106b63272ad22d82cd83fb857d136318e057e76cb1269f72bbe28fbad8f"
-    },
-    {
-      "rank": 18,
-      "latency_ms": 84.8,
-      "successes": 1,
-      "fingerprint": "80a4711b2f90a8d5e20df70c7cfd97ed9a70e5c9d59263f2d7031bc54992e1bf"
-    },
-    {
-      "rank": 19,
-      "latency_ms": 84.9,
-      "successes": 1,
-      "fingerprint": "742b0f33193fa6b890f92f74a8dff21d4ffe20ebe5e0640025a171a883988336"
-    },
-    {
-      "rank": 20,
-      "latency_ms": 91.7,
-      "successes": 1,
-      "fingerprint": "f951eeb750359862e601102d824f31eccacfcd52b1c252ee28585c2ce2669e6a"
-    },
-    {
-      "rank": 21,
-      "latency_ms": 94.1,
-      "successes": 1,
-      "fingerprint": "c05fcff72d900e3b478b8339d6e6bf9236d9257e0fffa3148a4fb9fce7c46ad6"
-    },
-    {
-      "rank": 22,
-      "latency_ms": 96.4,
-      "successes": 1,
-      "fingerprint": "1151abb96003c63586a15c4c93641bb0aff160b0fdbf8bc82e200b66664862fc"
-    },
-    {
-      "rank": 23,
-      "latency_ms": 98.7,
-      "successes": 1,
-      "fingerprint": "6df3faa58353033ef097cf75fc14ac2ebde4092e9aa50fac09b0b3431308ae6d"
-    },
-    {
-      "rank": 24,
-      "latency_ms": 99.1,
-      "successes": 1,
-      "fingerprint": "5b4746c0cb0d0da9c856a1bcd4c6a73ddec726b9dbd1fd5001b52a5eb2278cda"
-    },
-    {
-      "rank": 25,
-      "latency_ms": 104.9,
-      "successes": 1,
-      "fingerprint": "6dd1a49faf560752ddd8950a08fe14ed64d8ceaa8dbc9213eeb0d3bd203a22a3"
-    },
-    {
-      "rank": 26,
-      "latency_ms": 106.1,
-      "successes": 1,
-      "fingerprint": "e855652f93b705f8105aabff0a60d0fd6cf649726d8c9f7eee2786995ab6e40c"
-    },
-    {
-      "rank": 27,
-      "latency_ms": 107.6,
-      "successes": 1,
-      "fingerprint": "2c4de5e2d5e43bda431b25b5b43e8e57a3526e01b0bc556d4f4b116ebcdf016e"
-    },
-    {
-      "rank": 28,
-      "latency_ms": 117.3,
-      "successes": 1,
-      "fingerprint": "58744bda4df3c1f8f697daa61e9e081bcc214afc267a5639ce52ea5cef65f080"
-    },
-    {
-      "rank": 29,
-      "latency_ms": 118.1,
-      "successes": 1,
-      "fingerprint": "67b246d82d381aff1da0420d2e4550072cb23083a45a0d80acb2d481297d222f"
-    },
-    {
-      "rank": 30,
-      "latency_ms": 121.3,
-      "successes": 1,
-      "fingerprint": "bad3db8e3c28e109ce325b4ee1217d1666ebb94e05e415e134b6d1afbd86e122"
-    },
-    {
-      "rank": 31,
-      "latency_ms": 137.9,
-      "successes": 1,
-      "fingerprint": "be5fdf6b9a67f6e32d42c4f843f5c8637efa6047ec6dad7fcf1b0a450c79d232"
-    },
-    {
-      "rank": 32,
-      "latency_ms": 242.6,
-      "successes": 1,
-      "fingerprint": "b146e63394abfbce18ddf6192f4d253164cccec1c2853dee2f44bb58e38ccfec"
-    },
-    {
-      "rank": 33,
-      "latency_ms": 247.1,
-      "successes": 1,
-      "fingerprint": "29553eb8a6c51cdbc6585fb5fee081e270743c73a06fca02b1adc7d0b22c63b1"
-    },
-    {
-      "rank": 34,
-      "latency_ms": 247.9,
-      "successes": 1,
+      "score": 0.9576,
+      "median_latency_ms": 63.2,
+      "best_latency_ms": 57.9,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
       "fingerprint": "7b66ebcd1971e3b2b7c4a8ebfda8bc07923c66868cc47019a32c8fa020b71db3"
     },
     {
-      "rank": 35,
-      "latency_ms": 258.9,
-      "successes": 1,
+      "rank": 8,
+      "score": 0.9555,
+      "median_latency_ms": 67.9,
+      "best_latency_ms": 63.9,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "ec43883c8c2cf383ba8c16eb54b3c6517556f1ce687b2bb244f7e25572cdccde"
+    },
+    {
+      "rank": 9,
+      "score": 0.9494,
+      "median_latency_ms": 69.9,
+      "best_latency_ms": 61.3,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "52d1279c1ce3a0e0ca0704609a75600027b56af066a04598f1ba1547a8628116"
+    },
+    {
+      "rank": 10,
+      "score": 0.9492,
+      "median_latency_ms": 63.2,
+      "best_latency_ms": 54.5,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "9b6497ca8173f0a5ac3e33b24b509310f90e819f55cf8c12797f7a2ca4c70105"
+    },
+    {
+      "rank": 11,
+      "score": 0.9484,
+      "median_latency_ms": 69.2,
+      "best_latency_ms": 59.2,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "23d8694ab346e35b8163481741a6e8e141802392a441ebbaaa70fe59100c8967"
+    },
+    {
+      "rank": 12,
+      "score": 0.9483,
+      "median_latency_ms": 54.5,
+      "best_latency_ms": 52.8,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "246765edeb2489ba4303fb009cce14a2d6d9aaf1f2d1152b3da87248d7c5f9d7"
+    },
+    {
+      "rank": 13,
+      "score": 0.9466,
+      "median_latency_ms": 66.8,
+      "best_latency_ms": 61.2,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "e6f4f538533c1321df6b3f89c850add2710b37f29330fb678750055cede23792"
+    },
+    {
+      "rank": 14,
+      "score": 0.9449,
+      "median_latency_ms": 124.2,
+      "best_latency_ms": 118.4,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
       "fingerprint": "d91df0ea82651fce193acca268ba9298bf57ec93d3fb9aa544f653eead33013e"
     },
     {
-      "rank": 36,
-      "latency_ms": 266.1,
-      "successes": 1,
-      "fingerprint": "2102dd14aaa53177fa3acc99f0767dc8f92095690eba229884eb4300c8167f51"
-    },
-    {
-      "rank": 37,
-      "latency_ms": 266.9,
-      "successes": 1,
-      "fingerprint": "2ee0447bd258acf20414f61fd2279a2936100f63a81f3f4421bafa0b783462be"
-    },
-    {
-      "rank": 38,
-      "latency_ms": 275.4,
-      "successes": 1,
-      "fingerprint": "8533b336ab230fa05096332701edc4f813434d8a1ae6a4929c08198e10686c55"
-    },
-    {
-      "rank": 39,
-      "latency_ms": 277.7,
-      "successes": 1,
+      "rank": 15,
+      "score": 0.9435,
+      "median_latency_ms": 80.2,
+      "best_latency_ms": 72.6,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
       "fingerprint": "6bbfbc822a1bc18d966fab5aaaf4b8f8ffff8081b3842ac1aa353f6f2ebb17c6"
     },
     {
+      "rank": 16,
+      "score": 0.943,
+      "median_latency_ms": 52.1,
+      "best_latency_ms": 44.9,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "9382727e839357134d67580e797246970c2c46f849b68f94f99a86fdaaa48077"
+    },
+    {
+      "rank": 17,
+      "score": 0.9417,
+      "median_latency_ms": 60.3,
+      "best_latency_ms": 57.0,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "eb31985947e9af2076a327171441a1d0d49ae76aa2084dce50a01715b1a836d8"
+    },
+    {
+      "rank": 18,
+      "score": 0.9412,
+      "median_latency_ms": 61.1,
+      "best_latency_ms": 58.6,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "b1e483d4f61693099b71e5fd6e733d44a48174423c1c214021af7d2a23ed0206"
+    },
+    {
+      "rank": 19,
+      "score": 0.9405,
+      "median_latency_ms": 52.9,
+      "best_latency_ms": 46.3,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "8235c7b57f8d3ca47889386fdea14e8d698675fa67a998bda77783b730dbfe63"
+    },
+    {
+      "rank": 20,
+      "score": 0.9404,
+      "median_latency_ms": 57.0,
+      "best_latency_ms": 50.0,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "4ac47af4d869a00f81d93a211d6c115d5725ccac9f560bd569f2a522a1aa030a"
+    },
+    {
+      "rank": 21,
+      "score": 0.9347,
+      "median_latency_ms": 115.4,
+      "best_latency_ms": 113.6,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "2102dd14aaa53177fa3acc99f0767dc8f92095690eba229884eb4300c8167f51"
+    },
+    {
+      "rank": 22,
+      "score": 0.9334,
+      "median_latency_ms": 107.2,
+      "best_latency_ms": 106.7,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "d8d851a17ad9592c53c33df56c701785b4e733b87e481730d198a4bfddc10af7"
+    },
+    {
+      "rank": 23,
+      "score": 0.9284,
+      "median_latency_ms": 73.4,
+      "best_latency_ms": 64.1,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "c7fe8e44be1936dbc0c473080cce2e3dfc51713675acc3f4a82442e30fb6a4d0"
+    },
+    {
+      "rank": 24,
+      "score": 0.926,
+      "median_latency_ms": 53.5,
+      "best_latency_ms": 51.0,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "cf490976c5bb1d40d5910e3f6eee6736406f734e81d6cf9cfb18976c3979149b"
+    },
+    {
+      "rank": 25,
+      "score": 0.9256,
+      "median_latency_ms": 75.6,
+      "best_latency_ms": 64.4,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "b5480d31793ec3a42e7069a5524d1d06286bde140c96e5f6a7508c56be465462"
+    },
+    {
+      "rank": 26,
+      "score": 0.9216,
+      "median_latency_ms": 52.6,
+      "best_latency_ms": 50.6,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "09ac0307f19213df1693c41008a00be0008eb0295815c95d1c3e402f6bcee988"
+    },
+    {
+      "rank": 27,
+      "score": 0.9202,
+      "median_latency_ms": 51.4,
+      "best_latency_ms": 49.9,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "85676f6c31707df0e976c8718a82c394883258a52853554ec1e203f122152130"
+    },
+    {
+      "rank": 28,
+      "score": 0.9141,
+      "median_latency_ms": 65.2,
+      "best_latency_ms": 57.9,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "a554ac58ab0ff2d7507a63941f1beb5ed2a4036a91c1102ae55fe3321220d39f"
+    },
+    {
+      "rank": 29,
+      "score": 0.9079,
+      "median_latency_ms": 85.8,
+      "best_latency_ms": 82.0,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "967829e78382565b0863401e6ae13fc547b774302233109eadd3aebb9a210ab7"
+    },
+    {
+      "rank": 30,
+      "score": 0.9039,
+      "median_latency_ms": 73.9,
+      "best_latency_ms": 71.3,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "29553eb8a6c51cdbc6585fb5fee081e270743c73a06fca02b1adc7d0b22c63b1"
+    },
+    {
+      "rank": 31,
+      "score": 0.9026,
+      "median_latency_ms": 74.6,
+      "best_latency_ms": 69.5,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "46f80853c2b3624081bf05abf8a6a7ee3fa48150c070b9a8d203d7fce61a5fb5"
+    },
+    {
+      "rank": 32,
+      "score": 0.8972,
+      "median_latency_ms": 63.0,
+      "best_latency_ms": 60.6,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "1ef3535f236cb0cb46434607864b87ed8cdd653c6436a1e4275fbf314dfc45f6"
+    },
+    {
+      "rank": 33,
+      "score": 0.8938,
+      "median_latency_ms": 53.1,
+      "best_latency_ms": 50.8,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "05d4305176935f5eab2ced77bd5aa547503f062175ba71ae14b5828ad90bc6c6"
+    },
+    {
+      "rank": 34,
+      "score": 0.8902,
+      "median_latency_ms": 71.7,
+      "best_latency_ms": 65.5,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "8c69c7a46d21737f31aa05563cb5337e47064beba31ca71fbec2b72dc297d9b8"
+    },
+    {
+      "rank": 35,
+      "score": 0.8762,
+      "median_latency_ms": 83.7,
+      "best_latency_ms": 58.4,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "162267012e1c153002fbf2a6dafa1bf3f96b1933fd578d524884974da4f40892"
+    },
+    {
+      "rank": 36,
+      "score": 0.8747,
+      "median_latency_ms": 46.1,
+      "best_latency_ms": 41.6,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "6dd02d8bf66f27c90ce4d08fa9ed060e97e65ae57337fa64da9fb6dccc82b53c"
+    },
+    {
+      "rank": 37,
+      "score": 0.8723,
+      "median_latency_ms": 158.0,
+      "best_latency_ms": 136.5,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "f51d8cab269c8726235fbe1b77fca817fa514c7ee9098cbd86750dfc8f673d56"
+    },
+    {
+      "rank": 38,
+      "score": 0.856,
+      "median_latency_ms": 82.1,
+      "best_latency_ms": 61.6,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "226102e42b8f3b77d3bac7626a962df0eb4a46e67257be05c9e9a727f44aea83"
+    },
+    {
+      "rank": 39,
+      "score": 0.8525,
+      "median_latency_ms": 207.3,
+      "best_latency_ms": 131.8,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "d257b4bde893bbf4f68644467e37360ae0cadcfc3530dca036b8b4e1c9c96fff"
+    },
+    {
       "rank": 40,
-      "latency_ms": 277.8,
-      "successes": 1,
-      "fingerprint": "1112336a065036050140cb98c9968fd48b9431dd9c3aefcb9f5bf10eea6353c0"
+      "score": 0.8424,
+      "median_latency_ms": 71.2,
+      "best_latency_ms": 69.7,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "7888e1cf4b9d5aad4dfacaf2587fc312eeb6a6e09c3473bd794d7f2fbedebe53"
     },
     {
       "rank": 41,
-      "latency_ms": 280.9,
-      "successes": 1,
-      "fingerprint": "fcbe1c43389e47147dee9fd1c7f82bd7225816c02f0067a9ed07b71a1062b309"
+      "score": 0.8246,
+      "median_latency_ms": 139.5,
+      "best_latency_ms": 83.8,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "610fedcf9140ab77f07a5aaeb79415aba884075d92ba0dc7c55faa05b51c3daa"
     },
     {
       "rank": 42,
-      "latency_ms": 281.8,
-      "successes": 1,
-      "fingerprint": "9766904b97f0e789fe1593037c313c6d67a44fcae2ab0bc3ee5c6669e3034c02"
+      "score": 0.8211,
+      "median_latency_ms": 82.7,
+      "best_latency_ms": 81.3,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "2df169b57e6bd343f1536aed12144ad80eec4e7b3a84b8c7ce5d3b66b445cbbb"
     },
     {
       "rank": 43,
-      "latency_ms": 284.3,
-      "successes": 1,
-      "fingerprint": "018dff4315c5b22aaf021d893e5fc9f5221d6e95f8e8384b3be2ca193ee8010e"
+      "score": 0.8194,
+      "median_latency_ms": 199.0,
+      "best_latency_ms": 142.1,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "e50c0bb80cd45565aeaf3710767b4e1b51d41b595fe7ca258bbac93b927410b6"
     },
     {
       "rank": 44,
-      "latency_ms": 288.8,
-      "successes": 1,
+      "score": 0.8153,
+      "median_latency_ms": 210.9,
+      "best_latency_ms": 153.9,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
       "fingerprint": "d168de8051df03964dce6aea7f63536b5078efca7f5f561fbcf6056556d0e905"
     },
     {
       "rank": 45,
-      "latency_ms": 289.8,
-      "successes": 1,
-      "fingerprint": "fb7050ecef17c02248199e6a02ac545b75a9cb6c32416f3dcb7f75eb4df9c4ef"
+      "score": 0.8149,
+      "median_latency_ms": 138.2,
+      "best_latency_ms": 132.9,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "18d49660163364d4e517d929c2cf5f70c0b0f1f9a3454ac54e170e50e501c107"
     },
     {
       "rank": 46,
-      "latency_ms": 291.4,
-      "successes": 1,
-      "fingerprint": "10ee36d9a69b38e19246feedb6bf676551dd31cefa8dfe6edf61aaa5ec2f6379"
+      "score": 0.8135,
+      "median_latency_ms": 203.2,
+      "best_latency_ms": 148.5,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "343eceed76fe55fd23acf6486c6be13cb624c7332554c900ffd3004ad4d33979"
     },
     {
       "rank": 47,
-      "latency_ms": 291.9,
-      "successes": 1,
-      "fingerprint": "d257b4bde893bbf4f68644467e37360ae0cadcfc3530dca036b8b4e1c9c96fff"
+      "score": 0.8112,
+      "median_latency_ms": 203.1,
+      "best_latency_ms": 137.1,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "02e920326892c14dbc76141de844d4b160488afa09b8244f712edea1cc251cb0"
     },
     {
       "rank": 48,
-      "latency_ms": 292.7,
-      "successes": 1,
-      "fingerprint": "6106d3eb517b2a05f7c8a318b7b772c66966ead078f81abbddc481e1eb9355d4"
-    },
-    {
-      "rank": 49,
-      "latency_ms": 294.0,
-      "successes": 1,
+      "score": 0.8062,
+      "median_latency_ms": 134.1,
+      "best_latency_ms": 77.5,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
       "fingerprint": "4c04d30fc34df3dec599acf665788068ee24e41abbe867efd27fae671932d54b"
     },
     {
-      "rank": 50,
-      "latency_ms": 295.4,
-      "successes": 1,
+      "rank": 49,
+      "score": 0.804,
+      "median_latency_ms": 138.6,
+      "best_latency_ms": 77.1,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
       "fingerprint": "a99aabf6ec99187c3d4b87b0f2699cb7393e695dae5422d81d1a0ec150c5b871"
+    },
+    {
+      "rank": 50,
+      "score": 0.8027,
+      "median_latency_ms": 135.2,
+      "best_latency_ms": 79.3,
+      "successes": 3,
+      "attempts": 3,
+      "success_rate": 1.0,
+      "fingerprint": "87893394db40de66b0671ba2a6007f867ab073e8ca82fdd645dc22f10fc619ba"
     }
   ]
 }

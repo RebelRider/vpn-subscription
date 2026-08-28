@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
+
 """
-Best50 builder.
+Best50 v2 — quality-first VLESS subscription builder.
 
-Quality-first pipeline:
-- fetch small, already-filtered upstream lists;
-- keep VLESS only for the first release (the dominant/high-signal protocol);
-- deduplicate;
-- perform a REAL HTTP request through each candidate using sing-box;
-- keep a rolling stability history;
-- publish only the best N nodes.
+Pipeline:
 
-The VLESS URI parser intentionally supports the common VLESS/Reality forms
-found in public subscriptions. Unsupported transports are rejected rather
-than guessed.
+1. Fetch upstream VLESS subscriptions.
+2. Parse and deduplicate candidates.
+3. First-pass REAL HTTP connectivity test through sing-box.
+4. Keep the best first-pass candidates.
+5. Re-test finalists multiple times.
+6. Combine current results with historical stability.
+7. Publish best20 / best50 / best100.
+8. Save detailed status and rolling history.
+
+Important:
+The latency measured here is the end-to-end HTTP request time from the
+GitHub Actions runner through the candidate proxy to the test URL.
+It is NOT the same thing as RTT from the end user's country/network.
 """
 
 from __future__ import annotations
@@ -22,7 +27,6 @@ import base64
 import hashlib
 import json
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -31,39 +35,67 @@ import urllib.request
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
+
 ROOT = Path(__file__).resolve().parents[1]
 CFG = json.loads((ROOT / "config.json").read_text())
+
 OUT = ROOT / "output"
 OUT.mkdir(exist_ok=True)
 
+SING_BOX = "sing-box"
+
+# ---------------------------------------------------------
+# Utility
+# ---------------------------------------------------------
+
 
 def fetch(url: str) -> str:
-    req = urllib.request.Request(url, headers={"User-Agent": "Best50Builder/1.0"})
-    with urllib.request.urlopen(req, timeout=20) as r:
-        raw = r.read()
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": "Best50Builder/2.0",
+            "Accept": "*/*",
+        },
+    )
+
+    with urllib.request.urlopen(req, timeout=25) as response:
+        raw = response.read()
+
     text = raw.decode("utf-8", "ignore").strip()
 
+    # Some subscriptions are base64 encoded.
     compact = re.sub(r"\s+", "", text)
+
     if "vless://" not in text.lower():
         try:
             decoded = base64.b64decode(compact + "===")
             candidate = decoded.decode("utf-8", "ignore")
+
             if "vless://" in candidate.lower():
                 text = candidate
         except Exception:
             pass
+
     return text
 
 
 def extract_vless(text: str) -> list[str]:
-    found = []
+    found: list[str] = []
+
     for line in text.splitlines():
         line = line.strip()
+
         if not line or line.startswith("#"):
             continue
-        m = re.search(r"vless://\S+", line, re.I)
-        if m:
-            found.append(m.group(0).rstrip("`),]"))
+
+        match = re.search(r"vless://\S+", line, re.I)
+
+        if match:
+            link = match.group(0).rstrip("`),]")
+
+            if link.lower().startswith("vless://"):
+                found.append(link)
+
     return found
 
 
@@ -71,347 +103,1361 @@ def fingerprint(link: str) -> str:
     return hashlib.sha256(link.encode()).hexdigest()
 
 
-def q1(q: dict[str, list[str]], key: str, default: str = "") -> str:
-    return q.get(key, [default])[0]
+def q1(
+    query: dict[str, list[str]],
+    key: str,
+    default: str = "",
+) -> str:
+    return query.get(key, [default])[0]
 
 
-def vless_to_singbox(link: str, tag: str = "node") -> dict:
-    """
-    Convert the common VLESS URI variants to a sing-box outbound.
+# ---------------------------------------------------------
+# VLESS -> sing-box
+# ---------------------------------------------------------
 
-    Supported:
-      - TCP
-      - WebSocket
-      - gRPC
-      - HTTP
-      - HTTPUpgrade
-      - TLS / Reality
-      - Vision flow
 
-    Unsupported transports are rejected. This is deliberate: publishing a
-    guessed conversion would create exactly the dead/broken nodes this
-    project is designed to eliminate.
-    """
-    u = urlsplit(link)
-    if u.scheme.lower() != "vless":
+def vless_to_singbox(
+    link: str,
+    tag: str = "node",
+) -> dict:
+    uri = urlsplit(link)
+
+    if uri.scheme.lower() != "vless":
         raise ValueError("not VLESS")
-    if not u.hostname or not u.port or not u.username:
-        raise ValueError("missing host/port/uuid")
 
-    q = parse_qs(u.query, keep_blank_values=True)
-    network = q1(q, "type", "tcp").lower()
-    security = q1(q, "security", "").lower()
-    flow = q1(q, "flow", "")
+    if not uri.hostname:
+        raise ValueError("missing host")
 
-    if network in ("xhttp", "splithttp", "quic", "kcp"):
-        raise ValueError(f"unsupported transport: {network}")
+    if not uri.port:
+        raise ValueError("missing port")
 
-    out = {
+    if not uri.username:
+        raise ValueError("missing UUID")
+
+    query = parse_qs(
+        uri.query,
+        keep_blank_values=True,
+    )
+
+    network = q1(
+        query,
+        "type",
+        "tcp",
+    ).lower()
+
+    security = q1(
+        query,
+        "security",
+        "",
+    ).lower()
+
+    flow = q1(
+        query,
+        "flow",
+        "",
+    )
+
+    # Deliberately unsupported in this version.
+    unsupported = {
+        "xhttp",
+        "splithttp",
+        "quic",
+        "kcp",
+    }
+
+    if network in unsupported:
+        raise ValueError(
+            f"unsupported transport: {network}"
+        )
+
+    outbound = {
         "type": "vless",
         "tag": tag,
-        "server": u.hostname,
-        "server_port": u.port,
-        "uuid": unquote(u.username),
+        "server": uri.hostname,
+        "server_port": uri.port,
+        "uuid": unquote(uri.username),
     }
 
     if flow:
-        out["flow"] = flow
+        outbound["flow"] = flow
 
+    # TLS / Reality
     if security in ("tls", "reality"):
         tls = {
             "enabled": True,
-            "server_name": q1(q, "sni") or q1(q, "host") or u.hostname,
+            "server_name": (
+                q1(query, "sni")
+                or q1(query, "host")
+                or uri.hostname
+            ),
         }
 
-        fp = q1(q, "fp")
-        if fp:
-            tls["utls"] = {"enabled": True, "fingerprint": fp}
+        fingerprint_value = q1(
+            query,
+            "fp",
+        )
 
-        alpn = q1(q, "alpn")
-        if alpn:
-            tls["alpn"] = [x for x in alpn.split(",") if x]
-
-        if security == "reality":
-            pbk = q1(q, "pbk") or q1(q, "publicKey")
-            sid = q1(q, "sid") or q1(q, "shortId")
-            if not pbk or not sid:
-                raise ValueError("Reality without public key/short id")
-            tls["reality"] = {
+        if fingerprint_value:
+            tls["utls"] = {
                 "enabled": True,
-                "public_key": pbk,
-                "short_id": sid,
+                "fingerprint": fingerprint_value,
             }
 
-        out["tls"] = tls
-    elif security in ("none", ""):
-        pass
-    else:
-        raise ValueError(f"unsupported security: {security}")
+        alpn = q1(
+            query,
+            "alpn",
+        )
 
+        if alpn:
+            tls["alpn"] = [
+                value
+                for value in alpn.split(",")
+                if value
+            ]
+
+        if security == "reality":
+            public_key = (
+                q1(query, "pbk")
+                or q1(query, "publicKey")
+            )
+
+            short_id = (
+                q1(query, "sid")
+                or q1(query, "shortId")
+            )
+
+            if not public_key:
+                raise ValueError(
+                    "Reality without public key"
+                )
+
+            if not short_id:
+                raise ValueError(
+                    "Reality without short id"
+                )
+
+            tls["reality"] = {
+                "enabled": True,
+                "public_key": public_key,
+                "short_id": short_id,
+            }
+
+        outbound["tls"] = tls
+
+    elif security in ("", "none"):
+        pass
+
+    else:
+        raise ValueError(
+            f"unsupported security: {security}"
+        )
+
+    # WebSocket
     if network == "ws":
-        path = unquote(q1(q, "path", "/"))
+        path = unquote(
+            q1(query, "path", "/")
+        )
+
+        host = q1(
+            query,
+            "host",
+        )
+
         headers = {}
-        host = q1(q, "host")
+
         if host:
             headers["Host"] = host
-        out["transport"] = {
+
+        outbound["transport"] = {
             "type": "ws",
             "path": path,
             "headers": headers,
         }
 
+    # gRPC
     elif network == "grpc":
-        service = unquote(q1(q, "serviceName", ""))
-        if not service:
-            raise ValueError("gRPC without serviceName")
-        out["transport"] = {
-            "type": "grpc",
-            "service_name": service,
-        }
-        mode = q1(q, "mode")
-        if mode:
-            out["transport"]["idle_timeout"] = "15s"
+        service_name = unquote(
+            q1(query, "serviceName", "")
+        )
 
+        if not service_name:
+            raise ValueError(
+                "gRPC without serviceName"
+            )
+
+        outbound["transport"] = {
+            "type": "grpc",
+            "service_name": service_name,
+        }
+
+    # HTTP transport
     elif network == "http":
-        path = unquote(q1(q, "path", "/"))
-        host = q1(q, "host")
-        out["transport"] = {
+        path = unquote(
+            q1(query, "path", "/")
+        )
+
+        host = q1(
+            query,
+            "host",
+        )
+
+        outbound["transport"] = {
             "type": "http",
             "path": path,
             "host": [host] if host else [],
         }
 
+    # HTTPUpgrade
     elif network == "httpupgrade":
-        path = unquote(q1(q, "path", "/"))
-        host = q1(q, "host")
-        headers = {"Host": host} if host else {}
-        out["transport"] = {
+        path = unquote(
+            q1(query, "path", "/")
+        )
+
+        host = q1(
+            query,
+            "host",
+        )
+
+        headers = {}
+
+        if host:
+            headers["Host"] = host
+
+        outbound["transport"] = {
             "type": "httpupgrade",
             "path": path,
             "headers": headers,
         }
 
-    # TCP needs no transport. If a V2Ray-style HTTP header is present,
-    # map the common form instead of silently ignoring it.
+    # TCP
     elif network == "tcp":
-        header_type = q1(q, "headerType", "").lower()
+        header_type = q1(
+            query,
+            "headerType",
+            "",
+        ).lower()
+
         if header_type == "http":
-            host = q1(q, "host")
-            path = unquote(q1(q, "path", "/"))
-            out["transport"] = {
+            host = q1(
+                query,
+                "host",
+            )
+
+            path = unquote(
+                q1(query, "path", "/")
+            )
+
+            outbound["transport"] = {
                 "type": "http",
                 "host": [host] if host else [],
                 "path": path,
             }
+
         elif header_type not in ("", "none"):
-            raise ValueError(f"unsupported TCP headerType: {header_type}")
+            raise ValueError(
+                f"unsupported TCP headerType: {header_type}"
+            )
 
-    return out
+    return outbound
 
 
-async def run_process(cmd: list[str], timeout: float) -> tuple[int, bytes, bytes]:
-    p = await asyncio.create_subprocess_exec(
-        *cmd,
+# ---------------------------------------------------------
+# Process execution
+# ---------------------------------------------------------
+
+
+async def run_process(
+    command: list[str],
+    timeout: float,
+) -> tuple[int, bytes, bytes]:
+
+    process = await asyncio.create_subprocess_exec(
+        *command,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
+
     try:
-        out, err = await asyncio.wait_for(p.communicate(), timeout=timeout)
-        return p.returncode, out, err
+        stdout, stderr = await asyncio.wait_for(
+            process.communicate(),
+            timeout=timeout,
+        )
+
+        return (
+            process.returncode,
+            stdout,
+            stderr,
+        )
+
     except asyncio.TimeoutError:
-        p.kill()
-        await p.wait()
-        return 124, b"", b"timeout"
+        process.kill()
+
+        try:
+            await process.wait()
+        except Exception:
+            pass
+
+        return (
+            124,
+            b"",
+            b"timeout",
+        )
 
 
-async def probe_one(link: str, sem: asyncio.Semaphore, index: int) -> tuple[str, float | None]:
+# ---------------------------------------------------------
+# Single real connectivity probe
+# ---------------------------------------------------------
+
+
+async def probe_one(
+    link: str,
+    sem: asyncio.Semaphore,
+    index: int,
+) -> tuple[str, float | None]:
+
     async with sem:
+
         try:
             outbound = vless_to_singbox(link)
-        except Exception as e:
-            print(f"SKIP parse: {e}", file=sys.stderr)
+
+        except Exception as error:
+            print(
+                f"SKIP parse: {error}",
+                file=sys.stderr,
+            )
+
             return link, None
 
-        # Unique port per task avoids collisions between parallel probes.
-        port = 22000 + index
+        # Keep ports deterministic and unique.
+        port = 22000 + (index % 20000)
 
-        with tempfile.TemporaryDirectory() as td:
-            cfg_path = Path(td) / "config.json"
-            cfg = {
-                "log": {"level": "error"},
+        with tempfile.TemporaryDirectory() as temp_dir:
+
+            config_path = (
+                Path(temp_dir)
+                / "config.json"
+            )
+
+            config = {
+                "log": {
+                    "level": "error"
+                },
+
                 "dns": {
                     "servers": [
-                        {"type": "local", "tag": "local"}
+                        {
+                            "type": "local",
+                            "tag": "local",
+                        }
                     ],
-                    "final": "local"
+                    "final": "local",
                 },
-                "inbounds": [{
-                    "type": "socks",
-                    "tag": "socks",
-                    "listen": "127.0.0.1",
-                    "listen_port": port
-                }],
+
+                "inbounds": [
+                    {
+                        "type": "socks",
+                        "tag": "socks",
+                        "listen": "127.0.0.1",
+                        "listen_port": port,
+                    }
+                ],
+
                 "outbounds": [
                     outbound,
-                    {"type": "direct", "tag": "direct"}
-                ],
-                "route": {"final": "node"}
-            }
-            # Ensure the outbound tag matches the route target.
-            cfg["outbounds"][0]["tag"] = "node"
-            cfg_path.write_text(json.dumps(cfg))
 
-            check = await run_process(
-                ["sing-box", "check", "-c", str(cfg_path)], 8
+                    {
+                        "type": "direct",
+                        "tag": "direct",
+                    },
+                ],
+
+                "route": {
+                    "final": "node",
+                },
+            }
+
+            config_path.write_text(
+                json.dumps(
+                    config,
+                    ensure_ascii=False,
+                )
             )
-            if check[0] != 0:
+
+            # Validate config first.
+            check_code, _, check_error = (
+                await run_process(
+                    [
+                        SING_BOX,
+                        "check",
+                        "-c",
+                        str(config_path),
+                    ],
+                    8,
+                )
+            )
+
+            if check_code != 0:
                 return link, None
 
-            proc = await asyncio.create_subprocess_exec(
-                "sing-box", "run", "-c", str(cfg_path),
-                stdout=asyncio.subprocess.DEVNULL,
-                stderr=asyncio.subprocess.DEVNULL
+            # Start proxy.
+            process = (
+                await asyncio.create_subprocess_exec(
+                    SING_BOX,
+                    "run",
+                    "-c",
+                    str(config_path),
+                    stdout=asyncio.subprocess.DEVNULL,
+                    stderr=asyncio.subprocess.DEVNULL,
+                )
             )
 
             try:
-                await asyncio.sleep(0.25)
+                # Give sing-box time to initialize.
+                await asyncio.sleep(0.30)
+
                 start = time.perf_counter()
-                code, out, _ = await run_process([
-                    "curl",
-                    "--socks5-hostname", f"127.0.0.1:{port}",
-                    "--connect-timeout", str(CFG["connect_timeout"]),
-                    "--max-time", str(CFG["request_timeout"]),
-                    "-sS", "-o", "/dev/null",
-                    "-w", "%{http_code}",
-                    CFG["test_url"],
-                ], CFG["request_timeout"] + 2)
 
-                elapsed = (time.perf_counter() - start) * 1000
-                http_code = out.decode(errors="ignore").strip()
+                code, output, _ = (
+                    await run_process(
+                        [
+                            "curl",
 
-                if code == 0 and http_code.startswith(("2", "3")):
-                    return link, elapsed
+                            "--socks5-hostname",
+                            f"127.0.0.1:{port}",
+
+                            "--connect-timeout",
+                            str(
+                                CFG[
+                                    "connect_timeout"
+                                ]
+                            ),
+
+                            "--max-time",
+                            str(
+                                CFG[
+                                    "request_timeout"
+                                ]
+                            ),
+
+                            "-sS",
+
+                            "-o",
+                            "/dev/null",
+
+                            "-w",
+                            "%{http_code}",
+
+                            CFG["test_url"],
+                        ],
+
+                        CFG["request_timeout"] + 3,
+                    )
+                )
+
+                elapsed = (
+                    time.perf_counter()
+                    - start
+                ) * 1000
+
+                http_code = (
+                    output
+                    .decode(
+                        errors="ignore"
+                    )
+                    .strip()
+                )
+
+                if (
+                    code == 0
+                    and http_code.startswith(
+                        ("2", "3")
+                    )
+                ):
+                    return (
+                        link,
+                        elapsed,
+                    )
+
+                return link, None
+
             finally:
-                proc.terminate()
-                try:
-                    await asyncio.wait_for(proc.wait(), timeout=2)
-                except asyncio.TimeoutError:
-                    proc.kill()
-                    await proc.wait()
+                process.terminate()
 
-        return link, None
+                try:
+                    await asyncio.wait_for(
+                        process.wait(),
+                        timeout=2,
+                    )
+
+                except asyncio.TimeoutError:
+                    process.kill()
+
+                    try:
+                        await process.wait()
+                    except Exception:
+                        pass
+
+
+# ---------------------------------------------------------
+# History
+# ---------------------------------------------------------
 
 
 def load_history() -> dict:
-    p = ROOT / CFG["history_file"]
-    if not p.exists():
+
+    path = (
+        ROOT
+        / CFG["history_file"]
+    )
+
+    if not path.exists():
         return {}
+
     try:
-        return json.loads(p.read_text())
+        return json.loads(
+            path.read_text()
+        )
+
     except Exception:
         return {}
 
 
-def save_history(history: dict):
-    (ROOT / CFG["history_file"]).write_text(
-        json.dumps(history, ensure_ascii=False, indent=2, sort_keys=True)
+def save_history(
+    history: dict,
+) -> None:
+
+    path = (
+        ROOT
+        / CFG["history_file"]
+    )
+
+    path.write_text(
+        json.dumps(
+            history,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
     )
 
 
-async def main_async():
-    all_links = []
+def update_history(
+    history: dict,
+    link: str,
+    latency: float | None,
+    now: int,
+) -> dict:
 
-    for source in CFG["sources"]:
-        try:
-            text = await asyncio.to_thread(fetch, source["url"])
-            links = extract_vless(text)
-            print(f"{source['name']}: {len(links)} VLESS candidates")
-            all_links.extend(links)
-        except Exception as e:
-            print(f"WARNING {source['name']}: {e}", file=sys.stderr)
+    fp = fingerprint(link)
 
-    unique = {}
-    for link in all_links:
-        unique.setdefault(fingerprint(link), link)
-
-    links = list(unique.values())[: CFG["candidate_limit"]]
-    print(f"Unique VLESS candidates: {len(links)}")
-
-    sem = asyncio.Semaphore(CFG["max_parallel"])
-    results = await asyncio.gather(
-        *(probe_one(link, sem, i) for i, link in enumerate(links))
-    )
-
-    history = load_history()
-    now = int(time.time())
-    good = []
-
-    for link, latency in results:
-        fp = fingerprint(link)
-        item = history.get(fp, {
+    item = history.get(
+        fp,
+        {
             "successes": 0,
             "failures": 0,
             "last_success": 0,
-            "best_ms": None
-        })
+            "last_failure": 0,
+            "best_ms": None,
+            "latencies": [],
+        },
+    )
 
-        if latency is not None:
-            item["successes"] += 1
-            item["last_success"] = now
-            item["best_ms"] = (
-                latency if item["best_ms"] is None
-                else min(item["best_ms"], latency)
-            )
-            good.append((link, latency, item))
+    if latency is not None:
+
+        item["successes"] += 1
+        item["last_success"] = now
+
+        if item["best_ms"] is None:
+            item["best_ms"] = latency
         else:
-            item["failures"] += 1
+            item["best_ms"] = min(
+                item["best_ms"],
+                latency,
+            )
 
-        history[fp] = item
+        latencies = item.get(
+            "latencies",
+            [],
+        )
 
-    save_history(history)
+        latencies.append(
+            round(latency, 1)
+        )
 
-    scored = []
-    for link, latency, item in good:
-        # Strong preference for low latency, with modest stability bonuses.
-        stability = min(item["successes"], 20) / 20
-        age_h = max(0, (now - item["last_success"]) / 3600)
-        recency = max(0.0, 1.0 - age_h / 24)
-        score = latency - 120 * stability - 80 * recency
-        scored.append((score, latency, link, item["successes"]))
+        # Keep rolling history small.
+        item["latencies"] = latencies[-20:]
 
-    scored.sort(key=lambda x: (x[0], x[1]))
-    chosen = scored[: CFG["max_output"]]
+    else:
+
+        item["failures"] += 1
+        item["last_failure"] = now
+
+    # Protect the history from unbounded growth.
+    item["successes"] = int(
+        item.get("successes", 0)
+    )
+
+    item["failures"] = int(
+        item.get("failures", 0)
+    )
+
+    return item
+
+
+# ---------------------------------------------------------
+# Scoring
+# ---------------------------------------------------------
+
+
+def calculate_score(
+    latency: float,
+    item: dict,
+    current_successes: int,
+    current_attempts: int,
+    now: int,
+) -> float:
+
+    total_successes = (
+        int(item.get("successes", 0))
+    )
+
+    total_failures = (
+        int(item.get("failures", 0))
+    )
+
+    historical_attempts = (
+        total_successes
+        + total_failures
+    )
+
+    historical_success_rate = (
+        total_successes
+        / historical_attempts
+        if historical_attempts
+        else 0.0
+    )
+
+    current_success_rate = (
+        current_successes
+        / current_attempts
+        if current_attempts
+        else 0.0
+    )
+
+    # Blend current and historical reliability.
+    reliability = (
+        current_success_rate * 0.65
+        + historical_success_rate * 0.35
+    )
+
+    # Latency component.
+    #
+    # 50ms -> very good
+    # 500ms -> acceptable
+    # 1000ms -> poor
+    latency_score = max(
+        0.0,
+        1.0 - latency / 1000.0,
+    )
+
+    # Consistency of recent measurements.
+    latencies = item.get(
+        "latencies",
+        [],
+    )
+
+    consistency = 0.0
+
+    if len(latencies) >= 2:
+        average = (
+            sum(latencies)
+            / len(latencies)
+        )
+
+        if average > 0:
+            deviation = (
+                max(latencies)
+                - min(latencies)
+            ) / average
+
+            consistency = max(
+                0.0,
+                1.0 - min(
+                    deviation,
+                    1.0,
+                ),
+            )
+
+    # Recency bonus.
+    last_success = int(
+        item.get(
+            "last_success",
+            0,
+        )
+    )
+
+    age_hours = (
+        max(
+            0,
+            now - last_success,
+        )
+        / 3600
+        if last_success
+        else 999
+    )
+
+    recency = max(
+        0.0,
+        1.0 - age_hours / 24.0,
+    )
+
+    # Final normalized score.
+    #
+    # Reliability: 40%
+    # Latency:     35%
+    # Consistency: 15%
+    # Recency:     10%
+    score = (
+        reliability * 0.40
+        + latency_score * 0.35
+        + consistency * 0.15
+        + recency * 0.10
+    )
+
+    return score
+
+
+# ---------------------------------------------------------
+# First pass
+# ---------------------------------------------------------
+
+
+async def run_first_pass(
+    links: list[str],
+) -> list[tuple[str, float]]:
+
+    sem = asyncio.Semaphore(
+        CFG["max_parallel"]
+    )
+
+    results = await asyncio.gather(
+        *(
+            probe_one(
+                link,
+                sem,
+                index,
+            )
+
+            for index, link
+            in enumerate(links)
+        )
+    )
+
+    return [
+        (link, latency)
+        for link, latency
+        in results
+        if latency is not None
+    ]
+
+
+# ---------------------------------------------------------
+# Final repeated verification
+# ---------------------------------------------------------
+
+
+async def run_final_pass(
+    links: list[str],
+) -> dict[str, list[float]]:
+
+    sem = asyncio.Semaphore(
+        CFG["max_parallel_final"]
+    )
+
+    final: dict[
+        str,
+        list[float]
+    ] = {
+        link: []
+        for link in links
+    }
+
+    attempts = CFG[
+        "final_test_attempts"
+    ]
+
+    for round_number in range(
+        attempts
+    ):
+
+        print(
+            "Final verification "
+            f"{round_number + 1}/{attempts}"
+        )
+
+        results = await asyncio.gather(
+            *(
+                probe_one(
+                    link,
+                    sem,
+                    index,
+                )
+
+                for index, link
+                in enumerate(links)
+            )
+        )
+
+        for link, latency in results:
+
+            if latency is not None:
+                final[link].append(
+                    latency
+                )
+
+    return final
+
+
+# ---------------------------------------------------------
+# Publishing
+# ---------------------------------------------------------
+
+
+def publish_file(
+    name: str,
+    chosen: list[dict],
+    now: int,
+    candidates: int,
+    first_pass_working: int,
+    final_tested: int,
+) -> None:
 
     lines = [
-        "# Best50 — REAL-HTTP-TESTED public VLESS configurations",
-        f"# generated: {time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(now))}",
-        f"# candidates tested: {len(links)}",
-        f"# working: {len(good)}",
+        "# Best50 v2 — REAL-HTTP-TESTED VLESS",
+        (
+            "# generated: "
+            + time.strftime(
+                "%Y-%m-%d %H:%M:%S UTC",
+                time.gmtime(now),
+            )
+        ),
+        f"# candidates: {candidates}",
+        f"# first_pass_working: {first_pass_working}",
+        f"# final_tested: {final_tested}",
         f"# published: {len(chosen)}",
-        f"# test URL: {CFG['test_url']}",
-        "# only VLESS is published in v1; unsupported configs are discarded",
+        f"# test_url: {CFG['test_url']}",
+        "#",
+        "# Quality-filtered public VLESS configurations.",
+        "#",
     ]
-    lines += [link for _, _, link, _ in chosen]
-    (OUT / "best50.txt").write_text("\n".join(lines) + "\n")
+
+    lines.extend(
+        item["link"]
+        for item in chosen
+    )
+
+    (
+        OUT / name
+    ).write_text(
+        "\n".join(lines)
+        + "\n"
+    )
+
+
+# ---------------------------------------------------------
+# Main
+# ---------------------------------------------------------
+
+
+async def main_async():
+
+    now = int(
+        time.time()
+    )
+
+    all_links: list[str] = []
+
+    # -----------------------------
+    # Fetch
+    # -----------------------------
+
+    for source in CFG["sources"]:
+
+        try:
+
+            text = await asyncio.to_thread(
+                fetch,
+                source["url"],
+            )
+
+            links = extract_vless(
+                text
+            )
+
+            print(
+                f"{source['name']}: "
+                f"{len(links)} VLESS candidates"
+            )
+
+            all_links.extend(
+                links
+            )
+
+        except Exception as error:
+
+            print(
+                f"WARNING "
+                f"{source['name']}: "
+                f"{error}",
+                file=sys.stderr,
+            )
+
+    # -----------------------------
+    # Deduplicate
+    # -----------------------------
+
+    unique: dict[
+        str,
+        str
+    ] = {}
+
+    for link in all_links:
+
+        unique.setdefault(
+            fingerprint(link),
+            link,
+        )
+
+    # Important:
+    # Don't arbitrarily take the first 100.
+    # Use the configured larger candidate pool.
+    candidate_limit = int(
+        CFG["candidate_limit"]
+    )
+
+    links = list(
+        unique.values()
+    )[:candidate_limit]
+
+    print(
+        f"Unique candidates: "
+        f"{len(unique)}"
+    )
+
+    print(
+        f"Candidates selected: "
+        f"{len(links)}"
+    )
+
+    # -----------------------------
+    # First pass
+    # -----------------------------
+
+    first_pass = (
+        await run_first_pass(
+            links
+        )
+    )
+
+    print(
+        "First-pass working: "
+        f"{len(first_pass)}"
+    )
+
+    if not first_pass:
+
+        print(
+            "ERROR: no working nodes "
+            "found; preserving previous "
+            "published files."
+        )
+
+        return 1
+
+    # -----------------------------
+    # Update history with first pass
+    # -----------------------------
+
+    history = load_history()
+
+    for link, latency in first_pass:
+
+        history[
+            fingerprint(link)
+        ] = update_history(
+            history,
+            link,
+            latency,
+            now,
+        )
+
+    # Failures from first pass.
+    first_pass_set = {
+        fingerprint(link)
+        for link, _
+        in first_pass
+    }
+
+    for link in links:
+
+        fp = fingerprint(link)
+
+        if fp not in first_pass_set:
+
+            history[fp] = update_history(
+                history,
+                link,
+                None,
+                now,
+            )
+
+    save_history(
+        history
+    )
+
+    # -----------------------------
+    # Select finalists
+    # -----------------------------
+
+    first_pass_sorted = sorted(
+        first_pass,
+        key=lambda item: item[1],
+    )
+
+    finalist_limit = int(
+        CFG["finalist_limit"]
+    )
+
+    finalists = [
+        link
+        for link, _
+        in first_pass_sorted[
+            :finalist_limit
+        ]
+    ]
+
+    print(
+        "Finalists: "
+        f"{len(finalists)}"
+    )
+
+    # -----------------------------
+    # Final repeated verification
+    # -----------------------------
+
+    final_results = (
+        await run_final_pass(
+            finalists
+        )
+    )
+
+    # -----------------------------
+    # Update history with final tests
+    # -----------------------------
+
+    for link, latencies in (
+        final_results.items()
+    ):
+
+        for latency in latencies:
+
+            history[
+                fingerprint(link)
+            ] = update_history(
+                history,
+                link,
+                latency,
+                now,
+            )
+
+    save_history(
+        history
+    )
+
+    # -----------------------------
+    # Score finalists
+    # -----------------------------
+
+    scored: list[dict] = []
+
+    for link, latencies in (
+        final_results.items()
+    ):
+
+        attempts = int(
+            CFG["final_test_attempts"]
+        )
+
+        successes = len(
+            latencies
+        )
+
+        # Minimum final reliability.
+        if successes < int(
+            CFG["minimum_final_successes"]
+        ):
+            continue
+
+        if not latencies:
+            continue
+
+        # Median is more robust than a single
+        # unusually fast measurement.
+        ordered = sorted(
+            latencies
+        )
+
+        middle = len(
+            ordered
+        ) // 2
+
+        if len(ordered) % 2:
+            median_latency = (
+                ordered[middle]
+            )
+        else:
+            median_latency = (
+                ordered[middle - 1]
+                + ordered[middle]
+            ) / 2
+
+        fp = fingerprint(
+            link
+        )
+
+        item = history.get(
+            fp,
+            {},
+        )
+
+        score = calculate_score(
+            median_latency,
+            item,
+            successes,
+            attempts,
+            now,
+        )
+
+        scored.append(
+            {
+                "link": link,
+                "score": score,
+                "median_ms": median_latency,
+                "best_ms": min(
+                    latencies
+                ),
+                "attempts": attempts,
+                "successes": successes,
+                "success_rate": (
+                    successes
+                    / attempts
+                ),
+                "fingerprint": fp,
+            }
+        )
+
+    scored.sort(
+        key=lambda item: (
+            -item["score"],
+            item["median_ms"],
+        )
+    )
+
+    print(
+        "Final stable nodes: "
+        f"{len(scored)}"
+    )
+
+    # -----------------------------
+    # Publish
+    # -----------------------------
+
+    best20 = scored[:20]
+    best50 = scored[:50]
+    best100 = scored[:100]
+
+    publish_file(
+        "best20.txt",
+        best20,
+        now,
+        len(links),
+        len(first_pass),
+        len(finalists),
+    )
+
+    publish_file(
+        "best50.txt",
+        best50,
+        now,
+        len(links),
+        len(first_pass),
+        len(finalists),
+    )
+
+    publish_file(
+        "best100.txt",
+        best100,
+        now,
+        len(links),
+        len(first_pass),
+        len(finalists),
+    )
+
+    # -----------------------------
+    # Status
+    # -----------------------------
 
     status = {
         "generated_at": now,
-        "candidates": len(links),
-        "working": len(good),
-        "published": len(chosen),
-        "test_url": CFG["test_url"],
+        "candidates_discovered": len(
+            unique
+        ),
+        "candidates_tested": len(
+            links
+        ),
+        "first_pass_working": len(
+            first_pass
+        ),
+        "finalists": len(
+            finalists
+        ),
+        "final_stable": len(
+            scored
+        ),
+        "published": {
+            "best20": len(
+                best20
+            ),
+            "best50": len(
+                best50
+            ),
+            "best100": len(
+                best100
+            ),
+        },
+        "test_url": CFG[
+            "test_url"
+        ],
+        "final_attempts": CFG[
+            "final_test_attempts"
+        ],
+        "minimum_final_successes": CFG[
+            "minimum_final_successes"
+        ],
         "top": [
             {
-                "rank": i + 1,
-                "latency_ms": round(lat, 1),
-                "successes": successes,
-                "fingerprint": fingerprint(link),
+                "rank": index + 1,
+                "score": round(
+                    item["score"],
+                    4,
+                ),
+                "median_latency_ms": round(
+                    item["median_ms"],
+                    1,
+                ),
+                "best_latency_ms": round(
+                    item["best_ms"],
+                    1,
+                ),
+                "successes": item[
+                    "successes"
+                ],
+                "attempts": item[
+                    "attempts"
+                ],
+                "success_rate": round(
+                    item[
+                        "success_rate"
+                    ],
+                    3,
+                ),
+                "fingerprint": item[
+                    "fingerprint"
+                ],
             }
-            for i, (_, lat, link, successes) in enumerate(chosen)
+
+            for index, item
+            in enumerate(
+                scored[:50]
+            )
         ],
     }
-    (OUT / "status.json").write_text(json.dumps(status, indent=2))
+
+    (
+        OUT / "status.json"
+    ).write_text(
+        json.dumps(
+            status,
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+    print()
+    print(
+        "================================"
+    )
+    print(
+        "BEST50 BUILD COMPLETE"
+    )
+    print(
+        "================================"
+    )
+    print(
+        f"Candidates: "
+        f"{len(links)}"
+    )
+    print(
+        f"First-pass working: "
+        f"{len(first_pass)}"
+    )
+    print(
+        f"Finalists: "
+        f"{len(finalists)}"
+    )
+    print(
+        f"Final stable: "
+        f"{len(scored)}"
+    )
+    print(
+        f"Best20: "
+        f"{len(best20)}"
+    )
+    print(
+        f"Best50: "
+        f"{len(best50)}"
+    )
+    print(
+        f"Best100: "
+        f"{len(best100)}"
+    )
+
+    return 0
+
+
+def main() -> None:
+
+    try:
+        exit_code = asyncio.run(
+            main_async()
+        )
+
+    except KeyboardInterrupt:
+        exit_code = 130
+
+    except Exception as error:
+
+        print(
+            f"FATAL: {error}",
+            file=sys.stderr,
+        )
+
+        exit_code = 1
+
+    raise SystemExit(
+        exit_code
+    )
 
 
 if __name__ == "__main__":
-    asyncio.run(main_async())
+    main()

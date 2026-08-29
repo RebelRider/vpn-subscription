@@ -7,8 +7,8 @@
   },
   "02c465c6f43b7ab432fa52c4aa0da15f40c685c04a0dfa24fdf032af3aee012e": {
     "best_ms": null,
-    "failures": 1,
-    "last_failure": 1788014240,
+    "failures": 2,
+    "last_failure": 1788026038,
     "last_success": 0,
     "latencies": [],
     "successes": 0
@@ -16,14 +16,15 @@
   "02e920326892c14dbc76141de844d4b160488afa09b8244f712edea1cc251cb0": {
     "best_ms": 80.68744199999855,
     "failures": 0,
-    "last_success": 1787956495,
+    "last_success": 1788026038,
     "latencies": [
       80.7,
       203.1,
       137.1,
-      203.1
+      203.1,
+      379.2
     ],
-    "successes": 5
+    "successes": 6
   },
   "038899c1b3306e894dcbac0a013002233cac9e5e6db5c4a86f51adaabc49f23f": {
     "best_ms": 305.0957200000042,
@@ -148,6 +149,16 @@
     ],
     "successes": 4
   },
+  "074ce4c5add829295e7544a8d9b6ce2c47e607de92f0afc19bf6380d2a7335fd": {
+    "best_ms": 496.61797999999635,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      496.6
+    ],
+    "successes": 1
+  },
   "087141f8b5f8ef4564533af9e3b27eb1207e06d0f6fc02aedf7a0e56ee63c47c": {
     "best_ms": null,
     "failures": 2,
@@ -176,12 +187,13 @@
   "0ab1fd72521e095a94644b41b1c93ae924405ee4ed1496aacc457617169c585c": {
     "best_ms": 200.22015700000395,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
       200.2,
-      355.9
+      355.9,
+      427.7
     ],
-    "successes": 3
+    "successes": 4
   },
   "0df865b9cf27d4b5e87f2b773dcbf72d9cec7fe60c5394b9448acadf4ad75784": {
     "best_ms": null,
@@ -233,12 +245,13 @@
   "10ee36d9a69b38e19246feedb6bf676551dd31cefa8dfe6edf61aaa5ec2f6379": {
     "best_ms": 141.3736969999988,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
       141.4,
-      328.8
+      328.8,
+      363.4
     ],
-    "successes": 3
+    "successes": 4
   },
   "1112336a065036050140cb98c9968fd48b9431dd9c3aefcb9f5bf10eea6353c0": {
     "best_ms": 252.64579400000287,
@@ -265,14 +278,18 @@
     "best_ms": 64.9579420000066,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
       87.6,
       74.8,
       75.6,
-      65.0
+      65.0,
+      76.6,
+      88.1,
+      92.0,
+      87.8
     ],
-    "successes": 4
+    "successes": 8
   },
   "1347174bb9374383b05eb142f3d33fb523809e832d71d2b14b6c1dc3069b9fd0": {
     "best_ms": 103.83871700000213,
@@ -312,14 +329,18 @@
     "best_ms": 64.93306000000132,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1787995407,
+    "last_success": 1788026038,
     "latencies": [
       64.9,
       67.2,
       76.5,
-      66.9
+      66.9,
+      73.0,
+      97.2,
+      84.3,
+      79.4
     ],
-    "successes": 4
+    "successes": 8
   },
   "1732fc11ce9d8c42e37fbebb120b98f467affa131079a3aafeb0d430ddede3e4": {
     "best_ms": null,
@@ -336,6 +357,16 @@
     "last_success": 0,
     "latencies": [],
     "successes": 0
+  },
+  "1783d69facf7281e80d1208e3acdc3a4995a8e7f0e9c0b49dc1248b40452ed28": {
+    "best_ms": 476.1682480000218,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      476.2
+    ],
+    "successes": 1
   },
   "17c81482e672c93fe4d4c3ce485da57929a62d7d2c7503f9086ac6fa112e2667": {
     "best_ms": 49.70922600000449,
@@ -370,15 +401,19 @@
   "18d49660163364d4e517d929c2cf5f70c0b0f1f9a3454ac54e170e50e501c107": {
     "best_ms": 81.88776699999778,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
       81.9,
       138.2,
       132.9,
       210.3,
-      423.3
+      423.3,
+      298.3,
+      424.4,
+      299.8,
+      426.4
     ],
-    "successes": 6
+    "successes": 10
   },
   "1994be9dff8151d02d3068d247aac54e34d200e67ade00373eda224604b5bf2a": {
     "best_ms": 48.576420000003395,
@@ -393,11 +428,37 @@
     ],
     "successes": 4
   },
+  "19a1fcc75a959d7addcc754012151aaf9a55be0336d32a262e68ffbab49c3143": {
+    "best_ms": 68.61565999997765,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      68.6,
+      74.7,
+      96.2,
+      72.5
+    ],
+    "successes": 4
+  },
   "1a3f9f257030bb0e5893082f5f938c534c2d6ea9074df2d177f380f5d04015c2": {
     "best_ms": null,
     "failures": 1,
     "last_success": 0,
     "successes": 0
+  },
+  "1ca03b6b2dca6a9d103e94322662492dd75af8f8864b661f0356c24d77ac16d4": {
+    "best_ms": 69.69168199998421,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      69.7,
+      99.7,
+      92.1,
+      82.6
+    ],
+    "successes": 4
   },
   "1d20079e27d6efc2172c2729d5b3438a889ced0c578523754897bdac8702d7f8": {
     "best_ms": 73.75235899999666,
@@ -433,6 +494,19 @@
     "latencies": [],
     "successes": 0
   },
+  "1e3e61909238537314103c0c7eb1e70a3780bc90880d08b484537702b8f4ed0f": {
+    "best_ms": 83.43933300000117,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      88.2,
+      96.0,
+      83.4,
+      87.4
+    ],
+    "successes": 4
+  },
   "1e67d28005e7cc8b730512d91e46ea7de786e7c720f024c2dff1008c8f44b320": {
     "best_ms": null,
     "failures": 2,
@@ -451,8 +525,8 @@
   },
   "1ef3535f236cb0cb46434607864b87ed8cdd653c6436a1e4275fbf314dfc45f6": {
     "best_ms": 60.61640099999721,
-    "failures": 0,
-    "last_failure": 0,
+    "failures": 1,
+    "last_failure": 1788026038,
     "last_success": 1788014240,
     "latencies": [
       101.0,
@@ -491,6 +565,19 @@
       257.7
     ],
     "successes": 9
+  },
+  "2136704e69573a5bfa76e46f6b510ca77e78a6687ee5b7b741bc8d94ef9368a1": {
+    "best_ms": 298.8753590000215,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      303.6,
+      774.0,
+      363.7,
+      298.9
+    ],
+    "successes": 4
   },
   "21a530bddbea224ed814a202fe8ec37d9f9590253d62408382a77a79f4a7981b": {
     "best_ms": null,
@@ -580,6 +667,19 @@
     "last_success": 1787903499,
     "successes": 1
   },
+  "25165004f8ede18e43ce5b258b7db0276b689c59fc2a78209d78e83fa045c2c0": {
+    "best_ms": 292.29554000005464,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      292.3,
+      430.0,
+      427.9,
+      425.9
+    ],
+    "successes": 4
+  },
   "25178336b88eccd57cf38b67fd37349dd16bda67860d222274320f741e8db2ef": {
     "best_ms": 94.55112900000273,
     "failures": 0,
@@ -615,11 +715,38 @@
     "latencies": [],
     "successes": 0
   },
+  "25a4d9dd258491763d6387ff07b3b487c2e5f682def07e20b4439083d5dd3932": {
+    "best_ms": null,
+    "failures": 1,
+    "last_failure": 1788026038,
+    "last_success": 0,
+    "latencies": [],
+    "successes": 0
+  },
+  "26d5692e447f92c4956ded2c2e11fe962d5ea516a2e00655a16da6fdbfaa65e2": {
+    "best_ms": 78.57225800000833,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      78.6,
+      93.5,
+      90.5,
+      83.2
+    ],
+    "successes": 4
+  },
   "28cf8277c1ac8e1ba5bcc02b29cc9f3265efcafac1da89865be731da536834a1": {
     "best_ms": 70.67380000000156,
     "failures": 0,
-    "last_success": 1787903499,
-    "successes": 1
+    "last_success": 1788026038,
+    "latencies": [
+      81.0,
+      73.1,
+      85.0,
+      93.7
+    ],
+    "successes": 5
   },
   "29553eb8a6c51cdbc6585fb5fee081e270743c73a06fca02b1adc7d0b22c63b1": {
     "best_ms": 60.887298000004364,
@@ -637,8 +764,14 @@
   "2c4de5e2d5e43bda431b25b5b43e8e57a3526e01b0bc556d4f4b116ebcdf016e": {
     "best_ms": 107.59467799999811,
     "failures": 0,
-    "last_success": 1787903499,
-    "successes": 1
+    "last_success": 1788026038,
+    "latencies": [
+      116.8,
+      114.5,
+      115.3,
+      121.0
+    ],
+    "successes": 5
   },
   "2cb3dabe3661cb736b472f3634c1fe9d974f0ce2d4d581540d418011051fc9a6": {
     "best_ms": null,
@@ -687,15 +820,19 @@
   "2df169b57e6bd343f1536aed12144ad80eec4e7b3a84b8c7ce5d3b66b445cbbb": {
     "best_ms": 81.28429099999579,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
       91.1,
       210.7,
       82.7,
       81.3,
-      427.0
+      427.0,
+      294.1,
+      360.3,
+      301.7,
+      438.2
     ],
-    "successes": 6
+    "successes": 10
   },
   "2eb50126cd5822b5443284622814774cbfe7f7f06f4991ac89a23b72a3e68dd1": {
     "best_ms": 148.70919900000956,
@@ -758,8 +895,8 @@
   },
   "31a81e91dc04278182492bdba1d793834ba91082941178c425e79588a4e74210": {
     "best_ms": null,
-    "failures": 3,
-    "last_failure": 1788014240,
+    "failures": 4,
+    "last_failure": 1788026038,
     "last_success": 0,
     "successes": 0
   },
@@ -784,8 +921,14 @@
   "327f4e81ec1b0fb8c6d16caf089d8360dc43f497ca35723519c9c8edb8a34292": {
     "best_ms": 65.52829099999968,
     "failures": 0,
-    "last_success": 1787903499,
-    "successes": 1
+    "last_success": 1788026038,
+    "latencies": [
+      72.1,
+      104.4,
+      95.3,
+      80.0
+    ],
+    "successes": 5
   },
   "3304dd14646eb9d0131ffa607679f2e3fa668113934d74cd2c4043ef348dfc8d": {
     "best_ms": null,
@@ -826,15 +969,16 @@
   "343eceed76fe55fd23acf6486c6be13cb624c7332554c900ffd3004ad4d33979": {
     "best_ms": 84.82232199999373,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
       84.8,
       208.9,
       203.2,
       148.5,
-      351.6
+      351.6,
+      346.5
     ],
-    "successes": 6
+    "successes": 7
   },
   "347e40185b1e0c0a419eef4518a3260c30a1cb793e62164770808a8976a4446a": {
     "best_ms": null,
@@ -871,6 +1015,19 @@
     ],
     "successes": 4
   },
+  "3821303f9bc594129da98b6c614a6fadfcce80abce0d9630d24791f3654a4f36": {
+    "best_ms": 72.81458199997815,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      82.6,
+      73.6,
+      86.5,
+      72.8
+    ],
+    "successes": 4
+  },
   "384936f0aeffd69d7255cbb49e76159bd847ab0818477584e8b310fb15b9669d": {
     "best_ms": 93.71079099999946,
     "failures": 0,
@@ -883,6 +1040,16 @@
       95.9
     ],
     "successes": 4
+  },
+  "38fa2c8d5397cf0d21ce141de42dd16f5c1a35f25b3f25610174b0b34bbeef45": {
+    "best_ms": 5036.094178999974,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      5036.1
+    ],
+    "successes": 1
   },
   "398c2561919f37bacbea976853d3f74e321e3b7d190fd01854ff1c7733e96691": {
     "best_ms": 93.92342199999604,
@@ -960,12 +1127,39 @@
   "3e88f1fe078470055b7dac3c618b5d8b5e1216f65e363d17a81d2c99e35f6aed": {
     "best_ms": 145.02889300000277,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
       145.0,
-      355.4
+      355.4,
+      419.5
     ],
-    "successes": 3
+    "successes": 4
+  },
+  "3e969827e9181a62b7bc8dffbbe0eea3d8def889440107b2a334bb1b462fb6aa": {
+    "best_ms": 69.92940800000724,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      69.9,
+      87.2,
+      87.2,
+      95.6
+    ],
+    "successes": 4
+  },
+  "3fb0282422e9a2a5d8f3c6877c759273b0430fe2b5aa78fcd3fe06b4ba7a1ed2": {
+    "best_ms": 81.83783599997696,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      82.6,
+      84.7,
+      106.7,
+      81.8
+    ],
+    "successes": 4
   },
   "40f5e94cff3d8bfd353e2301bc007df930d875bcbe865fb6399b309841d10eea": {
     "best_ms": 150.54913899999178,
@@ -983,11 +1177,15 @@
   "41a9c7a632916bdad396b1d7a8969d71c401a75b722f3c344ca0c4d6835605d6": {
     "best_ms": 150.2731790000027,
     "failures": 0,
-    "last_success": 1787956495,
+    "last_success": 1788026038,
     "latencies": [
-      150.3
+      150.3,
+      298.5,
+      354.8,
+      347.7,
+      2480.7
     ],
-    "successes": 2
+    "successes": 6
   },
   "422f6f5b2593caf0381582db7924fa66e525c65afbbeee3c0d4b0b181c3b6350": {
     "best_ms": 417.66582099999994,
@@ -1063,15 +1261,29 @@
     ],
     "successes": 4
   },
-  "484ced3871f20a3808239f3274f406cf5383461f0d3e59b0cd39b1074398c397": {
-    "best_ms": 421.435577000004,
+  "483a1eea3f9178b96c99b05f4208e440f458a4ff09817a2995a47ead4daa2855": {
+    "best_ms": 69.61111900000105,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
-      421.4
+      69.6,
+      85.7,
+      82.9,
+      91.5
     ],
-    "successes": 1
+    "successes": 4
+  },
+  "484ced3871f20a3808239f3274f406cf5383461f0d3e59b0cd39b1074398c397": {
+    "best_ms": 416.82455699992715,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      421.4,
+      416.8
+    ],
+    "successes": 2
   },
   "49c64ea15234f361632d1271c1c0f7fd1ff42a585c2871aeefd328251f19ae5d": {
     "best_ms": null,
@@ -1084,21 +1296,26 @@
   "4a06cfe8291f932bc0bda27b95f1c398076d4f7f5b48de454c555506335747ed": {
     "best_ms": 204.4868679999965,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
       204.5,
-      360.7
+      360.7,
+      360.1
     ],
-    "successes": 3
+    "successes": 4
   },
   "4a8870d6af612c1e8f1470ed17730ea6e70b7ffbe4eb5f68141f55026a0384b9": {
     "best_ms": 145.63073099999713,
     "failures": 0,
-    "last_success": 1787956495,
+    "last_success": 1788026038,
     "latencies": [
-      145.6
+      145.6,
+      301.7,
+      428.1,
+      299.6,
+      415.4
     ],
-    "successes": 2
+    "successes": 6
   },
   "4ac47af4d869a00f81d93a211d6c115d5725ccac9f560bd569f2a522a1aa030a": {
     "best_ms": 46.130439000002355,
@@ -1146,24 +1363,29 @@
     "best_ms": 198.86002399999825,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
       198.9,
-      305.5
+      305.5,
+      355.7
     ],
-    "successes": 2
+    "successes": 3
   },
   "4c04d30fc34df3dec599acf665788068ee24e41abbe867efd27fae671932d54b": {
     "best_ms": 76.92661099999754,
     "failures": 0,
-    "last_success": 1787956495,
+    "last_success": 1788026038,
     "latencies": [
       76.9,
       195.4,
       77.5,
-      134.1
+      134.1,
+      298.8,
+      299.3,
+      419.3,
+      429.9
     ],
-    "successes": 5
+    "successes": 9
   },
   "4cb3cee7ff07fb0d58e1579847886f43c7c0f787f2236cdc5273facee141b996": {
     "best_ms": null,
@@ -1233,11 +1455,12 @@
     "best_ms": 597.4432290000067,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
-      597.4
+      597.4,
+      686.5
     ],
-    "successes": 1
+    "successes": 2
   },
   "52d1279c1ce3a0e0ca0704609a75600027b56af066a04598f1ba1547a8628116": {
     "best_ms": 61.3362120000005,
@@ -1252,6 +1475,16 @@
     ],
     "successes": 4
   },
+  "54a6d5b39cde813aa6056ab4b29614ac2636858217e219fe156c92c452f523ec": {
+    "best_ms": 1443.19201899998,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      1443.2
+    ],
+    "successes": 1
+  },
   "54d3669479bf8d81a16b01db0db0a5bcf5e1cb38f1d2e8be7fff1b5cfa2e0f10": {
     "best_ms": 65.39942199999871,
     "failures": 0,
@@ -1262,6 +1495,19 @@
       65.6,
       65.4,
       68.7
+    ],
+    "successes": 4
+  },
+  "5591c9afc343348b2a0c3b1b4257bfc7d4a6bef432a3fcfda3e2301d317072ca": {
+    "best_ms": 76.35469700005615,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      76.4,
+      87.9,
+      85.4,
+      80.2
     ],
     "successes": 4
   },
@@ -1358,8 +1604,8 @@
   },
   "582cf13cf5610616adb6077eb6ee5e88df14ee7eb87acc7a269be35b93b57be5": {
     "best_ms": null,
-    "failures": 3,
-    "last_failure": 1788014240,
+    "failures": 4,
+    "last_failure": 1788026038,
     "last_success": 0,
     "successes": 0
   },
@@ -1373,14 +1619,18 @@
     "best_ms": 40.84690000000535,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1787995407,
+    "last_success": 1788026038,
     "latencies": [
       40.8,
       75.8,
       62.8,
-      86.3
+      86.3,
+      68.5,
+      81.6,
+      78.7,
+      87.8
     ],
-    "successes": 4
+    "successes": 8
   },
   "58ccd7917614dfef5bc3b63c6e9e98f6976d6c00d343354f57036df14d5dfff6": {
     "best_ms": null,
@@ -1395,10 +1645,16 @@
     "successes": 1
   },
   "5ccdaffbb24221d962fdb2ca6b5581b59561a79197457ba9ebe6780922d29eb9": {
-    "best_ms": 75.80459999999789,
+    "best_ms": 73.44508599999244,
     "failures": 0,
-    "last_success": 1787903499,
-    "successes": 1
+    "last_success": 1788026038,
+    "latencies": [
+      73.4,
+      77.2,
+      78.7,
+      108.0
+    ],
+    "successes": 5
   },
   "5cdd73d0153b9bf9926a8b056a58b7c519df1e51edf115ffd54e0c325fba4df1": {
     "best_ms": 180.78514500000153,
@@ -1410,15 +1666,26 @@
     ],
     "successes": 1
   },
+  "5de927c55957ff5612a1065277db533f41db917aabd38b6f70e91a55c3bdf3c4": {
+    "best_ms": 665.7492900000079,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      665.7
+    ],
+    "successes": 1
+  },
   "5e141a2c87b26bb79c740decf0ccc173c57b41986e839fd193392e45da1fd0f5": {
     "best_ms": 210.58210300000013,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1787956495,
+    "last_success": 1788026038,
     "latencies": [
-      210.6
+      210.6,
+      423.1
     ],
-    "successes": 1
+    "successes": 2
   },
   "5e18f27890c684bb478cd20d0b07ae2066d81003ec3e3522e08c2b160cb36026": {
     "best_ms": null,
@@ -1459,24 +1726,26 @@
   "6106d3eb517b2a05f7c8a318b7b772c66966ead078f81abbddc481e1eb9355d4": {
     "best_ms": 292.7022489999942,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
-      354.1
+      354.1,
+      357.9
     ],
-    "successes": 2
+    "successes": 3
   },
   "610fedcf9140ab77f07a5aaeb79415aba884075d92ba0dc7c55faa05b51c3daa": {
     "best_ms": 83.84046799999822,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
       134.0,
       201.7,
       83.8,
       139.5,
-      359.6
+      359.6,
+      346.8
     ],
-    "successes": 6
+    "successes": 7
   },
   "6135181788ef818d5b5f040c426564e97fab6d89389b42f14bfdf9c6f7563553": {
     "best_ms": null,
@@ -1485,6 +1754,16 @@
     "last_success": 0,
     "latencies": [],
     "successes": 0
+  },
+  "61d38208b65c643e21cf6690108276307d8fabb9df7f4cc44064e3896efe99e2": {
+    "best_ms": 380.3059580000081,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      380.3
+    ],
+    "successes": 1
   },
   "651a7a9c3fa8e6df3e75e10ff077d9d7098c461771a0d9a20b87191f1c51c89e": {
     "best_ms": null,
@@ -1530,15 +1809,19 @@
   "6bbfbc822a1bc18d966fab5aaaf4b8f8ffff8081b3842ac1aa353f6f2ebb17c6": {
     "best_ms": 69.5339199999978,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
       69.5,
       72.6,
       80.2,
       84.0,
-      268.2
+      268.2,
+      269.9,
+      268.4,
+      280.0,
+      271.4
     ],
-    "successes": 6
+    "successes": 10
   },
   "6dd02d8bf66f27c90ce4d08fa9ed060e97e65ae57337fa64da9fb6dccc82b53c": {
     "best_ms": 41.57106000000255,
@@ -1621,6 +1904,14 @@
       50.6
     ],
     "successes": 8
+  },
+  "71e64937857e6c93bc09cbc64bd02e290c7b7ac908303a512fe70955a2dffb76": {
+    "best_ms": null,
+    "failures": 1,
+    "last_failure": 1788026038,
+    "last_success": 0,
+    "latencies": [],
+    "successes": 0
   },
   "7259890646e397da79820359bab6453bbaf2983eb45fc9f221e2a84dd228340f": {
     "best_ms": 66.6482230000014,
@@ -1745,6 +2036,19 @@
     ],
     "successes": 4
   },
+  "782b71de73851db84417cb415117af4070af47694e1ed3438f517dd858d77423": {
+    "best_ms": 81.70777500004078,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      83.4,
+      81.7,
+      86.4,
+      107.3
+    ],
+    "successes": 4
+  },
   "784a8d9eb190cdb56179c731145cb3260f6c13cf38d78e94507d1e0c150aa23d": {
     "best_ms": 45.05402699999195,
     "failures": 0,
@@ -1762,14 +2066,18 @@
     "best_ms": 50.163036999997246,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1787956495,
+    "last_success": 1788026038,
     "latencies": [
       50.2,
       118.7,
       71.2,
-      69.7
+      69.7,
+      77.2,
+      66.3,
+      74.6,
+      84.3
     ],
-    "successes": 4
+    "successes": 8
   },
   "791c49a9380c3d08996cf73c051eeae8b60d1a9e148d829beaa21eac22f4ef1e": {
     "best_ms": 340.616691000001,
@@ -1778,19 +2086,20 @@
     "successes": 1
   },
   "7a09dd98e7777acb081f00dd70f5ff0e6b1d869d879d24120c7071052ca36c08": {
-    "best_ms": 410.4277150000115,
+    "best_ms": 385.80241199997545,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
-      410.4
+      410.4,
+      385.8
     ],
-    "successes": 1
+    "successes": 2
   },
   "7a0f98804ae3e480ac73ed7e6131f0536dacad77ddd8e07ae7e31a958fb9ce36": {
     "best_ms": null,
-    "failures": 2,
-    "last_failure": 1788014240,
+    "failures": 3,
+    "last_failure": 1788026038,
     "last_success": 0,
     "latencies": [],
     "successes": 0
@@ -1810,15 +2119,19 @@
   "7b66ebcd1971e3b2b7c4a8ebfda8bc07923c66868cc47019a32c8fa020b71db3": {
     "best_ms": 57.90946099999417,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
       58.1,
       57.9,
       66.2,
       63.2,
-      252.8
+      252.8,
+      253.7,
+      285.2,
+      254.4,
+      267.6
     ],
-    "successes": 6
+    "successes": 10
   },
   "7b6d7f2192f57732ead40210ce0c7621134408e3729edd227f0dae3c1894852c": {
     "best_ms": 463.9285419999979,
@@ -1869,7 +2182,7 @@
     "best_ms": 69.120814999998,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1787995407,
+    "last_success": 1788026038,
     "latencies": [
       87.0,
       89.1,
@@ -1878,9 +2191,13 @@
       69.1,
       81.4,
       71.6,
-      76.9
+      76.9,
+      74.7,
+      103.2,
+      94.1,
+      104.9
     ],
-    "successes": 8
+    "successes": 12
   },
   "80a4711b2f90a8d5e20df70c7cfd97ed9a70e5c9d59263f2d7031bc54992e1bf": {
     "best_ms": 84.8466129999963,
@@ -1892,6 +2209,14 @@
     "best_ms": null,
     "failures": 2,
     "last_failure": 1788014240,
+    "last_success": 0,
+    "latencies": [],
+    "successes": 0
+  },
+  "81f8a52b231b2b35c6fbaf3b906ae1cb769f7bbb585ef44058e4240b108ad7b2": {
+    "best_ms": null,
+    "failures": 1,
+    "last_failure": 1788026038,
     "last_success": 0,
     "latencies": [],
     "successes": 0
@@ -1973,6 +2298,16 @@
     "latencies": [],
     "successes": 0
   },
+  "84ae81eb175911a5050c31a3fdf06c777283381768dd4b32445e3c7762175339": {
+    "best_ms": 658.2040859999552,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      658.2
+    ],
+    "successes": 1
+  },
   "8533b336ab230fa05096332701edc4f813434d8a1ae6a4929c08198e10686c55": {
     "best_ms": 275.3798379999992,
     "failures": 0,
@@ -1994,8 +2329,8 @@
   },
   "85aef6939ab683a999d78648405ee147f23ce475dc039c58ceb6ec27c5e40ad8": {
     "best_ms": null,
-    "failures": 1,
-    "last_failure": 1788014240,
+    "failures": 2,
+    "last_failure": 1788026038,
     "last_success": 0,
     "latencies": [],
     "successes": 0
@@ -2035,25 +2370,33 @@
     "successes": 0
   },
   "895153fae54d209229be7b1c5ca12d429f04c5ea32f1e31d96a3990e638ea26b": {
-    "best_ms": 428.5969129999998,
+    "best_ms": 301.39707900002577,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
-      3562.1
+      3562.1,
+      301.4,
+      424.7,
+      1044.7,
+      354.6
     ],
-    "successes": 2
+    "successes": 6
   },
   "8a8dc1810043e7d3b8ea7b210c3881a5165efe9e23c8c287e0d67f52dadf162b": {
     "best_ms": 45.1284749999985,
     "failures": 0,
-    "last_success": 1787995407,
+    "last_success": 1788026038,
     "latencies": [
       45.1,
       66.0,
       73.7,
-      71.7
+      71.7,
+      83.6,
+      74.8,
+      77.3,
+      72.5
     ],
-    "successes": 5
+    "successes": 9
   },
   "8b2e2a8d4e01128a650db7bee149cab6a63ef9be83880c542911f61c5498935b": {
     "best_ms": 74.42621700000984,
@@ -2127,7 +2470,7 @@
     "best_ms": 69.09768500000268,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1787995407,
+    "last_success": 1788026038,
     "latencies": [
       83.3,
       86.3,
@@ -2136,9 +2479,13 @@
       81.2,
       80.3,
       83.4,
+      75.0,
+      78.1,
+      85.3,
+      79.1,
       75.0
     ],
-    "successes": 8
+    "successes": 12
   },
   "8ea9d91e18096a9fd6d2dc237cfe231a06a820648c55e5648dcc0bd2ace35fb0": {
     "best_ms": null,
@@ -2302,6 +2649,19 @@
     ],
     "successes": 5
   },
+  "98ab9c9d65f7d2aab0516d6715199051b5c2098638409c34377150a3b4e975e0": {
+    "best_ms": 71.90772800004197,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      86.1,
+      76.7,
+      71.9,
+      72.1
+    ],
+    "successes": 4
+  },
   "98e855e89d92f2444ca18fbdf14e00890e38176970b295f7567ca80e4fde60d7": {
     "best_ms": 288.953247000002,
     "failures": 0,
@@ -2313,12 +2673,23 @@
     "successes": 1
   },
   "992e24d994e380e21608aa34cbcff04ec1c2b0d02646a3f83d499b50b0689a23": {
-    "best_ms": 413.2355990000036,
+    "best_ms": 373.916093000048,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
-      413.2
+      413.2,
+      373.9
+    ],
+    "successes": 2
+  },
+  "9975d8f8f1da603d3e14e070dffaa84b6165314cb300751e434fca33ead1f4c2": {
+    "best_ms": 489.15346400008275,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      489.2
     ],
     "successes": 1
   },
@@ -2412,8 +2783,8 @@
   },
   "9fe657e3035d15c3aae02bc73c8f315e0a25fcb4a2a8dc98f747f3394a37aa42": {
     "best_ms": null,
-    "failures": 1,
-    "last_failure": 1788014240,
+    "failures": 2,
+    "last_failure": 1788026038,
     "last_success": 0,
     "latencies": [],
     "successes": 0
@@ -2438,21 +2809,39 @@
   "a09daaf9831ea195e38c3b386f66c6235eeeec74c7d7092c399dbc74bb953467": {
     "best_ms": 146.39008500000017,
     "failures": 0,
-    "last_success": 1787956495,
+    "last_success": 1788026038,
     "latencies": [
-      146.4
+      146.4,
+      297.5,
+      295.3,
+      349.8,
+      432.9
     ],
-    "successes": 2
+    "successes": 6
   },
   "a0fb5e9cdda6ea00b893aa45cfd9b3d6e94c547133dc4e060cd5d53eca50b0a9": {
     "best_ms": 203.9313490000012,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1787956495,
+    "last_success": 1788026038,
     "latencies": [
-      203.9
+      203.9,
+      423.3
     ],
-    "successes": 1
+    "successes": 2
+  },
+  "a20d112dc884b495316f6253e4ec73c7ad4e224fa76c92d186a4e965161ae14b": {
+    "best_ms": 74.11332300000595,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      74.1,
+      99.5,
+      90.4,
+      74.7
+    ],
+    "successes": 4
   },
   "a45605f10110cd0e945374563f0feebcf582648537dcce3d19d21276dbf28eec": {
     "best_ms": 69.65476300000262,
@@ -2498,6 +2887,14 @@
     "latencies": [],
     "successes": 0
   },
+  "a6cd6114ec11e1ec0d92abc7a19cbb419cfa7ba0867b755a737f1729e9965a71": {
+    "best_ms": null,
+    "failures": 1,
+    "last_failure": 1788026038,
+    "last_success": 0,
+    "latencies": [],
+    "successes": 0
+  },
   "a6e0f86b5119eb903eeb0653f9df237a2889d8833635a782c6a15fa96020d57e": {
     "best_ms": 289.5711419999998,
     "failures": 0,
@@ -2527,23 +2924,25 @@
   "a940146860b659038c2391b632d0a0aaef8270cf132153936ed132d07907c4dd": {
     "best_ms": 420.9106050000031,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
-      425.3
+      425.3,
+      421.0
     ],
-    "successes": 2
+    "successes": 3
   },
   "a99aabf6ec99187c3d4b87b0f2699cb7393e695dae5422d81d1a0ec150c5b871": {
     "best_ms": 77.09092700000042,
     "failures": 0,
-    "last_success": 1787956495,
+    "last_success": 1788026038,
     "latencies": [
       86.5,
       77.1,
       200.7,
-      138.6
+      138.6,
+      356.8
     ],
-    "successes": 5
+    "successes": 6
   },
   "a9e5e08f32d18cff715ac42f69d95e31d4d876ebbbee79e5490393928a3443c6": {
     "best_ms": 2174.0203610000035,
@@ -2589,6 +2988,24 @@
     "latencies": [],
     "successes": 0
   },
+  "ac2ff8eacbb2985b543053acb623bd68899d75ede38bac114546ad71968019c8": {
+    "best_ms": null,
+    "failures": 1,
+    "last_failure": 1788026038,
+    "last_success": 0,
+    "latencies": [],
+    "successes": 0
+  },
+  "acfd276b5030ae5238dcffb8026afdd246c186434147563b7348e992c44be5bb": {
+    "best_ms": 1192.2489549999682,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      1192.2
+    ],
+    "successes": 1
+  },
   "ae155680590b795a4c01dfa7a3db7fc8194e8256cbf8ad91f3150c4a2b4a08ac": {
     "best_ms": 150.42826999999193,
     "failures": 0,
@@ -2619,11 +3036,12 @@
     "best_ms": 390.7528850000048,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
-      390.8
+      390.8,
+      408.0
     ],
-    "successes": 1
+    "successes": 2
   },
   "b146e63394abfbce18ddf6192f4d253164cccec1c2853dee2f44bb58e38ccfec": {
     "best_ms": 242.5888140000012,
@@ -2693,8 +3111,27 @@
   "b54cbdde774c6cf758ecdac86b3ed3e38435ffa6c172a0e74565c3e082ae64ae": {
     "best_ms": 69.70758199999949,
     "failures": 0,
-    "last_success": 1787903499,
-    "successes": 1
+    "last_success": 1788026038,
+    "latencies": [
+      70.5,
+      80.3,
+      82.6,
+      78.4
+    ],
+    "successes": 5
+  },
+  "b5c001f04bb531496646f0ca6a49a86c85b69eea6b94d46d0c858228e8f6946e": {
+    "best_ms": 71.39368200000717,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      80.0,
+      71.4,
+      73.4,
+      82.2
+    ],
+    "successes": 4
   },
   "b6116793e3c23b3ba0bb9917dd0693a8c3f0686efd2f4b10dcaebe5443ae3f30": {
     "best_ms": 305.6400729999993,
@@ -2742,6 +3179,19 @@
     ],
     "successes": 4
   },
+  "b8173e7ba14147b7075273355814ec7ded3d9cd1efc639864369c0c013992931": {
+    "best_ms": 75.75747200007754,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      75.8,
+      89.4,
+      79.3,
+      84.0
+    ],
+    "successes": 4
+  },
   "b8203a3f7afc88a2b579281fe87356656510ea2b05671770ba0f40de2b8e17e7": {
     "best_ms": 869.3698350000005,
     "failures": 0,
@@ -2751,6 +3201,19 @@
       869.4
     ],
     "successes": 1
+  },
+  "ba0fa81ba530d2aa6e637bd529078abc47b03ee76ae833e89256719b17e3c76c": {
+    "best_ms": 74.10653800002365,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      74.1,
+      82.5,
+      90.3,
+      77.9
+    ],
+    "successes": 4
   },
   "bad3db8e3c28e109ce325b4ee1217d1666ebb94e05e415e134b6d1afbd86e122": {
     "best_ms": 121.27758500000141,
@@ -2878,6 +3341,14 @@
     "last_success": 1787903499,
     "successes": 1
   },
+  "c27d3cb534afd9605e6dfe7930f4ba2510655962db21cb11946b15af134c3536": {
+    "best_ms": null,
+    "failures": 1,
+    "last_failure": 1788026038,
+    "last_success": 0,
+    "latencies": [],
+    "successes": 0
+  },
   "c2db9a67c14b543a72fe9959ff268db32fe10b9ceacdc5f8b22a55f65d21bc71": {
     "best_ms": null,
     "failures": 2,
@@ -2906,14 +3377,36 @@
     "best_ms": 56.734595000001775,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1787956495,
+    "last_success": 1788026038,
     "latencies": [
       56.7,
       73.4,
       77.5,
-      64.1
+      64.1,
+      78.8,
+      79.9,
+      106.3,
+      79.9
     ],
-    "successes": 4
+    "successes": 8
+  },
+  "c9ae9be6ad99731d39d2aaac3b0c1d47cb1936c54700bdd06e64079b29ce6d01": {
+    "best_ms": null,
+    "failures": 1,
+    "last_failure": 1788026038,
+    "last_success": 0,
+    "latencies": [],
+    "successes": 0
+  },
+  "cb94a9ac6b282469de5b69dfc97e07ecf4806931f22193b77878f62b7bd2cd51": {
+    "best_ms": 393.1278849998989,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      393.1
+    ],
+    "successes": 1
   },
   "cbfe176f0e157a32eb7aab9da52f27e891c61c3de35a688c8bffaefe7e57c3d6": {
     "best_ms": 42.607096000004674,
@@ -2976,18 +3469,45 @@
     ],
     "successes": 4
   },
+  "cf87a43d3442c8507d3f0388a1bc47169b59c4b9b32bdb7b11d3db2f8da64ad8": {
+    "best_ms": 71.32054700002755,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      71.3,
+      78.1,
+      96.2,
+      75.9
+    ],
+    "successes": 4
+  },
+  "d0e4101f4bba6521239df5bc892b16f4d67b97d1bc0e28642522ab89e9c96f23": {
+    "best_ms": 394.8337539999329,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      394.8
+    ],
+    "successes": 1
+  },
   "d168de8051df03964dce6aea7f63536b5078efca7f5f561fbcf6056556d0e905": {
     "best_ms": 91.53360500000218,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
       91.5,
       215.7,
       153.9,
       210.9,
-      310.8
+      310.8,
+      293.9,
+      304.0,
+      298.6,
+      350.7
     ],
-    "successes": 6
+    "successes": 10
   },
   "d18e85acca8a4d6997357867518a4002904484144426238bb09bd46319553c5a": {
     "best_ms": 69.29158900000232,
@@ -3026,14 +3546,15 @@
   "d257b4bde893bbf4f68644467e37360ae0cadcfc3530dca036b8b4e1c9c96fff": {
     "best_ms": 127.83025699999939,
     "failures": 0,
-    "last_success": 1787956495,
+    "last_success": 1788026038,
     "latencies": [
       127.8,
       131.8,
       212.7,
-      207.3
+      207.3,
+      424.4
     ],
-    "successes": 5
+    "successes": 6
   },
   "d280a68573d16e9bd314330ada241e52df881a7bc42c169896397a8929ae77a0": {
     "best_ms": null,
@@ -3045,7 +3566,8 @@
   },
   "d2e03d3c3989807cf2534c5d75599626bb0e3ab0e1ef16a8feb831ad58b71da5": {
     "best_ms": null,
-    "failures": 1,
+    "failures": 2,
+    "last_failure": 1788026038,
     "last_success": 0,
     "successes": 0
   },
@@ -3065,6 +3587,19 @@
       75.9
     ],
     "successes": 8
+  },
+  "d48867de2e98c24438ada14b319f1093e8f3106404daf8c28701fb03d46c8d28": {
+    "best_ms": 69.83564699999079,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      69.8,
+      101.4,
+      88.3,
+      98.6
+    ],
+    "successes": 4
   },
   "d4d29b2de8df1ca017ac01b75d62517e97812774deaa55d2136aacbf86de6b28": {
     "best_ms": null,
@@ -3156,6 +3691,14 @@
     ],
     "successes": 5
   },
+  "d92a63bd49f62a02753373e2076254b77303e85f52e214ec3bd0d25313e7e4df": {
+    "best_ms": null,
+    "failures": 1,
+    "last_failure": 1788026038,
+    "last_success": 0,
+    "latencies": [],
+    "successes": 0
+  },
   "da1c7ad111c45aa44adc1aa4de985f26b46fc7e724f74c620849327e18a4c73f": {
     "best_ms": null,
     "failures": 1,
@@ -3181,6 +3724,19 @@
       90.4
     ],
     "successes": 9
+  },
+  "daa5212937b6290216792a1ad06a418e64c7d5d90d0d27608782217568056737": {
+    "best_ms": 78.3289150000428,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      78.3,
+      85.2,
+      95.6,
+      97.0
+    ],
+    "successes": 4
   },
   "db4bb529884ee619d79987b946a77e0a65b1a7600d906cdc4ab3c82675ed1d8e": {
     "best_ms": 73.66173799999842,
@@ -3234,28 +3790,48 @@
     "successes": 4
   },
   "dd5566cf8862497197701e751719197f5f8cfdde8a09d350cd3d21b99c328a09": {
-    "best_ms": 294.29602999999815,
+    "best_ms": 285.9269350000204,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
-      294.3
+      294.3,
+      285.9,
+      290.0,
+      290.1,
+      287.8
     ],
-    "successes": 1
+    "successes": 5
   },
   "ddcf5814157c53b16c9ad7450e640129de414d7169daef02c9fd84e20d39076a": {
     "best_ms": 69.10263899999336,
     "failures": 0,
-    "last_success": 1787903499,
-    "successes": 1
+    "last_success": 1788026038,
+    "latencies": [
+      73.6,
+      85.1,
+      75.5,
+      77.0
+    ],
+    "successes": 5
   },
   "de5fb94e2f5e6b32e9f8e72a6358ff8708c1bf9f76016badaba501c914757e43": {
     "best_ms": null,
-    "failures": 1,
-    "last_failure": 1788014240,
+    "failures": 2,
+    "last_failure": 1788026038,
     "last_success": 0,
     "latencies": [],
     "successes": 0
+  },
+  "de687d9d776989fb95765653552eba9a61534bb6cd818b4ab642a34a52c8c238": {
+    "best_ms": 397.3637899999858,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      397.4
+    ],
+    "successes": 1
   },
   "deb3983eba979d6b56b7eb0639fd7838a5bda9f27a5b3e546280cb62cf4de965": {
     "best_ms": 195.1842359999887,
@@ -3295,6 +3871,19 @@
       54.8,
       78.4,
       45.3
+    ],
+    "successes": 4
+  },
+  "e2f36be830067fef52d47eddc656480893d6771d4c166ba0c31699e41ad17160": {
+    "best_ms": 251.23255599999084,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      256.7,
+      254.1,
+      252.6,
+      251.2
     ],
     "successes": 4
   },
@@ -3358,14 +3947,18 @@
   "e6f4f538533c1321df6b3f89c850add2710b37f29330fb678750055cede23792": {
     "best_ms": 54.63624800000133,
     "failures": 0,
-    "last_success": 1787956495,
+    "last_success": 1788026038,
     "latencies": [
       54.6,
       66.8,
       67.1,
-      61.2
+      61.2,
+      98.5,
+      71.2,
+      112.6,
+      76.7
     ],
-    "successes": 5
+    "successes": 9
   },
   "e855652f93b705f8105aabff0a60d0fd6cf649726d8c9f7eee2786995ab6e40c": {
     "best_ms": 106.1184449999999,
@@ -3490,11 +4083,12 @@
   "ee20b039eb7ab6bf4eeaed3ebcb7100cdead8b94ec52f122b55a05050030f5a7": {
     "best_ms": 347.1525530000008,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
-      417.1
+      417.1,
+      355.1
     ],
-    "successes": 2
+    "successes": 3
   },
   "ef6057a76b2570445b0ae92782b3b30a5c1d6fb489b356d982c8fe827a54e130": {
     "best_ms": 65.47445600000401,
@@ -3574,6 +4168,19 @@
     "last_success": 1787903499,
     "successes": 1
   },
+  "fa1427129179f2e35e61ce974db00f3f8bf93710c147b3a6cc784bd871176e2a": {
+    "best_ms": 71.12075100008042,
+    "failures": 0,
+    "last_failure": 0,
+    "last_success": 1788026038,
+    "latencies": [
+      75.6,
+      71.1,
+      77.6,
+      75.5
+    ],
+    "successes": 4
+  },
   "fa4e38fa50b9ab74f865bfac30b1f4457dce12503d7ab6125a75b1df14d34f3d": {
     "best_ms": null,
     "failures": 1,
@@ -3641,11 +4248,15 @@
   "fcbe1c43389e47147dee9fd1c7f82bd7225816c02f0067a9ed07b71a1062b309": {
     "best_ms": 280.891043000004,
     "failures": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
-      317.6
+      317.6,
+      317.2,
+      331.5,
+      368.7,
+      317.1
     ],
-    "successes": 2
+    "successes": 6
   },
   "fdb646be961090b80456da0f61aaef091cdc88a5df4ab1a34bb70743c0645217": {
     "best_ms": null,
@@ -3672,7 +4283,7 @@
     "best_ms": 62.70811899999984,
     "failures": 0,
     "last_failure": 0,
-    "last_success": 1788014240,
+    "last_success": 1788026038,
     "latencies": [
       93.4,
       77.5,
@@ -3682,14 +4293,26 @@
       69.7,
       83.0,
       83.2,
-      89.8
+      89.8,
+      77.0,
+      90.8,
+      79.7,
+      92.4
     ],
-    "successes": 9
+    "successes": 13
   },
   "ff21185bea9ae8b8c87b486766d911bd4e56d3bfcbd423731eb7c433b845416b": {
     "best_ms": null,
     "failures": 1,
     "last_failure": 1787971290,
+    "last_success": 0,
+    "latencies": [],
+    "successes": 0
+  },
+  "ff2eb4505ddc958960eef234fcfcc8930ef52b77cab844eeec730520f36c5eb2": {
+    "best_ms": null,
+    "failures": 1,
+    "last_failure": 1788026038,
     "last_success": 0,
     "latencies": [],
     "successes": 0

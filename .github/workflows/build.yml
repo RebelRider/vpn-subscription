@@ -3,15 +3,21 @@ name: Build Best50
 on:
   workflow_dispatch:
   schedule:
+    # Every 15 minutes.
+    # GitHub may delay scheduled jobs during high load.
     - cron: "*/15 * * * *"
 
 permissions:
   contents: write
 
+concurrency:
+  group: best50-build
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 60
 
     steps:
       - name: Checkout
@@ -26,34 +32,94 @@ jobs:
 
       - name: Install dependencies
         run: |
+          set -euo pipefail
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Update local GeoIP database
+        run: |
+          set -euo pipefail
+          python scripts/update_geoip.py
 
       - name: Install sing-box
         shell: bash
         run: |
           set -euo pipefail
+
           VERSION="1.13.19"
+
           curl -fsSL \
             "https://github.com/SagerNet/sing-box/releases/download/v${VERSION}/sing-box-${VERSION}-linux-amd64.tar.gz" \
             -o /tmp/sing-box.tgz
+
           tar -xzf /tmp/sing-box.tgz -C /tmp
-          sudo install "/tmp/sing-box-${VERSION}-linux-amd64/sing-box" /usr/local/bin/sing-box
+
+          sudo install \
+            "/tmp/sing-box-${VERSION}-linux-amd64/sing-box" \
+            /usr/local/bin/sing-box
+
           sing-box version
 
       - name: Build Best50
-        run: python scripts/build.py
+        run: |
+          set -euo pipefail
+          python -u scripts/build.py
+
+      - name: Validate published subscription
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -s output/best50.txt
+          test -s output/status.json
+
+          COUNT=$(grep -c '^vless://' output/best50.txt || true)
+
+          echo "Published VLESS configurations: ${COUNT}"
+
+          if [ "$COUNT" -lt 20 ]; then
+            echo "ERROR: Best50 subscription contains fewer than 20 VLESS nodes."
+            exit 1
+          fi
+
+          python3 - <<'PY'
+          import json
+
+          with open("output/status.json", "r") as f:
+              status = json.load(f)
+
+          published = status.get("published", {})
+
+          print("Published:", published)
+
+          if published.get("best50", 0) < 20:
+              raise SystemExit(
+                  "ERROR: status.json reports fewer than 20 Best50 nodes."
+              )
+          PY
 
       - name: Publish
         shell: bash
         run: |
           set -euo pipefail
+
           git config user.name "best50-bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add output/best50.txt output/status.json output/history.json
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add \
+            output/best20.txt \
+            output/best50.txt \
+            output/best100.txt \
+            output/status.json \
+            output/history.json
+
           if git diff --cached --quiet; then
-            echo "No changes"
+            echo "No changes in generated output."
             exit 0
           fi
-          git commit -m "chore: update Best50"
+
+          git commit \
+            -m "chore: update Best50 subscription"
+
           git push

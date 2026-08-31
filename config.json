@@ -1,17 +1,43 @@
 {
+  "pipeline_version": "4.4",
   "max_output": 50,
-  "candidate_limit": 100,
-  "finalist_limit": 50,
+  "candidate_limit": 0,
+  "first_pass": {
+    "max_parallel": 25,
+    "connect_timeout": 6,
+    "request_timeout": 10,
+    "minimum_http_status": 200
+  },
+  "final_pass": {
+    "finalist_limit": 500,
+    "max_parallel": 12,
+    "attempts": 5,
+    "minimum_successes": 4
+  },
+  "quality": {
+    "max_median_latency_ms": 3000,
+    "max_p95_latency_ms": 6000,
+    "max_jitter_ratio": 1.75
+  },
+  "diversity": {
+    "max_same_infrastructure_best20": 2,
+    "max_same_infrastructure_best50": 3,
+    "max_same_infrastructure_best100": 5,
+    "max_same_country_best20": 8,
+    "max_same_country_best50": 15,
+    "max_same_country_best100": 25
+  },
+  "history": {
+    "file": "output/history.json",
+    "max_latency_samples": 20,
+    "decay_days": 14
+  },
   "test_url": "https://www.gstatic.com/generate_204",
-  "connect_timeout": 6,
-  "request_timeout": 10,
-  "min_successes": 1,
-  "max_parallel": 6,
-  "max_parallel_final": 5,
-  "final_test_attempts": 3,
-  "minimum_final_successes": 2,
-  "history_file": "output/history.json",
   "sources": [
+    {
+      "name": "radikal-verified",
+      "url": "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/verified/configs.txt"
+    },
     {
       "name": "radikal-top100",
       "url": "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/top100.txt"
@@ -19,6 +45,121 @@
     {
       "name": "radikal-fast",
       "url": "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/fast/configs.txt"
+    },
+    {
+      "name": "morpheus-best",
+      "url": "https://raw.githubusercontent.com/morpheusadam/v2ray-config/main/subs/bundles/best.txt"
+    },
+    {
+      "name": "morpheus-vless",
+      "url": "https://raw.githubusercontent.com/morpheusadam/v2ray-config/main/subs/bundles/vless.txt"
+    },
+    {
+      "name": "morpheus-reality",
+      "url": "https://raw.githubusercontent.com/morpheusadam/v2ray-config/main/subs/bundles/reality.txt"
+    },
+    {
+      "name": "alirewa",
+      "url": "https://raw.githubusercontent.com/Alirewa/V2ray-Configs/main/config.txt"
+    },
+    {
+      "name": "solispirit-all",
+      "url": "https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/main/all_configs.txt"
+    },
+    {
+      "name": "nexus-vless",
+      "url": "https://raw.githubusercontent.com/ninjastrikers/nexus-nodes/main/configs/vless.txt"
+    },
+    {
+      "name": "zieng-vless",
+      "url": "https://raw.githubusercontent.com/zieng2/wl/main/vless.txt"
+    },
+    {
+      "name": "vpn-configs-for-russia-white-sni",
+      "url": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/main/WHITE-SNI-RU-all.txt"
+    },
+    {
+      "name": "vpn-configs-for-russia-white-cidr",
+      "url": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/main/WHITE-CIDR-RU-all.txt"
+    },
+    {
+      "name": "poommin",
+      "url": "https://raw.githubusercontent.com/poommin2543/v2ray-configsNew/main/All_Configs_Sub.txt"
+    },
+    {
+      "name": "freedom-v2ray",
+      "url": "https://raw.githubusercontent.com/MahanKenway/Freedom-V2Ray/main/configs/vless.txt"
+    },
+    {
+      "name": "mehrtat-vless",
+      "url": "https://raw.githubusercontent.com/mehrtat/vless-collector/main/vless.txt"
+    },
+    {
+      "name": "epodonios-vless",
+      "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vless.txt"
+    },
+    {
+      "name": "changsongyang-vless",
+      "url": "https://raw.githubusercontent.com/changsongyang/v2ray-configs1/main/Splitted-By-Protocol/vless.txt"
+    },
+    {
+      "name": "delta-kronecker-vless",
+      "url": "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/main/config/protocols/vless.txt"
+    },
+    {
+      "name": "radikal-vless",
+      "url": "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/protocols/vless.txt"
+    },
+    {
+      "name": "vovaplus-vless",
+      "url": "https://raw.githubusercontent.com/VovaplusEXP/p-configs/main/Splitted-By-Protocol/vless.txt"
+    },
+    {
+      "name": "217cnoc-us",
+      "url": "https://raw.githubusercontent.com/217CnoC/configs-collector-v2ray/main/sub/countries/US.txt"
+    },
+    {
+      "name": "217cnoc-de",
+      "url": "https://raw.githubusercontent.com/217CnoC/configs-collector-v2ray/main/sub/countries/DE.txt"
+    },
+    {
+      "name": "217cnoc-pl",
+      "url": "https://raw.githubusercontent.com/217CnoC/configs-collector-v2ray/main/sub/countries/PL.txt"
+    },
+    {
+      "name": "217cnoc-nl",
+      "url": "https://raw.githubusercontent.com/217CnoC/configs-collector-v2ray/main/sub/countries/NL.txt"
+    },
+    {
+      "name": "anonymouskeys-us",
+      "url": "https://raw.githubusercontent.com/anonymouskeys/Free-configs-/main/output/countries/us.txt"
+    },
+    {
+      "name": "anonymouskeys-de",
+      "url": "https://raw.githubusercontent.com/anonymouskeys/Free-configs-/main/output/countries/de.txt"
+    },
+    {
+      "name": "anonymouskeys-pl",
+      "url": "https://raw.githubusercontent.com/anonymouskeys/Free-configs-/main/output/countries/pl.txt"
+    },
+    {
+      "name": "anonymouskeys-nl",
+      "url": "https://raw.githubusercontent.com/anonymouskeys/Free-configs-/main/output/countries/nl.txt"
     }
-  ]
+  ],
+  "countries": {
+    "allow": [
+      "US",
+      "DE",
+      "PL",
+      "NL"
+    ],
+    "require_country": true,
+    "geoip": true,
+    "label_fallback": true,
+    "geoip_database": "sapics-server-country",
+    "geoip_db_ipv4": "data/geoip/server-country-ipv4.csv",
+    "geoip_db_ipv6": "data/geoip/server-country-ipv6.csv",
+    "dns_concurrency": 40
+  }
 }

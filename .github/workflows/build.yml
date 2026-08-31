@@ -2,10 +2,6 @@ name: Build Best50
 
 on:
   workflow_dispatch:
-  schedule:
-    # Every 15 minutes.
-    # GitHub may delay scheduled jobs during high load.
-    - cron: "*/15 * * * *"
 
 permissions:
   contents: write

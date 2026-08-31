@@ -28,6 +28,7 @@ import base64
 import hashlib
 import json
 import math
+import os
 import re
 import subprocess
 import sys
@@ -1492,160 +1493,386 @@ async def run_process(
 # =========================================================
 
 
-async def probe_one(
-    link: str,
-    sem: asyncio.Semaphore,
-    index: int,
-) -> tuple[str, float | None]:
+async def _probe_batch_in_slot(
+    items: list[tuple[int, str]],
+    slot: int,
+) -> list[tuple[str, float | None]]:
+    """
+    Probe multiple VLESS nodes through one sing-box instance.
 
-    async with sem:
+    Each candidate has:
+      - its own SOCKS inbound;
+      - its own VLESS outbound;
+      - an explicit inbound -> outbound route rule.
+
+    If sing-box rejects the combined configuration, recursively
+    split the batch until malformed candidates are isolated.
+    """
+
+    if not items:
+        return []
+
+    engine = CFG.get(
+        "probe_engine",
+        {},
+    )
+
+    batch_size = max(
+        1,
+        int(engine.get("batch_size", 64)),
+    )
+
+    startup_delay = float(
+        engine.get("startup_delay", 0.35)
+    )
+
+    curl_parallel = max(
+        1,
+        int(engine.get("curl_parallel", 64)),
+    )
+
+    base_port = (
+        int(engine.get("base_port", 22000))
+        + slot * (batch_size + 32)
+    )
+
+    valid: list[
+        tuple[int, str, int]
+    ] = []
+
+    immediate: list[
+        tuple[str, float | None]
+    ] = []
+
+    inbounds = []
+    outbounds = []
+    rules = []
+
+    for _, link in items:
 
         try:
             node = parse_vless(link)
-            outbound = vless_to_singbox(node)
+
+            local_index = len(valid)
+
+            inbound_tag = (
+                f"probe-in-{local_index}"
+            )
+
+            outbound_tag = (
+                f"probe-out-{local_index}"
+            )
+
+            outbound = vless_to_singbox(
+                node,
+                tag=outbound_tag,
+            )
 
         except Exception:
-
-            # Invalid/unsupported candidates are expected in large
-            # public source sets. Do not flood stderr here.
-            return link, None
-
-        port = 22000 + (index % 20000)
-
-        with tempfile.TemporaryDirectory() as temp_dir:
-
-            config_path = (
-                Path(temp_dir)
-                / "config.json"
+            immediate.append(
+                (link, None)
             )
+            continue
 
-            config = {
-                "log": {
-                    "level": "error"
-                },
+        port = base_port + local_index
 
-                "dns": {
-                    "servers": [
-                        {
-                            "type": "local",
-                            "tag": "local",
-                        }
-                    ],
-                    "final": "local",
-                },
+        valid.append(
+            (
+                local_index,
+                link,
+                port,
+            )
+        )
 
-                "inbounds": [
-                    {
-                        "type": "socks",
-                        "tag": "socks",
-                        "listen": "127.0.0.1",
-                        "listen_port": port,
-                    }
-                ],
-
-                "outbounds": [
-                    outbound,
-                    {
-                        "type": "direct",
-                        "tag": "direct",
-                    },
-                ],
-
-                "route": {
-                    "final": "node",
-                },
+        inbounds.append(
+            {
+                "type": "socks",
+                "tag": inbound_tag,
+                "listen": "127.0.0.1",
+                "listen_port": port,
             }
+        )
 
-            config_path.write_text(
-                json.dumps(
-                    config,
-                    ensure_ascii=False,
-                )
+        outbounds.append(
+            outbound
+        )
+
+        rules.append(
+            {
+                "inbound": [
+                    inbound_tag
+                ],
+                "action": "route",
+                "outbound": outbound_tag,
+            }
+        )
+
+    if not valid:
+        return immediate
+
+    outbounds.append(
+        {
+            "type": "direct",
+            "tag": "direct",
+        }
+    )
+
+    config = {
+        "log": {
+            "level": "error"
+        },
+        "dns": {
+            "servers": [
+                {
+                    "type": "local",
+                    "tag": "local",
+                }
+            ],
+            "final": "local",
+        },
+        "inbounds": inbounds,
+        "outbounds": outbounds,
+        "route": {
+            "rules": rules,
+            "final": "direct",
+        },
+    }
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+
+        config_path = (
+            Path(temp_dir)
+            / "config.json"
+        )
+
+        config_path.write_text(
+            json.dumps(
+                config,
+                ensure_ascii=False,
             )
+        )
 
-            check_code, _, _ = await run_process(
+        check_code, _, _ = (
+            await run_process(
                 [
                     SING_BOX,
                     "check",
                     "-c",
                     str(config_path),
                 ],
-                8,
+                15,
+            )
+        )
+
+        if check_code != 0:
+
+            links_only = [
+                link
+                for _, link, _
+                in valid
+            ]
+
+            if len(links_only) == 1:
+                return (
+                    immediate
+                    + [
+                        (
+                            links_only[0],
+                            None,
+                        )
+                    ]
+                )
+
+            middle = max(
+                1,
+                len(links_only) // 2,
             )
 
-            if check_code != 0:
-                return link, None
+            left_items = [
+                (
+                    index,
+                    link,
+                )
+                for index, link
+                in enumerate(
+                    links_only[:middle]
+                )
+            ]
 
-            process = (
-                await asyncio.create_subprocess_exec(
-                    SING_BOX,
-                    "run",
-                    "-c",
-                    str(config_path),
-                    stdout=asyncio.subprocess.DEVNULL,
-                    stderr=asyncio.subprocess.DEVNULL,
+            right_items = [
+                (
+                    index,
+                    link,
+                )
+                for index, link
+                in enumerate(
+                    links_only[middle:]
+                )
+            ]
+
+            left = (
+                await _probe_batch_in_slot(
+                    left_items,
+                    slot,
                 )
             )
 
-            try:
+            right = (
+                await _probe_batch_in_slot(
+                    right_items,
+                    slot,
+                )
+            )
 
-                await asyncio.sleep(0.30)
+            return (
+                immediate
+                + left
+                + right
+            )
 
-                start = time.perf_counter()
+        process = (
+            await asyncio.create_subprocess_exec(
+                SING_BOX,
+                "run",
+                "-c",
+                str(config_path),
+                stdout=asyncio.subprocess.DEVNULL,
+                stderr=asyncio.subprocess.DEVNULL,
+            )
+        )
 
-                code, output, _ = await run_process(
-                    [
-                        "curl",
-                        "--socks5-hostname",
-                        f"127.0.0.1:{port}",
-                        "--connect-timeout",
-                        str(
-                            CFG["first_pass"][
-                                "connect_timeout"
-                            ]
-                        ),
-                        "--max-time",
-                        str(
-                            CFG["first_pass"][
-                                "request_timeout"
-                            ]
-                        ),
-                        "-sS",
-                        "-o",
-                        "/dev/null",
-                        "-w",
-                        "%{http_code}",
-                        CFG["test_url"],
-                    ],
-                    CFG["first_pass"][
-                        "request_timeout"
-                    ] + 3,
+        try:
+
+            await asyncio.sleep(
+                startup_delay
+            )
+
+            if process.returncode is not None:
+
+                return (
+                    immediate
+                    + [
+                        (
+                            link,
+                            None,
+                        )
+                        for _, link, _
+                        in valid
+                    ]
                 )
 
-                elapsed = (
-                    time.perf_counter() - start
-                ) * 1000
+            sem = asyncio.Semaphore(
+                curl_parallel
+            )
 
-                http_code = (
-                    output
-                    .decode(errors="ignore")
-                    .strip()
-                )
+            connect_timeout = str(
+                CFG["first_pass"][
+                    "connect_timeout"
+                ]
+            )
 
-                if (
-                    code == 0
-                    and re.match(
-                        r"^[23]\d\d$",
-                        http_code,
+            request_timeout = float(
+                CFG["first_pass"][
+                    "request_timeout"
+                ]
+            )
+
+            async def probe_via_port(
+                link: str,
+                port: int,
+            ) -> tuple[
+                str,
+                float | None,
+            ]:
+
+                async with sem:
+
+                    started = (
+                        time.perf_counter()
                     )
-                ):
-                    return link, elapsed
 
-                return link, None
+                    code, output, _ = (
+                        await run_process(
+                            [
+                                "curl",
+                                "--socks5-hostname",
+                                (
+                                    "127.0.0.1:"
+                                    f"{port}"
+                                ),
+                                "--connect-timeout",
+                                connect_timeout,
+                                "--max-time",
+                                str(
+                                    request_timeout
+                                ),
+                                "-sS",
+                                "-o",
+                                "/dev/null",
+                                "-w",
+                                "%{http_code}",
+                                CFG["test_url"],
+                            ],
+                            request_timeout + 3,
+                        )
+                    )
 
-            finally:
+                    elapsed = (
+                        time.perf_counter()
+                        - started
+                    ) * 1000.0
 
-                process.terminate()
+                    http_code = (
+                        output
+                        .decode(
+                            errors="ignore"
+                        )
+                        .strip()
+                    )
+
+                    if (
+                        code == 0
+                        and re.match(
+                            r"^[23]\d\d$",
+                            http_code,
+                        )
+                    ):
+                        return (
+                            link,
+                            elapsed,
+                        )
+
+                    return (
+                        link,
+                        None,
+                    )
+
+            results = (
+                await asyncio.gather(
+                    *(
+                        probe_via_port(
+                            link,
+                            port,
+                        )
+                        for _, link, port
+                        in valid
+                    )
+                )
+            )
+
+            return (
+                immediate
+                + list(results)
+            )
+
+        finally:
+
+            if process.returncode is None:
+
+                try:
+                    process.terminate()
+                except ProcessLookupError:
+                    pass
 
                 try:
                     await asyncio.wait_for(
@@ -1655,12 +1882,164 @@ async def probe_one(
 
                 except asyncio.TimeoutError:
 
-                    process.kill()
+                    try:
+                        process.kill()
+                    except ProcessLookupError:
+                        pass
 
                     try:
                         await process.wait()
                     except Exception:
                         pass
+
+
+async def run_probe_batches(
+    links: list[str],
+    label: str,
+) -> list[
+    tuple[str, float | None]
+]:
+    """
+    Probe links in bounded batches.
+
+    parallel_batches sing-box instances are active at once.
+    Each instance owns its own non-overlapping port range.
+    """
+
+    if not links:
+        return []
+
+    engine = CFG.get(
+        "probe_engine",
+        {},
+    )
+
+    batch_size = max(
+        1,
+        int(
+            engine.get(
+                "batch_size",
+                64,
+            )
+        ),
+    )
+
+    parallel_batches = max(
+        1,
+        int(
+            engine.get(
+                "parallel_batches",
+                4,
+            )
+        ),
+    )
+
+    chunks = []
+
+    for start in range(
+        0,
+        len(links),
+        batch_size,
+    ):
+
+        chunk = [
+            (
+                index,
+                links[index],
+            )
+            for index in range(
+                start,
+                min(
+                    start + batch_size,
+                    len(links),
+                ),
+            )
+        ]
+
+        chunks.append(
+            chunk
+        )
+
+    slot_queue: asyncio.Queue[int] = (
+        asyncio.Queue()
+    )
+
+    for slot in range(
+        parallel_batches
+    ):
+        slot_queue.put_nowait(
+            slot
+        )
+
+    async def run_chunk(
+        chunk,
+    ):
+        slot = (
+            await slot_queue.get()
+        )
+
+        try:
+            return (
+                await _probe_batch_in_slot(
+                    chunk,
+                    slot,
+                )
+            )
+        finally:
+            slot_queue.put_nowait(
+                slot
+            )
+
+    tasks = [
+        asyncio.create_task(
+            run_chunk(chunk)
+        )
+        for chunk in chunks
+    ]
+
+    results = []
+
+    tested = 0
+    working = 0
+
+    total_batches = len(tasks)
+
+    for completed, task in enumerate(
+        asyncio.as_completed(tasks),
+        start=1,
+    ):
+
+        batch_results = await task
+
+        results.extend(
+            batch_results
+        )
+
+        tested += len(
+            batch_results
+        )
+
+        working += sum(
+            1
+            for _, latency
+            in batch_results
+            if latency is not None
+        )
+
+        if (
+            completed == 1
+            or completed % 10 == 0
+            or completed == total_batches
+        ):
+            print(
+                f"{label}: "
+                f"{tested}/{len(links)} tested, "
+                f"{working} working, "
+                f"{completed}/{total_batches} batches"
+            )
+
+    return results
+
 
 
 # =========================================================
@@ -2153,25 +2532,18 @@ async def run_first_pass(
     links: list[str],
 ) -> list[tuple[str, float]]:
 
-    sem = asyncio.Semaphore(
-        CFG["first_pass"]["max_parallel"]
-    )
-
-    results = await asyncio.gather(
-        *(
-            probe_one(
-                link,
-                sem,
-                index,
-            )
-            for index, link
-            in enumerate(links)
-        )
+    results = await run_probe_batches(
+        links,
+        "First pass",
     )
 
     return [
-        (link, latency)
-        for link, latency in results
+        (
+            link,
+            latency,
+        )
+        for link, latency
+        in results
         if latency is not None
     ]
 
@@ -2180,33 +2552,31 @@ async def run_final_pass(
     links: list[str],
 ) -> dict[str, list[float]]:
 
-    sem = asyncio.Semaphore(
-        CFG["final_pass"]["max_parallel"]
-    )
-
     final = {
         link: []
         for link in links
     }
 
-    attempts = CFG["final_pass"]["attempts"]
+    attempts = CFG[
+        "final_pass"
+    ]["attempts"]
 
-    for round_number in range(attempts):
+    for round_number in range(
+        attempts
+    ):
 
         print(
             f"Final verification "
             f"{round_number + 1}/{attempts}"
         )
 
-        results = await asyncio.gather(
-            *(
-                probe_one(
-                    link,
-                    sem,
-                    index,
-                )
-                for index, link
-                in enumerate(links)
+        results = (
+            await run_probe_batches(
+                links,
+                (
+                    "Final "
+                    f"{round_number + 1}"
+                ),
             )
         )
 
@@ -2788,6 +3158,109 @@ async def main_async() -> int:
     # -----------------------------------------------------
     # First pass
     # -----------------------------------------------------
+
+    benchmark_limit = int(
+        os.environ.get(
+            "BEST50_BENCHMARK_LIMIT",
+            "0",
+        )
+    )
+
+    if benchmark_limit > 0:
+
+        benchmark_limit = min(
+            benchmark_limit,
+            len(links),
+        )
+
+        step = (
+            len(links)
+            / benchmark_limit
+        )
+
+        benchmark_links = [
+            links[
+                min(
+                    int(index * step),
+                    len(links) - 1,
+                )
+            ]
+            for index in range(
+                benchmark_limit
+            )
+        ]
+
+        print()
+        print(
+            "=== BOUNDED PROBE BENCHMARK ==="
+        )
+        print(
+            f"Candidates: "
+            f"{len(benchmark_links)}"
+        )
+
+        started = (
+            time.perf_counter()
+        )
+
+        benchmark_results = (
+            await run_first_pass(
+                benchmark_links
+            )
+        )
+
+        elapsed = (
+            time.perf_counter()
+            - started
+        )
+
+        rate = (
+            len(benchmark_links)
+            / elapsed
+            if elapsed > 0
+            else 0.0
+        )
+
+        projected = (
+            len(links)
+            / rate
+            if rate > 0
+            else 0.0
+        )
+
+        print()
+        print(
+            "=== BENCHMARK RESULT ==="
+        )
+        print(
+            f"tested: "
+            f"{len(benchmark_links)}"
+        )
+        print(
+            f"working: "
+            f"{len(benchmark_results)}"
+        )
+        print(
+            f"elapsed_sec: "
+            f"{elapsed:.2f}"
+        )
+        print(
+            f"nodes_per_sec: "
+            f"{rate:.2f}"
+        )
+        print(
+            "projected_full_first_pass_sec: "
+            f"{projected:.1f}"
+        )
+        print(
+            "projected_full_first_pass_min: "
+            f"{projected / 60.0:.2f}"
+        )
+        print(
+            "BENCHMARK ONLY - nothing published"
+        )
+
+        return 0
 
     first_pass = await run_first_pass(
         links

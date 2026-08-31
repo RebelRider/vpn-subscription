@@ -1,5 +1,5 @@
 {
-  "pipeline_version": "4.4",
+  "pipeline_version": "4.5",
   "max_output": 50,
   "candidate_limit": 0,
   "first_pass": {
@@ -161,5 +161,12 @@
     "geoip_db_ipv4": "data/geoip/server-country-ipv4.csv",
     "geoip_db_ipv6": "data/geoip/server-country-ipv6.csv",
     "dns_concurrency": 40
+  },
+  "probe_engine": {
+    "batch_size": 64,
+    "parallel_batches": 4,
+    "curl_parallel": 64,
+    "base_port": 22000,
+    "startup_delay": 0.35
   }
 }

@@ -2889,6 +2889,10 @@ def publish_file(
         f"# Best50 v{CFG.get('pipeline_version', '4.4')} — REAL-HTTP-TESTED VLESS",
         "#profile-title: Best50 VPN",
         "#profile-update-interval: 1",
+        "#subscription-ping-onopen-enabled: 1",
+        "#ping-type: proxy",
+        "#check-url-via-proxy: https://www.gstatic.com/generate_204",
+        "#subscriptions-sort-type: ping",
         (
             "# generated: "
             + time.strftime(

@@ -21,6 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          ref: main
           fetch-depth: 1
 
       - name: Install Python
@@ -105,6 +106,23 @@ jobs:
           git config user.email \
             "41898282+github-actions[bot]@users.noreply.github.com"
 
+          # The build can take 30+ minutes. Never publish output generated
+          # from a repository state that is no longer the current main.
+          BUILD_SHA="$(git rev-parse HEAD)"
+
+          git fetch origin main
+
+          REMOTE_SHA="$(git rev-parse origin/main)"
+
+          echo "Build base:  ${BUILD_SHA}"
+          echo "Remote main: ${REMOTE_SHA}"
+
+          if [ "${BUILD_SHA}" != "${REMOTE_SHA}" ]; then
+            echo "STALE BUILD: main changed while this run was testing nodes."
+            echo "Generated output will not be published."
+            exit 0
+          fi
+
           git add \
             output/best20.txt \
             output/best50.txt \
@@ -120,4 +138,7 @@ jobs:
           git commit \
             -m "chore: update Best50 subscription"
 
-          git push
+          # Use an explicit refspec. If main changes in the tiny interval
+          # between the stale check and push, Git rejects the push safely
+          # instead of overwriting newer history.
+          git push origin HEAD:main

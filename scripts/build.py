@@ -1830,10 +1830,17 @@ async def _probe_batch_in_slot(
                         .strip()
                     )
 
+                    accepted_status_pattern = (
+                        CFG.get(
+                            "_probe_http_status_pattern",
+                            r"^[23]\\d\\d$",
+                        )
+                    )
+
                     if (
                         code == 0
-                        and re.match(
-                            r"^[23]\d\d$",
+                        and re.fullmatch(
+                            accepted_status_pattern,
                             http_code,
                         )
                     ):
@@ -2524,73 +2531,6 @@ def calculate_first_pass_priority(
 
 
 # =========================================================
-# First pass / final pass
-# =========================================================
-
-
-async def run_first_pass(
-    links: list[str],
-) -> list[tuple[str, float]]:
-
-    results = await run_probe_batches(
-        links,
-        "First pass",
-    )
-
-    return [
-        (
-            link,
-            latency,
-        )
-        for link, latency
-        in results
-        if latency is not None
-    ]
-
-
-async def run_final_pass(
-    links: list[str],
-) -> dict[str, list[float]]:
-
-    final = {
-        link: []
-        for link in links
-    }
-
-    attempts = CFG[
-        "final_pass"
-    ]["attempts"]
-
-    for round_number in range(
-        attempts
-    ):
-
-        print(
-            f"Final verification "
-            f"{round_number + 1}/{attempts}"
-        )
-
-        results = (
-            await run_probe_batches(
-                links,
-                (
-                    "Final "
-                    f"{round_number + 1}"
-                ),
-            )
-        )
-
-        for link, latency in results:
-
-            if latency is not None:
-                final[link].append(
-                    latency
-                )
-
-    return final
-
-
-# =========================================================
 # Quality
 # =========================================================
 
@@ -2960,6 +2900,378 @@ def write_status(
 # =========================================================
 # Main
 # =========================================================
+
+
+
+# =========================================================
+# Best50 v5 functional-quality gate engine
+# =========================================================
+
+async def _v5_probe_gate(
+    links: list[str],
+    name: str,
+    url: str,
+    request_timeout: float | None = None,
+    accepted_status_pattern: str = r"^[23]\\d\\d$",
+) -> dict[str, float]:
+    """
+    Run one real HTTP gate through every candidate VLESS outbound.
+
+    A candidate survives only when the existing sing-box batch probe
+    completes the HTTP request successfully through that node.
+    """
+    if not links:
+        return {}
+
+    previous_url = CFG.get("test_url")
+    previous_timeout = CFG["first_pass"]["request_timeout"]
+    previous_status_pattern = CFG.get(
+        "_probe_http_status_pattern"
+    )
+
+    CFG["test_url"] = url
+    CFG["_probe_http_status_pattern"] = (
+        accepted_status_pattern
+    )
+
+    if request_timeout is not None:
+        CFG["first_pass"]["request_timeout"] = float(
+            request_timeout
+        )
+
+    try:
+        print()
+        print(
+            f"V5 GATE {name}: "
+            f"{len(links)} candidates -> {url}"
+        )
+
+        results = await run_probe_batches(
+            links,
+            f"V5 {name.upper()}",
+        )
+
+        passed = {
+            link: latency
+            for link, latency in results
+            if latency is not None
+        }
+
+        print(
+            f"V5 GATE {name}: "
+            f"{len(passed)}/{len(links)} passed"
+        )
+
+        return passed
+
+    finally:
+        CFG["test_url"] = previous_url
+        CFG["first_pass"]["request_timeout"] = (
+            previous_timeout
+        )
+
+        if previous_status_pattern is None:
+            CFG.pop(
+                "_probe_http_status_pattern",
+                None,
+            )
+        else:
+            CFG["_probe_http_status_pattern"] = (
+                previous_status_pattern
+            )
+
+
+async def _v5_run_gate_chain(
+    links: list[str],
+    gates: list[dict],
+    stage: str,
+) -> tuple[list[str], dict[str, list[float]]]:
+    """
+    Run mandatory gates sequentially.
+
+    Failing one gate immediately removes the candidate from all
+    subsequent expensive tests.
+    """
+    survivors = list(links)
+
+    latencies: dict[str, list[float]] = {
+        link: []
+        for link in survivors
+    }
+
+    for gate in gates:
+        if not survivors:
+            break
+
+        name = str(gate["name"])
+        url = str(gate["url"])
+        timeout = gate.get("request_timeout")
+        accepted_status_pattern = gate.get(
+            "accepted_status_pattern",
+            r"^[23]\\d\\d$",
+        )
+
+        passed = await _v5_probe_gate(
+            survivors,
+            f"{stage}-{name}",
+            url,
+            timeout,
+            accepted_status_pattern,
+        )
+
+        survivors = [
+            link
+            for link in survivors
+            if link in passed
+        ]
+
+        for link in survivors:
+            latencies.setdefault(link, []).append(
+                passed[link]
+            )
+
+    return survivors, latencies
+
+
+def _v5_median(values: list[float]) -> float:
+    if not values:
+        return 0.0
+
+    ordered = sorted(values)
+    middle = len(ordered) // 2
+
+    if len(ordered) % 2:
+        return ordered[middle]
+
+    return (
+        ordered[middle - 1]
+        + ordered[middle]
+    ) / 2.0
+
+
+async def run_first_pass(
+    links: list[str],
+) -> list[tuple[str, float]]:
+    """
+    v5 first pass.
+
+    Stage 1:
+        cheap gstatic probe over the complete strict-country pool.
+
+    Stage 2:
+        Cloudflare + YouTube + ChatGPT mandatory functional gates.
+
+    Stage 3:
+        complete a real 1 MB payload transfer.
+
+    gstatic alone is explicitly NOT sufficient to call a node working.
+    """
+    functional = CFG.get(
+        "functional_tests",
+        {},
+    )
+
+    if not functional.get("enabled", True):
+        # Compatibility fallback.
+        results = await run_probe_batches(
+            links,
+            "FIRST PASS",
+        )
+
+        return [
+            (link, latency)
+            for link, latency in results
+            if latency is not None
+        ]
+
+    preliminary = functional["preliminary"]
+
+    preliminary_passed = await _v5_probe_gate(
+        links,
+        f"preliminary-{preliminary['name']}",
+        preliminary["url"],
+        preliminary.get("request_timeout"),
+        preliminary.get(
+            "accepted_status_pattern",
+            r"^204$",
+        ),
+    )
+
+    survivors = [
+        link
+        for link in links
+        if link in preliminary_passed
+    ]
+
+    accumulated: dict[str, list[float]] = {
+        link: [preliminary_passed[link]]
+        for link in survivors
+    }
+
+    print()
+    print(
+        "V5 PRELIMINARY SURVIVORS: "
+        f"{len(survivors)}/{len(links)}"
+    )
+
+    mandatory = functional.get(
+        "mandatory_gates",
+        [],
+    )
+
+    survivors, gate_latencies = (
+        await _v5_run_gate_chain(
+            survivors,
+            mandatory,
+            "mandatory",
+        )
+    )
+
+    for link in survivors:
+        accumulated.setdefault(
+            link,
+            [],
+        ).extend(
+            gate_latencies.get(
+                link,
+                [],
+            )
+        )
+
+    payload = functional.get(
+        "payload_gate",
+        {},
+    )
+
+    if (
+        survivors
+        and payload.get("enabled", False)
+    ):
+        payload_passed = await _v5_probe_gate(
+            survivors,
+            payload.get(
+                "name",
+                "payload",
+            ),
+            payload["url"],
+            payload.get(
+                "request_timeout",
+            ),
+            payload.get(
+                "accepted_status_pattern",
+                r"^2\\d\\d$",
+            ),
+        )
+
+        survivors = [
+            link
+            for link in survivors
+            if link in payload_passed
+        ]
+
+        for link in survivors:
+            accumulated.setdefault(
+                link,
+                [],
+            ).append(
+                payload_passed[link]
+            )
+
+    print()
+    print("=" * 64)
+    print(
+        "V5 FUNCTIONAL FIRST PASS: "
+        f"{len(survivors)}/{len(links)} qualified"
+    )
+    print("=" * 64)
+
+    return [
+        (
+            link,
+            _v5_median(
+                accumulated.get(
+                    link,
+                    [],
+                )
+            ),
+        )
+        for link in survivors
+    ]
+
+
+async def run_final_pass(
+    links: list[str],
+) -> dict[str, list[float]]:
+    """
+    v5 repeated functional verification.
+
+    One round counts as a success only when the candidate passes
+    EVERY final gate in that round.
+
+    Therefore minimum_final_successes continues to mean successful
+    complete functional rounds, rather than successful requests to a
+    single synthetic endpoint.
+    """
+    final: dict[str, list[float]] = {
+        link: []
+        for link in links
+    }
+
+    if not links:
+        return final
+
+    functional = CFG.get(
+        "functional_tests",
+        {},
+    )
+
+    gates = functional.get(
+        "final_gates",
+        [],
+    )
+
+    attempts = int(
+        CFG["final_pass"]["attempts"]
+    )
+
+    for round_number in range(attempts):
+        print()
+        print("=" * 64)
+        print(
+            "V5 FINAL FUNCTIONAL ROUND "
+            f"{round_number + 1}/{attempts}"
+        )
+        print("=" * 64)
+
+        survivors, round_latencies = (
+            await _v5_run_gate_chain(
+                links,
+                gates,
+                f"final-{round_number + 1}",
+            )
+        )
+
+        for link in survivors:
+            values = round_latencies.get(
+                link,
+                [],
+            )
+
+            if values:
+                final[link].append(
+                    _v5_median(values)
+                )
+
+        print(
+            "V5 ROUND "
+            f"{round_number + 1}: "
+            f"{len(survivors)}/{len(links)} "
+            "passed every functional gate"
+        )
+
+    return final
+
+
 
 
 async def main_async() -> int:

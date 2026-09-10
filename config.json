@@ -1,5 +1,5 @@
 {
-  "pipeline_version": "4.5",
+  "pipeline_version": "5.0",
   "max_output": 50,
   "candidate_limit": 0,
   "first_pass": {
@@ -168,5 +168,61 @@
     "curl_parallel": 64,
     "base_port": 22000,
     "startup_delay": 0.35
+  },
+  "functional_tests": {
+    "enabled": true,
+    "preliminary": {
+      "name": "gstatic",
+      "url": "https://www.gstatic.com/generate_204",
+      "request_timeout": 10,
+      "accepted_status_pattern": "^204$"
+    },
+    "mandatory_gates": [
+      {
+        "name": "cloudflare",
+        "url": "https://www.cloudflare.com/cdn-cgi/trace",
+        "request_timeout": 12,
+        "accepted_status_pattern": "^200$"
+      },
+      {
+        "name": "youtube",
+        "url": "https://www.youtube.com/generate_204",
+        "request_timeout": 12,
+        "accepted_status_pattern": "^204$"
+      },
+      {
+        "name": "chatgpt",
+        "url": "https://chatgpt.com/",
+        "request_timeout": 12,
+        "accepted_status_pattern": "^[234]\\d\\d$"
+      }
+    ],
+    "payload_gate": {
+      "enabled": true,
+      "name": "payload-1mb",
+      "url": "https://speed.cloudflare.com/__down?bytes=1000000",
+      "request_timeout": 15,
+      "accepted_status_pattern": "^2\\d\\d$"
+    },
+    "final_gates": [
+      {
+        "name": "gstatic",
+        "url": "https://www.gstatic.com/generate_204",
+        "request_timeout": 10,
+        "accepted_status_pattern": "^204$"
+      },
+      {
+        "name": "youtube",
+        "url": "https://www.youtube.com/generate_204",
+        "request_timeout": 12,
+        "accepted_status_pattern": "^204$"
+      },
+      {
+        "name": "chatgpt",
+        "url": "https://chatgpt.com/",
+        "request_timeout": 12,
+        "accepted_status_pattern": "^[234]\\d\\d$"
+      }
+    ]
   }
 }

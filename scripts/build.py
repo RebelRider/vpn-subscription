@@ -2826,7 +2826,7 @@ def publish_file(
 ) -> None:
 
     lines = [
-        f"# Best50 v{CFG.get('pipeline_version', '4.4')} — REAL-HTTP-TESTED VLESS",
+        f"# Best50 v{CFG.get('pipeline_version', '4.4')} — FUNCTIONALLY-TESTED VLESS",
         "#profile-title: Best50 VPN",
         "#profile-update-interval: 1",
         "#subscription-ping-onopen-enabled: 1",
@@ -2854,14 +2854,16 @@ def publish_file(
         f"# final_stable: "
         f"{stats['final_stable']}",
         f"# published: {len(chosen)}",
-        f"# test_url: {CFG['test_url']}",
+        "# functional_preliminary: gstatic",
+        "# functional_mandatory: cloudflare, youtube, chatgpt, payload-1mb",
+        f"# functional_final_rounds: {CFG['final_pass']['attempts']}",
         "#",
         "# Quality-filtered public VLESS configurations.",
         "#",
     ]
 
     lines.extend(
-        item["link"]
+        _published_link_with_country(item["link"], item["country"])
         for item in chosen
     )
 
@@ -3033,6 +3035,30 @@ async def _v5_run_gate_chain(
     return survivors, latencies
 
 
+def _published_link_with_country(
+    link: str,
+    country: str,
+) -> str:
+    """
+    Replace the untrusted source remark with the country determined by
+    the strict endpoint GeoIP/label-fallback classification pipeline.
+
+    The URI fragment is presentation-only and does not participate in
+    VLESS transport configuration.
+    """
+    normalized_country = str(country).upper().strip()
+
+    if normalized_country not in ALLOWED_COUNTRIES:
+        raise ValueError(
+            "Refusing to publish node with non-allowed country: "
+            f"{normalized_country!r}"
+        )
+
+    base = link.split("#", 1)[0]
+
+    return f"{base}#{normalized_country}"
+
+
 def _v5_median(values: list[float]) -> float:
     if not values:
         return 0.0
@@ -3169,13 +3195,12 @@ async def run_first_pass(
             if link in payload_passed
         ]
 
-        for link in survivors:
-            accumulated.setdefault(
-                link,
-                [],
-            ).append(
-                payload_passed[link]
-            )
+        # Payload is a strict pass/fail functional gate only.
+        #
+        # Do not mix the time required to transfer 1 MB into the
+        # latency metric. Transfer duration measures throughput and
+        # congestion, while the ranking latency represents lightweight
+        # request responsiveness.
 
     print()
     print("=" * 64)

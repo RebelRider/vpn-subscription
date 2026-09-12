@@ -1,0 +1,351 @@
+{
+  "generated_at": "2026-09-12T20:36:32.526321+00:00",
+  "algorithm": "v5-local-network-functional-filter-ranking",
+  "input": {
+    "path": "origin/main:output/qualified-all.txt",
+    "nodes": 216,
+    "mode": "origin-main-qualified-all"
+  },
+  "network": {
+    "system_route_interface": "utun5",
+    "probe_default_interface": "en0"
+  },
+  "gates": {
+    "preliminary": {
+      "gstatic": 36
+    },
+    "mandatory": {
+      "cloudflare": 36,
+      "youtube": 35,
+      "chatgpt": 35,
+      "payload-1mb": 34
+    }
+  },
+  "stability": {
+    "rounds": 3,
+    "minimum_successes": 2,
+    "first_pass_survivors": 34,
+    "round_survivors": [
+      30,
+      29,
+      30
+    ],
+    "qualified": 30
+  },
+  "countries": {
+    "US": 26,
+    "DE": 1,
+    "NL": 3
+  },
+  "nodes": [
+    {
+      "rank": 1,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 217.85262506455183,
+      "p95_latency": 442.6847919821739,
+      "upstream_rank": 58,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.42:2083?security=&alpn=v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus&encryption=none&type=grpc&serviceName=vless#US"
+    },
+    {
+      "rank": 2,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 220.56658286601305,
+      "p95_latency": 5061.296375002712,
+      "upstream_rank": 201,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.105.210:2083?encryption=none&security=none&serviceName=vless&type=grpc#US"
+    },
+    {
+      "rank": 3,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 233.47479198127985,
+      "p95_latency": 3327.2686249110848,
+      "upstream_rank": 175,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.42:2083?type=grpc&sni=/telegram_tm(@azarbayjab1),telegram_tm(@azarbayjab1),telegram_tm(@azarbayjab1),telegram_tm(@azarbayjab1),telegram_tm(@azarbayjab1),telegram_tm(@azarbayjab1),telegram_tm(@azarbayjab1)&mode=gun&serviceName=vless#US"
+    },
+    {
+      "rank": 4,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 242.2672079410404,
+      "p95_latency": 5162.875332869589,
+      "upstream_rank": 10,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.105.210:2083?security=&alpn=v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus&encryption=none&type=grpc&serviceName=vless#US"
+    },
+    {
+      "rank": 5,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 243.20245906710625,
+      "p95_latency": 288.2788749411702,
+      "upstream_rank": 11,
+      "link": "vless://02722550-1915-4629-a653-cbe95e594f70@50.7.95.196:443?type=tcp&security=reality&flow=xtls-rprx-vision&fp=firefox&pbk=8HYqDHdQ1IuLPhAOENT70_j0prAi1PNkwlT6venYAEM&sid=a78da1f7&sni=apiv23tw.goonars.com#US"
+    },
+    {
+      "rank": 6,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 244.6377919986844,
+      "p95_latency": 1464.9743330664933,
+      "upstream_rank": 211,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.42:2083?encryption=none&security=none&serviceName=vless&type=grpc#US"
+    },
+    {
+      "rank": 7,
+      "country": "DE",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 355.7416251860559,
+      "p95_latency": 3239.4045419059694,
+      "upstream_rank": 59,
+      "link": "vless://827a0eb0-21bf-4bce-96ef-0a7bac5d68f5@31.76.20.218:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=DS9mX6cMb5wvwFzga8yN2NLbs7soXM7038_P23yPKwk&security=reality&sid=8ffa160e608bf539&sni=de.pinkmoon.pro&type=tcp#DE"
+    },
+    {
+      "rank": 8,
+      "country": "NL",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 682.2593749966472,
+      "p95_latency": 4839.061500038952,
+      "upstream_rank": 89,
+      "link": "vless://02722550-1915-4629-a653-cbe95e594f70@201.51.10.239:443?encryption=none&flow=xtls-rprx-vision&pbk=unAvLudgWMwMSCs9ltSr2_Ayp7q3685S7EBxFVk_4Uw&security=reality&sid=9d0791d1&sni=apitw1.goonars.com&type=tcp&fp=chrome#NL"
+    },
+    {
+      "rank": 9,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 825.1361669972539,
+      "p95_latency": 1284.6497918944806,
+      "upstream_rank": 44,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@nl-new-ded.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US"
+    },
+    {
+      "rank": 10,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 836.8893328588456,
+      "p95_latency": 1357.2707921266556,
+      "upstream_rank": 108,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@nl-new-ded.failspace.top:443?flow=xtls-rprx-vision&fp=chrome&headerType=none&host=nl-new-ded.failspace.top&path=/&security=tls&type=tcp#US"
+    },
+    {
+      "rank": 11,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 841.3902500178665,
+      "p95_latency": 1352.864250075072,
+      "upstream_rank": 126,
+      "link": "vless://02722550-1915-4629-a653-cbe95e594f70@vf2nd.goonars.com:443?security=reality&encryption=none&pbk=OINuDFEDTdmtFR8QRxAZfQIMPA-wJxfGN1LjB3TFUHo&headerType=none&fp=firefox&spx=%2F&type=tcp&flow=xtls-rprx-vision&sni=apiv12nd.goonars.com&sid=535a3304#US"
+    },
+    {
+      "rank": 12,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 842.5930421799421,
+      "p95_latency": 1352.2255418356508,
+      "upstream_rank": 150,
+      "link": "vless://02722550-1915-4629-a653-cbe95e594f70@cdn1nd.goonars.com:443?encryption=none&flow=xtls-rprx-vision&fp=edge&headerType=none&pbk=8HYqDHdQ1IuLPhAOENT70_j0prAi1PNkwlT6venYAEM&security=reality&sid=a78da1f7&sni=apiv23tw.goonars.com&spx=/&type=tcp#US"
+    },
+    {
+      "rank": 13,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 867.2272909898311,
+      "p95_latency": 923.6860419623554,
+      "upstream_rank": 86,
+      "link": "vless://bca46025-bf43-40c0-895b-054a6fbcfd32@172.235.38.85:42942?type=tcp&security=reality&flow=xtls-rprx-vision&fp=firefox&pbk=JmkfJoDWpAqt6gj4cbc4_cwItsdryMlV7joAGfNTKQU&sid=a56d7d8da977f860&sni=www.tesla.com&packetEncoding=none#US"
+    },
+    {
+      "rank": 14,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 884.4044581055641,
+      "p95_latency": 975.7080001290888,
+      "upstream_rank": 71,
+      "link": "vless://bca46025-bf43-40c0-895b-054a6fbcfd32@172.235.38.85:42942?security=reality&encryption=none&pbk=JmkfJoDWpAqt6gj4cbc4_cwItsdryMlV7joAGfNTKQU&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=www.tesla.com&sid=a56d7d8da977f860#US"
+    },
+    {
+      "rank": 15,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 909.4006658997387,
+      "p95_latency": 1398.7423342186958,
+      "upstream_rank": 49,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US"
+    },
+    {
+      "rank": 16,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 911.7675831075758,
+      "p95_latency": 1471.443582791835,
+      "upstream_rank": 48,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@at-new-ded.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US"
+    },
+    {
+      "rank": 17,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 914.5203749649227,
+      "p95_latency": 1362.8184590488672,
+      "upstream_rank": 43,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@ir-new1.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US"
+    },
+    {
+      "rank": 18,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 917.7774579729885,
+      "p95_latency": 1400.6835839245468,
+      "upstream_rank": 45,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-viper.moritech.net:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US"
+    },
+    {
+      "rank": 19,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 924.9339159578085,
+      "p95_latency": 1501.4912500046194,
+      "upstream_rank": 61,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@at.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US"
+    },
+    {
+      "rank": 20,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 927.3812908213586,
+      "p95_latency": 1353.863790864125,
+      "upstream_rank": 60,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-ded.moritech.net:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US"
+    },
+    {
+      "rank": 21,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 933.7546669412404,
+      "p95_latency": 1402.3447912186384,
+      "upstream_rank": 54,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-new-ded.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US"
+    },
+    {
+      "rank": 22,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 934.608040843159,
+      "p95_latency": 1410.109540913254,
+      "upstream_rank": 166,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@ir-new1.failspace.top:443?&security=tls&flow=xtls-rprx-vision&fp=chrome&type=tcp&headerType=none&host=ir-new1.failspace.top&path=%2F#US"
+    },
+    {
+      "rank": 23,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 941.1656248848885,
+      "p95_latency": 1407.9324160702527,
+      "upstream_rank": 46,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-new-ded-2.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US"
+    },
+    {
+      "rank": 24,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 947.7508750278503,
+      "p95_latency": 1462.692166911438,
+      "upstream_rank": 103,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-viper.moritech.net:443?&security=tls&flow=xtls-rprx-vision&fp=chrome&type=tcp&headerType=none&host=poland-viper.moritech.net&path=%2F#US"
+    },
+    {
+      "rank": 25,
+      "country": "NL",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 949.5976660400629,
+      "p95_latency": 2449.3203330785036,
+      "upstream_rank": 163,
+      "link": "vless://02722550-1915-4629-a653-cbe95e594f70@201.51.10.240:443?encryption=none&flow=xtls-rprx-vision&pbk=VWDBW2RS3o-oFBrSNdpncoaVVU8KixbPNHoj4-Wy7lM&security=reality&sid=04a69fc6&sni=apitw3.goonars.com&type=tcp&fp=firefox#NL"
+    },
+    {
+      "rank": 26,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 989.3988331314176,
+      "p95_latency": 1478.6488329991698,
+      "upstream_rank": 90,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-new-ded.failspace.top:443?&security=tls&flow=xtls-rprx-vision&fp=chrome&type=tcp&headerType=none&host=poland-new-ded.failspace.top&path=%2F#US"
+    },
+    {
+      "rank": 27,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 1199.566917028278,
+      "p95_latency": 2117.6417919341475,
+      "upstream_rank": 95,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@at.failspace.top:443?&security=tls&flow=xtls-rprx-vision&fp=chrome&type=tcp&headerType=none&host=at.failspace.top&path=%2F#US"
+    },
+    {
+      "rank": 28,
+      "country": "US",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 1200.1287918537855,
+      "p95_latency": 2156.1683339532465,
+      "upstream_rank": 63,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@ai-dedic.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US"
+    },
+    {
+      "rank": 29,
+      "country": "NL",
+      "successful_final_rounds": 3,
+      "latency_samples": 13,
+      "median_latency": 1647.320874966681,
+      "p95_latency": 3786.4833751227707,
+      "upstream_rank": 96,
+      "link": "vless://02722550-1915-4629-a653-cbe95e594f70@cdn8tw.goonars.com:443?flow=xtls-rprx-vision&fp=chrome&headerType=none&host=cdn8tw.goonars.com&path=/&pbk=unAvLudgWMwMSCs9ltSr2_Ayp7q3685S7EBxFVk_4Uw&security=reality&sid=9d0791d1&sni=apitw1.goonars.com&type=tcp#NL"
+    },
+    {
+      "rank": 30,
+      "country": "US",
+      "successful_final_rounds": 2,
+      "latency_samples": 10,
+      "median_latency": 240.0712709641084,
+      "p95_latency": 333.5045841522515,
+      "upstream_rank": 207,
+      "link": "vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.42:2083?mode=gun&security=none&encryption=none&type=grpc&serviceName=vless&sni=/TELEGRAM_TM(@AZARBAYJAB1),TELEGRAM_TM(@AZARBAYJAB1),TELEGRAM_TM(@AZARBAYJAB1),TELEGRAM_TM(@AZARBAYJAB1),TELEGRAM_TM(@AZARBAYJAB1),TELEGRAM_TM(@AZARBAYJAB1),TELEGRAM_TM(@AZARBAYJAB1)#US"
+    }
+  ],
+  "upstream_sha": "209570013227537b941e3a749f80b7f2cb7dd270",
+  "upstream_generated_at": "2026-09-12 18:24:29 UTC",
+  "publication": {
+    "enabled": true,
+    "remote": "origin",
+    "branch": "regional",
+    "subscription_path": "output/best-local.txt",
+    "status_path": "output/local-status.json"
+  }
+}

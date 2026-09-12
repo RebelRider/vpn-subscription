@@ -7,6 +7,7 @@ import asyncio
 import importlib.util
 import json
 import re
+import statistics
 import subprocess
 import sys
 from collections import Counter
@@ -310,6 +311,37 @@ async def run_gate(
     )
 
 
+def latency_metrics(
+    samples: list[float],
+) -> dict[str, float | int]:
+    if not samples:
+        return {
+            "samples": 0,
+            "median": float("inf"),
+            "p95": float("inf"),
+        }
+
+    ordered = sorted(samples)
+
+    # Nearest-rank p95.
+    p95_index = max(
+        0,
+        (
+            95 * len(ordered) + 99
+        ) // 100 - 1,
+    )
+
+    return {
+        "samples": len(ordered),
+        "median": float(
+            statistics.median(ordered)
+        ),
+        "p95": float(
+            ordered[p95_index]
+        ),
+    }
+
+
 async def run_local_probe(
     build,
     links: list[str],
@@ -337,6 +369,23 @@ async def run_local_probe(
         "input": len(links),
     }
 
+    # Local ranking uses only lightweight functional request
+    # latency. The 1 MB payload test is deliberately excluded:
+    # transfer duration measures throughput/congestion rather
+    # than interactive request responsiveness.
+    latency_samples: dict[str, list[float]] = {
+        link: []
+        for link in links
+    }
+
+    upstream_rank = {
+        link: index
+        for index, link in enumerate(
+            links,
+            1,
+        )
+    }
+
     # -----------------------------------------------------
     # Stage 1: exact same preliminary gate as production v5
     # -----------------------------------------------------
@@ -355,6 +404,11 @@ async def run_local_probe(
         for link in links
         if link in passed
     ]
+
+    for link in survivors:
+        latency_samples[link].append(
+            passed[link]
+        )
 
     counts[
         f"preliminary_{preliminary['name']}"
@@ -382,6 +436,11 @@ async def run_local_probe(
             for link in survivors
             if link in passed
         ]
+
+        for link in survivors:
+            latency_samples[link].append(
+                passed[link]
+            )
 
         gate_counts[gate["name"]] = len(
             survivors
@@ -445,6 +504,11 @@ async def run_local_probe(
             first_pass_survivors
         )
 
+        round_latency_samples = {
+            link: []
+            for link in round_survivors
+        }
+
         print()
         print(
             "========================================"
@@ -474,11 +538,24 @@ async def run_local_probe(
                 if link in passed
             ]
 
+            for link in round_survivors:
+                round_latency_samples[
+                    link
+                ].append(
+                    passed[link]
+                )
+
             if not round_survivors:
                 break
 
         for link in round_survivors:
             successes[link] += 1
+
+            # Only a complete successful final round contributes
+            # latency to ranking. Partial failed rounds do not.
+            latency_samples[link].extend(
+                round_latency_samples[link]
+            )
 
         round_counts.append(
             len(round_survivors)
@@ -502,13 +579,32 @@ async def run_local_probe(
         )
     ]
 
+    metrics = {
+        link: latency_metrics(
+            latency_samples[link]
+        )
+        for link in qualified
+    }
+
+    # Stability is authoritative. Among equally stable nodes,
+    # rank by the actual lightweight request latency measured
+    # through the forced physical local interface.
+    qualified.sort(
+        key=lambda link: (
+            -successes[link],
+            metrics[link]["median"],
+            metrics[link]["p95"],
+            upstream_rank[link],
+        )
+    )
+
     status = {
         "generated_at": (
             datetime.now(timezone.utc)
             .isoformat()
         ),
         "algorithm": (
-            "v5-local-network-functional-filter"
+            "v5-local-network-functional-filter-ranking"
         ),
         "input": {
             "path": input_description,
@@ -557,6 +653,14 @@ async def run_local_probe(
                     country_from_link(link),
                 "successful_final_rounds":
                     successes.get(link, 0),
+                "latency_samples":
+                    metrics[link]["samples"],
+                "median_latency":
+                    metrics[link]["median"],
+                "p95_latency":
+                    metrics[link]["p95"],
+                "upstream_rank":
+                    upstream_rank[link],
                 "link":
                     link,
             }
@@ -611,10 +715,14 @@ def write_subscription(
             "# local_qualified: "
             f"{len(links)}"
         ),
+        (
+            "# local_ranking: "
+            "stability, median latency, p95 latency"
+        ),
         "#",
         (
-            "# Generated from the globally filtered "
-            "Best50 and re-tested through the current "
+            "# Generated from the globally quality-qualified "
+            "pool and re-tested through the current "
             "local network."
         ),
         "#",

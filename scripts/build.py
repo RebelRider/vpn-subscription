@@ -1638,6 +1638,23 @@ async def _probe_batch_in_slot(
         },
     }
 
+    # Optional local-probe override.
+    #
+    # Production/GitHub builds do not set this value and therefore
+    # preserve the normal routing behavior exactly as before.
+    #
+    # A local validator can force sing-box outbound sockets onto the
+    # physical network interface even while a system VPN/TUN route is
+    # active.
+    probe_default_interface = CFG.get(
+        "_probe_default_interface"
+    )
+
+    if probe_default_interface:
+        config["route"]["default_interface"] = str(
+            probe_default_interface
+        )
+
     with tempfile.TemporaryDirectory() as temp_dir:
 
         config_path = (
@@ -3875,6 +3892,7 @@ async def main_async() -> int:
         },
         **stats,
         "published": {
+            "qualified_all": len(ranked),
             "best20": len(best20),
             "best50": len(best50),
             "best100": len(best100),
@@ -3944,6 +3962,24 @@ async def main_async() -> int:
     # Atomic publication
     # -----------------------------------------------------
 
+    # Complete globally quality-qualified pool.
+    #
+    # Every item in ranked has already passed:
+    # - strict country classification;
+    # - v5 preliminary and mandatory functional gates;
+    # - repeated final functional verification;
+    # - quality_gate().
+    #
+    # Unlike Best20/50/100 this pool is intentionally NOT
+    # truncated by diversity selection. It is the upstream
+    # candidate set for regional/local validation.
+    publish_file(
+        "qualified-all.txt",
+        ranked,
+        now,
+        stats,
+    )
+
     publish_file(
         "best20.txt",
         best20,
@@ -3996,6 +4032,9 @@ async def main_async() -> int:
     print(
         f"Final stable:     "
         f"{stats['final_stable']}"
+    )
+    print(
+        f"Qualified all:    {len(ranked)}"
     )
     print(
         f"Best20:           {len(best20)}"

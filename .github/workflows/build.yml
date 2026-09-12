@@ -69,12 +69,15 @@ jobs:
         run: |
           set -euo pipefail
 
+          test -s output/qualified-all.txt
           test -s output/best50.txt
           test -s output/status.json
 
           COUNT=$(grep -c '^vless://' output/best50.txt || true)
+          QUALIFIED_COUNT=$(grep -c '^vless://' output/qualified-all.txt || true)
 
-          echo "Published VLESS configurations: ${COUNT}"
+          echo "Published Best50 configurations: ${COUNT}"
+          echo "Published qualified pool: ${QUALIFIED_COUNT}"
 
           if [ "$COUNT" -lt 20 ]; then
             echo "ERROR: Best50 subscription contains fewer than 20 VLESS nodes."
@@ -90,6 +93,26 @@ jobs:
           published = status.get("published", {})
 
           print("Published:", published)
+
+          qualified_all = published.get(
+              "qualified_all",
+              0,
+          )
+
+          if qualified_all < 20:
+              raise SystemExit(
+                  "ERROR: status.json reports fewer than "
+                  "20 globally qualified nodes."
+              )
+
+          if qualified_all != status.get(
+              "final_stable",
+              0,
+          ):
+              raise SystemExit(
+                  "ERROR: qualified_all does not match "
+                  "final_stable."
+              )
 
           if published.get("best50", 0) < 20:
               raise SystemExit(
@@ -124,6 +147,7 @@ jobs:
           fi
 
           git add \
+            output/qualified-all.txt \
             output/best20.txt \
             output/best50.txt \
             output/best100.txt \

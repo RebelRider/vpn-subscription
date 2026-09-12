@@ -10,6 +10,7 @@ import re
 import statistics
 import subprocess
 import sys
+import tempfile
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,6 +22,11 @@ BUILD_PATH = ROOT / "scripts" / "build.py"
 
 DEFAULT_OUTPUT = ROOT / "output" / "best-local.txt"
 DEFAULT_STATUS = ROOT / "output" / "local-status.json"
+
+REGIONAL_REMOTE = "origin"
+REGIONAL_BRANCH = "regional"
+REGIONAL_SUBSCRIPTION_PATH = "output/best-local.txt"
+REGIONAL_STATUS_PATH = "output/local-status.json"
 
 DEFAULT_UPSTREAM_REMOTE = "origin"
 DEFAULT_UPSTREAM_BRANCH = "main"
@@ -771,11 +777,449 @@ def write_status(
     temp.replace(path)
 
 
+def git_output(
+    *args: str,
+    cwd: Path = ROOT,
+) -> str:
+    result = subprocess.run(
+        ["git", *args],
+        cwd=cwd,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+
+    if result.returncode != 0:
+        raise RuntimeError(
+            "git command failed: "
+            + " ".join(args)
+            + "\n"
+            + result.stderr.strip()
+        )
+
+    return result.stdout.strip()
+
+
+def validate_generated_result(
+    subscription_path: Path,
+    status_path: Path,
+) -> None:
+    if not subscription_path.is_file():
+        raise RuntimeError(
+            "Generated subscription does not exist: "
+            f"{subscription_path}"
+        )
+
+    if not status_path.is_file():
+        raise RuntimeError(
+            "Generated status does not exist: "
+            f"{status_path}"
+        )
+
+    links = [
+        line.strip()
+        for line in subscription_path
+        .read_text()
+        .splitlines()
+        if line.startswith("vless://")
+    ]
+
+    status = json.loads(
+        status_path.read_text()
+    )
+
+    qualified = int(
+        status["stability"]["qualified"]
+    )
+
+    status_links = [
+        node["link"]
+        for node in status["nodes"]
+    ]
+
+    if not links:
+        raise RuntimeError(
+            "Refusing to publish an empty "
+            "regional subscription"
+        )
+
+    if len(links) != qualified:
+        raise RuntimeError(
+            "Subscription/status count mismatch: "
+            f"{len(links)} != {qualified}"
+        )
+
+    if links != status_links:
+        raise RuntimeError(
+            "Subscription order does not match "
+            "local ranking in status"
+        )
+
+    ranks = [
+        node["rank"]
+        for node in status["nodes"]
+    ]
+
+    if ranks != list(
+        range(1, len(ranks) + 1)
+    ):
+        raise RuntimeError(
+            "Status ranking is not contiguous"
+        )
+
+
+def qualified_pool_blob(
+    ref: str,
+) -> str:
+    return git_output(
+        "rev-parse",
+        (
+            f"{ref}:"
+            f"{DEFAULT_UPSTREAM_PATH}"
+        ),
+    )
+
+
+def ensure_input_still_current(
+    tested_sha: str,
+) -> str:
+    print(
+        "Checking whether the tested global "
+        "candidate pool is still current..."
+    )
+
+    git_output(
+        "fetch",
+        DEFAULT_UPSTREAM_REMOTE,
+        DEFAULT_UPSTREAM_BRANCH,
+    )
+
+    latest_sha = git_output(
+        "rev-parse",
+        DEFAULT_UPSTREAM_REF,
+    )
+
+    tested_blob = qualified_pool_blob(
+        tested_sha
+    )
+
+    latest_blob = qualified_pool_blob(
+        DEFAULT_UPSTREAM_REF
+    )
+
+    print(
+        f"Tested main SHA: {tested_sha}"
+    )
+    print(
+        f"Latest main SHA: {latest_sha}"
+    )
+    print(
+        f"Tested pool blob: {tested_blob}"
+    )
+    print(
+        f"Latest pool blob: {latest_blob}"
+    )
+
+    if tested_blob != latest_blob:
+        raise RuntimeError(
+            "STALE LOCAL RESULT: "
+            "output/qualified-all.txt changed "
+            "while the regional probe was running. "
+            "Run the regional probe again."
+        )
+
+    return latest_sha
+
+
+def remote_branch_exists(
+    remote: str,
+    branch: str,
+) -> bool:
+    result = subprocess.run(
+        [
+            "git",
+            "ls-remote",
+            "--exit-code",
+            "--heads",
+            remote,
+            branch,
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+    if result.returncode == 0:
+        return True
+
+    if result.returncode == 2:
+        return False
+
+    raise RuntimeError(
+        "Cannot inspect remote regional branch: "
+        + result.stderr.strip()
+    )
+
+
+def publish_regional_result(
+    subscription_path: Path,
+    status_path: Path,
+    tested_sha: str,
+) -> None:
+    subscription_path = (
+        subscription_path.resolve()
+    )
+    status_path = status_path.resolve()
+
+    if subscription_path != DEFAULT_OUTPUT.resolve():
+        raise RuntimeError(
+            "--publish requires the default "
+            "output/best-local.txt path"
+        )
+
+    if status_path != DEFAULT_STATUS.resolve():
+        raise RuntimeError(
+            "--publish requires the default "
+            "output/local-status.json path"
+        )
+
+    validate_generated_result(
+        subscription_path,
+        status_path,
+    )
+
+    ensure_input_still_current(
+        tested_sha
+    )
+
+    print()
+    print(
+        "========================================"
+    )
+    print(
+        "PUBLISH REGIONAL SUBSCRIPTION"
+    )
+    print(
+        "========================================"
+    )
+
+    # Refresh both refs immediately before creating
+    # the publication worktree.
+    git_output(
+        "fetch",
+        REGIONAL_REMOTE,
+        DEFAULT_UPSTREAM_BRANCH,
+    )
+
+    regional_exists = remote_branch_exists(
+        REGIONAL_REMOTE,
+        REGIONAL_BRANCH,
+    )
+
+    if regional_exists:
+        git_output(
+            "fetch",
+            REGIONAL_REMOTE,
+            REGIONAL_BRANCH,
+        )
+        base_ref = (
+            f"{REGIONAL_REMOTE}/"
+            f"{REGIONAL_BRANCH}"
+        )
+    else:
+        base_ref = DEFAULT_UPSTREAM_REF
+
+    with tempfile.TemporaryDirectory(
+        prefix="best50-regional-publish-"
+    ) as temporary_directory:
+        worktree = Path(
+            temporary_directory
+        )
+
+        # TemporaryDirectory creates the path, while git
+        # worktree requires the target path not to exist.
+        worktree.rmdir()
+
+        try:
+            git_output(
+                "worktree",
+                "add",
+                "--detach",
+                str(worktree),
+                base_ref,
+            )
+
+            output_directory = (
+                worktree / "output"
+            )
+
+            output_directory.mkdir(
+                parents=True,
+                exist_ok=True,
+            )
+
+            (
+                output_directory
+                / "best-local.txt"
+            ).write_bytes(
+                subscription_path.read_bytes()
+            )
+
+            (
+                output_directory
+                / "local-status.json"
+            ).write_bytes(
+                status_path.read_bytes()
+            )
+
+            git_output(
+                "add",
+                "-f",
+                REGIONAL_SUBSCRIPTION_PATH,
+                REGIONAL_STATUS_PATH,
+                cwd=worktree,
+            )
+
+            diff_result = subprocess.run(
+                [
+                    "git",
+                    "diff",
+                    "--cached",
+                    "--quiet",
+                    "--exit-code",
+                ],
+                cwd=worktree,
+                check=False,
+                timeout=30,
+            )
+
+            if diff_result.returncode == 0:
+                print(
+                    "Regional subscription is already "
+                    "identical to the remote version."
+                )
+                return
+
+            if diff_result.returncode != 1:
+                raise RuntimeError(
+                    "Cannot inspect staged regional changes"
+                )
+
+            # Recheck the global candidate pool immediately
+            # before creating the publication commit.
+            ensure_input_still_current(
+                tested_sha
+            )
+
+            git_output(
+                "commit",
+                "-m",
+                (
+                    "chore: update regional "
+                    "VPN subscription"
+                ),
+                cwd=worktree,
+            )
+
+            commit_sha = git_output(
+                "rev-parse",
+                "HEAD",
+                cwd=worktree,
+            )
+
+            # A normal non-force push is deliberate. If
+            # another publisher raced us, Git refuses the
+            # update rather than overwriting remote history.
+            git_output(
+                "push",
+                REGIONAL_REMOTE,
+                (
+                    "HEAD:"
+                    f"refs/heads/{REGIONAL_BRANCH}"
+                ),
+                cwd=worktree,
+            )
+
+            print(
+                f"Published commit: {commit_sha}"
+            )
+
+        finally:
+            subprocess.run(
+                [
+                    "git",
+                    "worktree",
+                    "remove",
+                    "--force",
+                    str(worktree),
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+
+    git_output(
+        "fetch",
+        REGIONAL_REMOTE,
+        REGIONAL_BRANCH,
+    )
+
+    remote_ref = (
+        f"{REGIONAL_REMOTE}/"
+        f"{REGIONAL_BRANCH}"
+    )
+
+    remote_subscription_blob = git_output(
+        "rev-parse",
+        (
+            f"{remote_ref}:"
+            f"{REGIONAL_SUBSCRIPTION_PATH}"
+        ),
+    )
+
+    remote_status_blob = git_output(
+        "rev-parse",
+        (
+            f"{remote_ref}:"
+            f"{REGIONAL_STATUS_PATH}"
+        ),
+    )
+
+    local_subscription_blob = git_output(
+        "hash-object",
+        str(subscription_path),
+    )
+
+    local_status_blob = git_output(
+        "hash-object",
+        str(status_path),
+    )
+
+    if (
+        remote_subscription_blob
+        != local_subscription_blob
+        or remote_status_blob
+        != local_status_blob
+    ):
+        raise RuntimeError(
+            "Regional publication verification failed"
+        )
+
+    print(
+        "REGIONAL PUBLICATION VERIFIED: PASS"
+    )
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description=(
-            "Re-test the globally selected Best50 "
-            "through the current local network."
+            "Re-test the globally quality-qualified "
+            "VLESS pool through the current local network."
         )
     )
 
@@ -823,6 +1267,15 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--publish",
+        action="store_true",
+        help=(
+            "Publish the successfully generated regional "
+            "subscription to the GitHub regional branch."
+        ),
+    )
+
+    parser.add_argument(
         "--interface",
         default="en0",
         help=(
@@ -836,6 +1289,16 @@ def parse_args():
 
 async def async_main() -> int:
     args = parse_args()
+
+    if (
+        args.publish
+        and args.input is not None
+    ):
+        raise RuntimeError(
+            "--publish cannot be used with --input; "
+            "publication must be based on the current "
+            "origin/main qualified pool"
+        )
 
     if args.rounds < 1:
         raise RuntimeError(
@@ -957,6 +1420,16 @@ async def async_main() -> int:
         upstream_generated
     )
 
+    status["publication"] = {
+        "enabled": bool(args.publish),
+        "remote": REGIONAL_REMOTE,
+        "branch": REGIONAL_BRANCH,
+        "subscription_path":
+            REGIONAL_SUBSCRIPTION_PATH,
+        "status_path":
+            REGIONAL_STATUS_PATH,
+    }
+
     write_subscription(
         args.output,
         qualified,
@@ -1060,6 +1533,38 @@ async def async_main() -> int:
             "WARNING: no locally qualified nodes."
         )
         return 2
+
+    validate_generated_result(
+        args.output,
+        args.status,
+    )
+
+    print(
+        "LOCAL GENERATED RESULT VALIDATION: PASS"
+    )
+
+    if args.publish:
+        if not upstream_sha:
+            raise RuntimeError(
+                "Cannot publish without an "
+                "origin/main upstream SHA"
+            )
+
+        publish_regional_result(
+            args.output,
+            args.status,
+            upstream_sha,
+        )
+
+        print()
+        print(
+            "Regional subscription URL:"
+        )
+        print(
+            "https://raw.githubusercontent.com/"
+            "RebelRider/vpn-subscription/"
+            "regional/output/best-local.txt"
+        )
 
     return 0
 

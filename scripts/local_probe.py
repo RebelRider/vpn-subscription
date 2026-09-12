@@ -18,9 +18,13 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_PATH = ROOT / "scripts" / "build.py"
 
-DEFAULT_INPUT = ROOT / "output" / "best50.txt"
 DEFAULT_OUTPUT = ROOT / "output" / "best-local.txt"
 DEFAULT_STATUS = ROOT / "output" / "local-status.json"
+
+DEFAULT_UPSTREAM_REMOTE = "origin"
+DEFAULT_UPSTREAM_BRANCH = "main"
+DEFAULT_UPSTREAM_REF = "origin/main"
+DEFAULT_UPSTREAM_PATH = "output/qualified-all.txt"
 
 ALLOWED_COUNTRIES = {"US", "DE", "PL", "NL"}
 
@@ -62,25 +66,122 @@ def load_build_module():
     return module
 
 
+def read_links_text(
+    text: str,
+    description: str,
+) -> list[str]:
+    links = [
+        line.strip()
+        for line in text.splitlines()
+        if line.strip().startswith("vless://")
+    ]
+
+    if not links:
+        raise RuntimeError(
+            f"No VLESS links found in {description}"
+        )
+
+    # Preserve upstream ranking and remove accidental duplicates.
+    return list(dict.fromkeys(links))
+
+
 def read_links(path: Path) -> list[str]:
     if not path.is_file():
         raise RuntimeError(
             f"Input subscription does not exist: {path}"
         )
 
-    links = [
-        line.strip()
-        for line in path.read_text().splitlines()
-        if line.strip().startswith("vless://")
-    ]
+    return read_links_text(
+        path.read_text(),
+        str(path),
+    )
 
-    if not links:
-        raise RuntimeError(
-            f"No VLESS links found in {path}"
+
+def run_git(
+    *args: str,
+) -> str:
+    result = subprocess.run(
+        ["git", *args],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+    if result.returncode != 0:
+        detail = (
+            result.stderr.strip()
+            or result.stdout.strip()
+            or f"exit {result.returncode}"
         )
 
-    # Preserve upstream ranking and remove accidental duplicates.
-    return list(dict.fromkeys(links))
+        raise RuntimeError(
+            "git "
+            + " ".join(args)
+            + f" failed: {detail}"
+        )
+
+    return result.stdout
+
+
+def upstream_generated_at(
+    text: str,
+) -> str | None:
+    match = re.search(
+        r"^# generated:\s*(.+?)\s*$",
+        text,
+        re.MULTILINE,
+    )
+
+    if not match:
+        return None
+
+    return match.group(1)
+
+
+def load_upstream_pool() -> tuple[
+    list[str],
+    str,
+    str | None,
+    str,
+]:
+    print(
+        "Fetching latest upstream main..."
+    )
+
+    run_git(
+        "fetch",
+        DEFAULT_UPSTREAM_REMOTE,
+        DEFAULT_UPSTREAM_BRANCH,
+    )
+
+    upstream_sha = run_git(
+        "rev-parse",
+        DEFAULT_UPSTREAM_REF,
+    ).strip()
+
+    description = (
+        f"{DEFAULT_UPSTREAM_REF}:"
+        f"{DEFAULT_UPSTREAM_PATH}"
+    )
+
+    text = run_git(
+        "show",
+        description,
+    )
+
+    links = read_links_text(
+        text,
+        description,
+    )
+
+    return (
+        links,
+        upstream_sha,
+        upstream_generated_at(text),
+        description,
+    )
 
 
 def country_from_link(link: str) -> str:
@@ -479,8 +580,8 @@ def write_subscription(
     )
 
     lines = [
-        "# Best50 v5.0 — LOCAL NETWORK VERIFIED VLESS",
-        "#profile-title: Best50 Local",
+        "# v5.0 — LOCAL NETWORK VERIFIED VLESS",
+        "#profile-title: Best Local VPN",
         "#profile-update-interval: 1",
         "#subscription-ping-onopen-enabled: 1",
         "#ping-type: proxy",
@@ -573,7 +674,12 @@ def parse_args():
     parser.add_argument(
         "--input",
         type=Path,
-        default=DEFAULT_INPUT,
+        default=None,
+        help=(
+            "Optional local subscription file for diagnostics. "
+            "By default the probe fetches "
+            "origin/main:output/qualified-all.txt."
+        ),
     )
 
     parser.add_argument(
@@ -617,15 +723,6 @@ def parse_args():
         ),
     )
 
-    parser.add_argument(
-        "--allow-tunnel",
-        action="store_true",
-        help=(
-            "Allow execution while a utun/PPP/IPsec "
-            "route is active. Normally do not use this."
-        ),
-    )
-
     return parser.parse_args()
 
 
@@ -651,7 +748,7 @@ async def async_main() -> int:
         "========================================"
     )
     print(
-        "BEST50 LOCAL NETWORK PROBE"
+        "REGIONAL LOCAL NETWORK PROBE"
     )
     print(
         "========================================"
@@ -661,16 +758,45 @@ async def async_main() -> int:
         args.interface
     )
 
-    links = read_links(
-        args.input
-    )
+    upstream_sha: str | None = None
+    upstream_generated: str | None = None
+
+    if args.input is not None:
+        links = read_links(
+            args.input
+        )
+        input_description = str(
+            args.input
+        )
+        input_mode = "local-file"
+    else:
+        (
+            links,
+            upstream_sha,
+            upstream_generated,
+            input_description,
+        ) = load_upstream_pool()
+        input_mode = "origin-main-qualified-all"
 
     print(
         f"Input nodes: {len(links)}"
     )
     print(
-        f"Input:       {args.input}"
+        f"Input:       {input_description}"
     )
+
+    if upstream_sha:
+        print(
+            f"Upstream SHA: "
+            f"{upstream_sha}"
+        )
+
+    if upstream_generated:
+        print(
+            f"Upstream generated: "
+            f"{upstream_generated}"
+        )
+
     print(
         f"Output:      {args.output}"
     )
@@ -678,8 +804,29 @@ async def async_main() -> int:
 
     build = load_build_module()
 
+    # The production probe engine is tuned for GitHub runners and can
+    # exceed the default macOS per-process file-descriptor limit when
+    # probing the full qualified pool locally.
+    #
+    # Keep production settings untouched and reduce concurrency only
+    # for this local regional validator.
+    probe_engine = build.CFG.setdefault(
+        "probe_engine",
+        {},
+    )
+    probe_engine["batch_size"] = 16
+    probe_engine["parallel_batches"] = 2
+    probe_engine["curl_parallel"] = 16
+
     build.CFG["_probe_default_interface"] = (
         args.interface
+    )
+
+    print(
+        "Local probe engine: "
+        f"batch_size={probe_engine['batch_size']}, "
+        f"parallel_batches={probe_engine['parallel_batches']}, "
+        f"curl_parallel={probe_engine['curl_parallel']}"
     )
 
     qualified, status = (
@@ -688,8 +835,18 @@ async def async_main() -> int:
             links,
             args.rounds,
             args.minimum_successes,
-            str(args.input),
+            input_description,
         )
+    )
+
+    status["input"]["mode"] = (
+        input_mode
+    )
+    status["upstream_sha"] = (
+        upstream_sha
+    )
+    status["upstream_generated_at"] = (
+        upstream_generated
     )
 
     write_subscription(
@@ -770,6 +927,19 @@ async def async_main() -> int:
     )
 
     print()
+
+    if upstream_sha:
+        print(
+            f"Upstream SHA:  "
+            f"{upstream_sha}"
+        )
+
+    if upstream_generated:
+        print(
+            f"Upstream time: "
+            f"{upstream_generated}"
+        )
+
     print(
         f"Subscription: {args.output}"
     )

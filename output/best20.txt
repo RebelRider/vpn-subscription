@@ -5,15 +5,15 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-09-16 00:22:31 UTC
+# generated: 2026-09-16 07:42:27 UTC
 #
-# candidates: 97080
-# parse_valid: 65812
-# exact_duplicates_removed: 21796
-# structural_duplicates_removed: 35876
-# first_pass_working: 471
-# final_tested: 471
-# final_stable: 374
+# candidates: 97266
+# parse_valid: 66322
+# exact_duplicates_removed: 21436
+# structural_duplicates_removed: 36265
+# first_pass_working: 343
+# final_tested: 343
+# final_stable: 248
 # published: 20
 # functional_preliminary: gstatic
 # functional_mandatory: cloudflare, youtube, chatgpt, payload-1mb
@@ -21,23 +21,23 @@
 #
 # Quality-filtered public VLESS configurations.
 #
-vless://47fcef29-ab4e-4aa6-932b-d95a18f28a4e@172.64.52.6:2052?security=none&type=ws&path=%2F%3Fed%3D2560security%3Dtls&host=8nj2r.2k8t.f88.hh.vavava.kdns.fr#US
-vless://c5694dc5-39fd-4a92-8430-3837baa522a3@88.216.57.128:443?encryption=none&fp=firefox&pbk=5en_SFrWntR3ZtxGn7_ZnnK5UW_Prh90rs-o8p7glw4&security=reality&sid=9c2378562188c3cb&sni=usa.superbuba.top&type=grpc#US
-vless://48ff2b70-e180-582f-8866-d9a2edeed5f5@15.204.97.216:23576?security=reality&type=tcp&allowInsecure=1&sni=fuck.rkn&fp=chrome&flow=xtls-rprx-vision&sid=01&pbk=1y5h2FGWKXTJ9xLPCqPo6Mw7RxoZzh6fGkEQKNxpZ3s#US
-vless://47fcef29-ab4e-4aa6-932b-d95a18f28a4e@104.18.47.113:2052?security=none&type=ws&host=8nj2r.2k8t.f88.hh.vavava.kdns.fr#US
-vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.225:443?security=reality&encryption=none&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=yahoo.com&sid=c39cc7310a#DE
-vless://cb2dbb6a-a1ea-4023-9ace-6466cee57241@51.81.203.63:443?security=reality&type=tcp&sni=www.icloud.com&fp=chrome&flow=xtls-rprx-vision&sid=4477382ff6d3d41c&pbk=nqwCf6oW49tEtmQ0EzxigZ0uu1pg0E30CS54G40Iti0#US
-vless://47fcef29-ab4e-4aa6-932b-d95a18f28a4e@188.114.97.6:8080?path=%2F%3Fed%3D2560&security=none&encryption=none&fm=%7B%22tcp%22%3A%20%5B%7B%22type%22%3A%20%22fragment%22%2C%20%22settings%22%3A%20%7B%22packets%22%3A%20%221-1%22%2C%20%22lengths%22%3A%20%5B%221%22%5D%2C%20%22delays%22%3A%20%5B%224%22%5D%2C%20%22maxSplit%22%3A%20%22355%22%7D%7D%5D%7D&host=zb1zi.s3nx.dyz.hh.vavava.kdns.fr&type=ws#US
+vless://7ab29f89-6eef-4171-b232-fc4f580ad31b@172.235.43.210:53957?security=reality&type=tcp&sni=www.nvidia.com&fp=firefox&flow=xtls-rprx-vision&sid=44e82fd7b97b14&pbk=XUHlbk5VH5z4E2wxZBhlpLZ33qevyQgqU7dheRDgoGQ#US
+vless://48ff2b70-e180-582f-8866-d9a2edeed5f5@15.204.97.216:23576?security=reality&type=tcp&sni=fuck.rkn&fp=chrome&flow=xtls-rprx-vision&sid=01&pbk=1y5h2FGWKXTJ9xLPCqPo6Mw7RxoZzh6fGkEQKNxpZ3s&encryption=none#US
 vless://47fcef29-ab4e-4aa6-932b-d95a18f28a4e@188.114.97.6:2052?ed=2560&eh=Sec-WebSocket-Protocol&encryption=none&host=zb1zi.s3nx.dyz.hh.vavava.kdns.fr&path=%2F&security=none&type=ws#US
-vless://1f8cf47a-b66a-4916-979f-26edfcf44eea@185.95.231.156:443?type=tcp&security=reality&flow=xtls-rprx-vision&fp=chrome&pbk=8eXftARun6KH38UZhuqIfPR1VF2DLS9RMBZEnF5k6To&sid=a3a578ab&sni=www.apple.com#US
-vless://74e72f14-f4f0-4df3-a92a-65de2a3e074e@185.147.127.110:17898?security=&encryption=none&headerType=none&type=tcp#NL
-vless://5fc7563b-552d-417f-9409-08ef92284599@192.248.182.183:39244?security=none&encryption=none&headerType=none&type=tcp#DE
-vless://cf990ae8-ee77-4436-aa3a-bbc2fb040c53@116.202.19.251:443?security=none&type=tcp&headerType=http&path=%2F&host=store.steampowered.com&encryption=none#DE
-vless://5f00ca4e-3f26-473e-ad1c-414112abb0a3@95.179.169.44:53224?encryption=none&type=tcp&allowInsecure=1#DE
-vless://d005cde6-263f-48ac-8b13-74ebf7f3f8ef@91.98.96.59:40017?security=none&type=tcp&encryption=none#DE
-vless://9f73cf9a-c68f-4e6d-90f0-e66b64f52f8a@192.145.31.5:443?security=none&encryption=none&type=ws#NL
-vless://de5906f3-df38-4463-aa9d-2b01320cc6ea@31.76.76.28:443?type=ws#NL
-vless://928e6cce-8ced-4243-9a48-a6642edd09b0@38.180.242.205:13779?encryption=none&flow=xtls-rprx-vision&fp=chrome&pbk=llTyp52oRXnJmQ3I9UUrmlwbMA79B-wLCRHCu-8dLGg&security=reality&sid=af1bdd293097b664&sni=tesla.com&type=tcp#NL
-vless://30f6c75f-8fcd-4555-854f-439f09d3e2e3@45.76.87.125:14750?encryption=none&security=tls&sni=c6dbx99g6stb418qeo.t3jmlj0r152zji4htdkm9.workers.dev&fp=chrome&insecure=0&allowInsecure=0&ech=cloudflare-ech.com%2Bhttps%3A%2F%2Fdns.alidns.com%2Fdns-query&type=ws&host=c6dbx99g6stb418qeo.t3jmlj0r152zji4htdkm9.workers.dev&path=%2F%40Marisa_kristi#DE
-vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@89.125.147.199:443?type=tcp&security=reality&fp=firefox&pbk=iQJ8UdFw-lUWa9mXugescYHkmwNH96nuj_z-LAZvfxg&sid=a1b2c3d4&sni=maps.apple.com#NL
+vless://47fcef29-ab4e-4aa6-932b-d95a18f28a4e@188.114.97.6:8080?path=%2F%3Fed%3D2560&security=none&encryption=none&fm=%7B%22tcp%22%3A%20%5B%7B%22type%22%3A%20%22fragment%22%2C%20%22settings%22%3A%20%7B%22packets%22%3A%20%221-1%22%2C%20%22lengths%22%3A%20%5B%221%22%5D%2C%20%22delays%22%3A%20%5B%224%22%5D%2C%20%22maxSplit%22%3A%20%22355%22%7D%7D%5D%7D&host=zb1zi.s3nx.dyz.hh.vavava.kdns.fr&type=ws#US
+vless://47fcef29-ab4e-4aa6-932b-d95a18f28a4e@172.64.229.170:8880?security=none&type=ws&path=%2F%3Fed%3D2560security%3Dtls&host=8nj2r.2k8t.f88.hh.vavava.kdns.fr#US
+vless://c5694dc5-39fd-4a92-8430-3837baa522a3@88.216.57.128:443?encryption=none&fp=firefox&pbk=5en_SFrWntR3ZtxGn7_ZnnK5UW_Prh90rs-o8p7glw4&security=reality&sid=9c2378562188c3cb&sni=usa.superbuba.top&type=grpc#US
+vless://fd4b654f-9ae2-42c5-977b-6aa54e8e9a83@91.99.57.24:443?security=&encryption=none&host=store.steampowered.com&headerType=http&type=tcp#DE
+vless://47fcef29-ab4e-4aa6-932b-d95a18f28a4e@162.159.48.32:2095?&type=ws&headerType=none&host=8nj2r.2k8t.f88.hh.vavava.kdns.fr&path=/?ed=2560security=tls#US
+vless://47fcef29-ab4e-4aa6-932b-d95a18f28a4e@104.18.47.113:2052?security=none&type=ws&host=8nj2r.2k8t.f88.hh.vavava.kdns.fr#US
+vless://cabd9303-ae32-4d25-86b9-26b312d0f044@89.125.147.199:443?security=reality&encryption=none&pbk=iQJ8UdFw-lUWa9mXugescYHkmwNH96nuj_z-LAZvfxg&headerType=none&fp=chrome&type=tcp&sni=maps.apple.com&sid=f6c7c139b9c938db#NL
+vless://cf990ae8-ee77-4436-aa3a-bbc2fb040c53@46.224.170.213:443?security=none&type=tcp&headerType=http&path=%2F&host=store.steampowered.com&encryption=none#DE
+vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.179:443?security=reality&encryption=none&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&headerType=&fp=ios&type=tcp&flow=xtls-rprx-vision&sni=yahoo.com&sid=c39cc7310a#DE
+vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&type=ws#NL
+vless://a289a3d3-5833-4b28-8809-ae72898a98d0@138.16.141.59:7443?security=reality&type=tcp&sni=ibm.com&fp=chrome&sid=a09ff9f8&pbk=RY7zkFQ01lI92jxNAyCa8T33UBW1fgpJgg8ZEqMA10k&encryption=none#NL
+vless://44ae52b9-76fc-444d-8e43-186b4384b80a@86.54.28.75:443?security=reality&flow=xtls-rprx-vision&sni=www.apple.com&type=tcp&fp=chrome&pbk=PryGoq51ilG0eLUPl9i0xCvmk1xpwkyFSr_tG4GNLlU&sid=1d86d17709852910#NL
+vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?security=none&type=ws&path=%2F&sni=85.17.145.65&encryption=none#NL
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=&alpn=v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus&encryption=none&type=ws&sni=85.17.145.65#NL
+vless://bf645ffe-a3cc-4480-8e4c-9bcd1af41052@170.101.109.37:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=www.cloudflare.com&fp=chrome&pbk=rTnh7Y8RsSA5HSvFf-pWT49x8va6U6XHMRgNiMuwB0A&sid=ab88d256&type=tcp&headerType=none#DE
+vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@89.125.147.199:443?type=tcp&security=reality&fp=firefox&pbk=iQJ8UdFw-lUWa9mXugescYHkmwNH96nuj_z-LAZvfxg&sid=a1b2c3d4&sni=maps.apple.com#NL
+vless://928e6cce-8ced-4243-9a48-a6642edd09b0@38.180.242.205:13779?encryption=none&flow=xtls-rprx-vision&fp=chrome&pbk=llTyp52oRXnJmQ3I9UUrmlwbMA79B-wLCRHCu-8dLGg&security=reality&sid=af1bdd293097b664&sni=tesla.com&type=tcp#NL

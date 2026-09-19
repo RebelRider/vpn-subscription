@@ -5,15 +5,15 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-09-19 00:22:23 UTC
+# generated: 2026-09-19 07:21:13 UTC
 #
-# candidates: 96352
-# parse_valid: 64797
-# exact_duplicates_removed: 21854
-# structural_duplicates_removed: 34999
-# first_pass_working: 565
-# final_tested: 500
-# final_stable: 424
+# candidates: 96878
+# parse_valid: 65525
+# exact_duplicates_removed: 21681
+# structural_duplicates_removed: 35448
+# first_pass_working: 351
+# final_tested: 351
+# final_stable: 259
 # published: 20
 # functional_preliminary: gstatic
 # functional_mandatory: cloudflare, youtube, chatgpt, payload-1mb
@@ -21,23 +21,23 @@
 #
 # Quality-filtered public VLESS configurations.
 #
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.42:2083?encryption=none&security=none&type=grpc&mode=gun&authority=&serviceName=vless#US
-vless://7a947ca5-28fc-4a8b-a0a7-df28ba87e40b@178.105.233.111:80?path=%2F&security=&encryption=none&type=ws#DE
-vless://44ae52b9-76fc-444d-8e43-186b4384b80a@free-amsterdam-node-1.cloudwidecdn.com:443?security=reality&encryption=none&pbk=PryGoq51ilG0eLUPl9i0xCvmk1xpwkyFSr_tG4GNLlU&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=www.apple.com&sid=1d86d17709852910#NL
-vless://57e2a48b-0cc2-4b60-aacd-b36358fcba96@2.26.51.75:443?security=reality&encryption=none&pbk=8q_xD5tfjZGDPsnq-3VqXWVV7-D03crExMBuL4xQNBM&headerType=none&fp=firefox&type=tcp&flow=xtls-rprx-vision&sni=4pda.to&sid=d4f6a8c1b2e3f9aa#DE
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@50.7.248.237:443?type=tcp&security=tls&flow=xtls-rprx-vision&fp=firefox&sni=pl-new-dedic.failspace.top#US
-vless://0a419fe1-068e-422f-911a-4977fa944e08@195.201.9.235:11342?security=reality&encryption=none&pbk=W2swPTQYWu_rfjh2fnyzQ5zg6lK5wKv2Z-mBpVI6_Bg&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=amp-api-edge.apps.apple.com&sid=6f7b38bd9420c4b8#DE
-vless://173b81b8-0ccc-48e8-b363-95e6c0e59b06@167.233.177.42:80?path=%2F&security=&encryption=none&type=ws#DE
-vless://9f73cf9a-c68f-4e6d-90f0-e66b64f52f8a@neth9.lunariai.ru:443?type=ws&sni=neth9.lunariai.ru#NL
-vless://190342ef-5555-4dd6-9d3e-529ce1bd1513@144.31.167.77:443?security=reality&encryption=none&pbk=6YFaX1wQaOAxYxehqj8d4zcSeHutarC_9VCBWeUGGG0&headerType=&fp=chrome&spx=%2F&type=tcp&flow=xtls-rprx-vision&sni=www.sony.com&sid=261afb322a#DE
-vless://47fcef29-ab4e-4aa6-932b-d95a18f28a4e@188.114.97.6:8880?&type=ws&headerType=none&host=zb1zi.s3nx.dyz.hh.vavava.kdns.fr&path=/?ed=2560#US
-vless://6dff8e33-b201-4cbb-8f89-b9418702bff2@108.165.32.16:443?encryption=none&type=tcp&flow=xtls-rprx-vision&security=reality&sni=www.logitech.com&fp=chrome&pbk=IGIgHNW_hZRsP2DZqItH5wvFSr6H4rqpI9x-0IUCskU&sid=ca3d&spx=/gpu8mKqPTngMAIi#DE
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@144.31.5.64:443?security=tls&alpn=h2&encryption=none&insecure=0&headerType=none&type=tcp&allowInsecure=0&flow=xtls-rprx-vision&sni=pl6.moritech.net#PL
-vless://df9f5aca-eda0-428f-a752-e53866153d12@31.56.189.27:2087?type=grpc&security=tls&fp=firefox&sni=srv-21bac9.vless.monster&serviceName=freegrpc#DE
-vless://47fcef29-ab4e-4aa6-932b-d95a18f28a4e@104.18.39.218:2086?host=8nj2r.2k8t.f88.hh.vavava.kdns.fr&path=%2F%3Fed%3D2560security%3Dtlssecurity%3Dtls&security=none&sni=8nj2r.2k8t.f88.hh.vavava.kdns.fr&type=ws#US
-vless://9f73cf9a-c68f-4e6d-90f0-e66b64f52f8a@neth9.lunariai.ru:8443?security=tls&encryption=none&insecure=0&headerType=none&type=tcp&allowInsecure=0#NL
-vless://911b84e1-d046-4fbf-bfc0-c168791115ef@172.67.203.158:443?allowInsecure=1&alpn=http/1.1&encryption=none&fp=chrome&host=12ygbae0k3gn0z0f.mehrshadhaddadi8.workers.dev&path=/vl/YCNmDFbqMu7cgTzgsfEWGtBD8kR&security=tls&sni=12ygbae0k3gn0z0f.mehrshadhaddadi8.workers.dev&type=ws#US
-vless://518de0d4-6ce8-4404-80db-23c4a8806128@104.21.70.21:8080?&sni=ez-5faafb.esmaoi.workers.dev&type=ws&headerType=none&host=ez-5faafb.esmaoi.workers.dev&path=/eyJqdW5rIjoiQkFLTnhqM2tZTSIsInByb3RvY29sIjoidmwiLCJtb2RlIjoicHJveHlpcCIsInBhbmVsSVBzIjpbXX0=#US
-vless://813cd228-ebf6-0e21-481a-ba4af8f85b82@188.114.97.6:8080?security=none&type=ws&path=/sync&host=odd-disk-98c5.assassincreed4048.workers.dev&packetEncoding=xudp&encryption=none#US
-vless://0432902e-6604-40cd-bbd0-57ab4e5d909f@188.114.97.6:8080?host=bpb-4dc4958b.hxjkcghchv.workers.dev&path=%2FeyJqdW5rIjoiOENNZnB6WTgiLCJwcm90b2NvbCI6InZsIiwibW9kZSI6InByb3h5aXAiLCJwYW5lbElQcyI6W119&security=none&type=ws#US
+vless://54ee5e59-55a3-4599-83ff-0c67b3f411b2@162.35.96.15:8081?encryption=none&path=/vless-test&security=none&type=ws#US
+vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.15:443?&security=reality&flow=xtls-rprx-vision&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&sid=c39cc7310a&fp=ios&sni=yahoo.com&type=tcp&headerType=none&host=yahoo.com&path=%2F#DE
 vless://928e6cce-8ced-4243-9a48-a6642edd09b0@38.180.242.205:13779?&security=reality&flow=xtls-rprx-vision&pbk=llTyp52oRXnJmQ3I9UUrmlwbMA79B-wLCRHCu-8dLGg&sid=af1bdd293097b664&fp=chrome&sni=tesla.com&type=tcp&headerType=none&host=tesla.com&path=%2F#NL
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.105.210:2083?mode=gun&security=none&encryption=none&type=grpc&serviceName=vless#US
+vless://d7cad038-0c3f-4cce-8f8a-36464aaf66c0@150.241.102.181:443?type=grpc&security=reality&fp=chrome&pbk=6KP5Xi1ao0hD5M3FGmco7NgKxU8z5gQVHwsvrQJVFS0&sid=8f3e2b1a&sni=www.cloudflare.com&mode=gun&serviceName=speedtest-grpc#US
+vless://00144519-7e0d-476b-8d28-435576af9262@167.17.69.171:443?encryption=none&flow=xtls-rprx-vision&fp=chrome&pbk=ALT8hIGeZEhi0sQFbXP_ntBg8Xo-v7i0YCLrqTnBxRk&security=reality&sid=0990d22f&sni=www.cloudflare.com&type=tcp#US
+vless://173b81b8-0ccc-48e8-b363-95e6c0e59b06@167.233.177.42:80?security=none&type=ws&path=%2F&encryption=none#DE
+vless://47fcef29-ab4e-4aa6-932b-d95a18f28a4e@188.114.97.6:8080?path=%2F%3Fed%3D2560&security=none&encryption=none&fm=%7B%22tcp%22%3A%20%5B%7B%22type%22%3A%20%22fragment%22%2C%20%22settings%22%3A%20%7B%22packets%22%3A%20%221-1%22%2C%20%22lengths%22%3A%20%5B%221%22%5D%2C%20%22delays%22%3A%20%5B%224%22%5D%2C%20%22maxSplit%22%3A%20%22355%22%7D%7D%5D%7D&host=zb1zi.s3nx.dyz.hh.vavava.kdns.fr&type=ws#US
+vless://47fcef29-ab4e-4aa6-932b-d95a18f28a4e@172.64.229.2:2086?security=none&type=ws&path=%2F%3Fed%3D2560security%3Dtls&host=8nj2r.2k8t.f88.hh.vavava.kdns.fr#US
+vless://0a419fe1-068e-422f-911a-4977fa944e08@88.99.161.169:11342?security=reality&type=tcp&sni=amp-api-edge.apps.apple.com&fp=chrome&flow=xtls-rprx-vision&sid=6f7b38bd9420c4b8&pbk=W2swPTQYWu_rfjh2fnyzQ5zg6lK5wKv2Z-mBpVI6_Bg&encryption=none#DE
+vless://7a947ca5-28fc-4a8b-a0a7-df28ba87e40b@178.105.233.111:80?security=none&type=ws&path=%2F&encryption=none#DE
+vless://9bbd487f-8f84-4ad7-b897-681c3f7d95dc@hyhhuh.mervi.icu:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=hyhhuh.mervi.icu&fp=random&pbk=wl-pbwMLXrvJkR4yo1JNBU7oiewyuQ-t7jxiS6Kz4D8&sid=2997575f36da5a09&type=tcp#US
+vless://a2f590d6-bb73-418d-8907-9d52a44e1a5a@91.107.244.212:8080?security=none&type=tcp&headerType=http&path=%2F%40Nap_v2ray---%40Nap_v2ray%40Nap_v2ray---%40Nap_v2ray%40Nap_v2ray---%40Nap_v2ray%40Nap_v2ray---%40Nap_v2ray&host=play-apps-features.googleusercontent.com&encryption=none#DE
+vless://59906cb2-a61b-4cf3-b77b-5762ef61d2b0@167.99.251.120:440?security=none&type=tcp&headerType=http&path=%2F&host=store.steampowered.com&encryption=none#DE
+vless://8fb65472-5957-4f64-ba2d-b5812b2f155a@144.21.43.119:62145?security=none&type=tcp&encryption=none#NL
+vless://de5906f3-df38-4463-aa9d-2b01320cc6ea@31.76.76.28:443?path=%2F&security=none&encryption=none&type=ws#NL
+vless://c423cc1b-f88e-421c-9a16-c480d84da20f@198.251.78.29:2053?type=tcp&security=reality&fp=firefox&pbk=Uk5b-Wh_uxeCc7R8NS9iWE40xc0h9wWC04rSB9yhgAw&sid=b5d625695ec82c7e&sni=www.cloudflare.com#US
+vless://9f73cf9a-c68f-4e6d-90f0-e66b64f52f8a@neth9.lunariai.ru:8443?security=tls&encryption=none&insecure=0&headerType=none&type=tcp&allowInsecure=0#NL
+vless://ead0dd61-d398-40ad-80d6-a0e1e516d7d3@212.227.235.66:2053/?type=tcp&encryption=none&flow=&sni=www.apple.com&fp=chrome&security=reality&pbk=7Y6Xb5Ql_03K25x8yKUSOKI2JTOMyv2nyCcFza90uxk&sid=29e8dcd2b37aaa7f&packetEncoding=xudp#DE
+vless://662d49d7-c9fc-e553-8d32-23b9182297ab@g30.www-fifaweb.com:9000?security=&encryption=none&host=dynu.com&headerType=http&type=tcp#DE

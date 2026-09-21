@@ -5,43 +5,25 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-09-12 20:36:32 UTC
+# generated: 2026-09-21 20:12:58 UTC
 #
 # Local filtering: gstatic + cloudflare + youtube + chatgpt + payload-1mb
 # Local final stability: 2/3 complete rounds required
-# upstream_nodes: 216
-# local_qualified: 30
+# upstream_nodes: 191
+# local_qualified: 12
 # local_ranking: stability, median latency, p95 latency
 #
 # Generated from the globally quality-qualified pool and re-tested through the current local network.
 #
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.42:2083?security=&alpn=v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus&encryption=none&type=grpc&serviceName=vless#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.105.210:2083?encryption=none&security=none&serviceName=vless&type=grpc#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.42:2083?type=grpc&sni=/telegram_tm(@azarbayjab1),telegram_tm(@azarbayjab1),telegram_tm(@azarbayjab1),telegram_tm(@azarbayjab1),telegram_tm(@azarbayjab1),telegram_tm(@azarbayjab1),telegram_tm(@azarbayjab1)&mode=gun&serviceName=vless#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.105.210:2083?security=&alpn=v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus&encryption=none&type=grpc&serviceName=vless#US
-vless://02722550-1915-4629-a653-cbe95e594f70@50.7.95.196:443?type=tcp&security=reality&flow=xtls-rprx-vision&fp=firefox&pbk=8HYqDHdQ1IuLPhAOENT70_j0prAi1PNkwlT6venYAEM&sid=a78da1f7&sni=apiv23tw.goonars.com#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.42:2083?encryption=none&security=none&serviceName=vless&type=grpc#US
-vless://827a0eb0-21bf-4bce-96ef-0a7bac5d68f5@31.76.20.218:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=DS9mX6cMb5wvwFzga8yN2NLbs7soXM7038_P23yPKwk&security=reality&sid=8ffa160e608bf539&sni=de.pinkmoon.pro&type=tcp#DE
-vless://02722550-1915-4629-a653-cbe95e594f70@201.51.10.239:443?encryption=none&flow=xtls-rprx-vision&pbk=unAvLudgWMwMSCs9ltSr2_Ayp7q3685S7EBxFVk_4Uw&security=reality&sid=9d0791d1&sni=apitw1.goonars.com&type=tcp&fp=chrome#NL
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@nl-new-ded.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@nl-new-ded.failspace.top:443?flow=xtls-rprx-vision&fp=chrome&headerType=none&host=nl-new-ded.failspace.top&path=/&security=tls&type=tcp#US
-vless://02722550-1915-4629-a653-cbe95e594f70@vf2nd.goonars.com:443?security=reality&encryption=none&pbk=OINuDFEDTdmtFR8QRxAZfQIMPA-wJxfGN1LjB3TFUHo&headerType=none&fp=firefox&spx=%2F&type=tcp&flow=xtls-rprx-vision&sni=apiv12nd.goonars.com&sid=535a3304#US
-vless://02722550-1915-4629-a653-cbe95e594f70@cdn1nd.goonars.com:443?encryption=none&flow=xtls-rprx-vision&fp=edge&headerType=none&pbk=8HYqDHdQ1IuLPhAOENT70_j0prAi1PNkwlT6venYAEM&security=reality&sid=a78da1f7&sni=apiv23tw.goonars.com&spx=/&type=tcp#US
-vless://bca46025-bf43-40c0-895b-054a6fbcfd32@172.235.38.85:42942?type=tcp&security=reality&flow=xtls-rprx-vision&fp=firefox&pbk=JmkfJoDWpAqt6gj4cbc4_cwItsdryMlV7joAGfNTKQU&sid=a56d7d8da977f860&sni=www.tesla.com&packetEncoding=none#US
-vless://bca46025-bf43-40c0-895b-054a6fbcfd32@172.235.38.85:42942?security=reality&encryption=none&pbk=JmkfJoDWpAqt6gj4cbc4_cwItsdryMlV7joAGfNTKQU&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=www.tesla.com&sid=a56d7d8da977f860#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@at-new-ded.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@ir-new1.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-viper.moritech.net:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@at.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-ded.moritech.net:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-new-ded.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@ir-new1.failspace.top:443?&security=tls&flow=xtls-rprx-vision&fp=chrome&type=tcp&headerType=none&host=ir-new1.failspace.top&path=%2F#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-new-ded-2.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-viper.moritech.net:443?&security=tls&flow=xtls-rprx-vision&fp=chrome&type=tcp&headerType=none&host=poland-viper.moritech.net&path=%2F#US
-vless://02722550-1915-4629-a653-cbe95e594f70@201.51.10.240:443?encryption=none&flow=xtls-rprx-vision&pbk=VWDBW2RS3o-oFBrSNdpncoaVVU8KixbPNHoj4-Wy7lM&security=reality&sid=04a69fc6&sni=apitw3.goonars.com&type=tcp&fp=firefox#NL
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-new-ded.failspace.top:443?&security=tls&flow=xtls-rprx-vision&fp=chrome&type=tcp&headerType=none&host=poland-new-ded.failspace.top&path=%2F#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@at.failspace.top:443?&security=tls&flow=xtls-rprx-vision&fp=chrome&type=tcp&headerType=none&host=at.failspace.top&path=%2F#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@ai-dedic.failspace.top:443?type=tcp&headerType=none&security=tls&encryption=none&flow=xtls-rprx-vision#US
-vless://02722550-1915-4629-a653-cbe95e594f70@cdn8tw.goonars.com:443?flow=xtls-rprx-vision&fp=chrome&headerType=none&host=cdn8tw.goonars.com&path=/&pbk=unAvLudgWMwMSCs9ltSr2_Ayp7q3685S7EBxFVk_4Uw&security=reality&sid=9d0791d1&sni=apitw1.goonars.com&type=tcp#NL
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.42:2083?mode=gun&security=none&encryption=none&type=grpc&serviceName=vless&sni=/TELEGRAM_TM(@AZARBAYJAB1),TELEGRAM_TM(@AZARBAYJAB1),TELEGRAM_TM(@AZARBAYJAB1),TELEGRAM_TM(@AZARBAYJAB1),TELEGRAM_TM(@AZARBAYJAB1),TELEGRAM_TM(@AZARBAYJAB1),TELEGRAM_TM(@AZARBAYJAB1)#US
+vless://fd4b654f-9ae2-42c5-977b-6aa54e8e9a83@91.99.58.195:443?encryption=none&security=none&type=tcp&headerType=http&path=%2F#DE
+vless://fd4b654f-9ae2-42c5-977b-6aa54e8e9a83@91.99.51.119:443?encryption=none&security=none&allowInsecure=1&insecure=1&type=http&path=%2F#DE
+vless://fd4b654f-9ae2-42c5-977b-6aa54e8e9a83@91.99.62.132:443?type=http&path=/#DE
+vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@cdn.snobvpn.online:80/?type=ws&encryption=none&flow=&path=%2Fsnob-ws#US
+vless://cabd9303-ae32-4d25-86b9-26b312d0f044@cdn.snobvpn.online:80?type=ws&path=%2Fsnob-ws&sni=cdn.snobvpn.online#US
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@hub-new.failspace.top:443?security=tls&flow=xtls-rprx-vision&sni=hub-new.failspace.top&fp=firefox&alpn=h2#US
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@uk-mori-new.failspace.top:443?security=tls&flow=xtls-rprx-vision&sni=uk-mori-new.failspace.top&fp=firefox&alpn=h2#US
+vless://cabd9303-ae32-4d25-86b9-26b312d0f044@cdn.snobvpn.online:80?path=%2Fsnob-ws&security=none&type=ws#US
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@ireland-new.failspace.top:443?security=tls&flow=xtls-rprx-vision&sni=ireland-new.failspace.top&fp=firefox&alpn=h2#US
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@austria-dedic1.failspace.top:443?security=tls&flow=xtls-rprx-vision&sni=austria-dedic1.failspace.top&fp=firefox&alpn=h2#US
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@at-dedic-new-two.failspace.top:443?security=tls&flow=xtls-rprx-vision&sni=at-dedic-new-two.failspace.top&fp=firefox&alpn=h2#US
+vless://399f9850-428a-b00a-6688-01d24438f959@69.46.46.93:443?path=%2Fws%2F399f9850-428a-b00a-6688-01d24438f959&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host=solipanelwodi-production-0e0c.up.railway.app&fp=chrome&type=ws&allowInsecure=0&sni=solipanelwodi-production-0e0c.up.railway.app#US

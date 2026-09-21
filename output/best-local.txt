@@ -5,11 +5,11 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-09-21 20:12:58 UTC
+# generated: 2026-09-21 20:28:31 UTC
 #
 # Local filtering: gstatic + cloudflare + youtube + chatgpt + payload-1mb
 # Local final stability: 2/3 complete rounds required
-# upstream_nodes: 191
+# upstream_nodes: 208
 # local_qualified: 12
 # local_ranking: stability, median latency, p95 latency
 #
@@ -18,12 +18,12 @@
 vless://fd4b654f-9ae2-42c5-977b-6aa54e8e9a83@91.99.58.195:443?encryption=none&security=none&type=tcp&headerType=http&path=%2F#DE
 vless://fd4b654f-9ae2-42c5-977b-6aa54e8e9a83@91.99.51.119:443?encryption=none&security=none&allowInsecure=1&insecure=1&type=http&path=%2F#DE
 vless://fd4b654f-9ae2-42c5-977b-6aa54e8e9a83@91.99.62.132:443?type=http&path=/#DE
-vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@cdn.snobvpn.online:80/?type=ws&encryption=none&flow=&path=%2Fsnob-ws#US
 vless://cabd9303-ae32-4d25-86b9-26b312d0f044@cdn.snobvpn.online:80?type=ws&path=%2Fsnob-ws&sni=cdn.snobvpn.online#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@hub-new.failspace.top:443?security=tls&flow=xtls-rprx-vision&sni=hub-new.failspace.top&fp=firefox&alpn=h2#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@uk-mori-new.failspace.top:443?security=tls&flow=xtls-rprx-vision&sni=uk-mori-new.failspace.top&fp=firefox&alpn=h2#US
+vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@cdn.snobvpn.online:80/?type=ws&encryption=none&flow=&path=%2Fsnob-ws#US
 vless://cabd9303-ae32-4d25-86b9-26b312d0f044@cdn.snobvpn.online:80?path=%2Fsnob-ws&security=none&type=ws#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@ireland-new.failspace.top:443?security=tls&flow=xtls-rprx-vision&sni=ireland-new.failspace.top&fp=firefox&alpn=h2#US
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@uk-mori-new.failspace.top:443?security=tls&flow=xtls-rprx-vision&sni=uk-mori-new.failspace.top&fp=firefox&alpn=h2#US
 vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@austria-dedic1.failspace.top:443?security=tls&flow=xtls-rprx-vision&sni=austria-dedic1.failspace.top&fp=firefox&alpn=h2#US
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@at-dedic-new-two.failspace.top:443?security=tls&flow=xtls-rprx-vision&sni=at-dedic-new-two.failspace.top&fp=firefox&alpn=h2#US
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@hub-new.failspace.top:443?security=tls&flow=xtls-rprx-vision&sni=hub-new.failspace.top&fp=firefox&alpn=h2#US
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@ireland-new.failspace.top:443?security=tls&flow=xtls-rprx-vision&sni=ireland-new.failspace.top&fp=firefox&alpn=h2#US
 vless://399f9850-428a-b00a-6688-01d24438f959@69.46.46.93:443?path=%2Fws%2F399f9850-428a-b00a-6688-01d24438f959&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host=solipanelwodi-production-0e0c.up.railway.app&fp=chrome&type=ws&allowInsecure=0&sni=solipanelwodi-production-0e0c.up.railway.app#US
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@at-dedic-new-two.failspace.top:443?security=tls&flow=xtls-rprx-vision&sni=at-dedic-new-two.failspace.top&fp=firefox&alpn=h2#US

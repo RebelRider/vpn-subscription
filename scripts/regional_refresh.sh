@@ -30,11 +30,62 @@ fail() {
 
 mkdir -p "$STATE_DIR" || exit 1
 
-# Atomic lock using mkdir.
-if ! mkdir "$LOCK_DIR" 2>/dev/null; then
-    log "Another regional refresh is already running; skipping."
-    exit 0
-fi
+# Atomic PID-aware lock using mkdir.
+#
+# mkdir provides the atomic exclusion primitive. The PID file allows
+# recovery after SIGKILL, process crash, or an interrupted machine
+# session leaves the lock directory behind.
+acquire_lock() {
+    if mkdir "$LOCK_DIR" 2>/dev/null; then
+        printf '%s\n' "$$" > "$LOCK_DIR/pid" || {
+            rmdir "$LOCK_DIR" 2>/dev/null || true
+            fail "Unable to write lock PID."
+        }
+        return 0
+    fi
+
+    LOCK_PID=""
+
+    if [ -f "$LOCK_DIR/pid" ]; then
+        LOCK_PID="$(
+            tr -dc '0-9' < "$LOCK_DIR/pid"
+        )"
+    fi
+
+    if [ -n "$LOCK_PID" ] && kill -0 "$LOCK_PID" 2>/dev/null; then
+        log "Another regional refresh is already running (PID $LOCK_PID); skipping."
+        exit 0
+    fi
+
+    log "Recovering stale regional refresh lock${LOCK_PID:+ from PID $LOCK_PID}."
+
+    rm -rf "$LOCK_DIR"         || fail "Unable to remove stale lock."
+
+    if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+        fail "Unable to acquire lock after stale-lock recovery."
+    fi
+
+    printf '%s\n' "$$" > "$LOCK_DIR/pid" || {
+        rm -rf "$LOCK_DIR" 2>/dev/null || true
+        fail "Unable to write recovered lock PID."
+    }
+}
+
+cleanup() {
+    if [ -f "$LOCK_DIR/pid" ]; then
+        OWNER_PID="$(
+            tr -dc '0-9' < "$LOCK_DIR/pid"
+        )"
+
+        if [ "$OWNER_PID" != "$$" ]; then
+            return
+        fi
+    fi
+
+    rm -rf "$LOCK_DIR" 2>/dev/null || true
+}
+
+acquire_lock
 
 trap cleanup EXIT INT TERM HUP
 

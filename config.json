@@ -30,7 +30,10 @@
   "history": {
     "file": "output/history.json",
     "max_latency_samples": 20,
-    "decay_days": 14
+    "decay_days": 14,
+    "max_nodes": 5000,
+    "retention_days": 14,
+    "max_file_bytes": 20000000
   },
   "test_url": "https://www.gstatic.com/generate_204",
   "sources": [

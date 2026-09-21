@@ -2090,21 +2090,219 @@ def load_history() -> dict:
         return {}
 
 
-def save_history(history: dict) -> None:
+def prune_history(
+    history: dict,
+    now: int,
+) -> dict:
+    """
+    Keep history bounded and useful.
+
+    History exists to rank nodes with evidence of successful
+    connectivity. Persisting unlimited failure-only fingerprints
+    from volatile public subscription feeds provides little ranking
+    value and eventually makes history.json unbounded.
+    """
+
+    history_cfg = CFG["history"]
+
+    max_nodes = int(
+        history_cfg.get(
+            "max_nodes",
+            5000,
+        )
+    )
+
+    retention_days = int(
+        history_cfg.get(
+            "retention_days",
+            history_cfg.get(
+                "decay_days",
+                14,
+            ),
+        )
+    )
+
+    cutoff = (
+        now
+        - retention_days * 86400
+    )
+
+    retained: list[
+        tuple[str, dict]
+    ] = []
+
+    for fp, raw_item in history.items():
+
+        if not isinstance(raw_item, dict):
+            continue
+
+        item = dict(raw_item)
+
+        successes = int(
+            item.get(
+                "successes",
+                0,
+            )
+            or 0
+        )
+
+        last_success = int(
+            item.get(
+                "last_success",
+                0,
+            )
+            or 0
+        )
+
+        # Failure-only records do not provide positive historical
+        # evidence and are the primary source of unbounded growth.
+        if (
+            successes <= 0
+            or last_success <= 0
+        ):
+            continue
+
+        # Once a node has not succeeded for longer than the history
+        # retention horizon, its evidence is no longer useful enough
+        # to justify permanent storage.
+        if last_success < cutoff:
+            continue
+
+        latencies = list(
+            item.get(
+                "latencies",
+                [],
+            )
+        )
+
+        item["latencies"] = latencies[
+            -history_cfg[
+                "max_latency_samples"
+            ]:
+        ]
+
+        observations = []
+
+        for observation in item.get(
+            "observations",
+            [],
+        ):
+            if not isinstance(
+                observation,
+                dict,
+            ):
+                continue
+
+            try:
+                ts = int(
+                    observation.get(
+                        "ts",
+                        0,
+                    )
+                    or 0
+                )
+            except (
+                TypeError,
+                ValueError,
+            ):
+                continue
+
+            if ts >= cutoff:
+                observations.append(
+                    observation
+                )
+
+        item["observations"] = (
+            observations[-100:]
+        )
+
+        retained.append(
+            (
+                fp,
+                item,
+            )
+        )
+
+    # Prefer nodes with the most recent successful evidence.
+    # successes is only a deterministic secondary preference.
+    retained.sort(
+        key=lambda pair: (
+            -int(
+                pair[1].get(
+                    "last_success",
+                    0,
+                )
+                or 0
+            ),
+            -int(
+                pair[1].get(
+                    "successes",
+                    0,
+                )
+                or 0
+            ),
+            pair[0],
+        )
+    )
+
+    retained = retained[
+        :max_nodes
+    ]
+
+    return {
+        fp: item
+        for fp, item in retained
+    }
+
+
+def save_history(
+    history: dict,
+) -> None:
 
     path = (
         ROOT
         / CFG["history"]["file"]
     )
 
-    path.write_text(
-        json.dumps(
-            history,
-            ensure_ascii=False,
-            indent=2,
-            sort_keys=True,
+    path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    payload = json.dumps(
+        history,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+    max_bytes = int(
+        CFG["history"].get(
+            "max_file_bytes",
+            20_000_000,
         )
     )
+
+    encoded_size = len(
+        payload.encode("utf-8")
+    )
+
+    if encoded_size > max_bytes:
+        raise RuntimeError(
+            "Refusing to write oversized history.json: "
+            f"{encoded_size} bytes > "
+            f"{max_bytes} byte safety limit"
+        )
+
+    temp = path.with_suffix(
+        path.suffix + ".tmp"
+    )
+
+    temp.write_text(
+        payload + "\n"
+    )
+
+    temp.replace(path)
 
 
 def update_history(
@@ -3657,9 +3855,11 @@ async def main_async() -> int:
         first_latency
     )
 
-    for node in parsed:
-
-        link = node["link"]
+    # Record observations only for nodes that actually entered
+    # the first-pass probe. `parsed` is broader than `links`; using
+    # `parsed` here incorrectly recorded filtered-out nodes as probe
+    # failures and caused history.json to grow without bound.
+    for link in links:
 
         history[
             fingerprint(link)
@@ -3669,6 +3869,21 @@ async def main_async() -> int:
             first_latency.get(link),
             now,
         )
+
+    history_before_prune = len(
+        history
+    )
+
+    history = prune_history(
+        history,
+        now,
+    )
+
+    print(
+        "History pruning: "
+        f"{history_before_prune} -> "
+        f"{len(history)} entries"
+    )
 
     save_history(history)
 

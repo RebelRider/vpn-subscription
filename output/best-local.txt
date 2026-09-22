@@ -5,19 +5,21 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-09-22 17:43:14 UTC
+# generated: 2026-09-22 22:16:54 UTC
 #
 # Local filtering: gstatic + cloudflare + youtube + chatgpt + payload-1mb
 # Local final stability: 2/3 complete rounds required
-# upstream_nodes: 193
-# local_qualified: 6
+# upstream_nodes: 209
+# local_qualified: 8
 # local_ranking: stability, median latency, p95 latency
 #
 # Generated from the globally quality-qualified pool and re-tested through the current local network.
 #
-vless://8fb65472-5957-4f64-ba2d-b5812b2f155a@141.148.225.58:62145?security=none&type=tcp&encryption=none#NL
 vless://8fb65472-5957-4f64-ba2d-b5812b2f155a@141.148.236.210:62145?security=none&type=tcp&encryption=none#NL
-vless://fd4b654f-9ae2-42c5-977b-6aa54e8e9a83@91.99.51.119:443?encryption=none&security=none&allowInsecure=1&insecure=1&type=http&path=%2F#DE
+vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@fi.snobvpn.online:80?path=%2Fsnob-ws&security=none&type=ws#US
+vless://8fb65472-5957-4f64-ba2d-b5812b2f155a@141.148.225.58:62145?security=none&type=tcp&encryption=none#NL
 vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@cdn.snobvpn.online:80?type=ws&path=%2Fsnob-ws&sni=cdn.snobvpn.online#US
-vless://e85ca8bc-21a5-418d-a639-00236f0c3d81@47.80.62.188:443?security=reality&flow=xtls-rprx-vision&pbk=an8lRnGRbCvX-GW3zuc5woB6hrTxEhfyrGCv-7_QyVo&sid=b229991df62826cc&fp=chrome&sni=www.nvidia.com&type=tcp&headerType=none&host=www.nvidia.com&path=/#US
-vless://52ecd83b-b6c1-41ee-bc36-049755bd33d2@5.78.159.214:80?security=reality&type=tcp&sni=5.78.159.214&fp=chrome&flow=xtls-rprx-vision&sid=0db5c018ed7bb596&pbk=NTXb7QGg9EyPkpG-7lmBNNaqf4473p_l8ITmTH-xmHg&encryption=none#US
+vless://f679bada-55ac-45e7-94f0-b28b4b70df2b@nl3.freekeysh110.online:443?encryption=none&flow=xtls-rprx-vision&fp=edge&pbk=zVEDSKwQEIM6xRD7YEhJakteNI2xPK3xhhKulDo_vWg&security=reality&sid=b664d93e9d7a04f1&sni=nl3.freekeysh110.online&type=tcp#NL
+vless://8fb65472-5957-4f64-ba2d-b5812b2f155a@141.144.201.224:62145?security=none&type=tcp&encryption=none#NL
+vless://7a657573-627d-c5d7-4e7b-9e260f5cfff1@104.25.217.189:443?path=/stream/PANEL_ZEUS/9e260f5cfff1/loc-0&security=tls&encryption=none&insecure=0&host=imzajnekupas.a3-60-morteza.workers.dev&fp=ios&type=ws&allowInsecure=0&sni=imzajnekupas.a3-60-morteza.workers.dev#US
+vless://c4edb87e-8544-4fa4-bd1c-b0cda9a34b46@141.101.122.147:443?&security=tls&fp=chrome&sni=a.cwvps.eu.org&type=ws&headerType=none&host=a.cwvps.eu.org&path=%2Fws#US

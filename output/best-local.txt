@@ -5,28 +5,20 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-09-23 01:20:43 UTC
+# generated: 2026-09-23 08:54:08 UTC
 #
 # Local filtering: gstatic + cloudflare + youtube + chatgpt + payload-1mb
 # Local final stability: 2/3 complete rounds required
-# upstream_nodes: 468
-# local_qualified: 15
+# upstream_nodes: 212
+# local_qualified: 7
 # local_ranking: stability, median latency, p95 latency
 #
 # Generated from the globally quality-qualified pool and re-tested through the current local network.
 #
-vless://8fb65472-5957-4f64-ba2d-b5812b2f155a@141.144.201.224:62145?security=none&type=tcp&encryption=none#NL
-vless://8fb65472-5957-4f64-ba2d-b5812b2f155a@193.123.60.87:62145?security=none&type=tcp&encryption=none#NL
-vless://ad181c5d-2998-408a-8706-003969e557a7@31.77.220.190:443?encryption=none&type=tcp&flow=xtls-rprx-vision&security=reality&sni=de3.global-cdn.org&fp=chrome&pbk=bg_o5_i-5MSy-t3CB3iyqIeI8Uqyy_wTP2kheJCXngg&sid=f7d0420b8ab26060&spx=/#DE
-vless://95de071f-747c-dc07-36ac-5c0854a9e50e@172.67.148.26:80?security=none&type=ws&path=/sync&host=restless-boat-ebf2.moha102030.workers.dev&packetEncoding=xudp&sni=restless-boat-ebf2.moha102030.workers.dev&encryption=none#US
 vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@fi.snobvpn.online:80?path=%2Fsnob-ws&security=none&type=ws#US
-vless://3bb6fd82-3a15-eaea-6168-4dac2b70079e@141.101.113.100:443?encryption=none&security=tls&sni=nahan-fog-af01.dfghttr2012.workers.dev&fp=chrome&insecure=0&allowInsecure=0&type=ws&host=nahan-fog-af01.dfghttr2012.workers.dev&path=/sync#US
-vless://fa45096d-bed0-ad80-c773-23c30000001b@172.67.209.13:443?path=%2Fsync&security=tls&encryption=none&insecure=0&host=xo3ubk-c97eql-n2d4a9.shoameni17.workers.dev&fp=chrome&type=ws&allowInsecure=0&sni=xo3ubk-c97eql-n2d4a9.shoameni17.workers.dev#US
-vless://50414e45-4c5f-5a45-5553-05920b4f8f35@104.21.66.137:443?encryption=none&fp=chrome&host=o5zmxbeoutis.o7zluiebuo8s.workers.dev&path=/stream/PANEL_ZEUS/05920b4f8f35&security=tls&sni=o5zmxbeoutis.o7zluiebuo8s.workers.dev&type=ws#US
-vless://65d3f9b3-d289-4a8e-9c87-90bba156de30@ld.235231.xyz:443?sni=ld.235231.xyz&type=ws&host=&path=/fp=chrome&security=tls#US
-vless://50414e45-4c5f-5a45-5553-635698a6bb9c@172.67.151.109:443?encryption=none&security=tls&sni=jdzit4e4urks.xwzohsebujps.workers.dev&type=ws&host=jdzit4e4urks.xwzohsebujps.workers.dev&path=%2Fstream%2FPANEL_ZEUS%2F635698a6bb9c%2Floc-0#US
-vless://50414e45-4c5f-5a45-5553-9568000eed47@104.17.154.178:443?security=tls&type=ws&path=/stream/PANEL_ZEUS/9568000eed47/loc-1&host=urzpn8e9ub5s.shoameni2.workers.dev&packetEncoding=xudp&sni=urzpn8e9ub5s.shoameni2.workers.dev&fp=chrome&encryption=none#US
-vless://c4edb87e-8544-4fa4-bd1c-b0cda9a34b46@141.101.122.147:443?encryption=none&fp=random&host=a.cwvps.eu.org&packetEncoding=xudp&path=/ws&security=tls&sni=a.cwvps.eu.org&type=ws#US
-vless://43e60b75-9920-450a-94ee-8762758ca49c@172.64.159.190:443?encryption=none&type=ws&host=a860d725.69lover.site&path=%2Fapi%2Fv2%2F288cd04559d84d1d%2Fstream&security=tls&alpn=http%2F1.1&fp=chrome&sni=a860d725.69lover.site#US
-vless://c4edb87e-8544-4fa4-bd1c-b0cda9a34b46@141.101.122.147:443?&security=tls&fp=chrome&sni=a.cwvps.eu.org&type=ws&headerType=none&host=a.cwvps.eu.org&path=%2Fws#US
-vless://c4edb87e-8544-4fa4-bd1c-b0cda9a34b46@188.114.97.6:443?path=%2Fws&security=tls&encryption=none&insecure=0&host=a.cwvps.eu.org&ech=ip.gs%2Budp%3A%2F%2F8.8.8.8&type=ws&allowInsecure=0&sni=a.cwvps.eu.org#US
+vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@cdn.snobvpn.online:80?type=ws&path=%2Fsnob-ws&sni=cdn.snobvpn.online#US
+vless://695fdf80-e4f8-400f-bb42-f9fdcb8e8267@5.78.139.175:80?security=reality&type=tcp&sni=5.78.139.175&fp=chrome&flow=xtls-rprx-vision&sid=81c2dc2ca4e93afc&pbk=Si3nHb-uXwCpAXeH8H3WkhfSvRVk6Q5oL5ej04WPglI&encryption=none#US
+vless://52ecd83b-b6c1-41ee-bc36-049755bd33d2@5.78.159.214:80?security=reality&encryption=none&pbk=NTXb7QGg9EyPkpG-7lmBNNaqf4473p_l8ITmTH-xmHg&headerType=none&fp=chrome&spx=/&type=tcp&flow=xtls-rprx-vision&sni=5.78.159.214&sid=0db5c018ed7bb596#US
+vless://695fdf80-e4f8-400f-bb42-f9fdcb8e8267@5.78.139.175:80?security=reality&type=tcp&fp=firefox&flow=xtls-rprx-vision&sid=81c2dc2ca4e93afc&pbk=Si3nHb-uXwCpAXeH8H3WkhfSvRVk6Q5oL5ej04WPglI#US
+vless://44e1105d-b46e-402f-933b-eaa136fcbb24@greatbritain.lavivas.org:7443?mode=gun&security=tls&encryption=none&insecure=0&type=grpc&serviceName=grpc&allowInsecure=0&sni=greatbritain.lavivas.org#US
+vless://43e60b75-9920-450a-94ee-8762758ca49c@172.64.159.190:443?&security=tls&fp=chrome&alpn=http%2F1.1&sni=a860d725.69lover.site&type=ws&headerType=none&host=a860d725.69lover.site&path=%2Fapi%2Fv2%2F288cd04559d84d1d%2Fstream#US

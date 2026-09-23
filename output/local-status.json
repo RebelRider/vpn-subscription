@@ -1,104 +1,95 @@
 {
-  "generated_at": "2026-09-23T14:36:51.718481+00:00",
+  "generated_at": "2026-09-23T19:09:03.979685+00:00",
   "algorithm": "v5-local-network-functional-filter-ranking",
   "input": {
     "path": "origin/main:output/qualified-all.txt",
-    "nodes": 218,
+    "nodes": 208,
     "mode": "origin-main-qualified-all"
   },
   "network": {
-    "system_route_interface": "en0",
+    "system_route_interface": "utun5",
     "probe_default_interface": "en0"
   },
   "gates": {
     "preliminary": {
-      "gstatic": 9
+      "gstatic": 7
     },
     "mandatory": {
       "cloudflare": 7,
       "youtube": 7,
       "chatgpt": 7,
-      "payload-1mb": 6
+      "payload-1mb": 5
     }
   },
   "stability": {
     "rounds": 3,
     "minimum_successes": 2,
-    "first_pass_survivors": 6,
+    "first_pass_survivors": 5,
     "round_survivors": [
-      6,
-      6,
-      6
+      4,
+      5,
+      5
     ],
-    "qualified": 6
+    "qualified": 5
   },
   "countries": {
-    "US": 6
+    "NL": 1,
+    "US": 4
   },
   "nodes": [
     {
       "rank": 1,
-      "country": "US",
+      "country": "NL",
       "successful_final_rounds": 3,
       "latency_samples": 13,
-      "median_latency": 375.9756660001585,
-      "p95_latency": 487.02541700004076,
-      "upstream_rank": 169,
-      "link": "vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@cdn.snobvpn.online:80/?type=ws&encryption=none&flow=&path=%2Fsnob-ws#US"
+      "median_latency": 531.8718330017873,
+      "p95_latency": 2464.8956250021,
+      "upstream_rank": 113,
+      "link": "vless://47f79fc1-0646-40e8-8a58-73e85d183d5a@64.188.126.56:43000?encryption=none&type=tcp&flow=xtls-rprx-vision&security=reality&sni=64.188.126.56&fp=safari&pbk=jjbMUO41S9JE7ou_zbbDStzSYLzJVN_0O-j0f6b380E&sid=bf4e20af99d3042d&spx=%2F&allowInsecure=1#NL"
     },
     {
       "rank": 2,
       "country": "US",
       "successful_final_rounds": 3,
       "latency_samples": 13,
-      "median_latency": 403.13954100020055,
-      "p95_latency": 4430.483375000222,
-      "upstream_rank": 201,
-      "link": "vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@fi.snobvpn.online:80?path=%2Fsnob-ws&security=none&type=ws#US"
+      "median_latency": 962.5168330021552,
+      "p95_latency": 3094.010166998487,
+      "upstream_rank": 27,
+      "link": "vless://695fdf80-e4f8-400f-bb42-f9fdcb8e8267@5.78.139.175:80?security=reality&type=tcp&fp=firefox&flow=xtls-rprx-vision&sid=81c2dc2ca4e93afc&pbk=Si3nHb-uXwCpAXeH8H3WkhfSvRVk6Q5oL5ej04WPglI#US"
     },
     {
       "rank": 3,
       "country": "US",
       "successful_final_rounds": 3,
       "latency_samples": 13,
-      "median_latency": 894.930624999688,
-      "p95_latency": 1440.9940420000567,
-      "upstream_rank": 20,
-      "link": "vless://695fdf80-e4f8-400f-bb42-f9fdcb8e8267@5.78.139.175:80?security=reality&type=tcp&fp=firefox&flow=xtls-rprx-vision&sid=81c2dc2ca4e93afc&pbk=Si3nHb-uXwCpAXeH8H3WkhfSvRVk6Q5oL5ej04WPglI#US"
+      "median_latency": 1215.180084000167,
+      "p95_latency": 3398.0864170007408,
+      "upstream_rank": 105,
+      "link": "vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@fi.snobvpn.online:80?path=%2Fsnob-ws&security=none&type=ws#US"
     },
     {
       "rank": 4,
       "country": "US",
       "successful_final_rounds": 3,
       "latency_samples": 13,
-      "median_latency": 896.3843750007072,
-      "p95_latency": 1475.4252499997165,
-      "upstream_rank": 126,
-      "link": "vless://695fdf80-e4f8-400f-bb42-f9fdcb8e8267@5.78.139.175:80?security=reality&encryption=none&pbk=Si3nHb-uXwCpAXeH8H3WkhfSvRVk6Q5oL5ej04WPglI&headerType=none&fp=chrome&spx=%2F&type=tcp&flow=xtls-rprx-vision&sni=5.78.139.175&sid=81c2dc2ca4e93afc#US"
+      "median_latency": 2162.5322090003465,
+      "p95_latency": 4917.663874999562,
+      "upstream_rank": 195,
+      "link": "vless://43e60b75-9920-450a-94ee-8762758ca49c@172.64.159.190:443?encryption=none&type=ws&host=a860d725.69lover.site&path=%2Fapi%2Fv2%2F288cd04559d84d1d%2Fstream&security=tls&alpn=http%2F1.1&fp=chrome&sni=a860d725.69lover.site#US"
     },
     {
       "rank": 5,
       "country": "US",
-      "successful_final_rounds": 3,
-      "latency_samples": 13,
-      "median_latency": 1052.340582999932,
-      "p95_latency": 1506.8171670000083,
-      "upstream_rank": 21,
-      "link": "vless://52ecd83b-b6c1-41ee-bc36-049755bd33d2@5.78.159.214:80?security=reality&type=tcp&sni=5.78.159.214&fp=chrome&flow=xtls-rprx-vision&sid=0db5c018ed7bb596&pbk=NTXb7QGg9EyPkpG-7lmBNNaqf4473p_l8ITmTH-xmHg&encryption=none#US"
-    },
-    {
-      "rank": 6,
-      "country": "US",
-      "successful_final_rounds": 3,
-      "latency_samples": 13,
-      "median_latency": 1064.1084160006358,
-      "p95_latency": 6026.283790999514,
-      "upstream_rank": 215,
-      "link": "vless://684f9a2e-4f96-497f-bfd9-ff1e34637952@support.zoom.us:80?security=none&type=ws&path=%2F&host=free.sahanwickramasinghe.me#US"
+      "successful_final_rounds": 2,
+      "latency_samples": 10,
+      "median_latency": 398.20816649989865,
+      "p95_latency": 1778.9816670010623,
+      "upstream_rank": 177,
+      "link": "vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@cdn.snobvpn.online:80/?type=ws&encryption=none&flow=&path=%2Fsnob-ws#US"
     }
   ],
-  "upstream_sha": "c159247c16b084761c5d623f6d3e3ca400869561",
-  "upstream_generated_at": "2026-09-23 13:39:41 UTC",
+  "upstream_sha": "a0de249d1a5bd7c7a455eb5fdde53a0fd0a03ad4",
+  "upstream_generated_at": "2026-09-23 18:24:48 UTC",
   "publication": {
     "enabled": true,
     "remote": "origin",

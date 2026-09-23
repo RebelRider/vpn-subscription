@@ -5,19 +5,18 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-09-23 14:36:51 UTC
+# generated: 2026-09-23 19:09:03 UTC
 #
 # Local filtering: gstatic + cloudflare + youtube + chatgpt + payload-1mb
 # Local final stability: 2/3 complete rounds required
-# upstream_nodes: 218
-# local_qualified: 6
+# upstream_nodes: 208
+# local_qualified: 5
 # local_ranking: stability, median latency, p95 latency
 #
 # Generated from the globally quality-qualified pool and re-tested through the current local network.
 #
-vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@cdn.snobvpn.online:80/?type=ws&encryption=none&flow=&path=%2Fsnob-ws#US
-vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@fi.snobvpn.online:80?path=%2Fsnob-ws&security=none&type=ws#US
+vless://47f79fc1-0646-40e8-8a58-73e85d183d5a@64.188.126.56:43000?encryption=none&type=tcp&flow=xtls-rprx-vision&security=reality&sni=64.188.126.56&fp=safari&pbk=jjbMUO41S9JE7ou_zbbDStzSYLzJVN_0O-j0f6b380E&sid=bf4e20af99d3042d&spx=%2F&allowInsecure=1#NL
 vless://695fdf80-e4f8-400f-bb42-f9fdcb8e8267@5.78.139.175:80?security=reality&type=tcp&fp=firefox&flow=xtls-rprx-vision&sid=81c2dc2ca4e93afc&pbk=Si3nHb-uXwCpAXeH8H3WkhfSvRVk6Q5oL5ej04WPglI#US
-vless://695fdf80-e4f8-400f-bb42-f9fdcb8e8267@5.78.139.175:80?security=reality&encryption=none&pbk=Si3nHb-uXwCpAXeH8H3WkhfSvRVk6Q5oL5ej04WPglI&headerType=none&fp=chrome&spx=%2F&type=tcp&flow=xtls-rprx-vision&sni=5.78.139.175&sid=81c2dc2ca4e93afc#US
-vless://52ecd83b-b6c1-41ee-bc36-049755bd33d2@5.78.159.214:80?security=reality&type=tcp&sni=5.78.159.214&fp=chrome&flow=xtls-rprx-vision&sid=0db5c018ed7bb596&pbk=NTXb7QGg9EyPkpG-7lmBNNaqf4473p_l8ITmTH-xmHg&encryption=none#US
-vless://684f9a2e-4f96-497f-bfd9-ff1e34637952@support.zoom.us:80?security=none&type=ws&path=%2F&host=free.sahanwickramasinghe.me#US
+vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@fi.snobvpn.online:80?path=%2Fsnob-ws&security=none&type=ws#US
+vless://43e60b75-9920-450a-94ee-8762758ca49c@172.64.159.190:443?encryption=none&type=ws&host=a860d725.69lover.site&path=%2Fapi%2Fv2%2F288cd04559d84d1d%2Fstream&security=tls&alpn=http%2F1.1&fp=chrome&sni=a860d725.69lover.site#US
+vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@cdn.snobvpn.online:80/?type=ws&encryption=none&flow=&path=%2Fsnob-ws#US

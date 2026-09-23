@@ -767,9 +767,16 @@ def _load_geoip_ranges(
             handle
         )
 
-        for row in reader:
+        for row_number, row in enumerate(
+            reader,
+            start=1,
+        ):
             if len(row) < 3:
-                continue
+                raise RuntimeError(
+                    "Invalid GeoIP row in "
+                    f"{path} at line "
+                    f"{row_number}: {row!r}"
+                )
 
             try:
                 start_ip = (
@@ -784,8 +791,12 @@ def _load_geoip_ranges(
                     )
                 )
 
-            except ValueError:
-                continue
+            except ValueError as error:
+                raise RuntimeError(
+                    "Invalid GeoIP address in "
+                    f"{path} at line "
+                    f"{row_number}: {row!r}"
+                ) from error
 
             if (
                 start_ip.version
@@ -793,7 +804,26 @@ def _load_geoip_ranges(
                 or end_ip.version
                 != expected_version
             ):
-                continue
+                raise RuntimeError(
+                    "Wrong IP version in "
+                    f"{path} at line "
+                    f"{row_number}: {row!r}"
+                )
+
+            start_value = int(
+                start_ip
+            )
+
+            end_value = int(
+                end_ip
+            )
+
+            if start_value > end_value:
+                raise RuntimeError(
+                    "Invalid GeoIP range in "
+                    f"{path} at line "
+                    f"{row_number}: {row!r}"
+                )
 
             country = (
                 row[2]
@@ -805,14 +835,18 @@ def _load_geoip_ranges(
                 r"[A-Z]{2}",
                 country,
             ):
-                country = "XX"
+                raise RuntimeError(
+                    "Invalid GeoIP country in "
+                    f"{path} at line "
+                    f"{row_number}: {country!r}"
+                )
 
             starts.append(
-                int(start_ip)
+                start_value
             )
 
             ends.append(
-                int(end_ip)
+                end_value
             )
 
             countries.append(
@@ -1011,10 +1045,23 @@ async def classify_countries_batch(
       - Blocking DNS runs outside the asyncio event loop.
       - dns_concurrency limits DNS concurrency.
     """
+    country_cfg = CFG.get("countries", {})
+
+    # GeoIP is part of the strict country-security boundary.
+    # Validate and cache both databases before any DNS work.
+    #
+    # Database/configuration failures are fatal. They must never
+    # degrade into per-IP "XX" results and label fallback.
+    if bool(
+        country_cfg.get(
+            "geoip",
+            True,
+        )
+    ):
+        _load_geoip_databases()
+
     if not candidates:
         return []
-
-    country_cfg = CFG.get("countries", {})
 
     dns_concurrency = max(
         1,
@@ -1127,13 +1174,9 @@ async def classify_countries_batch(
         unique_ips,
         start=1,
     ):
-        try:
-            country = geoip_country(
-                endpoint_ip
-            )
-
-        except Exception:
-            country = "XX"
+        country = geoip_country(
+            endpoint_ip
+        )
 
         ip_to_country[
             endpoint_ip

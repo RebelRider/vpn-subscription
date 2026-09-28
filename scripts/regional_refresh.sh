@@ -7,7 +7,30 @@ PYTHON="/opt/homebrew/bin/python3"
 SING_BOX="/opt/homebrew/bin/sing-box"
 
 STATE_DIR="$HOME/Library/Application Support/best50-vpn"
-STATE_FILE="$STATE_DIR/regional-validation-state"
+
+# Keep validation acknowledgement scoped to the checkout that actually
+# performed the work. This prevents a manual development run from
+# suppressing the dedicated production runtime, while manual bootstrap
+# and launchd runs against the same runtime continue to share state.
+CANONICAL_REPO="$(
+    cd "$REPO" 2>/dev/null && pwd -P
+)" || {
+    printf '%s\n' "Unable to resolve repository path: $REPO" >&2
+    exit 1
+}
+
+STATE_ID="$(
+    printf '%s' "$CANONICAL_REPO" |
+        /usr/bin/shasum -a 256 |
+        /usr/bin/awk '{print substr($1,1,16)}'
+)"
+
+[ -n "$STATE_ID" ] || {
+    printf '%s\n' "Unable to derive regional state identity." >&2
+    exit 1
+}
+
+STATE_FILE="$STATE_DIR/regional-validation-state.$STATE_ID"
 LEGACY_STATE_FILE="$STATE_DIR/last-regional-pool-blob"
 LOCK_DIR="$STATE_DIR/regional-refresh.lock"
 

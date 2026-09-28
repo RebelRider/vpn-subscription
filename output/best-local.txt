@@ -5,18 +5,33 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-09-23 19:09:03 UTC
+# generated: 2026-09-28 05:57:43 UTC
 #
 # Local filtering: gstatic + cloudflare + youtube + chatgpt + payload-1mb
 # Local final stability: 2/3 complete rounds required
-# upstream_nodes: 208
-# local_qualified: 5
+# upstream_nodes: 225
+# local_qualified: 20
 # local_ranking: stability, median latency, p95 latency
 #
 # Generated from the globally quality-qualified pool and re-tested through the current local network.
 #
-vless://47f79fc1-0646-40e8-8a58-73e85d183d5a@64.188.126.56:43000?encryption=none&type=tcp&flow=xtls-rprx-vision&security=reality&sni=64.188.126.56&fp=safari&pbk=jjbMUO41S9JE7ou_zbbDStzSYLzJVN_0O-j0f6b380E&sid=bf4e20af99d3042d&spx=%2F&allowInsecure=1#NL
-vless://695fdf80-e4f8-400f-bb42-f9fdcb8e8267@5.78.139.175:80?security=reality&type=tcp&fp=firefox&flow=xtls-rprx-vision&sid=81c2dc2ca4e93afc&pbk=Si3nHb-uXwCpAXeH8H3WkhfSvRVk6Q5oL5ej04WPglI#US
-vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@fi.snobvpn.online:80?path=%2Fsnob-ws&security=none&type=ws#US
-vless://43e60b75-9920-450a-94ee-8762758ca49c@172.64.159.190:443?encryption=none&type=ws&host=a860d725.69lover.site&path=%2Fapi%2Fv2%2F288cd04559d84d1d%2Fstream&security=tls&alpn=http%2F1.1&fp=chrome&sni=a860d725.69lover.site#US
-vless://246b101b-4e4a-451f-8e9c-5e8d3b64b4ef@cdn.snobvpn.online:80/?type=ws&encryption=none&flow=&path=%2Fsnob-ws#US
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.105.211:2083?security=&encryption=none&fm=AhmadV2ray&type=grpc&serviceName=vless#US
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.43:2083?type=grpc&serviceName=vless#US
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.43:2083?encryption=none&security=none&type=grpc&mode=gun&authority=&serviceName=vless#US
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.105.211:2083?encryption=none&security=none&type=grpc&authority=&serviceName=vless&mode=gun#US
+vless://1d9cbbf4-bb99-4b09-8750-1cc22d510018@178.105.120.168:80?path=%2F&security=none&encryption=none&type=ws#DE
+vless://3f1a4a95-e459-4bf7-87eb-d43830e18466@45.76.93.230:80?encryption=none&security=none&type=ws&host=&path=%2F#DE
+vless://4c250d79-700a-4968-b50d-bae96983e1d7@199.247.7.55:80?encryption=none&security=none&type=ws&host=&path=%2F#DE
+vless://2787849c-1a49-4457-9db7-efcdb2578268@192.248.179.81:80?type=ws&path=/#DE
+vless://dc31fe25-d91d-4691-94cb-1085d31ab4f8@188.34.184.151:80?encryption=none&security=none&type=ws&path=%2F#DE
+vless://2787849c-1a49-4457-9db7-efcdb2578268@192.248.179.81:80?security=none&type=ws&path=%2F&encryption=none#DE
+vless://8ccc4581-eba9-4226-abbc-64e7d8fb415e@45.77.143.204:80?security=none&type=ws&path=%2F#DE
+vless://2a12a637-2724-4789-a64d-64ebc1b9bbf3@64.176.77.202:80?encryption=none&security=none&type=ws&host=&path=%2F#PL
+vless://1d9cbbf4-bb99-4b09-8750-1cc22d510018@178.105.120.168:80?path=%2F&security=&encryption=none&type=ws#DE
+vless://06d05a0a-f298-4be9-8fab-3de32e3fb770@159.195.197.211:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=RMjWKm3Jj09ytfHD-90J0c3qdpQtjqJ4muUSAuF2eXQ&security=reality&sid=fbbda5&sni=acde3.astro-wall.online&type=tcp#DE
+vless://52ecd83b-b6c1-41ee-bc36-049755bd33d2@5.78.159.214:80?security=reality&encryption=none&pbk=NTXb7QGg9EyPkpG-7lmBNNaqf4473p_l8ITmTH-xmHg&headerType=none&fp=chrome&spx=/&type=tcp&flow=xtls-rprx-vision&sni=5.78.159.214&sid=0db5c018ed7bb596#US
+vless://cbf3b4be-b3a8-4f70-bd28-988e72f7d46d@x9f2.guiming.net:8443?encryption=none&type=ws&security=tls&sni=x9f2.guiming.net&path=%2Fd8f3k2m9&host=x9f2.guiming.net#US
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@polka.failspace.top:443?security=tls&encryption=none&flow=xtls-rprx-vision&type=tcp#US
+vless://52ecd83b-b6c1-41ee-bc36-049755bd33d2@5.78.159.214:80?flow=xtls-rprx-vision&fp=random&pbk=NTXb7QGg9EyPkpG-7lmBNNaqf4473p_l8ITmTH-xmHg&security=reality&sid=0db5c018ed7bb596&sni=5.78.159.214&type=tcp#US
+vless://38415950-f815-4ca8-94d0-6cbf22be7566@170.114.52.22:443?&security=tls&fp=chrome&sni=asia.csmasterofficial.store&type=ws&headerType=none&host=asia.csmasterofficial.store&path=%2Fcs#US
+vless://dc31fe25-d91d-4691-94cb-1085d31ab4f8@188.34.184.151:80?path=/&security=&encryption=none&type=ws#DE

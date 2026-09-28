@@ -5,28 +5,46 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-09-28 14:57:44 UTC
+# generated: 2026-09-28 21:34:32 UTC
 #
 # Local filtering: gstatic + cloudflare + youtube + chatgpt + payload-1mb
 # Local final stability: 2/3 complete rounds required
-# upstream_nodes: 225
-# local_qualified: 15
+# upstream_nodes: 186
+# local_qualified: 33
 # local_ranking: stability, median latency, p95 latency
 #
 # Generated from the globally quality-qualified pool and re-tested through the current local network.
 #
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.43:2083?encryption=none&security=none&type=grpc&mode=gun&authority=&serviceName=vless#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%201
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.105.211:2083?security=&encryption=none&fm=AhmadV2ray&type=grpc&serviceName=vless#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%202
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.105.211:2083?encryption=none&security=none&type=grpc&authority=&serviceName=vless&mode=gun#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%203
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.43:2083?type=grpc&serviceName=vless#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%204
-vless://a5e7a4c6-b6c2-4927-8962-ada82278a717@91.107.252.112:80?encryption=none&security=none&type=ws&host=&path=%2F#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%205
-vless://efe19c5a-0ea1-4666-8a4c-4a33f4670775@104.21.70.21:443?path=/raccoonwsvless&security=tls&alpn=http/1.1&encryption=none&insecure=0&host=playlux.homes&type=ws&allowInsecure=0&sni=playlux.homes#%F0%9F%87%A8%F0%9F%87%A6%20CA%20%7C%20Montreal%20%7C%206
-vless://5a201de9-624a-4b58-b62e-32756556cdfc@s1d.syslogd.ir:443?path=%2Fpa-m-v2&security=tls&alpn=h3%2Ch2&encryption=none&insecure=0&host=prx.nikpush.ir&type=ws&allowInsecure=0&sni=1fe60fe05d84ecc3.nikpush.ir#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%207
-vless://736062c3-e976-838c-8624-a977e95ee324@victoryprovpn-production-c6dc.up.railway.app:443?path=%2Fws%2F736062c3-e976-838c-8624-a977e95ee324&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host=victoryprovpn-production-c6dc.up.railway.app&fp=ios&type=ws&allowInsecure=0&sni=victoryprovpn-production-c6dc.up.railway.app#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Amsterdam%20%7C%208
-vless://cbf3b4be-b3a8-4f70-bd28-988e72f7d46d@x9f2.guiming.net:8443?encryption=none&type=ws&security=tls&sni=x9f2.guiming.net&path=%2Fd8f3k2m9&host=x9f2.guiming.net#%F0%9F%87%BA%F0%9F%87%B8%20US%20%7C%20Marietta%20%7C%209
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@polka-dot.failspace.top:443?security=tls&encryption=none&flow=xtls-rprx-vision&type=tcp#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%2010
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-ded-new-one.failspace.top:443?security=tls&encryption=none&flow=xtls-rprx-vision&type=tcp#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%2011
-vless://11d3544f-a944-4bc1-9cf1-f4f3407fdc12@node-production-59a7.up.railway.app:443?insecure=0&type=ws&security=tls&host=node-production-59a7.up.railway.app&allowInsecure=0&path=%2Fws&encryption=none#%F0%9F%87%BA%F0%9F%87%B8%20US%20%7C%20Palo%20Alto%20%7C%2012
-vless://30610baf-4645-4c7b-9a22-0d0a0a79eab5@cdn.8211992.xyz:443?fp=chrome&host=mao.mao114514.kdns.fr&path=%2Fglasspanel%2Fguest000_0_5de14443985f%2F&security=tls&sni=mao.mao114514.kdns.fr&type=ws#%F0%9F%87%BA%F0%9F%87%B8%20US%20%7C%20Buffalo%20%7C%2013
-vless://11d3544f-a944-4bc1-9cf1-f4f3407fdc12@node-production-59a7.up.railway.app:443?Telegram=@GozargahAzad,@GozargahAzad,@GozargahAzad,@GozargahAzad,@GozargahAzad,@GozargahAzad,@GozargahAzad&encryption=none&security=tls&type=ws&host=&path=%2Fws#%F0%9F%87%BA%F0%9F%87%B8%20US%20%7C%20Palo%20Alto%20%7C%2014
-vless://28f48a7a-f967-458d-bffd-eafc9e072f37@91.107.255.158:80?encryption=none&security=none&type=ws&host=&path=%2F#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%2015
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.42:2083?mode=gun&security=&encryption=none&type=grpc&serviceName=vless#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%201
+vless://659ffdfa-47d2-47d7-af40-5afe0907eead@162.55.242.208:2053?type=tcp&security=reality&fp=firefox&pbk=jeS6Zu-p1Gf6GtraIAbpgQoSeT26Xq3GqgqVxccbVhY&sid=4d14da19b19cfc8c&sni=www.cloudflare.com#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Falkenstein%20%7C%202
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.43:2083?mode=gun&security=&encryption=none&type=grpc&serviceName=vless#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%203
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.105.211:2083?encryption=none&security=none&type=grpc&authority=&serviceName=vless&mode=gun#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%204
+vless://44ff6d71-319e-4bcb-a956-58d31290e45b@150.251.143.3:16857?flow=xtls-rprx-vision&fp=firefox&headerType=none&host=image.semiconductor.samsung.com&path=/&pbk=lB6OaYmyeYYrTWzaE3U4Elp0TayJt4136HcLfnrdFQ0&security=reality&sid=31&sni=image.semiconductor.samsung.com&type=tcp#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Amsterdam%20%7C%205
+vless://28f48a7a-f967-458d-bffd-eafc9e072f37@91.107.255.158:80?encryption=none&security=none&type=ws&host=&path=%2F#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%206
+vless://22a375e0-f7c6-4d8f-a154-81189914bbf4@89.105.197.202:443?encryption=none&type=tcp&flow=xtls-rprx-vision&security=reality&sni=findmypackets.com&fp=safari&pbk=mza5Hn1aolSz65qu-UwvBP3oesxMe25r11o4nxvikF0&sid=64c1fe36c7846400&allowInsecure=0#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Enschede%20%7C%207
+vless://11d826ce-d6e5-4154-8658-6829bb17dca2@2.27.12.108:2096?path=/cdn/v3/live&security=tls&encryption=none&insecure=0&fp=chrome&type=ws&allowInsecure=0&sni=stadb90.rumedia-cdn.com#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Eygelshoven%20%7C%208
+vless://11d826ce-d6e5-4154-8658-6829bb17dca2@2.27.12.108:2096?type=ws&security=tls&encryption=none&path=/cdn/v3/live&sni=stadb90.rumedia-cdn.com&fp=random&headerType=none#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Eygelshoven%20%7C%209
+vless://a7ceb94c-d25e-4a91-8a8f-327dd5789ebc@64.176.77.85:80?encryption=none&security=none&type=ws&host=&path=%2F#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%2010
+vless://49b65d3a-b53e-45d0-b71e-f295146849c8@lands.zavqeron.ir:2053?security=tls&type=ws&path=%2Fnl-cdn&host=lands.zavqeron.ir&packetEncoding=xudp&alpn=h3%2Ch2%2Chttp%2F1.1&sni=zavqeron.ir&fp=chrome&encryption=none#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Amsterdam%20%7C%2011
+vless://44ff6d71-319e-4bcb-a956-58d31290e45b@150.251.143.3:16857?type=tcp&security=reality&flow=xtls-rprx-vision&fp=firefox&pbk=lB6OaYmyeYYrTWzaE3U4Elp0TayJt4136HcLfnrdFQ0&sid=31&sni=image.semiconductor.samsung.com&encryption=none#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Amsterdam%20%7C%2012
+vless://11d826ce-d6e5-4154-8658-6829bb17dca2@2.26.125.147:2096?allowInsecure=0&encryption=none&fp=chrome&host=stf94fd.rumedia-cdn.com&insecure=0&path=/cdn/v3/live&security=tls&sni=stf94fd.rumedia-cdn.com&type=ws#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%2013
+vless://9ef61079-6f7d-4911-9608-943da85d8e6f@178.83.46.216:2053?security=none&type=tcp#%F0%9F%87%B9%F0%9F%87%B7%20TR%20%7C%20Istanbul%20%7C%2014
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.43:2083?encryption=none&security=none&type=grpc&mode=gun&authority=&serviceName=vless#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%2015
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.105.211:2083?security=&encryption=none&fm=AhmadV2ray&type=grpc&serviceName=vless#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%2016
+vless://2412bd96-925b-43f2-81d1-0ed4f0793699@91.132.160.209:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=9XSdNkmBhBszLYoODqMrm7r_JRur2PRbzF9T1Uf2AV0&security=reality&sid=f1004027e382c2fa&sni=dlcdn.apache.org&type=tcp#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%2017
+vless://49b65d3a-b53e-45d0-b71e-f295146849c8@land.zavqeron.ir:2053?path=/uk-cdn&fp=chrome&allowInsecure=0&alpn=h3,h2,http/1.1&type=ws&sni=zavqeron.ir&encryption=none&host=land.zavqeron.ir&insecure=0&security=tls#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20Slough%20%7C%2018
+vless://49b65d3a-b53e-45d0-b71e-f295146849c8@any.zavqeron.ir:2053?path=/de1-cdn&fp=chrome&allowInsecure=0&alpn=h3,h2,http/1.1&type=ws&sni=zavqeron.ir&encryption=none&host=any.zavqeron.ir&insecure=0&security=tls#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Falkenstein%20%7C%2019
+vless://48ff2b70-e180-582f-8866-d9a2edeed5f5@15.204.97.214:23576?security=reality&type=tcp&allowInsecure=1&sni=fuck.rkn&fp=chrome&flow=xtls-rprx-vision&sid=01&pbk=1y5h2FGWKXTJ9xLPCqPo6Mw7RxoZzh6fGkEQKNxpZ3s#%F0%9F%87%BA%F0%9F%87%B8%20US%20%7C%20Reston%20%7C%2020
+vless://48ff2b70-e180-582f-8866-d9a2edeed5f5@15.204.97.206:23576?security=reality&encryption=none&pbk=1y5h2FGWKXTJ9xLPCqPo6Mw7RxoZzh6fGkEQKNxpZ3s&host=v2rayNplus--v2rayNplus--v2rayNplus&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=fuck.rkn&sid=01#%F0%9F%87%BA%F0%9F%87%B8%20US%20%7C%20Reston%20%7C%2021
+vless://ee168497-4da2-59bb-b44a-596d0d8616bb@newyork-production-611e.up.railway.app:443?encryption=none&security=tls&type=ws&host=newyork-production-611e.up.railway.app&path=/ws/ee168497-4da2-59bb-b44a-596d0d8616bb&sni=newyork-production-611e.up.railway.app&fp=chrome&alpn=http/1.1#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Amsterdam%20%7C%2022
+vless://e55a46d5-b655-b13a-9edd-3a2769b44d14@victoryprovpn-production-2e4c.up.railway.app:443?path=%2Fws%2Fe55a46d5-b655-b13a-9edd-3a2769b44d14&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host=victoryprovpn-production-2e4c.up.railway.app&fp=ios&type=ws&allowInsecure=0&sni=victoryprovpn-production-2e4c.up.railway.app#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Amsterdam%20%7C%2023
+vless://49b65d3a-b53e-45d0-b71e-f295146849c8@bul.zavqeron.ir:2053?path=/tr2-cdn&fp=chrome&allowInsecure=0&alpn=h3,h2,http/1.1&type=ws&sni=zavqeron.ir&encryption=none&host=bul.zavqeron.ir&insecure=0&security=tls#%F0%9F%87%B9%F0%9F%87%B7%20TR%20%7C%20Arnavutkoy%20%7C%2024
+vless://8f6e1d7f-1cdb-2f99-ffbe-988c484f6881@victoryprovpn-production-aa9f.up.railway.app:443?path=%2Fws%2F8f6e1d7f-1cdb-2f99-ffbe-988c484f6881&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host=victoryprovpn-production-aa9f.up.railway.app&fp=ios&type=ws&allowInsecure=0&sni=victoryprovpn-production-aa9f.up.railway.app#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Schiphol-Rijk%20%7C%2025
+vless://9ef61079-6f7d-4911-9608-943da85d8e6f@test.keoplentuio.xyz:2053?encryption=none&security=none&type=tcp#%F0%9F%87%B9%F0%9F%87%B7%20TR%20%7C%20Istanbul%20%7C%2026
+vless://bb1be788-6b00-47c8-a96e-c828f3a33de4@162.159.135.1:443?security=tls&type=ws&path=%2Fapi%2Fv2%2F671d8a5bccaf636f%2Fstream&host=d3b866e4.69lover.site&alpn=http%2F1.1&sni=d3b866e4.69lover.site&fp=chrome#%F0%9F%87%AF%F0%9F%87%B5%20JP%20%7C%20Shibuya%20City%20%7C%2027
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.42:2083?mode=gun&security=none&encryption=none&type=grpc&serviceName=vless#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%2028
+vless://2412bd96-925b-43f2-81d1-0ed4f0793699@192.209.62.50:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=CEhjnz-MRoOyaK9HbwZm9F_JXa2Eu9E7lZm0OLAaJys&security=reality&sid=2f6ebfec2419e415&sni=download.amd.com&type=tcp#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%2029
+vless://2412bd96-925b-43f2-81d1-0ed4f0793699@91.132.160.209:443?encryption=none&flow=xtls-rprx-vision&pbk=9XSdNkmBhBszLYoODqMrm7r_JRur2PRbzF9T1Uf2AV0&security=reality&sid=f1004027e382c2fa&sni=dlcdn.apache.org&type=tcp&fp=chrome#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%2030
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-ded-new-one.failspace.top:443?&security=tls&flow=xtls-rprx-vision&fp=chrome&type=tcp&headerType=none&host=poland-ded-new-one.failspace.top&path=%2F#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%2031
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@poland-ded-new-one.failspace.top:443?security=tls&encryption=none&flow=xtls-rprx-vision&type=tcp#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%2032
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@polka-dot.failspace.top:443?security=tls&encryption=none&flow=xtls-rprx-vision&type=tcp#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%2033

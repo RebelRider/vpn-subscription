@@ -14,7 +14,7 @@ import tempfile
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import unquote, urlsplit
+from urllib.parse import quote, unquote, urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -200,6 +200,46 @@ def country_from_link(link: str) -> str:
         return "XX"
 
     return country
+
+
+COUNTRY_FLAGS = {
+    "US": "🇺🇸",
+    "DE": "🇩🇪",
+    "PL": "🇵🇱",
+    "NL": "🇳🇱",
+}
+
+
+def published_link(
+    link: str,
+    rank: int,
+) -> str:
+    """
+    Return the presentation-only regional subscription URI.
+
+    Ranking, probing, history and node identity continue to use the
+    original URI whose fragment is the trusted two-letter country code.
+    Only the final published URI gets a human-facing flag/country/rank
+    label for VPN clients such as Happ.
+    """
+    country = country_from_link(link)
+
+    if country not in ALLOWED_COUNTRIES:
+        raise ValueError(
+            "Refusing to publish node with invalid country: "
+            f"{country!r}"
+        )
+
+    if rank < 1:
+        raise ValueError(
+            f"Refusing to publish invalid rank: {rank}"
+        )
+
+    flag = COUNTRY_FLAGS[country]
+    label = f"{flag} {country} {rank}"
+    base = link.split("#", 1)[0]
+
+    return f"{base}#{quote(label, safe='')}"
 
 
 def route_interface(
@@ -734,7 +774,15 @@ def write_subscription(
         "#",
     ]
 
-    lines.extend(links)
+    published_links = [
+        published_link(link, rank)
+        for rank, link in enumerate(
+            links,
+            1,
+        )
+    ]
+
+    lines.extend(published_links)
 
     output_path.parent.mkdir(
         parents=True,
@@ -833,8 +881,11 @@ def validate_generated_result(
         status["stability"]["qualified"]
     )
 
-    status_links = [
-        node["link"]
+    expected_published_links = [
+        published_link(
+            node["link"],
+            int(node["rank"]),
+        )
         for node in status["nodes"]
     ]
 
@@ -850,9 +901,9 @@ def validate_generated_result(
             f"{len(links)} != {qualified}"
         )
 
-    if links != status_links:
+    if links != expected_published_links:
         raise RuntimeError(
-            "Subscription order does not match "
+            "Published subscription order/names do not match "
             "local ranking in status"
         )
 

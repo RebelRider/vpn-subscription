@@ -7,8 +7,11 @@ PYTHON="/opt/homebrew/bin/python3"
 SING_BOX="/opt/homebrew/bin/sing-box"
 
 STATE_DIR="$HOME/Library/Application Support/best50-vpn"
-STATE_FILE="$STATE_DIR/last-regional-pool-blob"
+STATE_FILE="$STATE_DIR/regional-validation-state"
+LEGACY_STATE_FILE="$STATE_DIR/last-regional-pool-blob"
 LOCK_DIR="$STATE_DIR/regional-refresh.lock"
+
+STATE_SCHEMA="regional-validation-v2"
 
 LOG_PREFIX="[regional-refresh]"
 
@@ -128,32 +131,65 @@ REMOTE_SHA="$(
     git rev-parse origin/main 2>/dev/null
 )" || fail "Unable to resolve origin/main."
 
+git_blob() {
+    git rev-parse "origin/main:$1" 2>/dev/null
+}
+
 POOL_BLOB="$(
-    git rev-parse \
-        "origin/main:output/qualified-all.txt" \
-        2>/dev/null
+    git_blob "output/qualified-all.txt"
 )" || fail "origin/main:output/qualified-all.txt does not exist."
+
+LOCAL_PROBE_BLOB="$(
+    git_blob "scripts/local_probe.py"
+)" || fail "origin/main:scripts/local_probe.py does not exist."
+
+BUILD_BLOB="$(
+    git_blob "scripts/build.py"
+)" || fail "origin/main:scripts/build.py does not exist."
+
+CONFIG_BLOB="$(
+    git_blob "config.json"
+)" || fail "origin/main:config.json does not exist."
+
+CURRENT_STATE="$(
+    printf '%s\n' \
+        "schema=$STATE_SCHEMA" \
+        "pool=$POOL_BLOB" \
+        "local_probe=$LOCAL_PROBE_BLOB" \
+        "build=$BUILD_BLOB" \
+        "config=$CONFIG_BLOB"
+)"
 
 log "origin/main SHA: $REMOTE_SHA"
 log "qualified-all blob: $POOL_BLOB"
+log "local_probe blob: $LOCAL_PROBE_BLOB"
+log "build blob: $BUILD_BLOB"
+log "config blob: $CONFIG_BLOB"
 
-LAST_BLOB=""
+LAST_STATE=""
 
 if [ -f "$STATE_FILE" ]; then
-    LAST_BLOB="$(
-        tr -d '\r\n' < "$STATE_FILE"
+    LAST_STATE="$(
+        tr -d '\r' < "$STATE_FILE"
     )"
 fi
 
-if [ "$POOL_BLOB" = "$LAST_BLOB" ]; then
-    log "Candidate pool already processed; nothing to do."
+if [ -n "$LAST_STATE" ] && [ "$CURRENT_STATE" = "$LAST_STATE" ]; then
+    log "Regional validation state already processed; nothing to do."
     exit 0
 fi
 
-if [ -n "$LAST_BLOB" ]; then
-    log "Candidate pool changed: $LAST_BLOB -> $POOL_BLOB"
+if [ -n "$LAST_STATE" ]; then
+    log "Regional validation state changed; revalidation required."
+elif [ -f "$LEGACY_STATE_FILE" ]; then
+    LEGACY_BLOB="$(
+        tr -d '\r\n' < "$LEGACY_STATE_FILE"
+    )"
+
+    log "Legacy pool-only state detected: ${LEGACY_BLOB:-<empty>}"
+    log "One-time migration to composite validation state required."
 else
-    log "No previous automation state; current pool requires validation."
+    log "No previous regional validation state; validation required."
 fi
 
 log "Starting strict regional validation."
@@ -182,22 +218,46 @@ if ! git fetch --quiet origin main; then
 fi
 
 LATEST_POOL_BLOB="$(
-    git rev-parse \
-        "origin/main:output/qualified-all.txt" \
-        2>/dev/null
+    git_blob "output/qualified-all.txt"
 )" || fail "Unable to resolve post-publication candidate pool."
 
-if [ "$LATEST_POOL_BLOB" != "$POOL_BLOB" ]; then
-    fail "Candidate pool changed immediately after publication; leaving state unacknowledged so it will be tested again."
+LATEST_LOCAL_PROBE_BLOB="$(
+    git_blob "scripts/local_probe.py"
+)" || fail "Unable to resolve post-publication local_probe.py."
+
+LATEST_BUILD_BLOB="$(
+    git_blob "scripts/build.py"
+)" || fail "Unable to resolve post-publication build.py."
+
+LATEST_CONFIG_BLOB="$(
+    git_blob "config.json"
+)" || fail "Unable to resolve post-publication config.json."
+
+LATEST_STATE="$(
+    printf '%s\n' \
+        "schema=$STATE_SCHEMA" \
+        "pool=$LATEST_POOL_BLOB" \
+        "local_probe=$LATEST_LOCAL_PROBE_BLOB" \
+        "build=$LATEST_BUILD_BLOB" \
+        "config=$LATEST_CONFIG_BLOB"
+)"
+
+if [ "$LATEST_STATE" != "$CURRENT_STATE" ]; then
+    fail "Relevant origin/main validation inputs changed during the regional run; leaving state unacknowledged so the new state will be tested."
 fi
 
 TMP_STATE="${STATE_FILE}.tmp.$$"
 
-printf '%s\n' "$POOL_BLOB" > "$TMP_STATE" \
-    || fail "Unable to write temporary state."
+printf '%s\n' "$CURRENT_STATE" > "$TMP_STATE" \
+    || fail "Unable to write temporary composite state."
 
 mv "$TMP_STATE" "$STATE_FILE" \
-    || fail "Unable to commit automation state."
+    || fail "Unable to commit composite automation state."
 
-log "Recorded processed pool blob: $POOL_BLOB"
+# The legacy file is no longer authoritative after a successful
+# composite-state validation. Remove it only after the new state
+# has been committed successfully.
+rm -f "$LEGACY_STATE_FILE"
+
+log "Recorded composite regional validation state."
 log "REGIONAL REFRESH SUCCESS"

@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import csv
+import gzip
 import importlib.util
+import ipaddress
 import json
+import os
 import re
 import statistics
 import subprocess
@@ -34,6 +38,42 @@ DEFAULT_UPSTREAM_REF = "origin/main"
 DEFAULT_UPSTREAM_PATH = "output/qualified-all.txt"
 
 ALLOWED_COUNTRIES = {"US", "DE", "PL", "NL"}
+
+STATE_DIR = (
+    Path.home()
+    / "Library"
+    / "Application Support"
+    / "best50-vpn"
+)
+
+CITY_DB_IPV4 = Path(
+    os.environ.get(
+        "BEST50_CITY_DB_IPV4",
+        str(
+            STATE_DIR
+            / "geoip"
+            / "dbip-city-ipv4.csv.gz"
+        ),
+    )
+)
+
+CITY_DB_IPV6 = Path(
+    os.environ.get(
+        "BEST50_CITY_DB_IPV6",
+        str(
+            STATE_DIR
+            / "geoip"
+            / "dbip-city-ipv6.csv.gz"
+        ),
+    )
+)
+
+EXIT_TRACE_URL = (
+    "https://www.cloudflare.com/cdn-cgi/trace"
+)
+
+EXIT_GEO_BATCH_SIZE = 8
+EXIT_GEO_BASE_PORT = 28000
 
 
 def load_build_module():
@@ -202,45 +242,121 @@ def country_from_link(link: str) -> str:
     return country
 
 
-COUNTRY_FLAGS = {
-    "US": "🇺🇸",
-    "DE": "🇩🇪",
-    "PL": "🇵🇱",
-    "NL": "🇳🇱",
-}
+def country_flag(
+    country: str | None,
+) -> str:
+    country = (
+        country or ""
+    ).strip().upper()
+
+    if not re.fullmatch(
+        r"[A-Z]{2}",
+        country,
+    ):
+        return "🌐"
+
+    return "".join(
+        chr(
+            0x1F1E6
+            + ord(letter)
+            - ord("A")
+        )
+        for letter in country
+    )
+
+
+def normalize_city(
+    city: str | None,
+) -> str:
+    city = (
+        city or ""
+    ).strip()
+
+    if not city:
+        return ""
+
+    city = re.sub(
+        r"\s+\([^()]+\)\s*$",
+        "",
+        city,
+    ).strip()
+
+    return city
+
+
+def presentation_label(
+    rank: int,
+    exit_country: str | None = None,
+    exit_city: str | None = None,
+) -> str:
+    if rank < 1:
+        raise ValueError(
+            f"Invalid rank: {rank}"
+        )
+
+    country = (
+        exit_country or ""
+    ).strip().upper()
+
+    city = normalize_city(
+        exit_city
+    )
+
+    if not re.fullmatch(
+        r"[A-Z]{2}",
+        country,
+    ):
+        return f"🌐 | {rank}"
+
+    prefix = (
+        f"{country_flag(country)} "
+        f"{country}"
+    )
+
+    if city:
+        return (
+            f"{prefix} | "
+            f"{city} | "
+            f"{rank}"
+        )
+
+    return (
+        f"{prefix} | "
+        f"{rank}"
+    )
 
 
 def published_link(
     link: str,
     rank: int,
+    exit_country: str | None = None,
+    exit_city: str | None = None,
 ) -> str:
     """
-    Return the presentation-only regional subscription URI.
+    Build presentation-only URI fragment.
 
-    Ranking, probing, history and node identity continue to use the
-    original URI whose fragment is the trusted two-letter country code.
-    Only the final published URI gets a human-facing flag/country/rank
-    label for VPN clients such as Happ.
+    Final user-facing geography comes only from the actual VPN
+    egress connection. Source/endpoint country is not used as a
+    presentation fallback.
+
+    Failure to determine egress geography does not disqualify an
+    otherwise working node; it gets a neutral globe label.
     """
-    country = country_from_link(link)
+    label = presentation_label(
+        rank,
+        exit_country,
+        exit_city,
+    )
 
-    if country not in ALLOWED_COUNTRIES:
-        raise ValueError(
-            "Refusing to publish node with invalid country: "
-            f"{country!r}"
-        )
+    base = link.split(
+        "#",
+        1,
+    )[0]
 
-    if rank < 1:
-        raise ValueError(
-            f"Refusing to publish invalid rank: {rank}"
-        )
-
-    flag = COUNTRY_FLAGS[country]
-    label = f"{flag} {country} {rank}"
-    base = link.split("#", 1)[0]
-
-    return f"{base}#{quote(label, safe='')}"
-
+    return (
+        f"{base}#"
+        f"{quote(label, safe='')}"
+    )
 
 def route_interface(
     destination: str = "1.1.1.1",
@@ -271,6 +387,895 @@ def route_interface(
         return None
 
     return match.group(1)
+
+
+
+async def _capture_process(
+    args: list[str],
+    timeout: float,
+) -> tuple[
+    int,
+    bytes,
+    bytes,
+]:
+    process = (
+        await asyncio.create_subprocess_exec(
+            *args,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+    )
+
+    try:
+        stdout, stderr = (
+            await asyncio.wait_for(
+                process.communicate(),
+                timeout=timeout,
+            )
+        )
+    except asyncio.TimeoutError:
+        process.kill()
+
+        stdout, stderr = (
+            await process.communicate()
+        )
+
+        return (
+            124,
+            stdout,
+            stderr,
+        )
+
+    return (
+        int(
+            process.returncode
+            if process.returncode is not None
+            else 1
+        ),
+        stdout,
+        stderr,
+    )
+
+
+def _parse_cloudflare_trace(
+    payload: bytes,
+) -> dict[str, str] | None:
+    values: dict[str, str] = {}
+
+    for raw_line in payload.decode(
+        errors="ignore",
+    ).splitlines():
+
+        if "=" not in raw_line:
+            continue
+
+        key, value = raw_line.split(
+            "=",
+            1,
+        )
+
+        values[
+            key.strip()
+        ] = value.strip()
+
+    raw_ip = values.get(
+        "ip",
+        "",
+    )
+
+    if not raw_ip:
+        return None
+
+    try:
+        address = (
+            ipaddress.ip_address(
+                raw_ip
+            )
+        )
+    except ValueError:
+        return None
+
+    country = values.get(
+        "loc",
+        "",
+    ).strip().upper()
+
+    if not re.fullmatch(
+        r"[A-Z]{2}",
+        country,
+    ):
+        country = ""
+
+    return {
+        "exit_ip": str(address),
+        "trace_country": country,
+    }
+
+
+async def _probe_exit_batch(
+    build,
+    links: list[str],
+    batch_index: int,
+) -> dict[str, dict]:
+    if not links:
+        return {}
+
+    inbounds = []
+    outbounds = []
+    rules = []
+
+    ports: dict[str, int] = {}
+    results: dict[str, dict] = {}
+
+    base_port = (
+        EXIT_GEO_BASE_PORT
+        + batch_index * 64
+    )
+
+    for local_index, link in enumerate(
+        links
+    ):
+        try:
+            node = build.parse_vless(
+                link
+            )
+
+            inbound_tag = (
+                f"exit-in-{local_index}"
+            )
+
+            outbound_tag = (
+                f"exit-out-{local_index}"
+            )
+
+            outbound = (
+                build.vless_to_singbox(
+                    node,
+                    tag=outbound_tag,
+                )
+            )
+
+        except Exception as exc:
+            results[link] = {
+                "exit_geo_status":
+                    "parse-failed",
+                "exit_geo_error":
+                    str(exc),
+            }
+            continue
+
+        port = (
+            base_port
+            + local_index
+        )
+
+        ports[link] = port
+
+        inbounds.append(
+            {
+                "type": "socks",
+                "tag": inbound_tag,
+                "listen": "127.0.0.1",
+                "listen_port": port,
+            }
+        )
+
+        outbounds.append(
+            outbound
+        )
+
+        rules.append(
+            {
+                "inbound": [
+                    inbound_tag
+                ],
+                "action": "route",
+                "outbound": outbound_tag,
+            }
+        )
+
+    if not ports:
+        return results
+
+    outbounds.append(
+        {
+            "type": "direct",
+            "tag": "direct",
+        }
+    )
+
+    config = {
+        "log": {
+            "level": "error",
+        },
+        "dns": {
+            "servers": [
+                {
+                    "type": "local",
+                    "tag": "local",
+                }
+            ],
+            "final": "local",
+        },
+        "inbounds": inbounds,
+        "outbounds": outbounds,
+        "route": {
+            "rules": rules,
+            "final": "direct",
+        },
+    }
+
+    interface = build.CFG.get(
+        "_probe_default_interface"
+    )
+
+    if interface:
+        config["route"][
+            "default_interface"
+        ] = str(interface)
+
+    sing_box = str(
+        getattr(
+            build,
+            "SING_BOX",
+            "/opt/homebrew/bin/sing-box",
+        )
+    )
+
+    with tempfile.TemporaryDirectory(
+        prefix="best50-exit-geo-"
+    ) as temporary_directory:
+
+        config_path = (
+            Path(temporary_directory)
+            / "config.json"
+        )
+
+        config_path.write_text(
+            json.dumps(
+                config,
+                ensure_ascii=False,
+            )
+        )
+
+        (
+            check_code,
+            _,
+            check_stderr,
+        ) = await _capture_process(
+            [
+                sing_box,
+                "check",
+                "-c",
+                str(config_path),
+            ],
+            20,
+        )
+
+        if check_code != 0:
+            detail = (
+                check_stderr
+                .decode(
+                    errors="ignore"
+                )
+                .strip()
+            )
+
+            for link in ports:
+                results[link] = {
+                    "exit_geo_status":
+                        "config-check-failed",
+                    "exit_geo_error":
+                        detail,
+                }
+
+            return results
+
+        process = (
+            await asyncio.create_subprocess_exec(
+                sing_box,
+                "run",
+                "-c",
+                str(config_path),
+                stdout=asyncio.subprocess.DEVNULL,
+                stderr=asyncio.subprocess.DEVNULL,
+            )
+        )
+
+        try:
+            await asyncio.sleep(
+                0.75
+            )
+
+            if process.returncode is not None:
+                for link in ports:
+                    results[link] = {
+                        "exit_geo_status":
+                            "sing-box-start-failed",
+                    }
+
+                return results
+
+            async def trace_one(
+                link: str,
+                port: int,
+            ) -> tuple[
+                str,
+                dict,
+            ]:
+                last_error = ""
+
+                for attempt in (
+                    1,
+                    2,
+                ):
+                    (
+                        code,
+                        stdout,
+                        stderr,
+                    ) = await _capture_process(
+                        [
+                            "curl",
+                            "--socks5-hostname",
+                            (
+                                "127.0.0.1:"
+                                f"{port}"
+                            ),
+                            "--connect-timeout",
+                            "8",
+                            "--max-time",
+                            "15",
+                            "--silent",
+                            "--show-error",
+                            EXIT_TRACE_URL,
+                        ],
+                        20,
+                    )
+
+                    if code == 0:
+                        parsed = (
+                            _parse_cloudflare_trace(
+                                stdout
+                            )
+                        )
+
+                        if parsed:
+                            return (
+                                link,
+                                {
+                                    "exit_geo_status":
+                                        "trace-ok",
+                                    "exit_geo_attempts":
+                                        attempt,
+                                    **parsed,
+                                },
+                            )
+
+                    last_error = (
+                        stderr
+                        .decode(
+                            errors="ignore"
+                        )
+                        .strip()
+                        or f"curl exit {code}"
+                    )
+
+                    if attempt == 1:
+                        await asyncio.sleep(
+                            0.35
+                        )
+
+                return (
+                    link,
+                    {
+                        "exit_geo_status":
+                            "trace-failed",
+                        "exit_geo_attempts":
+                            2,
+                        "exit_geo_error":
+                            last_error,
+                    },
+                )
+
+            traced = (
+                await asyncio.gather(
+                    *(
+                        trace_one(
+                            link,
+                            port,
+                        )
+                        for link, port
+                        in ports.items()
+                    )
+                )
+            )
+
+            for link, item in traced:
+                results[link] = item
+
+        finally:
+            if process.returncode is None:
+                process.terminate()
+
+                try:
+                    await asyncio.wait_for(
+                        process.wait(),
+                        timeout=5,
+                    )
+                except asyncio.TimeoutError:
+                    process.kill()
+                    await process.wait()
+
+    return results
+
+
+async def probe_actual_exit_metadata(
+    build,
+    links: list[str],
+) -> dict[str, dict]:
+    """
+    Best-effort presentation enrichment only.
+
+    It must never remove a node that already passed functional
+    and stability validation.
+    """
+    results: dict[str, dict] = {}
+
+    for start in range(
+        0,
+        len(links),
+        EXIT_GEO_BATCH_SIZE,
+    ):
+        batch = links[
+            start:
+            start + EXIT_GEO_BATCH_SIZE
+        ]
+
+        batch_result = (
+            await _probe_exit_batch(
+                build,
+                batch,
+                start
+                // EXIT_GEO_BATCH_SIZE,
+            )
+        )
+
+        results.update(
+            batch_result
+        )
+
+    return results
+
+
+def _lookup_city_database(
+    database_path: Path,
+    addresses: list[str],
+) -> dict[str, dict]:
+    if (
+        not database_path.is_file()
+        or not addresses
+    ):
+        return {}
+
+    targets = []
+
+    for raw_address in addresses:
+        try:
+            address = (
+                ipaddress.ip_address(
+                    raw_address
+                )
+            )
+        except ValueError:
+            continue
+
+        targets.append(
+            (
+                int(address),
+                str(address),
+                address.version,
+            )
+        )
+
+    if not targets:
+        return {}
+
+    versions = {
+        item[2]
+        for item in targets
+    }
+
+    if len(versions) != 1:
+        raise ValueError(
+            "Mixed IP families in one DB lookup"
+        )
+
+    version = next(
+        iter(versions)
+    )
+
+    ordered_targets = sorted(
+        (
+            value,
+            text,
+        )
+        for value, text, _
+        in targets
+    )
+
+    result: dict[str, dict] = {}
+    target_index = 0
+
+    try:
+        handle = gzip.open(
+            database_path,
+            "rt",
+            encoding="utf-8",
+            newline="",
+        )
+    except OSError:
+        return {}
+
+    with handle:
+        reader = csv.reader(
+            handle
+        )
+
+        for row in reader:
+            if len(row) < 6:
+                continue
+
+            try:
+                start_ip = (
+                    ipaddress.ip_address(
+                        row[0].strip()
+                    )
+                )
+
+                end_ip = (
+                    ipaddress.ip_address(
+                        row[1].strip()
+                    )
+                )
+            except ValueError:
+                continue
+
+            if (
+                start_ip.version != version
+                or end_ip.version != version
+            ):
+                continue
+
+            start_value = int(
+                start_ip
+            )
+
+            end_value = int(
+                end_ip
+            )
+
+            while (
+                target_index
+                < len(ordered_targets)
+                and ordered_targets[
+                    target_index
+                ][0] < start_value
+            ):
+                target_index += 1
+
+            while (
+                target_index
+                < len(ordered_targets)
+                and start_value
+                <= ordered_targets[
+                    target_index
+                ][0]
+                <= end_value
+            ):
+                _, target_text = (
+                    ordered_targets[
+                        target_index
+                    ]
+                )
+
+                result[
+                    target_text
+                ] = {
+                    "db_country":
+                        row[2]
+                        .strip()
+                        .upper(),
+                    "region":
+                        row[3]
+                        .strip(),
+                    "region2":
+                        row[4]
+                        .strip(),
+                    "city":
+                        normalize_city(
+                            row[5]
+                        ),
+                }
+
+                target_index += 1
+
+            if (
+                target_index
+                >= len(
+                    ordered_targets
+                )
+            ):
+                break
+
+    return result
+
+
+def apply_exit_geography(
+    status: dict,
+    metadata: dict[str, dict],
+) -> None:
+    ipv4: list[str] = []
+    ipv6: list[str] = []
+
+    for item in metadata.values():
+        raw_ip = item.get(
+            "exit_ip",
+            "",
+        )
+
+        if not raw_ip:
+            continue
+
+        try:
+            address = (
+                ipaddress.ip_address(
+                    raw_ip
+                )
+            )
+        except ValueError:
+            continue
+
+        if address.version == 4:
+            ipv4.append(
+                str(address)
+            )
+        else:
+            ipv6.append(
+                str(address)
+            )
+
+    city_lookup = {}
+
+    city_lookup.update(
+        _lookup_city_database(
+            CITY_DB_IPV4,
+            list(
+                dict.fromkeys(
+                    ipv4
+                )
+            ),
+        )
+    )
+
+    city_lookup.update(
+        _lookup_city_database(
+            CITY_DB_IPV6,
+            list(
+                dict.fromkeys(
+                    ipv6
+                )
+            ),
+        )
+    )
+
+    exit_country_counts = Counter()
+
+    complete = 0
+    country_only = 0
+    neutral = 0
+
+    for node in status.get(
+        "nodes",
+        [],
+    ):
+        link = node[
+            "link"
+        ]
+
+        item = dict(
+            metadata.get(
+                link,
+                {},
+            )
+        )
+
+        exit_ip = item.get(
+            "exit_ip",
+            "",
+        )
+
+        trace_country = (
+            item.get(
+                "trace_country",
+                "",
+            )
+            .strip()
+            .upper()
+        )
+
+        db_item = city_lookup.get(
+            exit_ip,
+            {},
+        )
+
+        db_country = (
+            db_item.get(
+                "db_country",
+                "",
+            )
+            .strip()
+            .upper()
+        )
+
+        if re.fullmatch(
+            r"[A-Z]{2}",
+            trace_country,
+        ):
+            exit_country = (
+                trace_country
+            )
+
+            country_source = (
+                "cloudflare-trace"
+            )
+
+        elif re.fullmatch(
+            r"[A-Z]{2}",
+            db_country,
+        ):
+            exit_country = (
+                db_country
+            )
+
+            country_source = (
+                "dbip-exit-ip"
+            )
+
+        else:
+            exit_country = ""
+            country_source = ""
+
+        city = db_item.get(
+            "city",
+            "",
+        )
+
+        if (
+            city
+            and exit_country
+            and db_country
+            and db_country
+            != exit_country
+        ):
+            city = ""
+
+        node[
+            "source_country"
+        ] = node.get(
+            "country",
+            "XX",
+        )
+
+        node[
+            "exit_ip"
+        ] = (
+            exit_ip
+            or None
+        )
+
+        node[
+            "exit_country"
+        ] = (
+            exit_country
+            or None
+        )
+
+        node[
+            "exit_country_source"
+        ] = (
+            country_source
+            or None
+        )
+
+        node[
+            "exit_city"
+        ] = (
+            city
+            or None
+        )
+
+        node[
+            "exit_region"
+        ] = (
+            db_item.get(
+                "region"
+            )
+            or None
+        )
+
+        node[
+            "exit_db_country"
+        ] = (
+            db_country
+            or None
+        )
+
+        node[
+            "exit_geo_status"
+        ] = item.get(
+            "exit_geo_status",
+            "not-probed",
+        )
+
+        if item.get(
+            "exit_geo_error"
+        ):
+            node[
+                "exit_geo_error"
+            ] = item[
+                "exit_geo_error"
+            ]
+
+        if item.get(
+            "exit_geo_attempts"
+        ):
+            node[
+                "exit_geo_attempts"
+            ] = item[
+                "exit_geo_attempts"
+            ]
+
+        if exit_country:
+            exit_country_counts[
+                exit_country
+            ] += 1
+
+        if (
+            exit_country
+            and city
+        ):
+            complete += 1
+
+        elif exit_country:
+            country_only += 1
+
+        else:
+            neutral += 1
+
+    status[
+        "exit_geography"
+    ] = {
+        "mode":
+            "actual-vpn-exit-presentation-only",
+        "affects_qualification":
+            False,
+        "trace_url":
+            EXIT_TRACE_URL,
+        "ipv4_database":
+            str(CITY_DB_IPV4),
+        "ipv6_database":
+            str(CITY_DB_IPV6),
+        "complete":
+            complete,
+        "country_only":
+            country_only,
+        "neutral":
+            neutral,
+        "countries":
+            dict(
+                exit_country_counts
+            ),
+    }
 
 
 def ensure_probe_network(
@@ -774,15 +1779,30 @@ def write_subscription(
         "#",
     ]
 
-    published_links = [
-        published_link(link, rank)
-        for rank, link in enumerate(
-            links,
-            1,
+    nodes = status.get(
+        "nodes",
+        [],
+    )
+
+    if len(nodes) != len(links):
+        raise RuntimeError(
+            "Status node count does not match "
+            "qualified link count"
         )
+
+    published_links = [
+        published_link(
+            node["link"],
+            int(node["rank"]),
+            node.get("exit_country"),
+            node.get("exit_city"),
+        )
+        for node in nodes
     ]
 
-    lines.extend(published_links)
+    lines.extend(
+        published_links
+    )
 
     output_path.parent.mkdir(
         parents=True,
@@ -885,6 +1905,8 @@ def validate_generated_result(
         published_link(
             node["link"],
             int(node["rank"]),
+            node.get("exit_country"),
+            node.get("exit_city"),
         )
         for node in status["nodes"]
     ]
@@ -1461,6 +2483,58 @@ async def async_main() -> int:
         )
     )
 
+    print()
+    print(
+        "========================================"
+    )
+    print(
+        "ACTUAL VPN EXIT GEO ENRICHMENT"
+    )
+    print(
+        "========================================"
+    )
+
+    print(
+        "Exit geography is presentation-only; "
+        "failure cannot remove a working node."
+    )
+
+    exit_metadata = (
+        await probe_actual_exit_metadata(
+            build,
+            qualified,
+        )
+    )
+
+    apply_exit_geography(
+        status,
+        exit_metadata,
+    )
+
+    geo_summary = status[
+        "exit_geography"
+    ]
+
+    print(
+        "Exit geo complete:     "
+        f"{geo_summary['complete']}"
+    )
+
+    print(
+        "Exit country only:     "
+        f"{geo_summary['country_only']}"
+    )
+
+    print(
+        "Neutral fallback:      "
+        f"{geo_summary['neutral']}"
+    )
+
+    print(
+        "Actual exit countries: "
+        f"{geo_summary['countries']}"
+    )
+
     status["input"]["mode"] = (
         input_mode
     )
@@ -1548,12 +2622,14 @@ async def async_main() -> int:
     )
 
     print(
-        "Countries:           "
+        "Actual countries:    "
         + ", ".join(
             f"{country}={count}"
             for country, count
             in sorted(
-                status["countries"].items()
+                status["exit_geography"][
+                    "countries"
+                ].items()
             )
         )
     )

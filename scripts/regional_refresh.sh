@@ -34,7 +34,7 @@ STATE_FILE="$STATE_DIR/regional-validation-state.$STATE_ID"
 LEGACY_STATE_FILE="$STATE_DIR/last-regional-pool-blob"
 LOCK_DIR="$STATE_DIR/regional-refresh.lock"
 
-STATE_SCHEMA="regional-validation-v2"
+STATE_SCHEMA="regional-validation-v3-exit-geo"
 
 LOG_PREFIX="[regional-refresh]"
 
@@ -130,6 +130,42 @@ fi
 [ -x "$SING_BOX" ] || fail "sing-box not executable: $SING_BOX"
 [ -f "scripts/local_probe.py" ] || fail "scripts/local_probe.py missing"
 
+[ -f "scripts/update_exit_geoip.py" ] || fail "scripts/update_exit_geoip.py missing"
+
+GEOIP_DIR="$STATE_DIR/geoip"
+CITY_DB_IPV4="$GEOIP_DIR/dbip-city-ipv4.csv.gz"
+CITY_DB_IPV6="$GEOIP_DIR/dbip-city-ipv6.csv.gz"
+
+log "Refreshing actual-exit city GeoIP cache if stale."
+
+if ! "$PYTHON" scripts/update_exit_geoip.py \
+    --state-dir "$STATE_DIR" \
+    --max-age-days 7
+then
+    log "WARNING: GeoIP updater failed unexpectedly; working VPN nodes will still be preserved."
+fi
+
+export BEST50_CITY_DB_IPV4="$CITY_DB_IPV4"
+export BEST50_CITY_DB_IPV6="$CITY_DB_IPV6"
+
+file_sha_or_missing() {
+    if [ -f "$1" ]; then
+        /usr/bin/shasum -a 256 "$1" |
+            /usr/bin/awk '{print $1}'
+    else
+        printf '%s\n' "missing"
+    fi
+}
+
+CITY_DB_IPV4_SHA="$(
+    file_sha_or_missing "$CITY_DB_IPV4"
+)"
+
+CITY_DB_IPV6_SHA="$(
+    file_sha_or_missing "$CITY_DB_IPV6"
+)"
+
+
 if ! ifconfig en0 >/dev/null 2>&1; then
     fail "Network interface en0 does not exist."
 fi
@@ -174,13 +210,21 @@ CONFIG_BLOB="$(
     git_blob "config.json"
 )" || fail "origin/main:config.json does not exist."
 
+GEO_UPDATER_BLOB="$(
+    git_blob "scripts/update_exit_geoip.py"
+)" || fail "origin/main:scripts/update_exit_geoip.py does not exist."
+
 CURRENT_STATE="$(
-    printf '%s\n' \
+    printf '%s
+' \
         "schema=$STATE_SCHEMA" \
         "pool=$POOL_BLOB" \
         "local_probe=$LOCAL_PROBE_BLOB" \
         "build=$BUILD_BLOB" \
-        "config=$CONFIG_BLOB"
+        "config=$CONFIG_BLOB" \
+        "geo_updater=$GEO_UPDATER_BLOB" \
+        "city_ipv4=$CITY_DB_IPV4_SHA" \
+        "city_ipv6=$CITY_DB_IPV6_SHA"
 )"
 
 log "origin/main SHA: $REMOTE_SHA"
@@ -188,6 +232,9 @@ log "qualified-all blob: $POOL_BLOB"
 log "local_probe blob: $LOCAL_PROBE_BLOB"
 log "build blob: $BUILD_BLOB"
 log "config blob: $CONFIG_BLOB"
+log "geo updater blob: $GEO_UPDATER_BLOB"
+log "city IPv4 sha: $CITY_DB_IPV4_SHA"
+log "city IPv6 sha: $CITY_DB_IPV6_SHA"
 
 LAST_STATE=""
 
@@ -256,13 +303,29 @@ LATEST_CONFIG_BLOB="$(
     git_blob "config.json"
 )" || fail "Unable to resolve post-publication config.json."
 
+LATEST_GEO_UPDATER_BLOB="$(
+    git_blob "scripts/update_exit_geoip.py"
+)" || fail "Unable to resolve post-publication exit GeoIP updater."
+
+LATEST_CITY_DB_IPV4_SHA="$(
+    file_sha_or_missing "$CITY_DB_IPV4"
+)"
+
+LATEST_CITY_DB_IPV6_SHA="$(
+    file_sha_or_missing "$CITY_DB_IPV6"
+)"
+
 LATEST_STATE="$(
-    printf '%s\n' \
+    printf '%s
+' \
         "schema=$STATE_SCHEMA" \
         "pool=$LATEST_POOL_BLOB" \
         "local_probe=$LATEST_LOCAL_PROBE_BLOB" \
         "build=$LATEST_BUILD_BLOB" \
-        "config=$LATEST_CONFIG_BLOB"
+        "config=$LATEST_CONFIG_BLOB" \
+        "geo_updater=$LATEST_GEO_UPDATER_BLOB" \
+        "city_ipv4=$LATEST_CITY_DB_IPV4_SHA" \
+        "city_ipv6=$LATEST_CITY_DB_IPV6_SHA"
 )"
 
 if [ "$LATEST_STATE" != "$CURRENT_STATE" ]; then

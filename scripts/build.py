@@ -22,6 +22,8 @@ Pipeline:
 """
 
 from __future__ import annotations
+import atexit
+import signal
 
 import asyncio
 import base64
@@ -1532,6 +1534,169 @@ async def run_process(
 
 
 # =========================================================
+# Owned probe process lifecycle
+# =========================================================
+
+
+_OWNED_PROBE_PROCESSES: set[asyncio.subprocess.Process] = set()
+
+
+def _register_owned_probe_process(
+    process: asyncio.subprocess.Process,
+) -> None:
+    """
+    Register only subprocess objects created by this probe engine.
+
+    This registry must never contain Happ/system VPN processes.
+    """
+
+    _OWNED_PROBE_PROCESSES.add(process)
+
+
+def _unregister_owned_probe_process(
+    process: asyncio.subprocess.Process,
+) -> None:
+
+    _OWNED_PROBE_PROCESSES.discard(process)
+
+
+def _cleanup_owned_probe_processes_at_exit() -> None:
+    """
+    Last-resort synchronous cleanup.
+
+    Only subprocess objects explicitly registered by this Python process
+    are touched. This intentionally never searches for processes by name
+    and never sends signals to arbitrary stored PIDs.
+    """
+
+    processes = tuple(
+        _OWNED_PROBE_PROCESSES
+    )
+
+    if not processes:
+        return
+
+    for process in processes:
+
+        if process.returncode is not None:
+            _OWNED_PROBE_PROCESSES.discard(
+                process
+            )
+            continue
+
+        try:
+            process.terminate()
+        except (
+            ProcessLookupError,
+            PermissionError,
+        ):
+            pass
+
+    # atexit cannot await asyncio subprocesses. Give owned children a
+    # short opportunity to honor SIGTERM before the hard fallback.
+    time.sleep(0.25)
+
+    for process in tuple(
+        _OWNED_PROBE_PROCESSES
+    ):
+
+        if process.returncode is not None:
+            _OWNED_PROBE_PROCESSES.discard(
+                process
+            )
+            continue
+
+        try:
+            process.kill()
+        except (
+            ProcessLookupError,
+            PermissionError,
+        ):
+            pass
+
+
+atexit.register(
+    _cleanup_owned_probe_processes_at_exit
+)
+
+async def _stop_owned_probe_process(
+    process: asyncio.subprocess.Process,
+) -> None:
+    """
+    Cancellation-safe shutdown for one probe-owned subprocess.
+
+    TERM -> bounded wait -> KILL -> reap.
+
+    The inner cleanup task is shielded from cancellation so a cancelled
+    probe coroutine cannot abandon its sing-box child.
+    """
+
+    async def cleanup() -> None:
+
+        try:
+
+            if process.returncode is None:
+
+                try:
+                    process.terminate()
+                except ProcessLookupError:
+                    pass
+
+            try:
+                await asyncio.wait_for(
+                    process.wait(),
+                    timeout=2,
+                )
+
+            except asyncio.TimeoutError:
+
+                if process.returncode is None:
+
+                    try:
+                        process.kill()
+                    except ProcessLookupError:
+                        pass
+
+                try:
+                    await process.wait()
+                except (
+                    ProcessLookupError,
+                    ChildProcessError,
+                ):
+                    pass
+
+        finally:
+
+            _unregister_owned_probe_process(
+                process
+            )
+
+    cleanup_task = asyncio.create_task(
+        cleanup()
+    )
+
+    cancellation = None
+
+    while not cleanup_task.done():
+
+        try:
+            await asyncio.shield(
+                cleanup_task
+            )
+        except asyncio.CancelledError as exc:
+            # Preserve cancellation semantics, but first finish reaping
+            # the child we own.
+            cancellation = exc
+            continue
+
+    # Propagate cleanup failures before restoring cancellation.
+    await cleanup_task
+
+    if cancellation is not None:
+        raise cancellation
+
+
+# =========================================================
 # Real proxy probe
 # =========================================================
 
@@ -1801,6 +1966,10 @@ async def _probe_batch_in_slot(
             )
         )
 
+        _register_owned_probe_process(
+            process
+        )
+
         try:
 
             await asyncio.sleep(
@@ -1934,30 +2103,9 @@ async def _probe_batch_in_slot(
 
         finally:
 
-            if process.returncode is None:
-
-                try:
-                    process.terminate()
-                except ProcessLookupError:
-                    pass
-
-                try:
-                    await asyncio.wait_for(
-                        process.wait(),
-                        timeout=2,
-                    )
-
-                except asyncio.TimeoutError:
-
-                    try:
-                        process.kill()
-                    except ProcessLookupError:
-                        pass
-
-                    try:
-                        await process.wait()
-                    except Exception:
-                        pass
+            await _stop_owned_probe_process(
+                process
+            )
 
 
 async def run_probe_batches(

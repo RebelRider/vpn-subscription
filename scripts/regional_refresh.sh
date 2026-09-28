@@ -2,7 +2,7 @@
 
 set -uo pipefail
 
-REPO="$HOME/best50-vpn-subscription"
+REPO="${BEST50_REPO:-$HOME/best50-vpn-subscription}"
 PYTHON="/opt/homebrew/bin/python3"
 SING_BOX="/opt/homebrew/bin/sing-box"
 

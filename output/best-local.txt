@@ -5,25 +5,22 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-09-29 07:32:19 UTC
+# generated: 2026-09-29 09:21:25 UTC
 #
 # Local filtering: gstatic + cloudflare + youtube + chatgpt + payload-1mb
 # Local final stability: 5/5 complete rounds required
-# upstream_nodes: 425
-# local_qualified: 12
+# upstream_nodes: 258
+# local_qualified: 9
 # local_ranking: stability, median latency, p95 latency
 #
 # Generated from the globally quality-qualified pool and re-tested through the current local network.
 #
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.43:2083?mode=gun&security=&encryption=none&type=grpc&serviceName=vless#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%201
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.105.211:2083?security=&encryption=none&fm=AhmadV2ray&type=grpc&serviceName=vless#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%202
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.105.211:2083?encryption=none&security=none&type=grpc&authority=&serviceName=vless&mode=gun#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%203
-vless://a3ee9529-9344-46b3-8b9b-a8af01639ba4@91.107.247.161:80?type=ws&security=none&path=%2F#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%204
-vless://28f48a7a-f967-458d-bffd-eafc9e072f37@91.107.255.158:80?encryption=none&security=none&type=ws&host=&path=%2F#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%205
-vless://041ad6cc-a89e-497d-a4a2-0dd4b9fc8aa2@167.233.178.237:80?type=ws&security=none&path=%2F#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%206
-vless://3076f0f0-558c-cbb3-0570-ca4200000014@104.25.244.62:80?security=none&type=ws&path=%2Fsync&host=abolfazl-1.danayyabwalfdl6.workers.dev&packetEncoding=xudp&encryption=none#%F0%9F%87%BA%F0%9F%87%B8%20US%20%7C%20Ashburn%20%7C%207
-vless://659ffdfa-47d2-47d7-af40-5afe0907eead@162.55.242.208:2053?type=tcp&security=reality&fp=firefox&pbk=jeS6Zu-p1Gf6GtraIAbpgQoSeT26Xq3GqgqVxccbVhY&sid=4d14da19b19cfc8c&sni=www.cloudflare.com#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Falkenstein%20%7C%208
-vless://a7ceb94c-d25e-4a91-8a8f-327dd5789ebc@64.176.77.85:80?encryption=none&security=none&type=ws&host=&path=%2F#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%209
-vless://cdd6bfce-781a-4454-b7d5-4778abb5c24f@198.105.112.242:443?type=tcp&security=tls&flow=xtls-rprx-vision&fp=firefox&sni=kostaa9.api3-max.ru#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Eindhoven%20%7C%2010
-vless://11d826ce-d6e5-4154-8658-6829bb17dca2@2.27.12.108:2096?type=ws&security=tls&encryption=none&path=/cdn/v3/live&sni=stadb90.rumedia-cdn.com&fp=random&headerType=none#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Eygelshoven%20%7C%2011
-vless://11d826ce-d6e5-4154-8658-6829bb17dca2@2.27.12.108:2096?path=/cdn/v3/live&security=tls&encryption=none&insecure=0&fp=chrome&type=ws&allowInsecure=0&sni=stadb90.rumedia-cdn.com#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Eygelshoven%20%7C%2012
+vless://659ffdfa-47d2-47d7-af40-5afe0907eead@162.55.242.208:2053?fp=chrome&pbk=jeS6Zu-p1Gf6GtraIAbpgQoSeT26Xq3GqgqVxccbVhY&security=reality&sid=4d14da19b19cfc8c&sni=www.cloudflare.com&type=tcp#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Falkenstein%20%7C%201
+vless://22a375e0-f7c6-4d8f-a154-81189914bbf4@89.105.197.202:443?flow=xtls-rprx-vision&fp=random&pbk=mza5Hn1aolSz65qu-UwvBP3oesxMe25r11o4nxvikF0&security=reality&sid=64c1fe36c7846400&sni=findmypackets.com&type=tcp#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Enschede%20%7C%202
+vless://a7ceb94c-d25e-4a91-8a8f-327dd5789ebc@64.176.77.85:80?encryption=none&security=none&type=ws&host=&path=%2F#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%203
+vless://3960e940-5fbb-4b4b-89ee-44b631a23a93@64.176.77.235:80?type=ws&security=none&path=%2F#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%204
+vless://19a21d16-4df8-4f63-b53b-83e05b4e321c@64.176.77.247:80?security=none&type=ws&path=%2F#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%205
+vless://659ffdfa-47d2-47d7-af40-5afe0907eead@162.55.242.208:2053?type=tcp&security=reality&fp=firefox&pbk=jeS6Zu-p1Gf6GtraIAbpgQoSeT26Xq3GqgqVxccbVhY&sid=4d14da19b19cfc8c&sni=www.cloudflare.com#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Falkenstein%20%7C%206
+vless://11d826ce-d6e5-4154-8658-6829bb17dca2@2.27.12.108:2096?type=ws&security=tls&encryption=none&path=/cdn/v3/live&sni=stadb90.rumedia-cdn.com&fp=random&headerType=none#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Eygelshoven%20%7C%207
+vless://11d826ce-d6e5-4154-8658-6829bb17dca2@2.27.12.108:2096?path=/cdn/v3/live&security=tls&encryption=none&insecure=0&fp=chrome&type=ws&allowInsecure=0&sni=stadb90.rumedia-cdn.com#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Eygelshoven%20%7C%208
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.43:2083?encryption=none&security=none&type=grpc&mode=gun&authority=&serviceName=vless#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%209

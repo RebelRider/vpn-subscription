@@ -75,6 +75,25 @@ EXIT_TRACE_URL = (
 EXIT_GEO_BATCH_SIZE = 8
 EXIT_GEO_BASE_PORT = 28000
 
+# Final best-local publication policy.
+#
+# These countries are checked against the ACTUAL VPN exit,
+# not the source label, endpoint IP, hostname, or upstream
+# country classification.
+ALLOWED_ACTUAL_EXIT_COUNTRIES = frozenset({
+    "GB",
+    "US",
+    "DE",
+    "NL",
+    "PL",
+})
+
+# best-local is deliberately a small high-confidence set.
+# Never pad the subscription with weaker nodes merely to
+# reach this number.
+MAX_LOCAL_PUBLISHED_NODES = 12
+MAX_LOCAL_MEDIAN_LATENCY_MS = 500.0
+
 
 def load_build_module():
     spec = importlib.util.spec_from_file_location(
@@ -1027,60 +1046,60 @@ def apply_exit_geography(
             continue
 
         try:
-            address = (
-                ipaddress.ip_address(
-                    raw_ip
-                )
+            address = ipaddress.ip_address(
+                raw_ip
             )
         except ValueError:
             continue
 
         if address.version == 4:
-            ipv4.append(
-                str(address)
-            )
+            ipv4.append(str(address))
         else:
-            ipv6.append(
-                str(address)
-            )
+            ipv6.append(str(address))
 
     city_lookup = {}
 
-    city_lookup.update(
-        _lookup_city_database(
-            CITY_DB_IPV4,
-            list(
-                dict.fromkeys(
-                    ipv4
-                )
-            ),
+    try:
+        city_lookup.update(
+            _lookup_city_database(
+                CITY_DB_IPV4,
+                list(dict.fromkeys(ipv4)),
+            )
         )
-    )
+    except Exception as exc:
+        print(
+            "WARNING: IPv4 exit-city lookup failed: "
+            f"{exc}"
+        )
 
-    city_lookup.update(
-        _lookup_city_database(
-            CITY_DB_IPV6,
-            list(
-                dict.fromkeys(
-                    ipv6
-                )
-            ),
+    try:
+        city_lookup.update(
+            _lookup_city_database(
+                CITY_DB_IPV6,
+                list(dict.fromkeys(ipv6)),
+            )
         )
-    )
+    except Exception as exc:
+        print(
+            "WARNING: IPv6 exit-city lookup failed: "
+            f"{exc}"
+        )
 
     exit_country_counts = Counter()
+    rejected_country_counts = Counter()
 
     complete = 0
     country_only = 0
-    neutral = 0
+    unknown = 0
+    rejected_country = 0
+
+    allowed_nodes: list[dict] = []
 
     for node in status.get(
         "nodes",
         [],
     ):
-        link = node[
-            "link"
-        ]
+        link = node["link"]
 
         item = dict(
             metadata.get(
@@ -1089,9 +1108,12 @@ def apply_exit_geography(
             )
         )
 
-        exit_ip = item.get(
-            "exit_ip",
-            "",
+        exit_ip = (
+            item.get(
+                "exit_ip",
+                "",
+            )
+            or ""
         )
 
         trace_country = (
@@ -1117,26 +1139,31 @@ def apply_exit_geography(
             .upper()
         )
 
-        if re.fullmatch(
-            r"[A-Z]{2}",
-            trace_country,
-        ):
-            exit_country = (
-                trace_country
+        # Cloudflare trace is preferred because it is observed
+        # through the actual VPN connection. DB-IP of that same
+        # observed exit IP is the fallback.
+        if (
+            re.fullmatch(
+                r"[A-Z]{2}",
+                trace_country,
             )
-
+            and trace_country
+            not in {"XX", "ZZ"}
+        ):
+            exit_country = trace_country
             country_source = (
                 "cloudflare-trace"
             )
 
-        elif re.fullmatch(
-            r"[A-Z]{2}",
-            db_country,
-        ):
-            exit_country = (
-                db_country
+        elif (
+            re.fullmatch(
+                r"[A-Z]{2}",
+                db_country,
             )
-
+            and db_country
+            not in {"XX", "ZZ"}
+        ):
+            exit_country = db_country
             country_source = (
                 "dbip-exit-ip"
             )
@@ -1150,132 +1177,322 @@ def apply_exit_geography(
             "",
         )
 
+        # Never combine a city from a DB country that disagrees
+        # with the authoritative actual-exit country.
         if (
             city
             and exit_country
             and db_country
-            and db_country
-            != exit_country
+            and db_country != exit_country
         ):
             city = ""
 
-        node[
-            "source_country"
-        ] = node.get(
+        node["source_country"] = node.get(
             "country",
             "XX",
         )
 
-        node[
-            "exit_ip"
-        ] = (
-            exit_ip
+        node["exit_ip"] = (
+            exit_ip or None
+        )
+
+        node["exit_country"] = (
+            exit_country or None
+        )
+
+        node["exit_country_source"] = (
+            country_source or None
+        )
+
+        node["exit_city"] = (
+            city or None
+        )
+
+        node["exit_region"] = (
+            db_item.get("region")
             or None
         )
 
-        node[
-            "exit_country"
-        ] = (
-            exit_country
-            or None
+        node["exit_db_country"] = (
+            db_country or None
         )
 
-        node[
-            "exit_country_source"
-        ] = (
-            country_source
-            or None
-        )
-
-        node[
-            "exit_city"
-        ] = (
-            city
-            or None
-        )
-
-        node[
-            "exit_region"
-        ] = (
-            db_item.get(
-                "region"
+        node["exit_geo_status"] = (
+            item.get(
+                "exit_geo_status",
+                "not-probed",
             )
-            or None
-        )
-
-        node[
-            "exit_db_country"
-        ] = (
-            db_country
-            or None
-        )
-
-        node[
-            "exit_geo_status"
-        ] = item.get(
-            "exit_geo_status",
-            "not-probed",
         )
 
         if item.get(
             "exit_geo_error"
         ):
-            node[
-                "exit_geo_error"
-            ] = item[
-                "exit_geo_error"
-            ]
+            node["exit_geo_error"] = (
+                item["exit_geo_error"]
+            )
 
         if item.get(
             "exit_geo_attempts"
         ):
-            node[
-                "exit_geo_attempts"
-            ] = item[
-                "exit_geo_attempts"
-            ]
+            node["exit_geo_attempts"] = (
+                item["exit_geo_attempts"]
+            )
 
         if exit_country:
             exit_country_counts[
                 exit_country
             ] += 1
 
+        # Absolute country gate.
+        if not exit_country:
+            node["country_gate"] = (
+                "rejected-unknown-actual-exit"
+            )
+            unknown += 1
+            continue
+
         if (
             exit_country
-            and city
+            not in ALLOWED_ACTUAL_EXIT_COUNTRIES
         ):
-            complete += 1
+            node["country_gate"] = (
+                "rejected-disallowed-actual-exit"
+            )
+            rejected_country_counts[
+                exit_country
+            ] += 1
+            rejected_country += 1
+            continue
 
-        elif exit_country:
+        node["country_gate"] = "passed"
+
+        if city:
+            complete += 1
+        else:
             country_only += 1
 
-        else:
-            neutral += 1
+        allowed_nodes.append(node)
 
-    status[
-        "exit_geography"
-    ] = {
+    # Keep only nodes whose ACTUAL VPN exit passed the absolute
+    # country gate. Re-rank after filtering so labels are
+    # contiguous in the published subscription.
+    for index, node in enumerate(
+        allowed_nodes,
+        1,
+    ):
+        node["rank"] = index
+
+    status["nodes"] = allowed_nodes
+
+    status["exit_geography"] = {
         "mode":
-            "actual-vpn-exit-presentation-only",
+            "actual-vpn-exit-strict-country-gate",
         "affects_qualification":
-            False,
+            True,
+        "allowed_countries":
+            sorted(
+                ALLOWED_ACTUAL_EXIT_COUNTRIES
+            ),
         "trace_url":
             EXIT_TRACE_URL,
         "ipv4_database":
             str(CITY_DB_IPV4),
         "ipv6_database":
             str(CITY_DB_IPV6),
+        "observed_countries":
+            dict(exit_country_counts),
+        "accepted_countries":
+            dict(
+                Counter(
+                    node["exit_country"]
+                    for node in allowed_nodes
+                )
+            ),
+        "rejected_countries":
+            dict(rejected_country_counts),
         "complete":
             complete,
         "country_only":
             country_only,
-        "neutral":
-            neutral,
-        "countries":
-            dict(
-                exit_country_counts
-            ),
+        "unknown_rejected":
+            unknown,
+        "disallowed_country_rejected":
+            rejected_country,
+        "country_qualified":
+            len(allowed_nodes),
     }
+
+
+def finalize_local_selection(
+    qualified: list[str],
+    status: dict,
+) -> list[str]:
+    allowed_nodes = status.get(
+        "nodes",
+        [],
+    )
+
+    allowed_links = {
+        node["link"]
+        for node in allowed_nodes
+    }
+
+    # Preserve the strict local stability/latency ordering
+    # established by run_local_probe(), but fail closed on
+    # excessive or missing local latency before applying the
+    # publication cap.
+    latency_qualified_links = {
+        node["link"]
+        for node in allowed_nodes
+        if (
+            isinstance(
+                node.get("median_latency"),
+                (int, float),
+            )
+            and node["median_latency"]
+            <= MAX_LOCAL_MEDIAN_LATENCY_MS
+        )
+    }
+
+    country_qualified = [
+        link
+        for link in qualified
+        if link in allowed_links
+    ]
+
+    latency_qualified = [
+        link
+        for link in country_qualified
+        if link in latency_qualified_links
+    ]
+
+    selected = latency_qualified[
+        :MAX_LOCAL_PUBLISHED_NODES
+    ]
+
+    selected_set = set(selected)
+
+    selected_nodes = [
+        node
+        for node in status.get(
+            "nodes",
+            [],
+        )
+        if node["link"] in selected_set
+    ]
+
+    node_by_link = {
+        node["link"]: node
+        for node in selected_nodes
+    }
+
+    selected_nodes = [
+        node_by_link[link]
+        for link in selected
+    ]
+
+    for index, node in enumerate(
+        selected_nodes,
+        1,
+    ):
+        node["rank"] = index
+
+    status["nodes"] = selected_nodes
+
+    status["stability"][
+        "pre_country_qualified"
+    ] = status["stability"].get(
+        "qualified",
+        len(qualified),
+    )
+
+    status["stability"][
+        "country_qualified"
+    ] = len(country_qualified)
+
+    status["stability"][
+        "qualified"
+    ] = len(selected)
+
+    status["selection"] = {
+        "policy":
+            "strict-actual-exit-and-local-stability",
+        "allowed_actual_exit_countries":
+            sorted(
+                ALLOWED_ACTUAL_EXIT_COUNTRIES
+            ),
+        "maximum_published_nodes":
+            MAX_LOCAL_PUBLISHED_NODES,
+        "maximum_median_latency_ms":
+            MAX_LOCAL_MEDIAN_LATENCY_MS,
+        "country_qualified":
+            len(country_qualified),
+        "latency_qualified":
+            len(latency_qualified),
+        "published":
+            len(selected),
+        "padding":
+            False,
+    }
+
+    status["countries"] = dict(
+        Counter(
+            node["exit_country"]
+            for node in selected_nodes
+        )
+    )
+
+    return selected
+
+
+def _active_ipv4_tunnel_routes() -> list[str]:
+    """
+    Return active IPv4 routes carried by utun interfaces.
+
+    Happ/sing-box on macOS may implement a full tunnel using
+    split-default routes (for example 1/8 ... 128.0/1) while the
+    traditional 0/0 default route remains on en0. Therefore
+    `route get default` alone is not a valid VPN detector.
+    """
+    try:
+        result = subprocess.run(
+            [
+                "netstat",
+                "-rn",
+                "-f",
+                "inet",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except Exception:
+        return []
+
+    if result.returncode != 0:
+        return []
+
+    routes: list[str] = []
+
+    for line in result.stdout.splitlines():
+        fields = line.split()
+
+        if len(fields) < 4:
+            continue
+
+        interface = fields[-1]
+
+        if not interface.startswith("utun"):
+            continue
+
+        destination = fields[0]
+
+        routes.append(
+            f"{destination}@{interface}"
+        )
+
+    return routes
 
 
 def ensure_probe_network(
@@ -1284,7 +1501,7 @@ def ensure_probe_network(
     system_interface = route_interface()
 
     print(
-        "System route interface:",
+        "System default route interface:",
         system_interface or "unknown",
     )
 
@@ -1328,20 +1545,46 @@ def ensure_probe_network(
             f"{forced_interface}"
         )
 
+    forced_ipv4 = ipv4_match.group(1)
+
     print(
         "Probe interface IPv4:",
-        ipv4_match.group(1),
+        forced_ipv4,
     )
 
-    if (
+    tunnel_routes = (
+        _active_ipv4_tunnel_routes()
+    )
+
+    if tunnel_routes:
+        print(
+            "Active IPv4 tunnel routing detected: "
+            + ", ".join(tunnel_routes[:12])
+            + (
+                " ..."
+                if len(tunnel_routes) > 12
+                else ""
+            )
+        )
+    elif (
         system_interface
         and system_interface.startswith("utun")
     ):
         print(
-            "Active system VPN detected; "
-            "probe VLESS outbounds will be forced through "
-            f"{forced_interface}."
+            "Active system VPN detected via "
+            "default route."
         )
+    else:
+        print(
+            "No IPv4 utun routing detected."
+        )
+
+    print(
+        "Probe VLESS transport sockets are forced "
+        f"through physical interface {forced_interface}; "
+        "the active Happ tunnel is bypassed for the "
+        "underlying test connection."
+    )
 
 
 async def run_gate(
@@ -2322,20 +2565,20 @@ def parse_args():
     parser.add_argument(
         "--rounds",
         type=int,
-        default=3,
+        default=5,
         help=(
             "Number of local final stability rounds "
-            "(default: 3)"
+            "(default: 5)"
         ),
     )
 
     parser.add_argument(
         "--minimum-successes",
         type=int,
-        default=2,
+        default=5,
         help=(
             "Required complete final rounds "
-            "(default: 2)"
+            "(default: 5)"
         ),
     )
 
@@ -2495,8 +2738,17 @@ async def async_main() -> int:
     )
 
     print(
-        "Exit geography is presentation-only; "
-        "failure cannot remove a working node."
+        "Actual VPN exit geography is an authoritative "
+        "final country gate."
+    )
+
+    print(
+        "Allowed actual exit countries: "
+        + ", ".join(
+            sorted(
+                ALLOWED_ACTUAL_EXIT_COUNTRIES
+            )
+        )
     )
 
     exit_metadata = (
@@ -2509,6 +2761,11 @@ async def async_main() -> int:
     apply_exit_geography(
         status,
         exit_metadata,
+    )
+
+    qualified = finalize_local_selection(
+        qualified,
+        status,
     )
 
     geo_summary = status[
@@ -2526,13 +2783,28 @@ async def async_main() -> int:
     )
 
     print(
-        "Neutral fallback:      "
-        f"{geo_summary['neutral']}"
+        "Unknown rejected:      "
+        f"{geo_summary['unknown_rejected']}"
     )
 
     print(
-        "Actual exit countries: "
-        f"{geo_summary['countries']}"
+        "Disallowed rejected:   "
+        f"{geo_summary['disallowed_country_rejected']}"
+    )
+
+    print(
+        "Observed exit countries: "
+        f"{geo_summary['observed_countries']}"
+    )
+
+    print(
+        "Accepted exit countries: "
+        f"{geo_summary['accepted_countries']}"
+    )
+
+    print(
+        "Final published nodes: "
+        f"{len(qualified)}"
     )
 
     status["input"]["mode"] = (
@@ -2627,9 +2899,7 @@ async def async_main() -> int:
             f"{country}={count}"
             for country, count
             in sorted(
-                status["exit_geography"][
-                    "countries"
-                ].items()
+                status["exit_geography"]["accepted_countries"].items()
             )
         )
     )

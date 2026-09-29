@@ -34,7 +34,7 @@ STATE_FILE="$STATE_DIR/regional-validation-state.$STATE_ID"
 LEGACY_STATE_FILE="$STATE_DIR/last-regional-pool-blob"
 LOCK_DIR="$STATE_DIR/regional-refresh.lock"
 
-STATE_SCHEMA="regional-validation-v3-exit-geo"
+STATE_SCHEMA="regional-validation-v4-strict-local"
 
 LOG_PREFIX="[regional-refresh]"
 
@@ -268,13 +268,13 @@ log "Starting strict regional validation."
 # - fetches the current upstream pool,
 # - forces VLESS probe outbounds through en0,
 # - performs V5 functional gates,
-# - requires 2/3 final rounds,
+# - requires 5/5 complete final rounds,
 # - checks for stale upstream pool before publication,
 # - publishes to the regional branch only after validation.
 if ! "$PYTHON" scripts/local_probe.py \
     --interface en0 \
-    --rounds 3 \
-    --minimum-successes 2 \
+    --rounds 5 \
+    --minimum-successes 5 \
     --publish
 then
     fail "Regional validation/publication failed. Previous regional subscription remains unchanged."

@@ -5,23 +5,21 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-10-15 02:23:05 UTC
+# generated: 2026-10-15 05:48:57 UTC
 #
 # Local filtering: gstatic + cloudflare + youtube + chatgpt + payload-1mb
 # Local final stability: 5/5 complete rounds required
-# upstream_nodes: 349
-# local_qualified: 10
+# upstream_nodes: 253
+# local_qualified: 8
 # local_ranking: stability, median latency, p95 latency
 #
 # Generated from the globally quality-qualified pool and re-tested through the current local network.
 #
-vless://3430793e-837c-47f2-8c8c-a3520d4217c2@2.28.232.213:2125?security=none&type=tcp#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%201
-vless://6338c01a-310e-42c3-bf4f-2a20e161054b@213.165.56.102:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=freede.aiage.work&fp=random&pbk=A_bQLZE6D32TJUdAf9doQTPaTUXyJjPXLSklplG4V1g&sid=57e7977c9011061c&type=tcp#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%202
-vless://4b09d40d-e36a-47c3-baa4-e6bf551b3183@31.59.217.164:443?security=reality&sni=www.adobe.com&fp=chrome&flow=xtls-rprx-vision&pbk=kOkILS7UXUQDNPLYn4SQ65kMIWKXNOttV5Kddw4ZqTo&sid=1625a2a79d01328f&type=tcp#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Eygelshoven%20%7C%203
-vless://20dd9433-389e-4573-ba7b-689619cf13da@89.169.53.176:4443?type=tcp&security=reality&flow=xtls-rprx-vision&fp=chrome&pbk=YIyohkkCU5kw6J5iZYZkhILyDwlfftFPDTkbITlrAUw&sid=df3aff719526dc5a&sni=gateway.icloud.com#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%204
-vless://5744e593-1cc8-48fa-b8ca-57cd494fe35b@104.18.0.181:2052?security=none&type=ws&path=%2Frain1226&host=eu02.123450908.xyz&sni=eu02.123450908.xyz#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%205
-vless://adc11f30-e4cb-4985-bf5e-f9ded69c019f@2.59.253.251:443?type=tcp&security=reality&flow=xtls-rprx-vision&fp=firefox&pbk=fNfokzklCF4l_c8k8PciOCjm5ecNoF_sNLjEtaO-xzI&sid=db04ce8bdb8900f1&sni=nvidia.com#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%206
-vless://5744e593-1cc8-48fa-b8ca-57cd494fe35b@172.64.229.129:2052?&type=ws&headerType=none&host=eu02.123450908.xyz&path=/rain1226#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%207
-vless://a5db5ab5-8d28-49c0-ad55-0ad4724e5c0d@94.103.168.52:2087?alpn=http/1.1&encryption=none&host=fert1qswdfegrthy.localip.ir&path=/hokm&security=tls&sni=fert1qswdfegrthy.localip.ir&type=ws#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%208
-vless://a5db5ab5-8d28-49c0-ad55-0ad4724e5c0d@46.225.46.136:2087?security=tls&sni=hoert1rert.localip.ir&type=ws&host=hoert1rert.localip.ir&path=%2Fhokm&alpn=http%2F1.1&allowInsecure=0#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%209
-vless://a5db5ab5-8d28-49c0-ad55-0ad4724e5c0d@178.104.248.34:2087?path=%2Fhokm&security=tls&encryption=none&host=tuyiuoyuthgfdbf.localip.ir&fp=random&type=ws&sni=tuyiuoyuthgfdbf.localip.ir#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%2010
+vless://adc11f30-e4cb-4985-bf5e-f9ded69c019f@2.59.253.251:443?type=tcp&security=reality&flow=xtls-rprx-vision&fp=firefox&pbk=fNfokzklCF4l_c8k8PciOCjm5ecNoF_sNLjEtaO-xzI&sid=db04ce8bdb8900f1&sni=nvidia.com#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%201
+vless://20dd9433-389e-4573-ba7b-689619cf13da@89.169.53.176:4443?flow=xtls-rprx-vision&fp=firefox&pbk=YIyohkkCU5kw6J5iZYZkhILyDwlfftFPDTkbITlrAUw&security=reality&sid=df3aff719526dc5a&sni=de.wvpn.one&type=tcp#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%202
+vless://a5db5ab5-8d28-49c0-ad55-0ad4724e5c0d@46.225.46.136:2087?security=tls&type=ws&path=%2Fhokm&host=hoert1rert.localip.ir&alpn=http%2F1.1&sni=hoert1rert.localip.ir&fp=chrome&encryption=none#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%203
+vless://7858128a-6b5e-4f86-9bff-52c1f1e6439d@91.107.247.173:2083?security=tls&type=ws&path=%2F&alpn=h3%2Ch2%2Chttp%2F1.1&sni=sino.bestsellers1.site&fp=chrome#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%204
+vless://a5db5ab5-8d28-49c0-ad55-0ad4724e5c0d@46.225.46.136:2087?security=tls&sni=hoert1rert.localip.ir&type=ws&host=hoert1rert.localip.ir&path=%2Fhokm&alpn=http%2F1.1&allowInsecure=0#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%205
+vless://20dd9433-389e-4573-ba7b-689619cf13da@89.169.53.176:4443?type=tcp&security=reality&flow=xtls-rprx-vision&fp=chrome&pbk=YIyohkkCU5kw6J5iZYZkhILyDwlfftFPDTkbITlrAUw&sid=df3aff719526dc5a&sni=gateway.icloud.com#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%206
+vless://a5db5ab5-8d28-49c0-ad55-0ad4724e5c0d@178.104.248.34:2087?security=tls&type=ws&path=%2Fhokm&host=tuyiuoyuthgfdbf.localip.ir&sni=tuyiuoyuthgfdbf.localip.ir&fp=chrome&encryption=none#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%207
+vless://a5db5ab5-8d28-49c0-ad55-0ad4724e5c0d@178.104.248.34:2087?path=%2Fhokm&security=tls&encryption=none&host=tuyiuoyuthgfdbf.localip.ir&fp=random&type=ws&sni=tuyiuoyuthgfdbf.localip.ir#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%208

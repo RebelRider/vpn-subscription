@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-15T18:03:31.211062+00:00",
+  "generated_at": "2026-10-15T22:11:21.551214+00:00",
   "algorithm": "v5-local-network-functional-filter-ranking",
   "input": {
     "path": "origin/main:output/qualified-all.txt",
-    "nodes": 154,
+    "nodes": 229,
     "mode": "origin-main-qualified-all"
   },
   "network": {
@@ -12,50 +12,50 @@
   },
   "gates": {
     "preliminary": {
-      "gstatic": 60
+      "gstatic": 93
     },
     "mandatory": {
-      "cloudflare": 44,
-      "youtube": 39,
-      "chatgpt": 33,
-      "payload-1mb": 28
+      "cloudflare": 81,
+      "youtube": 74,
+      "chatgpt": 66,
+      "payload-1mb": 60
     }
   },
   "stability": {
     "rounds": 5,
     "minimum_successes": 5,
-    "first_pass_survivors": 28,
+    "first_pass_survivors": 60,
     "round_survivors": [
-      25,
-      24,
-      23,
-      23,
-      26
+      53,
+      58,
+      57,
+      56,
+      58
     ],
     "qualified": 1,
-    "pre_country_qualified": 18,
-    "country_qualified": 5
+    "pre_country_qualified": 49,
+    "country_qualified": 17
   },
   "countries": {
-    "PL": 1
+    "NL": 1
   },
   "nodes": [
     {
       "rank": 1,
-      "country": "PL",
+      "country": "NL",
       "successful_final_rounds": 5,
       "latency_samples": 19,
-      "median_latency": 328.45379086211324,
-      "p95_latency": 1476.5915418975055,
-      "upstream_rank": 120,
-      "link": "vless://adc11f30-e4cb-4985-bf5e-f9ded69c019f@2.59.253.251:443?type=tcp&security=reality&flow=xtls-rprx-vision&fp=firefox&pbk=fNfokzklCF4l_c8k8PciOCjm5ecNoF_sNLjEtaO-xzI&sid=db04ce8bdb8900f1&sni=nvidia.com#PL",
-      "source_country": "PL",
-      "exit_ip": "2.59.253.251",
-      "exit_country": "PL",
+      "median_latency": 463.32724997773767,
+      "p95_latency": 1036.1960830632597,
+      "upstream_rank": 174,
+      "link": "vless://9c60369d-e5f9-4cec-9e63-1560e88e119a@195.123.221.36:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=dIv6pPS-x6IzbiPyHX8nNdRrwI2yZl4y3YCeRWy9UgE&security=reality&sid=3e67326f98ddb407&sni=gateway.icloud.com&type=tcp#NL",
+      "source_country": "NL",
+      "exit_ip": "2a02:27ab:8000::1c09",
+      "exit_country": "NL",
       "exit_country_source": "cloudflare-trace",
-      "exit_city": "Warsaw",
-      "exit_region": "Mazovia",
-      "exit_db_country": "PL",
+      "exit_city": "Meppel",
+      "exit_region": "Drenthe",
+      "exit_db_country": "NL",
       "exit_geo_status": "trace-ok",
       "exit_geo_attempts": 1,
       "country_gate": "passed"
@@ -75,28 +75,36 @@
     "ipv4_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv4.csv.gz",
     "ipv6_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv6.csv.gz",
     "observed_countries": {
-      "PL": 1,
-      "NL": 3,
-      "US": 1,
+      "NL": 4,
+      "PL": 2,
+      "FR": 1,
+      "DE": 5,
+      "US": 6,
       "TW": 1,
-      "FI": 11,
+      "CA": 2,
+      "FI": 26,
+      "TR": 1,
       "JP": 1
     },
     "accepted_countries": {
-      "PL": 1,
-      "NL": 3,
-      "US": 1
+      "NL": 4,
+      "PL": 2,
+      "DE": 5,
+      "US": 6
     },
     "rejected_countries": {
+      "FR": 1,
       "TW": 1,
-      "FI": 11,
+      "CA": 2,
+      "FI": 26,
+      "TR": 1,
       "JP": 1
     },
-    "complete": 5,
+    "complete": 17,
     "country_only": 0,
     "unknown_rejected": 0,
-    "disallowed_country_rejected": 13,
-    "country_qualified": 5
+    "disallowed_country_rejected": 32,
+    "country_qualified": 17
   },
   "selection": {
     "policy": "strict-actual-exit-and-local-stability",
@@ -109,13 +117,13 @@
     ],
     "maximum_published_nodes": 12,
     "maximum_median_latency_ms": 500.0,
-    "country_qualified": 5,
+    "country_qualified": 17,
     "latency_qualified": 1,
     "published": 1,
     "padding": false
   },
-  "upstream_sha": "a6b053a3acc16ee3152807671ee7c1232dee2c25",
-  "upstream_generated_at": "2026-10-15 17:02:59 UTC",
+  "upstream_sha": "f5bd14a788348aefa212e11a0631fdb19fa62e03",
+  "upstream_generated_at": "2026-10-15 21:24:49 UTC",
   "publication": {
     "enabled": true,
     "remote": "origin",

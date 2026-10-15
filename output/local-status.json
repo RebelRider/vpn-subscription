@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-15T12:26:52.840737+00:00",
+  "generated_at": "2026-10-15T18:03:31.211062+00:00",
   "algorithm": "v5-local-network-functional-filter-ranking",
   "input": {
     "path": "origin/main:output/qualified-all.txt",
-    "nodes": 211,
+    "nodes": 154,
     "mode": "origin-main-qualified-all"
   },
   "network": {
@@ -12,64 +12,42 @@
   },
   "gates": {
     "preliminary": {
-      "gstatic": 106
+      "gstatic": 60
     },
     "mandatory": {
-      "cloudflare": 100,
-      "youtube": 97,
-      "chatgpt": 93,
-      "payload-1mb": 82
+      "cloudflare": 44,
+      "youtube": 39,
+      "chatgpt": 33,
+      "payload-1mb": 28
     }
   },
   "stability": {
     "rounds": 5,
     "minimum_successes": 5,
-    "first_pass_survivors": 82,
+    "first_pass_survivors": 28,
     "round_survivors": [
-      67,
-      68,
-      75,
-      74,
-      73
+      25,
+      24,
+      23,
+      23,
+      26
     ],
-    "qualified": 7,
-    "pre_country_qualified": 54,
-    "country_qualified": 23
+    "qualified": 1,
+    "pre_country_qualified": 18,
+    "country_qualified": 5
   },
   "countries": {
-    "DE": 4,
-    "PL": 1,
-    "NL": 2
+    "PL": 1
   },
   "nodes": [
     {
       "rank": 1,
-      "country": "DE",
-      "successful_final_rounds": 5,
-      "latency_samples": 19,
-      "median_latency": 292.3546659294516,
-      "p95_latency": 716.5742500219494,
-      "upstream_rank": 128,
-      "link": "vless://3430793e-837c-47f2-8c8c-a3520d4217c2@2.28.232.213:2125?security=none&type=tcp#DE",
-      "source_country": "DE",
-      "exit_ip": "2.28.232.213",
-      "exit_country": "DE",
-      "exit_country_source": "cloudflare-trace",
-      "exit_city": "Nuremberg",
-      "exit_region": "Bavaria",
-      "exit_db_country": "DE",
-      "exit_geo_status": "trace-ok",
-      "exit_geo_attempts": 1,
-      "country_gate": "passed"
-    },
-    {
-      "rank": 2,
       "country": "PL",
       "successful_final_rounds": 5,
       "latency_samples": 19,
-      "median_latency": 294.9716669972986,
-      "p95_latency": 770.7052500918508,
-      "upstream_rank": 187,
+      "median_latency": 328.45379086211324,
+      "p95_latency": 1476.5915418975055,
+      "upstream_rank": 120,
       "link": "vless://adc11f30-e4cb-4985-bf5e-f9ded69c019f@2.59.253.251:443?type=tcp&security=reality&flow=xtls-rprx-vision&fp=firefox&pbk=fNfokzklCF4l_c8k8PciOCjm5ecNoF_sNLjEtaO-xzI&sid=db04ce8bdb8900f1&sni=nvidia.com#PL",
       "source_country": "PL",
       "exit_ip": "2.59.253.251",
@@ -78,106 +56,6 @@
       "exit_city": "Warsaw",
       "exit_region": "Mazovia",
       "exit_db_country": "PL",
-      "exit_geo_status": "trace-ok",
-      "exit_geo_attempts": 1,
-      "country_gate": "passed"
-    },
-    {
-      "rank": 3,
-      "country": "DE",
-      "successful_final_rounds": 5,
-      "latency_samples": 19,
-      "median_latency": 337.90037501603365,
-      "p95_latency": 824.0339159965515,
-      "upstream_rank": 91,
-      "link": "vless://3430793e-837c-47f2-8c8c-a3520d4217c2@2.28.232.213:2125?security=none&encryption=none&host=/?Telegram---PLANB_NET---PLANB_NET---PLANB_NET---PLANB_NET&headerType=none&type=tcp#DE",
-      "source_country": "DE",
-      "exit_ip": "2.28.232.213",
-      "exit_country": "DE",
-      "exit_country_source": "cloudflare-trace",
-      "exit_city": "Nuremberg",
-      "exit_region": "Bavaria",
-      "exit_db_country": "DE",
-      "exit_geo_status": "trace-ok",
-      "exit_geo_attempts": 1,
-      "country_gate": "passed"
-    },
-    {
-      "rank": 4,
-      "country": "NL",
-      "successful_final_rounds": 5,
-      "latency_samples": 19,
-      "median_latency": 392.09379092790186,
-      "p95_latency": 773.4889159910381,
-      "upstream_rank": 97,
-      "link": "vless://adc11f30-e4cb-4985-bf5e-f9ded69c019f@31.77.114.114:443?security=reality&encryption=none&pbk=fNfokzklCF4l_c8k8PciOCjm5ecNoF_sNLjEtaO-xzI&host=/?TELEGRAM---MARAMBASHI---MARAMBASHI---MARAMBASHI---MARAMBASHI&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=api.vk.me&sid=db04ce8bdb8900f1#NL",
-      "source_country": "NL",
-      "exit_ip": "31.77.114.114",
-      "exit_country": "NL",
-      "exit_country_source": "cloudflare-trace",
-      "exit_city": "Eygelshoven",
-      "exit_region": "Limburg",
-      "exit_db_country": "NL",
-      "exit_geo_status": "trace-ok",
-      "exit_geo_attempts": 1,
-      "country_gate": "passed"
-    },
-    {
-      "rank": 5,
-      "country": "NL",
-      "successful_final_rounds": 5,
-      "latency_samples": 19,
-      "median_latency": 395.2443338930607,
-      "p95_latency": 601.1985838413239,
-      "upstream_rank": 117,
-      "link": "vless://adc11f30-e4cb-4985-bf5e-f9ded69c019f@31.77.114.114:443?security=reality&encryption=none&pbk=fNfokzklCF4l_c8k8PciOCjm5ecNoF_sNLjEtaO-xzI&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=api.vk.me&sid=db04ce8bdb8900f1#NL",
-      "source_country": "NL",
-      "exit_ip": "31.77.114.114",
-      "exit_country": "NL",
-      "exit_country_source": "cloudflare-trace",
-      "exit_city": "Eygelshoven",
-      "exit_region": "Limburg",
-      "exit_db_country": "NL",
-      "exit_geo_status": "trace-ok",
-      "exit_geo_attempts": 1,
-      "country_gate": "passed"
-    },
-    {
-      "rank": 6,
-      "country": "DE",
-      "successful_final_rounds": 5,
-      "latency_samples": 19,
-      "median_latency": 406.2134581618011,
-      "p95_latency": 762.2286251280457,
-      "upstream_rank": 127,
-      "link": "vless://a5db5ab5-8d28-49c0-ad55-0ad4724e5c0d@46.225.46.136:2087?security=tls&sni=hoert1rert.localip.ir&type=ws&host=hoert1rert.localip.ir&path=%2Fhokm&alpn=http%2F1.1&allowInsecure=0#DE",
-      "source_country": "DE",
-      "exit_ip": "2a01:4f8:1c16:2d6a::1",
-      "exit_country": "DE",
-      "exit_country_source": "cloudflare-trace",
-      "exit_city": "Nuremberg",
-      "exit_region": "Bavaria",
-      "exit_db_country": "DE",
-      "exit_geo_status": "trace-ok",
-      "exit_geo_attempts": 1,
-      "country_gate": "passed"
-    },
-    {
-      "rank": 7,
-      "country": "DE",
-      "successful_final_rounds": 5,
-      "latency_samples": 19,
-      "median_latency": 410.5719157960266,
-      "p95_latency": 1539.0655000228435,
-      "upstream_rank": 143,
-      "link": "vless://a5db5ab5-8d28-49c0-ad55-0ad4724e5c0d@46.225.46.136:2087?security=tls&type=ws&path=%2Fhokm&host=hoert1rert.localip.ir&alpn=http%2F1.1&sni=hoert1rert.localip.ir&fp=chrome&encryption=none#DE",
-      "source_country": "DE",
-      "exit_ip": "2a01:4f8:1c16:2d6a::1",
-      "exit_country": "DE",
-      "exit_country_source": "cloudflare-trace",
-      "exit_city": "Nuremberg",
-      "exit_region": "Bavaria",
-      "exit_db_country": "DE",
       "exit_geo_status": "trace-ok",
       "exit_geo_attempts": 1,
       "country_gate": "passed"
@@ -197,34 +75,28 @@
     "ipv4_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv4.csv.gz",
     "ipv6_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv6.csv.gz",
     "observed_countries": {
-      "DE": 6,
-      "PL": 3,
-      "NL": 6,
-      "US": 8,
+      "PL": 1,
+      "NL": 3,
+      "US": 1,
       "TW": 1,
-      "FI": 26,
-      "JP": 2,
-      "SG": 1,
-      "CA": 1
+      "FI": 11,
+      "JP": 1
     },
     "accepted_countries": {
-      "DE": 6,
-      "PL": 3,
-      "NL": 6,
-      "US": 8
+      "PL": 1,
+      "NL": 3,
+      "US": 1
     },
     "rejected_countries": {
       "TW": 1,
-      "FI": 26,
-      "JP": 2,
-      "SG": 1,
-      "CA": 1
+      "FI": 11,
+      "JP": 1
     },
-    "complete": 22,
-    "country_only": 1,
+    "complete": 5,
+    "country_only": 0,
     "unknown_rejected": 0,
-    "disallowed_country_rejected": 31,
-    "country_qualified": 23
+    "disallowed_country_rejected": 13,
+    "country_qualified": 5
   },
   "selection": {
     "policy": "strict-actual-exit-and-local-stability",
@@ -237,13 +109,13 @@
     ],
     "maximum_published_nodes": 12,
     "maximum_median_latency_ms": 500.0,
-    "country_qualified": 23,
-    "latency_qualified": 7,
-    "published": 7,
+    "country_qualified": 5,
+    "latency_qualified": 1,
+    "published": 1,
     "padding": false
   },
-  "upstream_sha": "f4333377f9b50ffabd9e8544ff792dc3379f5be9",
-  "upstream_generated_at": "2026-10-15 11:31:47 UTC",
+  "upstream_sha": "a6b053a3acc16ee3152807671ee7c1232dee2c25",
+  "upstream_generated_at": "2026-10-15 17:02:59 UTC",
   "publication": {
     "enabled": true,
     "remote": "origin",

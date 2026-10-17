@@ -5,16 +5,19 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-10-17 13:02:43 UTC
+# generated: 2026-10-17 16:41:27 UTC
 #
 # Local filtering: gstatic + cloudflare + youtube + chatgpt + payload-1mb
 # Local final stability: 5/5 complete rounds required
-# upstream_nodes: 251
-# local_qualified: 3
+# upstream_nodes: 211
+# local_qualified: 6
 # local_ranking: stability, median latency, p95 latency
 #
 # Generated from the globally quality-qualified pool and re-tested through the current local network.
 #
 vless://7060231d-b9ba-495f-a218-bf427940cf3e@3.8.150.222:443?security=none&encryption=none&host=play.googleapis.com&headerType=http&type=tcp#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%201
-vless://7858128a-6b5e-4f86-9bff-52c1f1e6439d@91.107.247.173:2083?encryption=none&fp=firefox&security=tls&sni=sino.bestsellers1.site&type=ws#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%202
-vless://6338c01a-310e-42c3-bf4f-2a20e161054b@31.59.211.71:443?flow=xtls-rprx-vision&security=tls&sni=pl9.aiage.work&type=tcp#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%203
+vless://12be745f-0de5-4909-ac5e-604ac2b8af30@139.162.187.56:443?security=reality&encryption=none&pbk=JGsmGevFuMeQignXVLFIUmM2tpei4GtXKEQFMEIR_3U&headerType=&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=amp-api-edge.apps.apple.com&sid=12954892dc8d4acc#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%202
+vless://a034eba2-8b2c-40af-9233-629c45b40fc2@194.85.249.196:443?encryption=none&type=tcp&flow=xtls-rprx-vision&security=reality&sni=github.com&fp=firefox&pbk=9PaxmP7HVz6WmHzkX0eUAit8_EFG5BNMM3GZ_PhmjG0&sid=a2aa&allowInsecure=1#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Amsterdam%20%7C%203
+vless://7858128a-6b5e-4f86-9bff-52c1f1e6439d@91.107.247.173:2083?security=tls&sni=sino.bestsellers1.site&type=ws&path=%2F&fp=chrome&alpn=h3%2Ch2%2Chttp%2F1.1&allowInsecure=0#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%204
+vless://7858128a-6b5e-4f86-9bff-52c1f1e6439d@91.107.247.173:2083?encryption=none&fp=firefox&security=tls&sni=sino.bestsellers1.site&type=ws#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Nuremberg%20%7C%205
+vless://6338c01a-310e-42c3-bf4f-2a20e161054b@31.59.211.71:443?flow=xtls-rprx-vision&security=tls&sni=pl9.aiage.work&type=tcp#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%206

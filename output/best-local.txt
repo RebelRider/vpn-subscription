@@ -5,15 +5,18 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-10-19 14:21:39 UTC
+# generated: 2026-10-19 21:42:25 UTC
 #
 # Local filtering: gstatic + cloudflare + youtube + chatgpt + payload-1mb
 # Local final stability: 5/5 complete rounds required
-# upstream_nodes: 205
-# local_qualified: 2
+# upstream_nodes: 245
+# local_qualified: 5
 # local_ranking: stability, median latency, p95 latency
 #
 # Generated from the globally quality-qualified pool and re-tested through the current local network.
 #
 vless://4b09d40d-e36a-47c3-baa4-e6bf551b3183@31.59.217.164:443?flow=xtls-rprx-vision&fp=firefox&host=www.adobe.com&path=%2F&pbk=kOkILS7UXUQDNPLYn4SQ65kMIWKXNOttV5Kddw4ZqTo&security=reality&sid=1625a2a79d01328f&sni=www.adobe.com&type=tcp#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Eygelshoven%20%7C%201
-vless://0be0a2bf-aa20-4e52-aa5a-3d59d56b1582@31.56.185.175:2083?security=reality&flow=xtls-rprx-vision&fp=chrome&pbk=z4kKH-ZtCuJOEMOxWIjYrYmgT-7lbCNpU2wz5eFCYWg&sid=cbf7d7d0f10b65cf&sni=nlh2.underground.company&type=tcp#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Eygelshoven%20%7C%202
+vless://4b09d40d-e36a-47c3-baa4-e6bf551b3183@31.59.217.164:443?security=reality&pbk=kOkILS7UXUQDNPLYn4SQ65kMIWKXNOttV5Kddw4ZqTo&sid=1625a2a79d01328f&fp=firefox&sni=www.adobe.com&flow=xtls-rprx-vision&type=tcp#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Eygelshoven%20%7C%202
+vless://4b09d40d-e36a-47c3-baa4-e6bf551b3183@31.59.217.164:443?flow=xtls-rprx-vision&fp=chrome&pbk=kOkILS7UXUQDNPLYn4SQ65kMIWKXNOttV5Kddw4ZqTo&security=reality&sid=1625a2a79d01328f&sni=www.adobe.com&type=tcp#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Eygelshoven%20%7C%203
+vless://7060231d-b9ba-495f-a218-bf427940cf3e@98.92.171.189:443?type=http&path=/&host=98.92.171.189#%F0%9F%87%BA%F0%9F%87%B8%20US%20%7C%20Ashburn%20%7C%204
+vless://7060231d-b9ba-495f-a218-bf427940cf3e@100.54.27.217:443?type=http&path=/&host=100.54.27.217#%F0%9F%87%BA%F0%9F%87%B8%20US%20%7C%20Ashburn%20%7C%205

@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-20T12:25:33.624982+00:00",
+  "generated_at": "2026-10-20T18:40:45.787148+00:00",
   "algorithm": "v5-local-network-functional-filter-ranking",
   "input": {
     "path": "origin/main:output/qualified-all.txt",
-    "nodes": 228,
+    "nodes": 208,
     "mode": "origin-main-qualified-all"
   },
   "network": {
@@ -12,32 +12,33 @@
   },
   "gates": {
     "preliminary": {
-      "gstatic": 109
+      "gstatic": 102
     },
     "mandatory": {
-      "cloudflare": 78,
-      "youtube": 49,
-      "chatgpt": 42,
-      "payload-1mb": 34
+      "cloudflare": 70,
+      "youtube": 53,
+      "chatgpt": 47,
+      "payload-1mb": 43
     }
   },
   "stability": {
     "rounds": 5,
     "minimum_successes": 5,
-    "first_pass_survivors": 34,
+    "first_pass_survivors": 43,
     "round_survivors": [
+      31,
       26,
-      22,
-      21,
-      26,
-      20
+      32,
+      35,
+      19
     ],
-    "qualified": 1,
+    "qualified": 2,
     "pre_country_qualified": 18,
     "country_qualified": 4
   },
   "countries": {
-    "DE": 1
+    "DE": 1,
+    "NL": 1
   },
   "nodes": [
     {
@@ -45,17 +46,37 @@
       "country": "DE",
       "successful_final_rounds": 5,
       "latency_samples": 19,
-      "median_latency": 435.089249862358,
-      "p95_latency": 2786.06400010176,
-      "upstream_rank": 224,
-      "link": "vless://7858128a-6b5e-4f86-9bff-52c1f1e6439d@91.107.247.173:2083?security=tls&sni=sino.bestsellers1.site&type=ws#DE",
+      "median_latency": 477.1355001721531,
+      "p95_latency": 3448.829083936289,
+      "upstream_rank": 62,
+      "link": "vless://7858128a-6b5e-4f86-9bff-52c1f1e6439d@91.107.247.173:2083?security=tls&sni=sino.bestsellers1.site&type=ws&path=%2F&fp=chrome&alpn=h3%2Ch2%2Chttp%2F1.1&allowInsecure=0#DE",
       "source_country": "DE",
-      "exit_ip": "2a01:4f8:1c1b:1635::1",
+      "exit_ip": "91.107.247.173",
       "exit_country": "DE",
       "exit_country_source": "cloudflare-trace",
       "exit_city": "Nuremberg",
       "exit_region": "Bavaria",
       "exit_db_country": "DE",
+      "exit_geo_status": "trace-ok",
+      "exit_geo_attempts": 1,
+      "country_gate": "passed"
+    },
+    {
+      "rank": 2,
+      "country": "NL",
+      "successful_final_rounds": 5,
+      "latency_samples": 19,
+      "median_latency": 499.43287507630885,
+      "p95_latency": 5372.958666877821,
+      "upstream_rank": 25,
+      "link": "vless://b1097a54-29de-4014-962c-c835d96e8409@109.120.150.245:2053?flow=xtls-rprx-vision&fp=chrome&pbk=iywsgYk8P1mWMu9xBjwpJQnBNGSH43RKSaaRVVv75S0&security=reality&sid=c342eb1745bbaefd&sni=www.rutube.ru&type=tcp#NL",
+      "source_country": "NL",
+      "exit_ip": "109.120.150.245",
+      "exit_country": "NL",
+      "exit_country_source": "cloudflare-trace",
+      "exit_city": "Amsterdam",
+      "exit_region": "North Holland",
+      "exit_db_country": "NL",
       "exit_geo_status": "trace-ok",
       "exit_geo_attempts": 1,
       "country_gate": "passed"
@@ -75,20 +96,18 @@
     "ipv4_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv4.csv.gz",
     "ipv6_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv6.csv.gz",
     "observed_countries": {
-      "DE": 2,
-      "FR": 2,
-      "NL": 2,
-      "SG": 1,
-      "FI": 11
+      "FR": 4,
+      "DE": 3,
+      "NL": 1,
+      "FI": 10
     },
     "accepted_countries": {
-      "DE": 2,
-      "NL": 2
+      "DE": 3,
+      "NL": 1
     },
     "rejected_countries": {
-      "FR": 2,
-      "SG": 1,
-      "FI": 11
+      "FR": 4,
+      "FI": 10
     },
     "complete": 4,
     "country_only": 0,
@@ -108,12 +127,12 @@
     "maximum_published_nodes": 12,
     "maximum_median_latency_ms": 500.0,
     "country_qualified": 4,
-    "latency_qualified": 1,
-    "published": 1,
+    "latency_qualified": 2,
+    "published": 2,
     "padding": false
   },
-  "upstream_sha": "8827aae132d5e4892406017f1d5fc8e86c63c5ff",
-  "upstream_generated_at": "2026-10-20 11:39:37 UTC",
+  "upstream_sha": "8ceea6c5c4b16f2e0404cff5ad3e55d5aecf3832",
+  "upstream_generated_at": "2026-10-20 17:09:24 UTC",
   "publication": {
     "enabled": true,
     "remote": "origin",

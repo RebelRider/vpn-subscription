@@ -5,17 +5,15 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-10-20 22:20:26 UTC
+# generated: 2026-10-21 01:22:18 UTC
 #
 # Local filtering: gstatic + cloudflare + youtube + chatgpt + payload-1mb
 # Local final stability: 5/5 complete rounds required
-# upstream_nodes: 236
-# local_qualified: 4
+# upstream_nodes: 235
+# local_qualified: 2
 # local_ranking: stability, median latency, p95 latency
 #
 # Generated from the globally quality-qualified pool and re-tested through the current local network.
 #
-vless://e4514801-0d5a-42ba-869f-39bd605aef9e@18.134.224.162:22222?encryption=none&amp;security=none&amp;type=tcp#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%201
-vless://e4514801-0d5a-42ba-869f-39bd605aef9e@18.134.224.162:22222?encryption=none&security=none&type=tcp#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%202
-vless://c6362720-0931-4b91-b187-d8ecf3149734@212.74.39.236:10002?security=none&type=tcp#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%203
-vless://58037ab8-a8e2-4927-a8b1-f909f9fdb64c@89.105.218.106:2083?security=tls&sni=speedtestmark.com&alpn=http%2F1.1&fp=firefox&type=ws&path=%2Fvless-ws#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Enschede%20%7C%204
+vless://7060231d-b9ba-495f-a218-bf427940cf3e@18.192.119.124:443?security=&encryption=none&host=play.googleapis.com&headerType=http&type=tcp#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%201
+vless://58037ab8-a8e2-4927-a8b1-f909f9fdb64c@89.105.218.106:2083?security=tls&sni=speedtestmark.com&alpn=http%2F1.1&fp=firefox&type=ws&path=%2Fvless-ws#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Enschede%20%7C%202

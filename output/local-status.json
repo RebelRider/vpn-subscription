@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-22T13:22:14.085220+00:00",
+  "generated_at": "2026-10-22T21:57:38.960122+00:00",
   "algorithm": "v5-local-network-functional-filter-ranking",
   "input": {
     "path": "origin/main:output/qualified-all.txt",
-    "nodes": 169,
+    "nodes": 163,
     "mode": "origin-main-qualified-all"
   },
   "network": {
@@ -18,26 +18,26 @@
       "cloudflare": 5,
       "youtube": 5,
       "chatgpt": 5,
-      "payload-1mb": 5
+      "payload-1mb": 3
     }
   },
   "stability": {
     "rounds": 5,
     "minimum_successes": 5,
-    "first_pass_survivors": 5,
+    "first_pass_survivors": 3,
     "round_survivors": [
-      4,
-      5,
-      4,
-      5,
-      5
+      3,
+      3,
+      3,
+      3,
+      3
     ],
-    "qualified": 2,
-    "pre_country_qualified": 4,
-    "country_qualified": 4
+    "qualified": 1,
+    "pre_country_qualified": 3,
+    "country_qualified": 3
   },
   "countries": {
-    "GB": 2
+    "GB": 1
   },
   "nodes": [
     {
@@ -45,32 +45,12 @@
       "country": "XX",
       "successful_final_rounds": 5,
       "latency_samples": 19,
-      "median_latency": 343.2469579856843,
-      "p95_latency": 4240.48979091458,
-      "upstream_rank": 60,
-      "link": "vless://e4514801-0d5a-42ba-869f-39bd605aef9e@3.9.64.34:22223?security=none&type=tcp&encryption=none#GB",
+      "median_latency": 260.3078340180218,
+      "p95_latency": 3242.8505420684814,
+      "upstream_rank": 88,
+      "link": "vless://e4514801-0d5a-42ba-869f-39bd605aef9e@18.168.90.187:22223?encryption=none&security=none&type=tcp#GB",
       "source_country": "XX",
-      "exit_ip": "2a05:d01c:475:6000:51a1:d3f6:d84a:d902",
-      "exit_country": "GB",
-      "exit_country_source": "cloudflare-trace",
-      "exit_city": "London",
-      "exit_region": "England",
-      "exit_db_country": "GB",
-      "exit_geo_status": "trace-ok",
-      "exit_geo_attempts": 1,
-      "country_gate": "passed"
-    },
-    {
-      "rank": 2,
-      "country": "XX",
-      "successful_final_rounds": 5,
-      "latency_samples": 19,
-      "median_latency": 351.3375420589,
-      "p95_latency": 2255.7694579008967,
-      "upstream_rank": 67,
-      "link": "vless://e4514801-0d5a-42ba-869f-39bd605aef9e@3.9.64.34:22222?encryption=none&type=tcp#GB",
-      "source_country": "XX",
-      "exit_ip": "2a05:d01c:475:6000:51a1:d3f6:d84a:d902",
+      "exit_ip": "2a05:d01c:475:6000:1ed:ce53:4006:5a40",
       "exit_country": "GB",
       "exit_country_source": "cloudflare-trace",
       "exit_city": "London",
@@ -95,19 +75,19 @@
     "ipv4_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv4.csv.gz",
     "ipv6_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv6.csv.gz",
     "observed_countries": {
-      "GB": 2,
-      "DE": 2
+      "GB": 1,
+      "NL": 2
     },
     "accepted_countries": {
-      "GB": 2,
-      "DE": 2
+      "GB": 1,
+      "NL": 2
     },
     "rejected_countries": {},
-    "complete": 4,
+    "complete": 3,
     "country_only": 0,
     "unknown_rejected": 0,
     "disallowed_country_rejected": 0,
-    "country_qualified": 4
+    "country_qualified": 3
   },
   "selection": {
     "policy": "strict-actual-exit-and-local-stability",
@@ -120,13 +100,13 @@
     ],
     "maximum_published_nodes": 12,
     "maximum_median_latency_ms": 500.0,
-    "country_qualified": 4,
-    "latency_qualified": 2,
-    "published": 2,
+    "country_qualified": 3,
+    "latency_qualified": 1,
+    "published": 1,
     "padding": false
   },
-  "upstream_sha": "e228f3a00e5caaa174188edfd63e9e13aae3fa41",
-  "upstream_generated_at": "2026-10-22 11:55:16 UTC",
+  "upstream_sha": "874420685ae0a95a742e66c08ddf06a62d27a905",
+  "upstream_generated_at": "2026-10-22 17:12:20 UTC",
   "publication": {
     "enabled": true,
     "remote": "origin",

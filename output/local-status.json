@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-21T23:59:27.240283+00:00",
+  "generated_at": "2026-10-22T05:31:13.195051+00:00",
   "algorithm": "v5-local-network-functional-filter-ranking",
   "input": {
     "path": "origin/main:output/qualified-all.txt",
-    "nodes": 243,
+    "nodes": 305,
     "mode": "origin-main-qualified-all"
   },
   "network": {
@@ -12,50 +12,50 @@
   },
   "gates": {
     "preliminary": {
-      "gstatic": 16
+      "gstatic": 24
     },
     "mandatory": {
-      "cloudflare": 15,
-      "youtube": 15,
-      "chatgpt": 15,
-      "payload-1mb": 15
+      "cloudflare": 24,
+      "youtube": 22,
+      "chatgpt": 22,
+      "payload-1mb": 17
     }
   },
   "stability": {
     "rounds": 5,
     "minimum_successes": 5,
-    "first_pass_survivors": 15,
+    "first_pass_survivors": 17,
     "round_survivors": [
-      11,
-      11,
-      11,
-      11,
-      14
+      12,
+      17,
+      13,
+      16,
+      16
     ],
     "qualified": 1,
-    "pre_country_qualified": 11,
-    "country_qualified": 11
+    "pre_country_qualified": 10,
+    "country_qualified": 5
   },
   "countries": {
-    "DE": 1
+    "PL": 1
   },
   "nodes": [
     {
       "rank": 1,
-      "country": "DE",
+      "country": "PL",
       "successful_final_rounds": 5,
       "latency_samples": 19,
-      "median_latency": 494.0670838113874,
-      "p95_latency": 1448.694417020306,
-      "upstream_rank": 148,
-      "link": "vless://5a96c1fc-f167-44b9-9020-8f6867537d14@150.241.79.149:443?encryption=none&flow=xtls-rprx-vision&headerType=none&pbk=Y4cTOs9QErbv2GtQNSTTzvZg-4hc7mBqteJNYTSRRg8&security=reality&sid=439106af35a28917&sni=germany02.azotvpn.xyz&type=tcp&fp=chrome#DE",
-      "source_country": "DE",
-      "exit_ip": "150.241.79.149",
-      "exit_country": "DE",
+      "median_latency": 415.8614578191191,
+      "p95_latency": 840.8809159882367,
+      "upstream_rank": 187,
+      "link": "vless://9c794bb7-54fe-4acd-844a-a26209af36c3@144.31.0.140:443?security=reality&encryption=none&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=api.sakhalin.fyi&sid=7271129440ade8fa#PL",
+      "source_country": "PL",
+      "exit_ip": "2a09:bac5:5063:2478::3a2:4f",
+      "exit_country": "PL",
       "exit_country_source": "cloudflare-trace",
-      "exit_city": "Frankfurt am Main",
-      "exit_region": "Hesse",
-      "exit_db_country": "DE",
+      "exit_city": "Warsaw",
+      "exit_region": "Mazovia",
+      "exit_db_country": "PL",
       "exit_geo_status": "trace-ok",
       "exit_geo_attempts": 1,
       "country_gate": "passed"
@@ -75,19 +75,26 @@
     "ipv4_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv4.csv.gz",
     "ipv6_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv6.csv.gz",
     "observed_countries": {
-      "DE": 8,
-      "PL": 3
+      "PL": 1,
+      "CA": 1,
+      "DE": 4,
+      "RO": 2,
+      "SG": 2
     },
     "accepted_countries": {
-      "DE": 8,
-      "PL": 3
+      "PL": 1,
+      "DE": 4
     },
-    "rejected_countries": {},
-    "complete": 11,
+    "rejected_countries": {
+      "CA": 1,
+      "RO": 2,
+      "SG": 2
+    },
+    "complete": 5,
     "country_only": 0,
     "unknown_rejected": 0,
-    "disallowed_country_rejected": 0,
-    "country_qualified": 11
+    "disallowed_country_rejected": 5,
+    "country_qualified": 5
   },
   "selection": {
     "policy": "strict-actual-exit-and-local-stability",
@@ -100,13 +107,13 @@
     ],
     "maximum_published_nodes": 12,
     "maximum_median_latency_ms": 500.0,
-    "country_qualified": 11,
+    "country_qualified": 5,
     "latency_qualified": 1,
     "published": 1,
     "padding": false
   },
-  "upstream_sha": "ae1e461874b0942a7f8ad90734c8a5e003166af1",
-  "upstream_generated_at": "2026-10-21 23:21:11 UTC",
+  "upstream_sha": "68460a1a0445c1171d6f3f6f7a0ca4cec45b39a2",
+  "upstream_generated_at": "2026-10-22 04:49:51 UTC",
   "publication": {
     "enabled": true,
     "remote": "origin",

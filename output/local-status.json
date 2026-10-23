@@ -1,57 +1,77 @@
 {
-  "generated_at": "2026-10-22T23:07:57.634232+00:00",
+  "generated_at": "2026-10-23T01:43:49.442213+00:00",
   "algorithm": "v5-local-network-functional-filter-ranking",
   "input": {
     "path": "origin/main:output/qualified-all.txt",
-    "nodes": 172,
+    "nodes": 257,
     "mode": "origin-main-qualified-all"
   },
   "network": {
-    "system_route_interface": "utun5",
+    "system_route_interface": "en0",
     "probe_default_interface": "en0"
   },
   "gates": {
     "preliminary": {
-      "gstatic": 11
+      "gstatic": 27
     },
     "mandatory": {
-      "cloudflare": 9,
-      "youtube": 8,
-      "chatgpt": 8,
-      "payload-1mb": 8
+      "cloudflare": 26,
+      "youtube": 26,
+      "chatgpt": 25,
+      "payload-1mb": 24
     }
   },
   "stability": {
     "rounds": 5,
     "minimum_successes": 5,
-    "first_pass_survivors": 8,
+    "first_pass_survivors": 24,
     "round_survivors": [
-      8,
-      8,
-      8,
-      8,
-      7
+      24,
+      20,
+      21,
+      21,
+      18
     ],
-    "qualified": 2,
-    "pre_country_qualified": 7,
-    "country_qualified": 4
+    "qualified": 5,
+    "pre_country_qualified": 17,
+    "country_qualified": 10
   },
   "countries": {
-    "PL": 1,
-    "NL": 1
+    "NL": 3,
+    "PL": 2
   },
   "nodes": [
     {
       "rank": 1,
+      "country": "NL",
+      "successful_final_rounds": 5,
+      "latency_samples": 19,
+      "median_latency": 397.79970794916153,
+      "p95_latency": 728.1222499441355,
+      "upstream_rank": 114,
+      "link": "vless://9c794bb7-54fe-4acd-844a-a26209af36c3@152.53.107.241:443?security=reality&fp=chrome&flow=xtls-rprx-vision&sid=7271129440ade8fa&encryption=none&headerType=none&sni=news.moscowvibe.fyi&type=tcp&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ#NL",
+      "source_country": "NL",
+      "exit_ip": "2a09:bac1:5540::3e4:2e",
+      "exit_country": "NL",
+      "exit_country_source": "cloudflare-trace",
+      "exit_city": "Amsterdam",
+      "exit_region": "North Holland",
+      "exit_db_country": "NL",
+      "exit_geo_status": "trace-ok",
+      "exit_geo_attempts": 1,
+      "country_gate": "passed"
+    },
+    {
+      "rank": 2,
       "country": "PL",
       "successful_final_rounds": 5,
       "latency_samples": 19,
-      "median_latency": 380.16591616906226,
-      "p95_latency": 883.2624580245465,
-      "upstream_rank": 171,
-      "link": "vless://9c794bb7-54fe-4acd-844a-a26209af36c3@144.31.0.140:443?security=reality&encryption=none&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=api.sakhalin.fyi&sid=7271129440ade8fa#PL",
+      "median_latency": 400.6925830617547,
+      "p95_latency": 746.3049169164151,
+      "upstream_rank": 98,
+      "link": "vless://9c794bb7-54fe-4acd-844a-a26209af36c3@144.31.0.140:443?&security=reality&flow=xtls-rprx-vision&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ&sid=7271129440ade8fa&fp=chrome&sni=api.sakhalin.fyi&type=tcp&headerType=none&host=api.sakhalin.fyi&path=%2F#PL",
       "source_country": "PL",
-      "exit_ip": "2a09:bac5:5067:2482::3a3:51",
+      "exit_ip": "2a09:bac1:5be0:40::3a5:1e",
       "exit_country": "PL",
       "exit_country_source": "cloudflare-trace",
       "exit_city": "Warsaw",
@@ -62,16 +82,56 @@
       "country_gate": "passed"
     },
     {
-      "rank": 2,
+      "rank": 3,
+      "country": "PL",
+      "successful_final_rounds": 5,
+      "latency_samples": 19,
+      "median_latency": 423.0773749295622,
+      "p95_latency": 868.7942079268396,
+      "upstream_rank": 50,
+      "link": "vless://9c794bb7-54fe-4acd-844a-a26209af36c3@144.31.0.140:443?security=reality&encryption=none&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=api.sakhalin.fyi&sid=7271129440ade8fa#PL",
+      "source_country": "PL",
+      "exit_ip": "2a09:bac1:5be0:40::3a5:1e",
+      "exit_country": "PL",
+      "exit_country_source": "cloudflare-trace",
+      "exit_city": "Warsaw",
+      "exit_region": "Mazovia",
+      "exit_db_country": "PL",
+      "exit_geo_status": "trace-ok",
+      "exit_geo_attempts": 1,
+      "country_gate": "passed"
+    },
+    {
+      "rank": 4,
+      "country": "US",
+      "successful_final_rounds": 5,
+      "latency_samples": 19,
+      "median_latency": 472.21820801496506,
+      "p95_latency": 563.2947499398142,
+      "upstream_rank": 89,
+      "link": "vless://dd688bb9-41d9-4eb7-b5eb-6175f612cdb6@n1.fazelino.site:443?alpn=http/1.1&encryption=none&fp=chrome&host=api.fazelino.site&path=/api/get&security=tls&sni=api.fazelino.site&type=ws#US",
+      "source_country": "US",
+      "exit_ip": "2a13:7c00:11:2:f816:3eff:fe56:aaea",
+      "exit_country": "NL",
+      "exit_country_source": "cloudflare-trace",
+      "exit_city": "Amsterdam",
+      "exit_region": "North Holland",
+      "exit_db_country": "NL",
+      "exit_geo_status": "trace-ok",
+      "exit_geo_attempts": 1,
+      "country_gate": "passed"
+    },
+    {
+      "rank": 5,
       "country": "NL",
       "successful_final_rounds": 5,
       "latency_samples": 19,
-      "median_latency": 497.62495793402195,
-      "p95_latency": 3358.9852498844266,
-      "upstream_rank": 53,
-      "link": "vless://9c794bb7-54fe-4acd-844a-a26209af36c3@152.53.107.241:443?security=reality&encryption=none&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ&headerType=&fp=firefox&type=tcp&flow=xtls-rprx-vision&sni=news.moscowvibe.fyi&sid=7271129440ade8fa#NL",
+      "median_latency": 474.6684171259403,
+      "p95_latency": 649.4242500048131,
+      "upstream_rank": 39,
+      "link": "vless://9c794bb7-54fe-4acd-844a-a26209af36c3@152.53.107.241:443?security=reality&fp=firefox&flow=xtls-rprx-vision&sid=7271129440ade8fa&encryption=none&headerType=none&sni=news.moscowvibe.fyi&type=tcp&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ#NL",
       "source_country": "NL",
-      "exit_ip": "2a09:bac5:4e23:270f::3e4:2e",
+      "exit_ip": "2a09:bac1:5540::3e4:2e",
       "exit_country": "NL",
       "exit_country_source": "cloudflare-trace",
       "exit_city": "Amsterdam",
@@ -96,28 +156,38 @@
     "ipv4_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv4.csv.gz",
     "ipv6_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv6.csv.gz",
     "observed_countries": {
-      "PL": 1,
-      "NL": 2,
+      "RU": 1,
+      "NL": 3,
+      "PL": 3,
+      "DE": 2,
       "FR": 1,
-      "CA": 1,
+      "GB": 1,
       "US": 1,
-      "RU": 1
+      "FI": 1,
+      "RO": 1,
+      "SG": 2,
+      "CA": 1
     },
     "accepted_countries": {
-      "PL": 1,
-      "NL": 2,
+      "NL": 3,
+      "PL": 3,
+      "DE": 2,
+      "GB": 1,
       "US": 1
     },
     "rejected_countries": {
+      "RU": 1,
       "FR": 1,
-      "CA": 1,
-      "RU": 1
+      "FI": 1,
+      "RO": 1,
+      "SG": 2,
+      "CA": 1
     },
-    "complete": 3,
+    "complete": 9,
     "country_only": 1,
     "unknown_rejected": 0,
-    "disallowed_country_rejected": 3,
-    "country_qualified": 4
+    "disallowed_country_rejected": 7,
+    "country_qualified": 10
   },
   "selection": {
     "policy": "strict-actual-exit-and-local-stability",
@@ -130,13 +200,13 @@
     ],
     "maximum_published_nodes": 12,
     "maximum_median_latency_ms": 500.0,
-    "country_qualified": 4,
-    "latency_qualified": 2,
-    "published": 2,
+    "country_qualified": 10,
+    "latency_qualified": 5,
+    "published": 5,
     "padding": false
   },
-  "upstream_sha": "555db0c4e837dd8321a0f77d62a074a74284c6be",
-  "upstream_generated_at": "2026-10-22 21:37:28 UTC",
+  "upstream_sha": "f4c61368dd5e97d780cd4b8cdd4be67e7a4180d2",
+  "upstream_generated_at": "2026-10-23 00:41:07 UTC",
   "publication": {
     "enabled": true,
     "remote": "origin",

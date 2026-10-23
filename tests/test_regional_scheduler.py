@@ -99,32 +99,60 @@ class SchedulerTests(unittest.TestCase):
         self.assertEqual(runner.run([sys.executable, "-c", "print('healthy')"], "test"), (0, "healthy\n"))
 
     def test_failed_empty_run_preserves_published_state_and_artifact(self):
+        for probe_code in (2, 1):
+            with self.subTest(probe_exit=probe_code), tempfile.TemporaryDirectory() as temporary:
+                now = time.time()
+                calls = []
+                class FakeRunner:
+                    def __init__(self, repo, deadline): self.repo = repo
+                    def git(self, *args, **kwargs):
+                        return "" if args[0] == "status" else "main" if args[0] == "branch" else "sha"
+                    def fetch(self): pass
+                    def run(self, command, label, *args, **kwargs):
+                        calls.append(command)
+                        return (probe_code, "LOCAL QUALIFIED: 0; publication health fetch unavailable\n") if "scripts/local_probe.py" in command else (0, "")
+                    def stop(self): pass
+                repo = Path(temporary) / "runtime"
+                state_dir = Path(temporary) / "state"
+                (repo / "output").mkdir(parents=True)
+                state_dir.mkdir()
+                artifact = repo / "output/best-local.txt"
+                artifact.write_text("last-known-good")
+                (repo / "output/local-status.json").write_text(json.dumps({"generated_at": datetime.fromtimestamp(now, timezone.utc).isoformat(), "stability": {"qualified": 0}, "nodes": [], "diagnostics": [{"services": {"chatgpt": {"attempts": 1, "passed": 0}}}]}))
+                state_path = state_dir / "regional-scheduler-status.json"
+                scheduler.atomic_json(state_path, {"last_published_at": now - 100, "last_published_count": 3})
+                with mock.patch.object(scheduler, "Runner", FakeRunner), mock.patch.object(scheduler, "input_metadata", return_value=("changed", now)):
+                    self.assertEqual(scheduler.run_scheduler(repo, state_dir), 1)
+                state = scheduler.load_state(state_path)
+                self.assertEqual(state["last_published_count"], 3)
+                self.assertEqual(state["last_published_at"], now - 100)
+                self.assertEqual(state["last_local_qualified"], 0)
+                self.assertEqual(state["last_service_totals"]["chatgpt"]["attempts"], 1)
+                self.assertEqual(state["last_service_totals"]["chatgpt"]["passed"], 0)
+                self.assertTrue(any(command[:3] == ["gh", "workflow", "run"] for command in calls))
+                self.assertFalse(state["running"])
+                self.assertEqual(artifact.read_text(), "last-known-good")
+
+    def test_nonzero_probe_without_fresh_status_does_not_record_or_dispatch(self):
         now = time.time()
+        calls = []
         class FakeRunner:
             def __init__(self, repo, deadline): self.repo = repo
-            def git(self, *args, **kwargs):
-                return "" if args[0] == "status" else "main" if args[0] == "branch" else "sha"
+            def git(self, *args, **kwargs): return "" if args[0] == "status" else "main" if args[0] == "branch" else "sha"
             def fetch(self): pass
-            def run(self, command, label, *args, **kwargs): return (2, "LOCAL QUALIFIED: 0\n") if "scripts/local_probe.py" in command else (0, "")
+            def run(self, command, label, *args, **kwargs): calls.append(command); return 1, "GitHub unavailable"
             def stop(self): pass
         with tempfile.TemporaryDirectory() as temporary:
-            repo = Path(temporary) / "runtime"
-            state_dir = Path(temporary) / "state"
-            (repo / "output").mkdir(parents=True)
-            state_dir.mkdir()
-            artifact = repo / "output/best-local.txt"
-            artifact.write_text("last-known-good")
-            (repo / "output/local-status.json").write_text(json.dumps({"generated_at": now, "stability": {"qualified": 0}, "nodes": []}))
-            state_path = state_dir / "regional-scheduler-status.json"
-            scheduler.atomic_json(state_path, {"last_published_at": now - 100, "last_published_count": 3})
-            with mock.patch.object(scheduler, "Runner", FakeRunner), mock.patch.object(scheduler, "input_metadata", return_value=("changed", now)):
+            repo = Path(temporary)
+            (repo / "output").mkdir()
+            (repo / "output/local-status.json").write_text(json.dumps({"generated_at": now - 100, "stability": {"qualified": 0}, "nodes": []}))
+            state_dir = repo / "state"
+            with mock.patch.object(scheduler, "Runner", FakeRunner), mock.patch.object(scheduler, "input_metadata", return_value=("input", now)):
                 self.assertEqual(scheduler.run_scheduler(repo, state_dir), 1)
-            state = scheduler.load_state(state_path)
-            self.assertEqual(state["last_published_count"], 3)
-            self.assertEqual(state["last_published_at"], now - 100)
-            self.assertEqual(state["last_local_qualified"], 0)
-            self.assertFalse(state["running"])
-            self.assertEqual(artifact.read_text(), "last-known-good")
+            state = scheduler.load_state(state_dir / "regional-scheduler-status.json")
+            self.assertNotIn("last_local_qualified", state)
+            self.assertIn("no fresh local result", state["last_error"])
+            self.assertFalse(any(command[:3] == ["gh", "workflow", "run"] for command in calls))
 
     def test_stale_input_blocks_probe_and_dispatches(self):
         calls = []
@@ -189,6 +217,46 @@ class SchedulerTests(unittest.TestCase):
             scheduler.dispatch_replenishment(runner, state, path, now, "empty")
             scheduler.dispatch_replenishment(runner, state, path, now + 100, "empty")
             self.assertEqual(runner.run.call_count, 1)
+
+    def test_failed_replenishment_retries_before_six_hours_and_then_throttles_success(self):
+        runner = mock.Mock()
+        runner.run.side_effect = [scheduler.CommandFailure("dispatch", 1, "temporary GitHub error"), (0, ""), (0, "")]
+        now = time.time()
+        with tempfile.TemporaryDirectory() as temporary, mock.patch.object(scheduler.random, "random", return_value=0.5):
+            path = Path(temporary) / "state.json"
+            state = {}
+            scheduler.dispatch_replenishment(runner, state, path, now, "empty")
+            self.assertNotIn("last_replenishment_dispatched_at", state)
+            self.assertEqual(state["next_replenishment_retry_at"], now + 60)
+            scheduler.dispatch_replenishment(runner, state, path, now + 30, "empty")
+            self.assertEqual(runner.run.call_count, 1)
+            scheduler.dispatch_replenishment(runner, state, path, now + 61, "empty")
+            self.assertEqual(runner.run.call_count, 2)
+            self.assertEqual(state["last_replenishment_dispatched_at"], now + 61)
+            self.assertEqual(state["next_replenishment_retry_at"], 0)
+            self.assertNotIn("last_replenishment_error", state)
+            scheduler.dispatch_replenishment(runner, state, path, now + 100, "empty")
+            self.assertEqual(runner.run.call_count, 2)
+            scheduler.dispatch_replenishment(runner, state, path, now + 61 + 6 * 3600, "empty")
+            self.assertEqual(runner.run.call_count, 3)
+
+    def test_unchanged_successful_input_retries_pending_low_pool_dispatch(self):
+        now = time.time()
+        calls = []
+        class FakeRunner:
+            def __init__(self, repo, deadline): self.repo = repo
+            def git(self, *args, **kwargs): return "" if args[0] == "status" else "main" if args[0] == "branch" else "sha"
+            def fetch(self): pass
+            def run(self, command, *args, **kwargs): calls.append(command); return 0, ""
+            def stop(self): pass
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary)
+            state_dir = path / "state"
+            scheduler.atomic_json(state_dir / "regional-scheduler-status.json", {"last_validated_signature": "same", "last_validated_at": now - 100, "last_local_qualified": 2, "next_replenishment_retry_at": now - 10})
+            with mock.patch.object(scheduler, "Runner", FakeRunner), mock.patch.object(scheduler, "input_metadata", return_value=("same", now)):
+                self.assertEqual(scheduler.run_scheduler(path, state_dir), 0)
+            self.assertTrue(any(command[:3] == ["gh", "workflow", "run"] for command in calls))
+            self.assertFalse(any("scripts/local_probe.py" in command for command in calls))
 
     def test_owned_logs_rotate_without_touching_unrelated_logs(self):
         with tempfile.TemporaryDirectory() as temporary:

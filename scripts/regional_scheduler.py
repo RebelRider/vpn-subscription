@@ -243,17 +243,23 @@ def input_metadata(runner: Runner) -> tuple[str, float]:
 
 
 def dispatch_replenishment(runner: Runner, state: dict, state_path: Path, now: float, reason: str) -> None:
-    if now - state.get("last_replenishment_attempt_at", 0) < REPLENISH_SECONDS:
+    if now - state.get("last_replenishment_dispatched_at", 0) < REPLENISH_SECONDS:
+        return
+    if now < state.get("next_replenishment_retry_at", 0):
         return
     state["last_replenishment_attempt_at"] = now
     atomic_json(state_path, state)
     try:
         runner.run(["gh", "workflow", "run", "build.yml", "--ref", "main"], "candidate replenishment dispatch", 60)
-        state["last_replenishment_dispatched_at"] = now
+        state.update({"last_replenishment_dispatched_at": now, "replenishment_consecutive_failures": 0, "next_replenishment_retry_at": 0})
+        state.pop("last_replenishment_error", None)
         log(f"Candidate replenishment requested: {reason}")
     except (OSError, CommandFailure) as exc:
-        state["last_replenishment_error"] = redact(str(exc))
-        log(f"WARNING: candidate replenishment dispatch unavailable: {exc}")
+        previous = state.get("replenishment_consecutive_failures", 0)
+        failures = previous + 1 if isinstance(previous, int) and 0 <= previous <= 1000 else 1
+        delay = retry_delay(failures)
+        state.update({"last_replenishment_error": redact(str(exc)), "replenishment_consecutive_failures": failures, "next_replenishment_retry_at": now + delay})
+        log(f"WARNING: candidate replenishment dispatch unavailable: {exc}; retry eligible in {delay:.0f}s")
     atomic_json(state_path, state)
 
 
@@ -297,6 +303,9 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
                 dispatch_replenishment(runner, state, state_path, now, "stale or invalid Best50 timestamp")
                 raise RuntimeError(f"Best50 age {age / 3600:.1f}h is outside permitted freshness (18h)")
             if not validation_due(state, signature, now):
+                known_count = state.get("last_local_qualified")
+                if isinstance(known_count, int) and 0 <= known_count < LOW_POOL_SIZE:
+                    dispatch_replenishment(runner, state, state_path, now, f"only {known_count} local qualifiers; retry pending dispatch")
                 state["health"] = "waiting_retry" if now < state.get("next_retry_at", 0) else "current"
                 log("Input current; next six-hour validation or changed input will trigger a run")
                 return 0
@@ -311,30 +320,37 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
             code, output = runner.run([sys.executable, "scripts/local_probe.py", "--interface", "en0", "--rounds", "5", "--minimum-successes", "5", "--publish"], "local validation/publication", timeout=80 * 60, check=False)
             for line in output.splitlines()[-100:]:
                 log(line)
-            if code not in (0, 2):
-                raise CommandFailure("local validation/publication", code, output)
-            local_status = load_state(repo / "output/local-status.json")
-            qualified = local_status.get("stability", {}).get("qualified", len(local_status.get("nodes", [])))
-            if not isinstance(qualified, int) or isinstance(qualified, bool) or not 0 <= qualified <= 50 or qualified != len(local_status.get("nodes", [])):
-                raise RuntimeError("Invalid local validation status")
-            generated_at = parse_timestamp(local_status.get("generated_at"), "local validation")
-            if generated_at < now - 5:
-                raise RuntimeError("Local validation status is missing, stale, or has invalid timestamp")
-            service_totals = {name: {"attempts": 0, "passed": 0, "all_round_candidates": 0} for name in ("chatgpt", "youtube", "instagram")}
-            rounds = local_status.get("stability", {}).get("rounds", 5)
-            for diagnostic in local_status.get("diagnostics", []):
+            try:
+                local_status = load_state(repo / "output/local-status.json")
+                qualified = local_status.get("stability", {}).get("qualified", len(local_status.get("nodes", [])))
+                if not isinstance(qualified, int) or isinstance(qualified, bool) or not 0 <= qualified <= 50 or qualified != len(local_status.get("nodes", [])):
+                    raise RuntimeError("Invalid local validation status")
+                generated_at = parse_timestamp(local_status.get("generated_at"), "local validation")
+                if generated_at < now - 5:
+                    raise RuntimeError("Local validation status is missing, stale, or has invalid timestamp")
+                service_totals = {name: {"attempts": 0, "passed": 0, "all_round_candidates": 0} for name in ("chatgpt", "youtube", "instagram")}
+                rounds = local_status.get("stability", {}).get("rounds", 5)
+                for diagnostic in local_status.get("diagnostics", []):
+                    for name, total in service_totals.items():
+                        service = diagnostic.get("services", {}).get(name, {})
+                        attempts, passed = service.get("attempts", 0), service.get("passed", 0)
+                        if isinstance(attempts, int) and isinstance(passed, int) and 0 <= passed <= attempts <= 5:
+                            total["attempts"] += attempts
+                            total["passed"] += passed
+                            total["all_round_candidates"] += int(attempts == passed == rounds)
+                state.update({"last_local_result_at": generated_at, "last_local_qualified": qualified, "last_service_totals": service_totals})
                 for name, total in service_totals.items():
-                    service = diagnostic.get("services", {}).get(name, {})
-                    attempts, passed = service.get("attempts", 0), service.get("passed", 0)
-                    if isinstance(attempts, int) and isinstance(passed, int) and 0 <= passed <= attempts <= 5:
-                        total["attempts"] += attempts
-                        total["passed"] += passed
-                        total["all_round_candidates"] += int(attempts == passed == rounds)
-            state.update({"last_local_result_at": generated_at, "last_local_qualified": qualified, "last_service_totals": service_totals})
-            for name, total in service_totals.items():
-                log(f"Service {name}: {total['passed']}/{total['attempts']} successful HTTPS checks; {total['all_round_candidates']} candidates passed every round")
+                    log(f"Service {name}: {total['passed']}/{total['attempts']} successful HTTPS checks; {total['all_round_candidates']} candidates passed every round")
+            except (RuntimeError, TypeError, AttributeError, ValueError):
+                if code not in (0, 2):
+                    raise CommandFailure("local validation/publication; no fresh local result", code, output) from None
+                raise
             if qualified < LOW_POOL_SIZE:
                 dispatch_replenishment(runner, state, state_path, time.time(), f"only {qualified} local qualifiers")
+            if code not in (0, 2):
+                # A freshly completed validation remains useful even when GitHub
+                # publication fails. It never advances last-published state.
+                raise CommandFailure("local validation/publication", code, output)
             if code == 2 or qualified == 0:
                 raise CommandFailure("local validation found no qualifying servers; last published artifact retained", 2)
             state.update({"last_validated_at": generated_at, "last_validated_signature": signature, "last_published_validation_at": generated_at, "last_published_at": time.time(), "last_published_count": qualified, "consecutive_failures": 0, "next_retry_at": 0, "health": "published"})

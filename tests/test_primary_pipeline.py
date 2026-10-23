@@ -50,6 +50,11 @@ class PrimaryPolicyTests(unittest.TestCase):
         self.assertFalse(build.validate_primary_response("https://speed.cloudflare.com/__down?bytes=1000000", "200", b"short", 5))
         self.assertTrue(build.validate_primary_response("https://speed.cloudflare.com/__down?bytes=1000000", "200", b"x", 1000000))
 
+    def test_different_endpoint_is_not_collapsed_to_same_account(self):
+        first = build.parse_vless(LINK)
+        second = build.parse_vless(LINK.replace('1.1.1.1', '8.8.8.8'))
+        self.assertNotEqual(build.normalized_fingerprint(first), build.normalized_fingerprint(second))
+
     def test_grpc_service_names_remain_distinct(self):
         first = build.parse_vless(LINK.replace("#public", "&type=grpc&serviceName=one"))
         second = build.parse_vless(LINK.replace("#public", "&type=grpc&serviceName=two"))

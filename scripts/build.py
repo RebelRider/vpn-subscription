@@ -265,10 +265,10 @@ def _parse_vless(link: str) -> dict:
 
 def normalized_fingerprint(node: dict) -> str:
     """
-    Same configuration semantics, ignoring endpoint IP/port.
+    Same complete configuration semantics, including endpoint IP/port.
 
-    This catches cases where the same VLESS account is exposed
-    through multiple equivalent endpoints.
+    Endpoint diversity matters: the same account on another endpoint
+    can have a different local reachability result.
     """
 
     if node.get("protocol", "vless") != "vless":
@@ -279,6 +279,7 @@ def normalized_fingerprint(node: dict) -> str:
     value = "|".join(
         [
             node.get("protocol", "vless"),
+            node["server"], str(node["port"]),
             node["uuid"],
             node["transport"],
             node["security"],

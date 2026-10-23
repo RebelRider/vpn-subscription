@@ -1502,6 +1502,7 @@ def validate_generated_result(
     if rounds not in (3, 4, 5) or status["stability"].get("minimum_successes") != rounds:
         raise RuntimeError("Incomplete validation rounds")
     for node in status["nodes"]:
+        require_fresh_timestamp(node.get("validated_at"), 6, "candidate validation")
         if not valid_node_evidence(node, rounds):
             raise RuntimeError("A node lacks required service or latency evidence")
         if node.get("exit_country") not in ALLOWED_ACTUAL_EXIT_COUNTRIES:
@@ -1689,6 +1690,16 @@ def _publish_regional_once(
         )
     else:
         base_ref = DEFAULT_UPSTREAM_REF
+
+    if regional_exists:
+        try:
+            previous_status = json.loads(git_output("show", f"{base_ref}:{REGIONAL_STATUS_PATH}"))
+            previous_time = datetime.fromisoformat(previous_status["generated_at"].replace("Z", "+00:00"))
+            current_time = datetime.fromisoformat(status["generated_at"].replace("Z", "+00:00"))
+        except (RuntimeError, KeyError, TypeError, ValueError):
+            previous_time = current_time = None
+        if previous_time is not None and current_time is not None and previous_time > current_time:
+            raise RuntimeError("A newer regional validation already exists; refusing older result")
 
     with tempfile.TemporaryDirectory(
         prefix="best50-regional-publish-"
@@ -1906,6 +1917,12 @@ def publish_regional_health(status: dict) -> None:
                 try:
                     git_output("worktree", "add", "--detach", str(worktree), f"{REGIONAL_REMOTE}/{REGIONAL_BRANCH}")
                     target = worktree / "output/local-health.json"
+                    if target.is_file():
+                        previous = json.loads(target.read_text())
+                        previous_stamp = datetime.fromisoformat(previous["latest_attempt_at"].replace("Z", "+00:00"))
+                        if previous_stamp > datetime.fromisoformat(health["latest_attempt_at"].replace("Z", "+00:00")):
+                            print("A newer regional health report exists; retaining it")
+                            return
                     write_status(target, health)
                     git_output("add", "-f", "output/local-health.json", cwd=worktree)
                     diff = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=worktree, timeout=30)
@@ -2326,7 +2343,10 @@ async def async_main() -> int:
     if not qualified:
         print("WARNING: no locally qualified nodes; retained subscription is not a fresh validation.")
         if args.publish:
-            publish_regional_health(status)
+            try:
+                publish_regional_health(status)
+            except (RuntimeError, subprocess.TimeoutExpired):
+                print("WARNING: health publication failed; scheduler will retry; subscription remains unchanged", flush=True)
         return 2
 
     validate_generated_result(

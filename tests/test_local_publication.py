@@ -15,7 +15,7 @@ spec.loader.exec_module(m)
 
 
 def evidence(latency=100):
-    return {'link': 'vless://test', 'rank': 1, 'country': 'DE', 'exit_country': 'DE',
+    return {'validated_at':datetime.now(timezone.utc).isoformat(), 'link': 'vless://test', 'rank': 1, 'country': 'DE', 'exit_country': 'DE',
             'median_latency': latency, 'latency_samples_ms': [latency] * 5,
             'services': {name: {'passed': 5, 'attempts': 5} for name in ('chatgpt', 'youtube', 'instagram')}}
 
@@ -28,6 +28,11 @@ class EvidenceTests(unittest.TestCase):
             self.assertFalse(m.valid_node_evidence(evidence(v), 5))
         del node['services']['instagram']
         self.assertFalse(m.valid_node_evidence(node, 5))
+
+    def test_failed_publication_retries_transaction_without_weakening_validation(self):
+        with patch.object(m, '_publish_regional_once', side_effect=[RuntimeError('temporary failure'), None]) as publish, patch.object(m.time, 'sleep'):
+            m.publish_regional_result(Path('/tmp/test-subscription'), Path('/tmp/test-status'), 'tested')
+            self.assertEqual(publish.call_count, 2)
 
     def test_samples_must_match_measurement(self):
         node = evidence()

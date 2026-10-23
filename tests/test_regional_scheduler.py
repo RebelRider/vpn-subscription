@@ -208,6 +208,19 @@ class SchedulerTests(unittest.TestCase):
                     self.assertGreater(state["next_retry_at"], now)
                     self.assertNotIn("last_validated_signature", state)
 
+    def test_empty_pool_replenishment_is_hourly_and_bounded(self):
+        runner = mock.Mock()
+        with tempfile.TemporaryDirectory() as temporary:
+            now = time.time()
+            state = {"last_local_qualified": 0, "last_replenishment_dispatched_at": now}
+            path = Path(temporary) / "status.json"
+            scheduler.dispatch_replenishment(runner, state, path, now + 3599, "empty")
+            self.assertEqual(runner.run.call_count, 0)
+            scheduler.dispatch_replenishment(runner, state, path, now + 3600, "empty")
+            self.assertEqual(runner.run.call_count, 1)
+            scheduler.dispatch_replenishment(runner, state, path, now + 3601, "empty")
+            self.assertEqual(runner.run.call_count, 1)
+
     def test_replenishment_dispatch_throttled(self):
         runner = mock.Mock()
         with tempfile.TemporaryDirectory() as temporary:

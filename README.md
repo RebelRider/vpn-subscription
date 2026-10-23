@@ -113,7 +113,8 @@ and90minute job deadline within the six-hour target. Failures use bounded
 exponential backoff, automatically released crash locks and owned-child cleanup.
 
 Best50 older than18hours or with invalid timestamps is rejected. Fewer than10
-qualifiers or stale input requests a new GitHub build, throttled to six hours.
+qualifiers or stale input requests a new GitHub build. Empty pools may request
+hourly replenishment; other supplemental requests are throttled to six hours.
 The15minute poll retries failures; new input bypasses old-input retry backoff.
 Weekly exit geography caches remain optional enrichment, with the existing
 actual-exit allowed-country policy preserved (GB/US/DE/NL/PL).

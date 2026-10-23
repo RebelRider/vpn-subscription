@@ -184,6 +184,13 @@ class IsolationTests(unittest.TestCase):
 
 
 class AsyncProbeTests(unittest.IsolatedAsyncioTestCase):
+    async def test_public_dual_stack_prefers_physical_ipv4_path(self):
+        loop = asyncio.get_running_loop()
+        infos = [(10, 1, 6, "", ("2606:4700:4700::1111", 443, 0, 0)),
+                 (2, 1, 6, "", ("91.198.174.192", 443))]
+        with patch.object(loop, "getaddrinfo", AsyncMock(return_value=infos)):
+            self.assertEqual(await probe._resolve_public_server("example.com", 443), "91.198.174.192")
+
     async def test_private_or_mixed_resolution_rejected(self):
         with self.assertRaises(ValueError):
             await probe._resolve_public_server("127.0.0.1", 443)

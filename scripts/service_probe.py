@@ -192,7 +192,8 @@ async def _resolve_public_server(host: str, port: int) -> str:
             timeout=5,
         )
         addresses = [ipaddress.ip_address(item[4][0]) for item in resolved]
-    public = sorted({str(address) for address in addresses if address.is_global and not address.is_multicast})
+    public = sorted({str(address) for address in addresses if address.is_global and not address.is_multicast},
+                    key=lambda value: (ipaddress.ip_address(value).version, int(ipaddress.ip_address(value))))
     # Mixed private/public DNS is rejected, rather than letting resolution order
     # select a private endpoint. The selected public address is pinned in config.
     if not public or any(not address.is_global or address.is_multicast for address in addresses):

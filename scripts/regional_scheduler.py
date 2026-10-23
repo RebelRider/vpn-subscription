@@ -248,7 +248,11 @@ def input_metadata(runner: Runner) -> tuple[str, float]:
 
 
 def dispatch_replenishment(runner: Runner, state: dict, state_path: Path, now: float, reason: str) -> None:
-    if now - state.get("last_replenishment_dispatched_at", 0) < REPLENISH_SECONDS:
+    # Empty local pools need faster exploration; successful small pools retain
+    # the conservative six-hour dispatch limit. The ordinary two-hour schedule
+    # remains independent of these supplemental requests.
+    interval = 3600 if state.get("last_local_qualified") == 0 else REPLENISH_SECONDS
+    if now - state.get("last_replenishment_dispatched_at", 0) < interval:
         return
     if now < state.get("next_replenishment_retry_at", 0):
         return

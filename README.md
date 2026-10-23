@@ -85,6 +85,9 @@ Exact URI duplicates do not consume the candidate limit. A seven-day retirement
 cooldown prevents research or feed links from immediately reviving persistently
 unproductive sources. Resource-budget deferrals do not hurt reputation; malformed
 persisted state is normalized and rebuilt automatically.
+When the registry is full, up to four weak sources can be replaced per run to
+keep discovering alternatives. Configured seeds, the strongest 80% of discovered
+sources and trials younger than a day remain protected.
 
 A separate local `com.rebelrider.best50-source-research` launch agent checks hourly
 whether daily public-source research is due. It uses the installed Cursor agent's

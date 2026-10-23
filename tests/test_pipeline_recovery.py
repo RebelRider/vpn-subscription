@@ -24,6 +24,77 @@ SEED = "https://raw.githubusercontent.com/public/feed/main/config.txt"
 
 
 class SourceRecoveryTests(unittest.TestCase):
+    def full_pool(self, path, *, fresh_bottom=False):
+        pool = discovery.SourcePool([{"url": SEED}], path, now=NOW)
+        for index in range(discovery.MAX_SOURCES - 1):
+            self.assertTrue(pool.add(f"https://example.com/existing-{index}.txt", "github-search"))
+            item = next(reversed(pool.sources.values()))
+            item.update(first_seen=NOW - (3600 if fresh_bottom and index < 32 else 2 * 86400),
+                        functional_ema=(index + 1) / 200, last_tested_count=100,
+                        last_functional_count=min(index, 100), failures=0)
+        return pool
+
+    def test_full_registry_admits_four_bounded_trials_and_preserves_seeds_and_top_yield(self):
+        with tempfile.TemporaryDirectory() as directory:
+            pool = self.full_pool(Path(directory) / "state.json")
+            nonseeds = sorted(((key, item) for key, item in pool.sources.items() if item["origin"] != "seed"),
+                              key=lambda pair: pair[1]["functional_ema"])
+            protected = {key for key, item in pool.sources.items() if item["origin"] == "seed"}
+            protected.update(key for key, _ in nonseeds[len(nonseeds) // 5:])
+            for index in range(4):
+                self.assertTrue(pool.add(f"https://new.example.org/trial-{index}.txt", "grok-research"))
+            self.assertFalse(pool.add("https://new.example.org/fifth.txt", "grok-research"))
+            self.assertTrue(protected.issubset(pool.sources))
+            self.assertEqual(len(pool.sources), discovery.MAX_SOURCES)
+            self.assertEqual(pool.stats["exploration_replacements"], 4)
+            self.assertEqual(len(pool.state["retired_sources"]), 4)
+
+    def test_full_registry_protects_fresh_bottom_trials_without_evicting_higher_yield(self):
+        with tempfile.TemporaryDirectory() as directory:
+            pool = self.full_pool(Path(directory) / "state.json", fresh_bottom=True)
+            before = set(pool.sources)
+            self.assertFalse(pool.add("https://new.example.org/trial.txt", "github-search"))
+            self.assertEqual(set(pool.sources), before)
+            self.assertEqual(pool.state["retired_sources"], {})
+
+    def test_seed_heavy_full_registry_still_rotates_its_one_nonseed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            seeds = [{"url": f"https://example.com/seed-{i}.txt"} for i in range(discovery.MAX_SOURCES - 1)]
+            pool = discovery.SourcePool(seeds, Path(directory) / "state.json", now=NOW)
+            self.assertTrue(pool.add("https://example.org/old.txt", "github-search"))
+            next(reversed(pool.sources.values()))["first_seen"] = NOW - 2 * 86400
+            seed_keys = {key for key, item in pool.sources.items() if item["origin"] == "seed"}
+            self.assertTrue(pool.add("https://example.net/new.txt", "grok-research"))
+            self.assertTrue(seed_keys.issubset(pool.sources))
+            self.assertEqual(len(pool.sources), discovery.MAX_SOURCES)
+
+    def test_exploration_replacement_tombstones_survive_reload_and_block_immediate_readd(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            pool = self.full_pool(path)
+            original = {key: item["url"] for key, item in pool.sources.items()}
+            self.assertTrue(pool.add("https://new.example.org/trial.txt", "public-feed-link"))
+            victim = next(iter(pool.state["retired_sources"]))
+            self.assertFalse(pool.add(original[victim], "grok-research"))
+            pool.save()
+            restored = discovery.SourcePool([{"url": SEED}], path, now=NOW + 1)
+            self.assertEqual(len(restored.sources), discovery.MAX_SOURCES)
+            self.assertFalse(restored.add(original[victim], "github-search"))
+            self.assertLessEqual(len(restored.state["retired_sources"]), discovery.MAX_RETIRED_SOURCES)
+            self.assertEqual(restored.state["retired_sources"][victim], NOW + 7 * 86400)
+
+    def test_feedback_for_a_source_replaced_during_collection_does_not_crash_or_resurrect_it(self):
+        with tempfile.TemporaryDirectory() as directory:
+            pool = self.full_pool(Path(directory) / "state.json")
+            victim = min((key for key, item in pool.sources.items() if item["origin"] != "seed"),
+                         key=lambda key: pool.sources[key]["functional_ema"])
+            pool.link_sources[LINK] = {victim}
+            self.assertTrue(pool.add("https://new.example.org/trial.txt", "grok-research"))
+            self.assertNotIn(victim, pool.sources)
+            pool.feedback([LINK], {LINK}, 1)
+            self.assertNotIn(victim, pool.sources)
+            self.assertEqual(pool.state["last_qualified"], 1)
+
     def test_malformed_cached_types_recover_with_configured_seeds(self):
         cases = [[], None, {"sources": {"x": 1}}, {"sources": {}, "repositories": []},
                  {"sources": {}, "last_discovery": "corrupt"},

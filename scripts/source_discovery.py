@@ -413,7 +413,29 @@ class SourcePool:
         if key in self.sources:
             return False
         if len(self.sources) >= MAX_SOURCES:
-            return False
+            if origin == "seed" or getattr(self, "_exploration_replacements", 0) >= 4:
+                return False
+            # Keep the best 80% of established non-seeds and all configured
+            # seeds. Four bounded trials prevent a full, healthy-but-locally
+            # unhelpful registry from permanently blocking new discoveries.
+            nonseeds = [(existing, item) for existing, item in self.sources.items() if item["origin"] != "seed"]
+            nonseeds.sort(key=lambda pair: (
+                pair[1].get("functional_ema", 0),
+                min(1.0, pair[1].get("last_functional_count", 0) / max(1, pair[1].get("last_tested_count", 0))),
+                -pair[1].get("failures", 0), pair[1]["first_seen"], pair[0],
+            ))
+            eligible = [(existing, item) for existing, item in nonseeds[:max(1, len(nonseeds) // 5)]
+                        if self.now - item["first_seen"] >= 86400]
+            if not eligible:
+                return False
+            victim = eligible[0][0]
+            self.state["retired_sources"][victim] = self.now + RETIREMENT_COOLDOWN
+            self.state["retired_sources"] = dict(sorted(self.state["retired_sources"].items(),
+                                                        key=lambda pair: pair[1], reverse=True)[:MAX_RETIRED_SOURCES])
+            del self.sources[victim]
+            self._exploration_replacements = getattr(self, "_exploration_replacements", 0) + 1
+            if hasattr(self, "stats"):
+                self.stats["exploration_replacements"] = self._exploration_replacements
         self.sources[key] = {"url": url, "origin": origin, "first_seen": self.now, "last_fetch": 0, "last_changed": 0, "failures": 0, "functional_ema": 0.0, "next_fetch": 0}
         return True
 
@@ -545,6 +567,8 @@ class SourcePool:
         batches = []
         source_stats = {}
         for selected_index, (key, item) in enumerate(selected):
+            if key not in self.sources:  # Replaced while an earlier feed was discovering new sources.
+                continue
             try:
                 if not self.allowed(item["url"]):
                     raise ValueError("source policy disallows discovery")
@@ -609,7 +633,9 @@ class SourcePool:
                 total, passed = counts.get(key, (0, 0))
                 counts[key] = (total + 1, passed + int(link in functional))
         for key, (total, passed) in counts.items():
-            item = self.sources[key]
+            item = self.sources.get(key)
+            if item is None:  # Exploration may replace a source after its candidates were collected.
+                continue
             ratio = passed / total
             item["functional_ema"] = round(0.65 * float(item.get("functional_ema", 0)) + 0.35 * ratio, 6)
             item.update({"last_tested": self.now, "last_tested_count": total, "last_functional_count": passed, "validation_runs": int(item.get("validation_runs", 0)) + 1})

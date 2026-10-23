@@ -6,6 +6,10 @@ import argparse
 import asyncio
 import csv
 import gzip
+import hashlib
+import math
+import fcntl
+import time
 import importlib.util
 import ipaddress
 import json
@@ -35,7 +39,7 @@ REGIONAL_STATUS_PATH = "output/local-status.json"
 DEFAULT_UPSTREAM_REMOTE = "origin"
 DEFAULT_UPSTREAM_BRANCH = "main"
 DEFAULT_UPSTREAM_REF = "origin/main"
-DEFAULT_UPSTREAM_PATH = "output/qualified-all.txt"
+DEFAULT_UPSTREAM_PATH = "output/best50.txt"
 
 ALLOWED_COUNTRIES = {"US", "DE", "PL", "NL"}
 
@@ -68,12 +72,7 @@ CITY_DB_IPV6 = Path(
     )
 )
 
-EXIT_TRACE_URL = (
-    "https://www.cloudflare.com/cdn-cgi/trace"
-)
-
-EXIT_GEO_BATCH_SIZE = 8
-EXIT_GEO_BASE_PORT = 28000
+EXIT_TRACE_URL = "https://www.cloudflare.com/cdn-cgi/trace"
 
 # Final best-local publication policy.
 #
@@ -132,23 +131,24 @@ def load_build_module():
     return module
 
 
+def load_protocols():
+    spec = importlib.util.spec_from_file_location("bestlocal_protocols", ROOT / "scripts" / "protocols.py")
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
 def read_links_text(
     text: str,
     description: str,
 ) -> list[str]:
-    links = [
-        line.strip()
-        for line in text.splitlines()
-        if line.strip().startswith("vless://")
-    ]
-
-    if not links:
-        raise RuntimeError(
-            f"No VLESS links found in {description}"
-        )
-
-    # Preserve upstream ranking and remove accidental duplicates.
-    return list(dict.fromkeys(links))
+    if len(text.encode()) > 1024 * 1024:
+        raise RuntimeError("Subscription exceeds size limit")
+    entries = [line.strip() for line in text.splitlines() if line.strip() and not line.lstrip().startswith("#")]
+    if not entries or len(entries) > 50 or any(entry.split(":", 1)[0].lower() not in load_protocols().SUPPORTED_SCHEMES or len(entry) > 16384 for entry in entries):
+        raise RuntimeError("Best50 must contain 1..50 Happ-compatible configurations and comments only")
+    return list(dict.fromkeys(entries))
 
 
 def read_links(path: Path) -> list[str]:
@@ -367,15 +367,7 @@ def published_link(
         exit_city,
     )
 
-    base = link.split(
-        "#",
-        1,
-    )[0]
-
-    return (
-        f"{base}#"
-        f"{quote(label, safe='')}"
-    )
+    return load_protocols().relabel(link, label)
 
 def route_interface(
     destination: str = "1.1.1.1",
@@ -407,53 +399,6 @@ def route_interface(
 
     return match.group(1)
 
-
-
-async def _capture_process(
-    args: list[str],
-    timeout: float,
-) -> tuple[
-    int,
-    bytes,
-    bytes,
-]:
-    process = (
-        await asyncio.create_subprocess_exec(
-            *args,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-    )
-
-    try:
-        stdout, stderr = (
-            await asyncio.wait_for(
-                process.communicate(),
-                timeout=timeout,
-            )
-        )
-    except asyncio.TimeoutError:
-        process.kill()
-
-        stdout, stderr = (
-            await process.communicate()
-        )
-
-        return (
-            124,
-            stdout,
-            stderr,
-        )
-
-    return (
-        int(
-            process.returncode
-            if process.returncode is not None
-            else 1
-        ),
-        stdout,
-        stderr,
-    )
 
 
 def _parse_cloudflare_trace(
@@ -509,361 +454,6 @@ def _parse_cloudflare_trace(
         "exit_ip": str(address),
         "trace_country": country,
     }
-
-
-async def _probe_exit_batch(
-    build,
-    links: list[str],
-    batch_index: int,
-) -> dict[str, dict]:
-    if not links:
-        return {}
-
-    inbounds = []
-    outbounds = []
-    rules = []
-
-    ports: dict[str, int] = {}
-    results: dict[str, dict] = {}
-
-    base_port = (
-        EXIT_GEO_BASE_PORT
-        + batch_index * 64
-    )
-
-    for local_index, link in enumerate(
-        links
-    ):
-        try:
-            node = build.parse_vless(
-                link
-            )
-
-            inbound_tag = (
-                f"exit-in-{local_index}"
-            )
-
-            outbound_tag = (
-                f"exit-out-{local_index}"
-            )
-
-            outbound = (
-                build.vless_to_singbox(
-                    node,
-                    tag=outbound_tag,
-                )
-            )
-
-        except Exception as exc:
-            results[link] = {
-                "exit_geo_status":
-                    "parse-failed",
-                "exit_geo_error":
-                    str(exc),
-            }
-            continue
-
-        port = (
-            base_port
-            + local_index
-        )
-
-        ports[link] = port
-
-        inbounds.append(
-            {
-                "type": "socks",
-                "tag": inbound_tag,
-                "listen": "127.0.0.1",
-                "listen_port": port,
-            }
-        )
-
-        outbounds.append(
-            outbound
-        )
-
-        rules.append(
-            {
-                "inbound": [
-                    inbound_tag
-                ],
-                "action": "route",
-                "outbound": outbound_tag,
-            }
-        )
-
-    if not ports:
-        return results
-
-    outbounds.append(
-        {
-            "type": "direct",
-            "tag": "direct",
-        }
-    )
-
-    config = {
-        "log": {
-            "level": "error",
-        },
-        "dns": {
-            "servers": [
-                {
-                    "type": "local",
-                    "tag": "local",
-                }
-            ],
-            "final": "local",
-        },
-        "inbounds": inbounds,
-        "outbounds": outbounds,
-        "route": {
-            "rules": rules,
-            "final": "direct",
-        },
-    }
-
-    interface = build.CFG.get(
-        "_probe_default_interface"
-    )
-
-    if interface:
-        config["route"][
-            "default_interface"
-        ] = str(interface)
-
-    sing_box = str(
-        getattr(
-            build,
-            "SING_BOX",
-            "/opt/homebrew/bin/sing-box",
-        )
-    )
-
-    with tempfile.TemporaryDirectory(
-        prefix="best50-exit-geo-"
-    ) as temporary_directory:
-
-        config_path = (
-            Path(temporary_directory)
-            / "config.json"
-        )
-
-        config_path.write_text(
-            json.dumps(
-                config,
-                ensure_ascii=False,
-            )
-        )
-
-        (
-            check_code,
-            _,
-            check_stderr,
-        ) = await _capture_process(
-            [
-                sing_box,
-                "check",
-                "-c",
-                str(config_path),
-            ],
-            20,
-        )
-
-        if check_code != 0:
-            detail = (
-                check_stderr
-                .decode(
-                    errors="ignore"
-                )
-                .strip()
-            )
-
-            for link in ports:
-                results[link] = {
-                    "exit_geo_status":
-                        "config-check-failed",
-                    "exit_geo_error":
-                        detail,
-                }
-
-            return results
-
-        process = (
-            await asyncio.create_subprocess_exec(
-                sing_box,
-                "run",
-                "-c",
-                str(config_path),
-                stdout=asyncio.subprocess.DEVNULL,
-                stderr=asyncio.subprocess.DEVNULL,
-            )
-        )
-
-        try:
-            await asyncio.sleep(
-                0.75
-            )
-
-            if process.returncode is not None:
-                for link in ports:
-                    results[link] = {
-                        "exit_geo_status":
-                            "sing-box-start-failed",
-                    }
-
-                return results
-
-            async def trace_one(
-                link: str,
-                port: int,
-            ) -> tuple[
-                str,
-                dict,
-            ]:
-                last_error = ""
-
-                for attempt in (
-                    1,
-                    2,
-                ):
-                    (
-                        code,
-                        stdout,
-                        stderr,
-                    ) = await _capture_process(
-                        [
-                            "curl",
-                            "--socks5-hostname",
-                            (
-                                "127.0.0.1:"
-                                f"{port}"
-                            ),
-                            "--connect-timeout",
-                            "8",
-                            "--max-time",
-                            "15",
-                            "--silent",
-                            "--show-error",
-                            EXIT_TRACE_URL,
-                        ],
-                        20,
-                    )
-
-                    if code == 0:
-                        parsed = (
-                            _parse_cloudflare_trace(
-                                stdout
-                            )
-                        )
-
-                        if parsed:
-                            return (
-                                link,
-                                {
-                                    "exit_geo_status":
-                                        "trace-ok",
-                                    "exit_geo_attempts":
-                                        attempt,
-                                    **parsed,
-                                },
-                            )
-
-                    last_error = (
-                        stderr
-                        .decode(
-                            errors="ignore"
-                        )
-                        .strip()
-                        or f"curl exit {code}"
-                    )
-
-                    if attempt == 1:
-                        await asyncio.sleep(
-                            0.35
-                        )
-
-                return (
-                    link,
-                    {
-                        "exit_geo_status":
-                            "trace-failed",
-                        "exit_geo_attempts":
-                            2,
-                        "exit_geo_error":
-                            last_error,
-                    },
-                )
-
-            traced = (
-                await asyncio.gather(
-                    *(
-                        trace_one(
-                            link,
-                            port,
-                        )
-                        for link, port
-                        in ports.items()
-                    )
-                )
-            )
-
-            for link, item in traced:
-                results[link] = item
-
-        finally:
-            if process.returncode is None:
-                process.terminate()
-
-                try:
-                    await asyncio.wait_for(
-                        process.wait(),
-                        timeout=5,
-                    )
-                except asyncio.TimeoutError:
-                    process.kill()
-                    await process.wait()
-
-    return results
-
-
-async def probe_actual_exit_metadata(
-    build,
-    links: list[str],
-) -> dict[str, dict]:
-    """
-    Best-effort presentation enrichment only.
-
-    It must never remove a node that already passed functional
-    and stability validation.
-    """
-    results: dict[str, dict] = {}
-
-    for start in range(
-        0,
-        len(links),
-        EXIT_GEO_BATCH_SIZE,
-    ):
-        batch = links[
-            start:
-            start + EXIT_GEO_BATCH_SIZE
-        ]
-
-        batch_result = (
-            await _probe_exit_batch(
-                build,
-                batch,
-                start
-                // EXIT_GEO_BATCH_SIZE,
-            )
-        )
-
-        results.update(
-            batch_result
-        )
-
-    return results
 
 
 def _lookup_city_database(
@@ -1323,6 +913,22 @@ def apply_exit_geography(
     }
 
 
+def valid_node_evidence(node: dict, rounds: int) -> bool:
+    if rounds not in (3, 4, 5):
+        return False
+    services = node.get("services", {})
+    if any(services.get(name, {}).get("passed") != rounds or services.get(name, {}).get("attempts") != rounds
+           for name in ("chatgpt", "youtube", "instagram")):
+        return False
+    samples = node.get("latency_samples_ms", [])
+    if len(samples) != rounds or any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0 for v in samples):
+        return False
+    median = node.get("median_latency")
+    return (not isinstance(median, bool) and isinstance(median, (int, float))
+            and 0 <= median < MAX_LOCAL_MEDIAN_LATENCY_MS
+            and math.isclose(median, statistics.median(samples), abs_tol=0.001))
+
+
 def finalize_local_selection(
     qualified: list[str],
     status: dict,
@@ -1349,8 +955,8 @@ def finalize_local_selection(
                 node.get("median_latency"),
                 (int, float),
             )
-            and node["median_latency"]
-            <= MAX_LOCAL_MEDIAN_LATENCY_MS
+            and not isinstance(node.get("median_latency"), bool)
+            and 0 <= node["median_latency"] < MAX_LOCAL_MEDIAN_LATENCY_MS
         )
     }
 
@@ -1364,6 +970,7 @@ def finalize_local_selection(
         link
         for link in country_qualified
         if link in latency_qualified_links
+        and valid_node_evidence(next(node for node in allowed_nodes if node["link"] == link), status.get("stability", {}).get("rounds", 0))
     ]
 
     selected = latency_qualified[
@@ -1587,383 +1194,95 @@ def ensure_probe_network(
     )
 
 
-async def run_gate(
-    build,
-    links: list[str],
-    gate: dict,
-    prefix: str,
-) -> dict[str, float]:
-    return await build._v5_probe_gate(
-        links,
-        f"{prefix}-{gate['name']}",
-        gate["url"],
-        gate.get("request_timeout"),
-        gate.get(
-            "accepted_status_pattern",
-            r"^[23]\d\d$",
-        ),
+def load_service_probe():
+    spec = importlib.util.spec_from_file_location("bestlocal_service_probe", ROOT / "scripts" / "service_probe.py")
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def require_fresh_timestamp(value: str | None, max_hours: float, description: str) -> None:
+    try:
+        stamp = datetime.fromisoformat(str(value).replace(" UTC", "+00:00").replace("Z", "+00:00"))
+        if stamp.tzinfo is None:
+            raise ValueError("missing timezone")
+        age = (datetime.now(timezone.utc) - stamp).total_seconds()
+    except (ValueError, TypeError):
+        raise RuntimeError(f"Missing or invalid {description} timestamp") from None
+    if age < -300 or age > max_hours * 3600:
+        raise RuntimeError(f"Stale or future {description}; maximum age {max_hours:g}h")
+
+
+async def run_local_probe(build, links, final_rounds, minimum_successes, input_description):
+    if not 3 <= final_rounds <= 5 or minimum_successes != final_rounds:
+        raise RuntimeError("Local validation requires 3..5 rounds and every round must succeed")
+    service_probe = load_service_probe()
+    reports = await service_probe.validate_candidates(
+        build, links, rounds=final_rounds,
+        interface=build.CFG.get("_probe_default_interface", "en0"),
     )
-
-
-def latency_metrics(
-    samples: list[float],
-) -> dict[str, float | int]:
-    if not samples:
-        return {
-            "samples": 0,
-            "median": float("inf"),
-            "p95": float("inf"),
-        }
-
-    ordered = sorted(samples)
-
-    # Nearest-rank p95.
-    p95_index = max(
-        0,
-        (
-            95 * len(ordered) + 99
-        ) // 100 - 1,
-    )
-
-    return {
-        "samples": len(ordered),
-        "median": float(
-            statistics.median(ordered)
-        ),
-        "p95": float(
-            ordered[p95_index]
-        ),
-    }
-
-
-async def run_local_probe(
-    build,
-    links: list[str],
-    final_rounds: int,
-    minimum_successes: int,
-    input_description: str,
-) -> tuple[
-    list[str],
-    dict,
-]:
-    functional = build.CFG.get(
-        "functional_tests",
-        {},
-    )
-
-    if not functional.get(
-        "enabled",
-        True,
-    ):
-        raise RuntimeError(
-            "functional_tests are disabled in config.json"
+    build._local_reports = reports
+    history_path = STATE_DIR / "local-reliability.json"
+    try:
+        history = json.loads(history_path.read_text())
+    except (OSError, ValueError):
+        history = {}
+    now = int(time.time())
+    history = {k: v for k, v in history.items() if isinstance(v, dict) and now - v.get("last_seen", 0) < 28 * 86400}
+    gate_counts = {name: 0 for name in ("chatgpt", "youtube", "instagram")}
+    qualified = []
+    diagnostics = []
+    for rank, link in enumerate(links, 1):
+        result = reports.get(link, {})
+        services = result.get("services", {})
+        key = hashlib.sha256(link.split("#", 1)[0].encode()).hexdigest()
+        sample = history.setdefault(key, {"runs": 0, "passes": 0})
+        sample["runs"] = min(sample.get("runs", 0), 99) + 1
+        passed = bool(result.get("qualified")) and all(
+            services.get(name, {}).get("passed") == final_rounds
+            and services.get(name, {}).get("attempts") == final_rounds
+            for name in gate_counts
         )
-
-    counts: dict[str, int] = {
-        "input": len(links),
-    }
-
-    # Local ranking uses only lightweight functional request
-    # latency. The 1 MB payload test is deliberately excluded:
-    # transfer duration measures throughput/congestion rather
-    # than interactive request responsiveness.
-    latency_samples: dict[str, list[float]] = {
-        link: []
-        for link in links
-    }
-
-    upstream_rank = {
-        link: index
-        for index, link in enumerate(
-            links,
-            1,
-        )
-    }
-
-    # -----------------------------------------------------
-    # Stage 1: exact same preliminary gate as production v5
-    # -----------------------------------------------------
-
-    preliminary = functional["preliminary"]
-
-    passed = await run_gate(
-        build,
-        links,
-        preliminary,
-        "local-preliminary",
-    )
-
-    survivors = [
-        link
-        for link in links
-        if link in passed
-    ]
-
-    for link in survivors:
-        latency_samples[link].append(
-            passed[link]
-        )
-
-    counts[
-        f"preliminary_{preliminary['name']}"
-    ] = len(survivors)
-
-    # -----------------------------------------------------
-    # Stage 2: production mandatory functional gates
-    # -----------------------------------------------------
-
-    gate_counts = {}
-
-    for gate in functional.get(
-        "mandatory_gates",
-        [],
-    ):
-        passed = await run_gate(
-            build,
-            survivors,
-            gate,
-            "local-mandatory",
-        )
-
-        survivors = [
-            link
-            for link in survivors
-            if link in passed
-        ]
-
-        for link in survivors:
-            latency_samples[link].append(
-                passed[link]
-            )
-
-        gate_counts[gate["name"]] = len(
-            survivors
-        )
-
-    # -----------------------------------------------------
-    # Stage 3: mandatory real payload
-    # -----------------------------------------------------
-
-    payload = functional.get(
-        "payload_gate",
-        {},
-    )
-
-    if payload.get("enabled", True):
-        passed = await run_gate(
-            build,
-            survivors,
-            payload,
-            "local-payload",
-        )
-
-        survivors = [
-            link
-            for link in survivors
-            if link in passed
-        ]
-
-        gate_counts[payload["name"]] = len(
-            survivors
-        )
-
-    first_pass_survivors = list(
-        survivors
-    )
-
-    # -----------------------------------------------------
-    # Stage 4: local stability confirmation.
-    #
-    # Every round is successful for a node only if ALL
-    # production final gates succeed in that round.
-    # -----------------------------------------------------
-
-    final_gates = functional.get(
-        "final_gates",
-        [],
-    )
-
-    successes = {
-        link: 0
-        for link in first_pass_survivors
-    }
-
-    round_counts: list[int] = []
-
-    for round_index in range(
-        1,
-        final_rounds + 1,
-    ):
-        round_survivors = list(
-            first_pass_survivors
-        )
-
-        round_latency_samples = {
-            link: []
-            for link in round_survivors
-        }
-
-        print()
-        print(
-            "========================================"
-        )
-        print(
-            f"LOCAL FINAL ROUND "
-            f"{round_index}/{final_rounds}"
-        )
-        print(
-            "========================================"
-        )
-
-        for gate in final_gates:
-            passed = await run_gate(
-                build,
-                round_survivors,
-                gate,
-                (
-                    f"local-final-"
-                    f"r{round_index}"
-                ),
-            )
-
-            round_survivors = [
-                link
-                for link in round_survivors
-                if link in passed
-            ]
-
-            for link in round_survivors:
-                round_latency_samples[
-                    link
-                ].append(
-                    passed[link]
-                )
-
-            if not round_survivors:
-                break
-
-        for link in round_survivors:
-            successes[link] += 1
-
-            # Only a complete successful final round contributes
-            # latency to ranking. Partial failed rounds do not.
-            latency_samples[link].extend(
-                round_latency_samples[link]
-            )
-
-        round_counts.append(
-            len(round_survivors)
-        )
-
-        print(
-            f"LOCAL FINAL ROUND "
-            f"{round_index}: "
-            f"{len(round_survivors)}/"
-            f"{len(first_pass_survivors)} "
-            "passed complete suite"
-        )
-
-    qualified = [
-        link
-        for link in links
-        if (
-            link in successes
-            and successes[link]
-            >= minimum_successes
-        )
-    ]
-
-    metrics = {
-        link: latency_metrics(
-            latency_samples[link]
-        )
-        for link in qualified
-    }
-
-    # Stability is authoritative. Among equally stable nodes,
-    # rank by the actual lightweight request latency measured
-    # through the forced physical local interface.
-    qualified.sort(
-        key=lambda link: (
-            -successes[link],
-            metrics[link]["median"],
-            metrics[link]["p95"],
-            upstream_rank[link],
-        )
-    )
-
+        latency = result.get("median_ms")
+        measurements = result.get("latency_samples_ms", [])
+        passed = passed and len(measurements) == final_rounds and isinstance(latency, (int, float)) and not isinstance(latency, bool) and 0 <= latency < MAX_LOCAL_MEDIAN_LATENCY_MS
+        sample["passes"] = min(sample.get("passes", 0), sample["runs"] - 1) + int(passed)
+        sample["last_seen"] = now
+        reliability = (sample["passes"] + 1) / (sample["runs"] + 2)
+        for name in gate_counts:
+            gate_counts[name] += int(services.get(name, {}).get("passed") == final_rounds)
+        if passed:
+            qualified.append((link, result, rank, reliability))
+        diagnostic = {"id": key[:12], "upstream_rank": rank, "qualified": passed,
+                      "services": services, "latency_samples_ms": measurements,
+                      "median_latency": latency if isinstance(latency, (float, int)) and math.isfinite(latency) else None,
+                      "rejection_reasons": result.get("rejection_reasons", ["missing-result"] if not result else [])}
+        diagnostics.append(diagnostic)
+        print("Candidate", diagnostic["id"], json.dumps({k: v for k, v in diagnostic.items() if k not in {"id", "upstream_rank"}}, allow_nan=False), flush=True)
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    # Hash-only history is diagnostic; no candidate credentials are stored here.
+    write_status(history_path, dict(sorted(history.items(), key=lambda item: item[1]["last_seen"], reverse=True)[:5000]))
+    qualified.sort(key=lambda item: (-item[3], item[1]["median_ms"], item[1]["p95_ms"], item[2]))
     status = {
-        "generated_at": (
-            datetime.now(timezone.utc)
-            .isoformat()
-        ),
-        "algorithm": (
-            "v5-local-network-functional-filter-ranking"
-        ),
-        "input": {
-            "path": input_description,
-            "nodes": len(links),
-        },
-        "network": {
-            "system_route_interface": route_interface(),
-            "probe_default_interface": str(
-                build.CFG.get(
-                    "_probe_default_interface",
-                    "",
-                )
-            ),
-        },
-        "gates": {
-            "preliminary": {
-                preliminary["name"]:
-                    counts[
-                        f"preliminary_{preliminary['name']}"
-                    ],
-            },
-            "mandatory": gate_counts,
-        },
-        "stability": {
-            "rounds": final_rounds,
-            "minimum_successes":
-                minimum_successes,
-            "first_pass_survivors":
-                len(first_pass_survivors),
-            "round_survivors":
-                round_counts,
-            "qualified":
-                len(qualified),
-        },
-        "countries": dict(
-            Counter(
-                country_from_link(link)
-                for link in qualified
-            )
-        ),
-        "nodes": [
-            {
-                "rank":
-                    index + 1,
-                "country":
-                    country_from_link(link),
-                "successful_final_rounds":
-                    successes.get(link, 0),
-                "latency_samples":
-                    metrics[link]["samples"],
-                "median_latency":
-                    metrics[link]["median"],
-                "p95_latency":
-                    metrics[link]["p95"],
-                "upstream_rank":
-                    upstream_rank[link],
-                "link":
-                    link,
-            }
-            for index, link
-            in enumerate(qualified)
-        ],
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "algorithm": "bestlocal-strict-services-v6",
+        "input": {"path": input_description, "nodes": len(links)},
+        "network": {"system_route_interface": route_interface(), "probe_default_interface": build.CFG.get("_probe_default_interface", "en0"), "system_network_modified": False},
+        "gates": {"preliminary": {}, "mandatory": gate_counts},
+        "latency_method": "median of 3..5 fresh HTTPS gstatic generate_204 completion times in milliseconds via the candidate authenticated SOCKS/VLESS path; includes SOCKS, transport and TLS; strictly below 500ms",
+        "stability": {"rounds": final_rounds, "minimum_successes": minimum_successes,
+                      "first_pass_survivors": len(qualified), "round_survivors": [len(qualified)] * final_rounds, "qualified": len(qualified)},
+        "countries": {}, "diagnostics": diagnostics,
+        "nodes": [{"rank": index, "country": country_from_link(link), "link": link,
+                   "successful_final_rounds": final_rounds, "latency_samples": len(result["latency_samples_ms"]),
+                   "latency_samples_ms": result["latency_samples_ms"],
+                   "median_latency": result["median_ms"], "p95_latency": result["p95_ms"],
+                   "services": result["services"], "historical_reliability": reliability,
+                   "validated_at": result["validated_at"], "upstream_rank": upstream_rank}
+                  for index, (link, result, upstream_rank, reliability) in enumerate(qualified, 1)],
     }
-
-    return qualified, status
+    return [item[0] for item in qualified], status
 
 
 def write_subscription(
@@ -1978,7 +1297,7 @@ def write_subscription(
     )
 
     lines = [
-        "# v5.0 — LOCAL NETWORK VERIFIED VLESS",
+        "# v6.0 — LOCAL NETWORK VERIFIED PROXIES",
         "#profile-title: Best Local VPN",
         "#profile-update-interval: 1",
         "#subscription-ping-onopen-enabled: 1",
@@ -1992,8 +1311,8 @@ def write_subscription(
         "#",
         (
             "# Local filtering: "
-            "gstatic + cloudflare + youtube + "
-            "chatgpt + payload-1mb"
+            "ChatGPT providers JSON + YouTube video metadata + "
+            "Instagram application HTML; median proxy HTTPS latency <500 ms"
         ),
         (
             "# Local final stability: "
@@ -2015,8 +1334,8 @@ def write_subscription(
         ),
         "#",
         (
-            "# Generated from the globally quality-qualified "
-            "pool and re-tested through the current "
+            "# Generated from Best50 "
+            "and re-tested through the current "
             "local network."
         ),
         "#",
@@ -2081,6 +1400,7 @@ def write_status(
             status,
             ensure_ascii=False,
             indent=2,
+            allow_nan=False,
         )
         + "\n"
     )
@@ -2090,11 +1410,11 @@ def write_status(
 
 def git_output(
     *args: str,
-    cwd: Path = ROOT,
+    cwd: Path | None = None,
 ) -> str:
     result = subprocess.run(
         ["git", *args],
-        cwd=cwd,
+        cwd=ROOT if cwd is None else cwd,
         check=False,
         capture_output=True,
         text=True,
@@ -2133,7 +1453,7 @@ def validate_generated_result(
         for line in subscription_path
         .read_text()
         .splitlines()
-        if line.startswith("vless://")
+        if line.strip() and not line.lstrip().startswith("#")
     ]
 
     status = json.loads(
@@ -2171,6 +1491,21 @@ def validate_generated_result(
             "Published subscription order/names do not match "
             "local ranking in status"
         )
+
+    if len(links) > MAX_LOCAL_PUBLISHED_NODES:
+        raise RuntimeError("Regional result exceeds publication cap")
+    if status.get("algorithm") != "bestlocal-strict-services-v6":
+        raise RuntimeError("Missing strict service validation policy")
+    require_fresh_timestamp(status.get("generated_at"), 6, "local validation")
+    require_fresh_timestamp(status.get("upstream_generated_at"), 18, "Best50 input")
+    rounds = status.get("stability", {}).get("rounds", 0)
+    if rounds not in (3, 4, 5) or status["stability"].get("minimum_successes") != rounds:
+        raise RuntimeError("Incomplete validation rounds")
+    for node in status["nodes"]:
+        if not valid_node_evidence(node, rounds):
+            raise RuntimeError("A node lacks required service or latency evidence")
+        if node.get("exit_country") not in ALLOWED_ACTUAL_EXIT_COUNTRIES:
+            raise RuntimeError("A node lacks an allowed actual exit country")
 
     ranks = [
         node["rank"]
@@ -2240,7 +1575,7 @@ def ensure_input_still_current(
     if tested_blob != latest_blob:
         raise RuntimeError(
             "STALE LOCAL RESULT: "
-            "output/qualified-all.txt changed "
+            "output/best50.txt changed "
             "while the regional probe was running. "
             "Run the regional probe again."
         )
@@ -2280,7 +1615,7 @@ def remote_branch_exists(
     )
 
 
-def publish_regional_result(
+def _publish_regional_once(
     subscription_path: Path,
     status_path: Path,
     tested_sha: str,
@@ -2306,6 +1641,13 @@ def publish_regional_result(
         subscription_path,
         status_path,
     )
+
+    build = load_build_module()
+    tested = read_links_text(run_git("show", f"{tested_sha}:{DEFAULT_UPSTREAM_PATH}"), "tested Best50")
+    allowed = {build.normalized_fingerprint(build.parse_vless(link)) for link in tested}
+    status = json.loads(status_path.read_text())
+    if any(build.normalized_fingerprint(build.parse_vless(node["link"])) not in allowed for node in status["nodes"]):
+        raise RuntimeError("Refusing publication of a node absent from tested Best50")
 
     ensure_input_still_current(
         tested_sha
@@ -2531,6 +1873,58 @@ def publish_regional_result(
     )
 
 
+def publish_regional_result(subscription_path: Path, status_path: Path, tested_sha: str) -> None:
+    for attempt in range(3):
+        try:
+            _publish_regional_once(subscription_path, status_path, tested_sha)
+            return
+        except (RuntimeError, subprocess.TimeoutExpired) as exc:
+            if attempt == 2:
+                raise
+            print(f"Publication attempt {attempt + 1} failed ({type(exc).__name__}); retrying safely", flush=True)
+            time.sleep(2 ** (attempt + 1))
+
+
+def publish_regional_health(status: dict) -> None:
+    """Publish latest-attempt diagnostics without replacing the retained subscription."""
+    health = {
+        "schema": 1, "policy": "bestlocal-strict-services-v6",
+        "latest_attempt_at": status["generated_at"],
+        "input": status.get("input"), "upstream_sha": status.get("upstream_sha"),
+        "upstream_generated_at": status.get("upstream_generated_at"),
+        "qualified": status["stability"]["qualified"],
+        "artifact_status": "freshly-validated" if status["stability"]["qualified"] else "last-known-good-retained; latest strict validation found no qualifiers",
+        "current_policy_validated": bool(status["stability"]["qualified"]),
+        "gates": status.get("gates"), "latency_method": status.get("latency_method"),
+        "diagnostics": status.get("diagnostics", []),
+    }
+    for attempt in range(3):
+        try:
+            git_output("fetch", REGIONAL_REMOTE, REGIONAL_BRANCH)
+            with tempfile.TemporaryDirectory(prefix="bestlocal-health-") as directory:
+                worktree = Path(directory) / "checkout"
+                try:
+                    git_output("worktree", "add", "--detach", str(worktree), f"{REGIONAL_REMOTE}/{REGIONAL_BRANCH}")
+                    target = worktree / "output/local-health.json"
+                    write_status(target, health)
+                    git_output("add", "-f", "output/local-health.json", cwd=worktree)
+                    diff = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=worktree, timeout=30)
+                    if diff.returncode == 0:
+                        return
+                    if diff.returncode != 1:
+                        raise RuntimeError("Cannot inspect regional health diff")
+                    git_output("commit", "-m", "chore: record regional validation health", cwd=worktree)
+                    git_output("push", REGIONAL_REMOTE, f"HEAD:refs/heads/{REGIONAL_BRANCH}", cwd=worktree)
+                    print("Regional health published; subscription retained" if not health["qualified"] else "Regional health published", flush=True)
+                    return
+                finally:
+                    subprocess.run(["git", "worktree", "remove", "--force", str(worktree)], cwd=ROOT, capture_output=True, timeout=30)
+        except (RuntimeError, subprocess.TimeoutExpired):
+            if attempt == 2:
+                raise
+            time.sleep(2 ** (attempt + 1))
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description=(
@@ -2546,7 +1940,7 @@ def parse_args():
         help=(
             "Optional local subscription file for diagnostics. "
             "By default the probe fetches "
-            "origin/main:output/qualified-all.txt."
+            "origin/main:output/best50.txt."
         ),
     )
 
@@ -2613,13 +2007,13 @@ async def async_main() -> int:
         raise RuntimeError(
             "--publish cannot be used with --input; "
             "publication must be based on the current "
-            "origin/main qualified pool"
+            "origin/main Best50"
         )
 
-    if args.rounds < 1:
-        raise RuntimeError(
-            "--rounds must be >= 1"
-        )
+    if not 3 <= args.rounds <= 5 or args.minimum_successes != args.rounds:
+        raise RuntimeError("Require 3..5 rounds and --minimum-successes equal to --rounds")
+    if args.interface != "en0":
+        raise RuntimeError("Authoritative local validation must use en0")
 
     if (
         args.minimum_successes < 1
@@ -2663,11 +2057,13 @@ async def async_main() -> int:
             upstream_generated,
             input_description,
         ) = load_upstream_pool()
-        input_mode = "origin-main-qualified-all"
+        input_mode = "origin-main-best50"
 
-    print(
-        f"Input nodes: {len(links)}"
-    )
+    if upstream_sha:
+        require_fresh_timestamp(upstream_generated, 18, "Best50 input")
+    if len(links) > 50:
+        raise RuntimeError("Best50 input contains more than 50 candidates")
+    print(f"Input nodes: {len(links)}")
     print(
         f"Input:       {input_description}"
     )
@@ -2751,12 +2147,15 @@ async def async_main() -> int:
         )
     )
 
-    exit_metadata = (
-        await probe_actual_exit_metadata(
-            build,
-            qualified,
-        )
-    )
+    # Use the trace captured by the very same isolated candidate process.
+    # Do not start the legacy fixed-port enrichment engine.
+    exit_metadata = {}
+    for link in qualified:
+        trace = build._local_reports.get(link, {}).get("exit_trace", {})
+        if isinstance(trace, dict) and trace.get("ip"):
+            parsed = _parse_cloudflare_trace(f"ip={trace['ip']}\nloc={trace.get('loc', '')}\n".encode())
+            if parsed:
+                exit_metadata[link] = {**parsed, "exit_geo_status": "trace-ok"}
 
     apply_exit_geography(
         status,
@@ -2827,11 +2226,10 @@ async def async_main() -> int:
             REGIONAL_STATUS_PATH,
     }
 
-    write_subscription(
-        args.output,
-        qualified,
-        status,
-    )
+    if qualified:
+        write_subscription(args.output, qualified, status)
+    else:
+        status["publication"].update({"status": "withheld-empty", "last_known_good_preserved": True})
 
     write_status(
         args.status,
@@ -2926,9 +2324,9 @@ async def async_main() -> int:
     )
 
     if not qualified:
-        print(
-            "WARNING: no locally qualified nodes."
-        )
+        print("WARNING: no locally qualified nodes; retained subscription is not a fresh validation.")
+        if args.publish:
+            publish_regional_health(status)
         return 2
 
     validate_generated_result(
@@ -2947,11 +2345,8 @@ async def async_main() -> int:
                 "origin/main upstream SHA"
             )
 
-        publish_regional_result(
-            args.output,
-            args.status,
-            upstream_sha,
-        )
+        publish_regional_result(args.output, args.status, upstream_sha)
+        publish_regional_health(status)
 
         print()
         print(
@@ -2968,9 +2363,13 @@ async def async_main() -> int:
 
 def main() -> int:
     try:
-        return asyncio.run(
-            async_main()
-        )
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        with (STATE_DIR / "local-probe.lock").open("a+") as lock:
+            try:
+                fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                raise RuntimeError("Another BestLocal probe holds the validation lock") from None
+            return asyncio.run(async_main())
     except KeyboardInterrupt:
         print(
             "\nInterrupted.",

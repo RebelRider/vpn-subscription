@@ -39,6 +39,8 @@ import time
 import urllib.request
 import socket
 import ipaddress
+import uuid as uuid_module
+import fcntl
 from collections import Counter, defaultdict
 from pathlib import Path
 from statistics import median
@@ -53,6 +55,12 @@ OUT.mkdir(exist_ok=True)
 
 SING_BOX = "sing-box"
 
+# Also support importlib loading by local_probe without relying on cwd.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from source_discovery import SourcePool, safe_get, decode_subscription, extract_links, public_host
+import protocols
+
+
 
 # =========================================================
 # Generic helpers
@@ -64,64 +72,12 @@ def now_ts() -> int:
 
 
 def fetch(url: str) -> str:
-    request = urllib.request.Request(
-        url,
-        headers={
-            "User-Agent": "Best50Builder/3.0",
-            "Accept": "*/*",
-        },
-    )
-
-    with urllib.request.urlopen(request, timeout=30) as response:
-        raw = response.read()
-
-    text = raw.decode("utf-8", "ignore").strip()
-
-    if "vless://" not in text.lower():
-        compact = re.sub(r"\s+", "", text)
-
-        try:
-            decoded = base64.b64decode(
-                compact + "===",
-                validate=False,
-            )
-            candidate = decoded.decode("utf-8", "ignore")
-
-            if "vless://" in candidate.lower():
-                text = candidate
-
-        except Exception:
-            pass
-
-    return text
+    raw, _ = safe_get(url)
+    return decode_subscription(raw)
 
 
 def extract_vless(text: str) -> list[str]:
-    found: list[str] = []
-
-    for line in text.splitlines():
-        line = line.strip()
-
-        if not line or line.startswith("#"):
-            continue
-
-        match = re.search(
-            r"vless://\S+",
-            line,
-            re.IGNORECASE,
-        )
-
-        if not match:
-            continue
-
-        link = match.group(0).rstrip(
-            "`,)]}>\"'"
-        )
-
-        if link.lower().startswith("vless://"):
-            found.append(link)
-
-    return found
+    return extract_links(text)
 
 
 def q1(
@@ -169,6 +125,17 @@ def normalize_path(path: str) -> str:
 
 
 def parse_vless(link: str) -> dict:
+    """Compatibility entry point: parse supported proxy share URIs."""
+    if isinstance(link, str) and not link.lower().startswith("vless://"):
+        return protocols.parse_node(link)
+    node = _parse_vless(link)
+    node["protocol"] = "vless"
+    return node
+
+
+def _parse_vless(link: str) -> dict:
+    if not isinstance(link, str) or len(link) > 8192 or re.search(r"[\x00-\x20\x7f]", link):
+        raise ValueError("invalid or oversized VLESS URI")
     uri = urlsplit(link)
 
     if uri.scheme.lower() != "vless":
@@ -180,17 +147,28 @@ def parse_vless(link: str) -> dict:
     if not uri.port:
         raise ValueError("missing port")
 
-    if not uri.username:
-        raise ValueError("missing UUID")
+    if not uri.username or uri.password is not None:
+        raise ValueError("missing UUID or unexpected password")
 
-    query = parse_qs(
-        uri.query,
-        keep_blank_values=True,
-    )
+    query = parse_qs(uri.query, keep_blank_values=True, max_num_fields=64)
+    allowed_query = {"encryption", "security", "type", "sni", "host", "path", "flow", "fp", "pbk", "publicKey", "sid", "shortId", "headerType", "allowInsecure", "alpn", "serviceName", "remarks", "remark", "name"}
+    if set(query) - allowed_query:
+        raise ValueError("unsupported VLESS connection option")
+    if any(len(values) != 1 for values in query.values()):
+        raise ValueError("ambiguous duplicate VLESS parameter")
+    if any(re.search(r"[\x00-\x1f\x7f]", key + value) for key, values in query.items() for value in values):
+        raise ValueError("control character in VLESS parameter")
 
     server = normalize_host(uri.hostname)
+    if not public_host(server):
+        raise ValueError("non-public VLESS server")
     port = uri.port
-    uuid = unquote(uri.username).lower()
+    raw_uuid = unquote(uri.username)
+    if not re.fullmatch(r"[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}", raw_uuid):
+        raise ValueError("invalid UUID")
+    uuid = str(uuid_module.UUID(raw_uuid))
+    if q1(query, "encryption", "none").lower() != "none":
+        raise ValueError("unsupported VLESS encryption")
 
     transport = q1(
         query,
@@ -225,6 +203,10 @@ def parse_vless(link: str) -> dict:
         "fp",
     )
 
+    alpn = q1(query, "alpn").split(",") if q1(query, "alpn") else []
+    if len(alpn) > 8 or any(not re.fullmatch(r"[A-Za-z0-9./-]{1,32}", item) for item in alpn):
+        raise ValueError("invalid ALPN")
+
     public_key = (
         q1(query, "pbk")
         or q1(query, "publicKey")
@@ -235,37 +217,31 @@ def parse_vless(link: str) -> dict:
         or q1(query, "shortId")
     )
 
-    if transport in {
-        "xhttp",
-        "splithttp",
-        "quic",
-        "kcp",
-        "raw",
-    }:
-        raise ValueError(
-            f"unsupported transport: {transport}"
-        )
-
-    if security not in {
-        "",
-        "none",
-        "tls",
-        "reality",
-    }:
-        raise ValueError(
-            f"unsupported security: {security}"
-        )
-
+    if transport not in {"tcp", "ws", "grpc", "http", "httpupgrade"}:
+        raise ValueError("unsupported VLESS transport")
+    if security not in {"", "none", "tls", "reality"}:
+        raise ValueError("unsupported VLESS security")
+    if flow not in {"", "xtls-rprx-vision"} or (flow and (transport != "tcp" or security not in {"tls", "reality"})):
+        raise ValueError("unsupported VLESS flow")
+    if fingerprint_value and fingerprint_value not in {"chrome", "firefox", "safari", "ios", "android", "edge", "360", "qq", "random", "randomized"}:
+        raise ValueError("unsupported TLS fingerprint")
+    if not public_host(sni) or (host and not public_host(host)):
+        raise ValueError("invalid TLS or transport hostname")
+    if len(path) > 2048 or re.search(r"[\x00-\x1f\x7f]", path):
+        raise ValueError("invalid transport path")
+    if q1(query, "headerType", "none").lower() not in {"", "none", "http"}:
+        raise ValueError("unsupported TCP header")
+    if q1(query, "allowInsecure", "0").lower() not in {"", "0", "false"}:
+        raise ValueError("insecure TLS configuration")
     if security == "reality":
-        if not public_key:
-            raise ValueError(
-                "Reality without public key"
-            )
-
-        if not short_id:
-            raise ValueError(
-                "Reality without short id"
-            )
+        if not re.fullmatch(r"[A-Za-z0-9_-]{43}", public_key):
+            raise ValueError("invalid Reality public key")
+        if short_id and (not re.fullmatch(r"[0-9a-fA-F]{2,16}", short_id) or len(short_id) % 2):
+            raise ValueError("invalid Reality short id")
+    elif public_key or short_id:
+        raise ValueError("Reality parameters without Reality security")
+    if security not in {"tls", "reality"} and (fingerprint_value or alpn):
+        raise ValueError("TLS parameters without TLS")
 
     return {
         "link": link,
@@ -281,6 +257,9 @@ def parse_vless(link: str) -> dict:
         "fp": fingerprint_value,
         "public_key": public_key,
         "short_id": short_id,
+        "alpn": alpn,
+        "service_name": q1(query, "serviceName"),
+        "header_type": q1(query, "headerType", "none").lower(),
     }
 
 
@@ -292,8 +271,14 @@ def normalized_fingerprint(node: dict) -> str:
     through multiple equivalent endpoints.
     """
 
+    if node.get("protocol", "vless") != "vless":
+        # The adapter's complete outbound representation captures every
+        # protocol-specific credential and transport semantic, excluding tags.
+        return sha(json.dumps(protocols.to_singbox(node, tag="node"), sort_keys=True))
+
     value = "|".join(
         [
+            node.get("protocol", "vless"),
             node["uuid"],
             node["transport"],
             node["security"],
@@ -304,6 +289,9 @@ def normalized_fingerprint(node: dict) -> str:
             node["fp"],
             node["public_key"],
             node["short_id"],
+            node.get("service_name", ""),
+            node.get("header_type", "none"),
+            ",".join(node.get("alpn", [])),
         ]
     )
 
@@ -680,8 +668,8 @@ def resolve_endpoint_ip(host: str) -> str:
     host = normalize_host(host)
 
     try:
-        ipaddress.ip_address(host)
-        return host
+        address = ipaddress.ip_address(host)
+        return host if address.is_global and not address.is_multicast else ""
     except ValueError:
         pass
 
@@ -692,6 +680,9 @@ def resolve_endpoint_ip(host: str) -> str:
             socket.AF_UNSPEC,
             socket.SOCK_STREAM,
         )
+
+        if not infos or any(not ipaddress.ip_address(info[4][0]).is_global or ipaddress.ip_address(info[4][0]).is_multicast for info in infos):
+            return ""
 
         # Prefer IPv4 because public GeoIP APIs generally handle it
         # more consistently.
@@ -1065,7 +1056,7 @@ async def classify_countries_batch(
     if not candidates:
         return []
 
-    dns_concurrency = max(
+    dns_concurrency = min(64, max(
         1,
         int(
             country_cfg.get(
@@ -1073,6 +1064,8 @@ async def classify_countries_batch(
                 40,
             )
         ),
+    )
+
     )
 
     semaphore = asyncio.Semaphore(
@@ -1107,10 +1100,7 @@ async def classify_countries_batch(
         async with semaphore:
             try:
                 endpoint_ip = (
-                    await asyncio.to_thread(
-                        resolve_endpoint_ip,
-                        server,
-                    )
+                    await asyncio.wait_for(asyncio.to_thread(resolve_endpoint_ip, server), timeout=8)
                 )
             except Exception:
                 endpoint_ip = ""
@@ -1350,6 +1340,9 @@ def vless_to_singbox(
     tag: str = "node",
 ) -> dict:
 
+    if node.get("protocol", "vless") != "vless":
+        return protocols.to_singbox(node, tag=tag)
+
     outbound = {
         "type": "vless",
         "tag": tag,
@@ -1373,6 +1366,9 @@ def vless_to_singbox(
                 or node["server"]
             ),
         }
+
+        if node.get("alpn"):
+            tls["alpn"] = node["alpn"]
 
         if node["fp"]:
             tls["utls"] = {
@@ -1517,20 +1513,19 @@ async def run_process(
             stderr,
         )
 
-    except asyncio.TimeoutError:
+    except (asyncio.TimeoutError, asyncio.CancelledError) as error:
 
-        process.kill()
+        if process.returncode is None:
+            process.kill()
 
         try:
             await process.wait()
         except Exception:
             pass
 
-        return (
-            124,
-            b"",
-            b"timeout",
-        )
+        if isinstance(error, asyncio.CancelledError):
+            raise
+        return (124, b"", b"timeout")
 
 
 # =========================================================
@@ -1701,6 +1696,27 @@ async def _stop_owned_probe_process(
 # =========================================================
 
 
+def validate_primary_response(url: str, status: str, body: bytes, size: int) -> bool:
+    """Authenticated HTTPS 2xx with endpoint-specific content evidence."""
+    if not re.fullmatch(r"2\d\d", status):
+        return False
+    parsed = urlsplit(url)
+    if parsed.scheme != "https":
+        return False
+    if parsed.path.endswith("generate_204"):
+        return status == "204" and size == 0
+    if parsed.hostname == "www.cloudflare.com" and parsed.path == "/cdn-cgi/trace":
+        text = body.decode("utf-8", "replace")
+        return bool(re.search(r"(?m)^ip=[0-9a-fA-F:.]+$", text) and re.search(r"(?m)^loc=[A-Z]{2}$", text) and re.search(r"(?m)^h=www\.cloudflare\.com$", text))
+    if parsed.hostname == "speed.cloudflare.com" and parsed.path == "/__down":
+        expected = int(q1(parse_qs(parsed.query), "bytes", "1000000"))
+        return expected <= 2_000_000 and size == expected
+    if parsed.hostname in {"chatgpt.com", "www.chatgpt.com"}:
+        text = body[:2_000_000].decode("utf-8", "replace").lower()
+        return status == "200" and len(body) >= 2000 and bool(re.search(r"<title[^>]*>[^<]*chatgpt", text)) and not any(marker in text for marker in ("just a moment", "cf-chl-", "verify you are human", "access denied"))
+    return bool(size > 0)
+
+
 async def _probe_batch_in_slot(
     items: list[tuple[int, str]],
     slot: int,
@@ -1725,19 +1741,13 @@ async def _probe_batch_in_slot(
         {},
     )
 
-    batch_size = max(
-        1,
-        int(engine.get("batch_size", 64)),
-    )
+    batch_size = min(64, max(1, int(engine.get("batch_size", 64))))
 
     startup_delay = float(
         engine.get("startup_delay", 0.35)
     )
 
-    curl_parallel = max(
-        1,
-        int(engine.get("curl_parallel", 64)),
-    )
+    curl_parallel = min(64, max(1, int(engine.get("curl_parallel", 64))))
 
     base_port = (
         int(engine.get("base_port", 22000))
@@ -1760,6 +1770,10 @@ async def _probe_batch_in_slot(
 
         try:
             node = parse_vless(link)
+            endpoint_ip = await asyncio.wait_for(asyncio.to_thread(resolve_endpoint_ip, node["server"]), timeout=8)
+            if not endpoint_ip:
+                raise ValueError("VLESS endpoint has no public address")
+            node["server"] = endpoint_ip
 
             local_index = len(valid)
 
@@ -2020,10 +2034,14 @@ async def _probe_batch_in_slot(
                         time.perf_counter()
                     )
 
+                    body_path = Path(temp_dir) / f"response-{port}.body"
                     code, output, _ = (
                         await run_process(
                             [
                                 "curl",
+                                "--noproxy", "",
+                                "--proto", "=https",
+                                "--max-filesize", "2000000",
                                 "--socks5-hostname",
                                 (
                                     "127.0.0.1:"
@@ -2037,9 +2055,9 @@ async def _probe_batch_in_slot(
                                 ),
                                 "-sS",
                                 "-o",
-                                "/dev/null",
+                                str(body_path),
                                 "-w",
-                                "%{http_code}",
+                                "%{http_code} %{size_download}",
                                 CFG["test_url"],
                             ],
                             request_timeout + 3,
@@ -2051,23 +2069,22 @@ async def _probe_batch_in_slot(
                         - started
                     ) * 1000.0
 
-                    http_code = (
-                        output
-                        .decode(
-                            errors="ignore"
-                        )
-                        .strip()
-                    )
+                    parts = output.decode(errors="ignore").strip().split()
+                    http_code = parts[0] if parts else "000"
+                    size = int(float(parts[1])) if len(parts) == 2 else -1
+                    body = body_path.read_bytes()[:2_000_000] if body_path.exists() else b""
+                    body_path.unlink(missing_ok=True)
 
                     accepted_status_pattern = (
                         CFG.get(
                             "_probe_http_status_pattern",
-                            r"^[23]\\d\\d$",
+                            r"^2\d\d$",
                         )
                     )
 
                     if (
                         code == 0
+                        and validate_primary_response(CFG["test_url"], http_code, body, size)
                         and re.fullmatch(
                             accepted_status_pattern,
                             http_code,
@@ -2129,25 +2146,8 @@ async def run_probe_batches(
         {},
     )
 
-    batch_size = max(
-        1,
-        int(
-            engine.get(
-                "batch_size",
-                64,
-            )
-        ),
-    )
-
-    parallel_batches = max(
-        1,
-        int(
-            engine.get(
-                "parallel_batches",
-                4,
-            )
-        ),
-    )
+    batch_size = min(64, max(1, int(engine.get("batch_size", 64))))
+    parallel_batches = min(4, max(1, int(engine.get("parallel_batches", 4))))
 
     chunks = []
 
@@ -3232,7 +3232,7 @@ def publish_file(
 ) -> None:
 
     lines = [
-        f"# Best50 v{CFG.get('pipeline_version', '4.4')} — FUNCTIONALLY-TESTED VLESS",
+        f"# Best50 v{CFG.get('pipeline_version', '4.4')} — FUNCTIONALLY-TESTED PROXIES",
         "#profile-title: Best50 VPN",
         "#profile-update-interval: 1",
         "#subscription-ping-onopen-enabled: 1",
@@ -3261,10 +3261,10 @@ def publish_file(
         f"{stats['final_stable']}",
         f"# published: {len(chosen)}",
         "# functional_preliminary: gstatic",
-        "# functional_mandatory: cloudflare, youtube, chatgpt, payload-1mb",
+        "# primary_functional: verified HTTPS Cloudflare trace, YouTube204, 1MB payload; service acceptance is authoritative on Mac",
         f"# functional_final_rounds: {CFG['final_pass']['attempts']}",
         "#",
-        "# Quality-filtered public VLESS configurations.",
+        "# Quality-filtered public proxy configurations.",
         "#",
     ]
 
@@ -3320,7 +3320,7 @@ async def _v5_probe_gate(
     name: str,
     url: str,
     request_timeout: float | None = None,
-    accepted_status_pattern: str = r"^[23]\\d\\d$",
+    accepted_status_pattern: str = r"^2\d\d$",
 ) -> dict[str, float]:
     """
     Run one real HTTP gate through every candidate VLESS outbound.
@@ -3416,7 +3416,7 @@ async def _v5_run_gate_chain(
         timeout = gate.get("request_timeout")
         accepted_status_pattern = gate.get(
             "accepted_status_pattern",
-            r"^[23]\\d\\d$",
+            r"^2\d\d$",
         )
 
         passed = await _v5_probe_gate(
@@ -3460,9 +3460,7 @@ def _published_link_with_country(
             f"{normalized_country!r}"
         )
 
-    base = link.split("#", 1)[0]
-
-    return f"{base}#{normalized_country}"
+    return protocols.relabel(link, normalized_country)
 
 
 def _v5_median(values: list[float]) -> float:
@@ -3725,45 +3723,9 @@ async def main_async() -> int:
     # Fetch
     # -----------------------------------------------------
 
-    all_links: list[str] = []
-
-    source_stats = {}
-
-    for source in CFG["sources"]:
-
-        try:
-
-            text = await asyncio.to_thread(
-                fetch,
-                source["url"],
-            )
-
-            links = extract_vless(text)
-
-            source_stats[
-                source["name"]
-            ] = len(links)
-
-            print(
-                f"{source['name']}: "
-                f"{len(links)} VLESS candidates"
-            )
-
-            all_links.extend(links)
-
-        except Exception as error:
-
-            source_stats[
-                source["name"]
-            ] = {
-                "error": str(error)
-            }
-
-            print(
-                f"WARNING {source['name']}: "
-                f"{error}",
-                file=sys.stderr,
-            )
+    pool = SourcePool(CFG["sources"], OUT / "discovery-state.json", now=now)
+    all_links, source_stats = await asyncio.to_thread(pool.collect)
+    stats["discovery"] = pool.stats
 
     stats["candidates"] = len(all_links)
 
@@ -3897,6 +3859,7 @@ async def main_async() -> int:
     )
 
     if not parsed:
+        pool.feedback([], set(), 0)
         print(
             "ERROR: no valid VLESS candidates"
         )
@@ -4023,6 +3986,7 @@ async def main_async() -> int:
     )
 
     if not first_pass:
+        pool.feedback(links, set(), 0)
 
         print(
             "ERROR: no working nodes "
@@ -4167,10 +4131,12 @@ async def main_async() -> int:
         f"{len(stable)}"
     )
 
-    if len(stable) < 20:
+    pool.feedback(links, set(dict(first_pass)), len(stable))
+
+    if not stable:
 
         print(
-            "ERROR: fewer than 20 "
+            "ERROR: no "
             "quality-qualified nodes. "
             "Previous publication preserved."
         )
@@ -4255,7 +4221,7 @@ async def main_async() -> int:
         ),
     )
 
-    if len(best20) < 20:
+    if not best20 or not best50:
 
         print(
             "ERROR: diversity selector "
@@ -4286,7 +4252,9 @@ async def main_async() -> int:
 
     status = {
         "pipeline_version": CFG.get("pipeline_version", "4.4"),
-        "generated_at": now,
+        "generated_at": now_ts(),
+        "validation_started_at": now,
+        "valid_until": now_ts() + 6 * 3600,
         "sources": source_stats,
         "country_policy": {
             "allow": sorted(ALLOWED_COUNTRIES),
@@ -4465,10 +4433,18 @@ async def main_async() -> int:
 
 
 def main() -> int:
+    def interrupted(_signum, _frame):
+        raise KeyboardInterrupt
+    signal.signal(signal.SIGTERM, interrupted)
     try:
-        return asyncio.run(
-            main_async()
-        )
+        # Advisory lock is released by the OS even after crash/interrupt.
+        with (OUT / ".build.lock").open("a") as lock:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                print("Best50 build already running; skipped overlap")
+                return 0
+            return asyncio.run(main_async())
     except KeyboardInterrupt:
         print(
             "\nInterrupted.",

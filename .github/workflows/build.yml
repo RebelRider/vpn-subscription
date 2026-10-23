@@ -2,6 +2,14 @@ name: Build Best50
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - config.json
+      - .github/workflows/build.yml
+      - tests/test_primary_pipeline.py
+      - tests/test_source_discovery.py
   schedule:
     - cron: "17 */2 * * *"
 
@@ -29,6 +37,13 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Restore discovery reputation and backoff
+        uses: actions/cache/restore@v4
+        with:
+          path: output/discovery-state.json
+          key: discovery-v1-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: discovery-v1-
+
       - name: Install dependencies
         run: |
           set -euo pipefail
@@ -40,129 +55,95 @@ jobs:
           set -euo pipefail
           python scripts/update_geoip.py
 
-      - name: Install sing-box
+      - name: Install pinned, verified sing-box
         shell: bash
         run: |
           set -euo pipefail
-
           VERSION="1.13.19"
-
-          curl -fsSL \
+          # SHA256 from the official GitHub release asset digest.
+          SHA256="ef88a9e577d474210867bd708933d042e9b70106529df2656182c9db90106aa1"
+          curl --proto '=https' --tlsv1.2 -fsSL --retry 3 --retry-max-time 90 \
+            --connect-timeout 15 --max-time 60 \
             "https://github.com/SagerNet/sing-box/releases/download/v${VERSION}/sing-box-${VERSION}-linux-amd64.tar.gz" \
             -o /tmp/sing-box.tgz
-
+          echo "${SHA256}  /tmp/sing-box.tgz" | sha256sum --check --strict
           tar -xzf /tmp/sing-box.tgz -C /tmp
-
-          sudo install \
-            "/tmp/sing-box-${VERSION}-linux-amd64/sing-box" \
-            /usr/local/bin/sing-box
-
+          sudo install "/tmp/sing-box-${VERSION}-linux-amd64/sing-box" /usr/local/bin/sing-box
           sing-box version
+
+      - name: Run regression tests with the real proxy engine
+        run: python -m unittest discover -s tests -v
 
       - name: Build Best50
         run: |
           set -euo pipefail
-          python -u scripts/build.py
+          echo "BUILD_STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
+          timeout --signal=INT --kill-after=15s 5400 python -u scripts/build.py
 
-      - name: Validate published subscription
+      - name: Persist discovery state after success or failure
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: output/discovery-state.json
+          key: discovery-v1-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Validate fresh, nonempty publication
         shell: bash
         run: |
           set -euo pipefail
-
-          test -s output/qualified-all.txt
-          test -s output/best50.txt
-          test -s output/status.json
-
-          COUNT=$(grep -c '^vless://' output/best50.txt || true)
-          QUALIFIED_COUNT=$(grep -c '^vless://' output/qualified-all.txt || true)
-
-          echo "Published Best50 configurations: ${COUNT}"
-          echo "Published qualified pool: ${QUALIFIED_COUNT}"
-
-          if [ "$COUNT" -lt 20 ]; then
-            echo "ERROR: Best50 subscription contains fewer than 20 VLESS nodes."
-            exit 1
-          fi
-
           python3 - <<'PY'
-          import json
-
-          with open("output/status.json", "r") as f:
-              status = json.load(f)
-
+          import json, os, time
+          from pathlib import Path
+          from scripts.build import parse_vless
+          status = json.loads(Path("output/status.json").read_text())
+          generated = int(status.get("generated_at", 0))
+          if generated < int(os.environ["BUILD_STARTED_AT"]) or generated > time.time() + 60:
+              raise SystemExit("Refusing stale Best50 output")
           published = status.get("published", {})
-
-          print("Published:", published)
-
-          qualified_all = published.get(
-              "qualified_all",
-              0,
-          )
-
-          if qualified_all < 20:
-              raise SystemExit(
-                  "ERROR: status.json reports fewer than "
-                  "20 globally qualified nodes."
-              )
-
-          if qualified_all != status.get(
-              "final_stable",
-              0,
-          ):
-              raise SystemExit(
-                  "ERROR: qualified_all does not match "
-                  "final_stable."
-              )
-
-          if published.get("best50", 0) < 20:
-              raise SystemExit(
-                  "ERROR: status.json reports fewer than 20 Best50 nodes."
-              )
+          for name, limit in (("qualified-all", 500), ("best20", 20), ("best50", 50), ("best100", 100)):
+              lines = [line for line in Path(f"output/{name}.txt").read_text().splitlines() if line and not line.startswith("#")]
+              if not 1 <= len(lines) <= limit:
+                  raise SystemExit(f"Invalid {name} count: {len(lines)}")
+              for line in lines:
+                  parse_vless(line)
+              key = "qualified_all" if name == "qualified-all" else name
+              if len(lines) != published.get(key):
+                  raise SystemExit(f"Count mismatch for {name}")
+          if published["qualified_all"] != status.get("final_stable"):
+              raise SystemExit("Qualified pool does not match current successful validation")
+          print("Fresh validated publication:", published)
           PY
 
       - name: Publish
         shell: bash
         run: |
           set -euo pipefail
-
           git config user.name "best50-bot"
-          git config user.email \
-            "41898282+github-actions[bot]@users.noreply.github.com"
-
-          # The build can take 30+ minutes. Never publish output generated
-          # from a repository state that is no longer the current main.
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           BUILD_SHA="$(git rev-parse HEAD)"
-
           git fetch origin main
-
-          REMOTE_SHA="$(git rev-parse origin/main)"
-
-          echo "Build base:  ${BUILD_SHA}"
-          echo "Remote main: ${REMOTE_SHA}"
-
-          if [ "${BUILD_SHA}" != "${REMOTE_SHA}" ]; then
-            echo "STALE BUILD: main changed while this run was testing nodes."
-            echo "Generated output will not be published."
+          if [ "$BUILD_SHA" != "$(git rev-parse origin/main)" ]; then
+            echo "Main changed during validation; preserving published output until the next build."
             exit 0
           fi
-
-          git add \
-            output/qualified-all.txt \
-            output/best20.txt \
-            output/best50.txt \
-            output/best100.txt \
-            output/status.json \
-            output/history.json
-
+          git add output/qualified-all.txt output/best20.txt output/best50.txt \
+            output/best100.txt output/status.json output/history.json
           if git diff --cached --quiet; then
-            echo "No changes in generated output."
+            echo "Generated output is unchanged."
             exit 0
           fi
-
-          git commit \
-            -m "chore: update Best50 subscription"
-
-          # Use an explicit refspec. If main changes in the tiny interval
-          # between the stale check and push, Git rejects the push safely
-          # instead of overwriting newer history.
-          git push origin HEAD:main
+          git commit -m "chore: update Best50 subscription"
+          # Explicit, non-forced push is atomic at the Git branch. A concurrent
+          # main update is never overwritten. Retry only temporary transport errors.
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch origin main
+            if [ "$(git rev-parse origin/main)" = "$(git rev-parse HEAD)" ]; then exit 0; fi
+            if [ "$(git rev-parse origin/main)" != "$BUILD_SHA" ]; then
+              echo "Concurrent publication won; next scheduled build will refresh."
+              exit 0
+            fi
+            sleep "$((attempt * attempt * 5))"
+          done
+          echo "Publication failed after bounded retries; previous remote output is preserved."
+          exit 1

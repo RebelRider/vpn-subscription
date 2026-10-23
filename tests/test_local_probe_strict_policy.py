@@ -139,6 +139,10 @@ class StrictPolicyTests(unittest.TestCase):
             ],
         }
 
+        status["stability"].update(rounds=5, minimum_successes=5)
+        for node in status["nodes"]:
+            node["services"] = {name: {"passed": 5, "attempts": 5} for name in ("chatgpt", "youtube", "instagram")}
+            node["latency_samples_ms"] = [node["median_latency"]] * 5 if "median_latency" in node else []
         selected = (
             local_probe.finalize_local_selection(
                 links,
@@ -199,6 +203,10 @@ class StrictPolicyTests(unittest.TestCase):
             ],
         }
 
+        status["stability"].update(rounds=5, minimum_successes=5)
+        for node in status["nodes"]:
+            node["services"] = {name: {"passed": 5, "attempts": 5} for name in ("chatgpt", "youtube", "instagram")}
+            node["latency_samples_ms"] = [node["median_latency"]] * 5 if "median_latency" in node else []
         selected = (
             local_probe.finalize_local_selection(
                 links,
@@ -210,7 +218,6 @@ class StrictPolicyTests(unittest.TestCase):
             selected,
             [
                 "vless://fast",
-                "vless://boundary",
             ],
         )
 
@@ -225,12 +232,12 @@ class StrictPolicyTests(unittest.TestCase):
             status["selection"][
                 "latency_qualified"
             ],
-            2,
+            1,
         )
 
         self.assertEqual(
             status["selection"]["published"],
-            2,
+            1,
         )
 
 
@@ -257,6 +264,10 @@ class StrictPolicyTests(unittest.TestCase):
             ],
         }
 
+        status["stability"].update(rounds=5, minimum_successes=5)
+        for node in status["nodes"]:
+            node["services"] = {name: {"passed": 5, "attempts": 5} for name in ("chatgpt", "youtube", "instagram")}
+            node["latency_samples_ms"] = [node["median_latency"]] * 5 if "median_latency" in node else []
         selected = (
             local_probe.finalize_local_selection(
                 links,

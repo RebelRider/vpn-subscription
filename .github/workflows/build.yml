@@ -8,9 +8,7 @@ on:
       - 'scripts/**'
       - config.json
       - .github/workflows/build.yml
-      - tests/test_primary_pipeline.py
-      - tests/test_source_discovery.py
-      - tests/test_local_feedback.py
+      - 'tests/**'
   schedule:
     - cron: "17 */2 * * *"
 
@@ -159,3 +157,9 @@ jobs:
           done
           echo "Publication failed after bounded retries; previous remote output is preserved."
           exit 1
+
+      - name: Expose stale retained BestLocal results
+        if: always() && hashFiles('scripts/subscription_state.py') != ''
+        run: |
+          timeout --signal=INT --kill-after=10s 180 \
+            python scripts/subscription_state.py --mark-regional --repo "$GITHUB_WORKSPACE"

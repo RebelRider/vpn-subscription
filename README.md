@@ -81,6 +81,28 @@ capacity. Dead/unproductive discovered feeds retire automatically. Candidate
 sampling rotates between runs so a large failing feed cannot permanently starve
 alternatives. Source bodies, DNS resolution, redirects, requests and candidate
 counts are bounded; external HTTPS targets must resolve entirely to public IPs.
+Exact URI duplicates do not consume the candidate limit. A seven-day retirement
+cooldown prevents research or feed links from immediately reviving persistently
+unproductive sources. Resource-budget deferrals do not hurt reputation; malformed
+persisted state is normalized and rebuilt automatically.
+
+A separate local `com.rebelrider.best50-source-research` launch agent checks hourly
+whether daily public-source research is due. It uses the installed Cursor agent's
+strongest available Grok Extra High model, verifies the effective model, and runs
+in read-only ask mode with a sandbox and disposable empty workspace. It receives
+public source URLs, never candidate credentials or repository files. Only bounded
+JSON proposals are accepted. Public HTTPS feeds are independently checked for
+access policy, safe destinations and compatible configuration syntax, then merged
+into regional `sources/primary-sources.json` with an atomic Git push. The existing
+builder reads that catalog alongside automatic GitHub discovery; suggestions
+never bypass either functional validation stage.
+
+Quota, region, authentication, model or network failures retry after one, two,
+four, then at most six hours. A source's longer `Retry-After` is respected up to
+the bounded twenty-four-hour source policy limit. A pending successful proposal is replayed without
+another model call when feed validation or GitHub publication fails. Catalog
+entries expire after thirty days without independent verification. This is a
+supplement to discovery, so unavailable Grok never stops the normal pipeline.
 
 Primary validation retains the existing sing-box/SOCKS engine, repeated rounds,
 GeoIP country policy, performance history and infrastructure/country diversity.
@@ -93,7 +115,10 @@ locally rejected candidates move behind untested functional alternatives for a
 bounded cooldown; recent local successes receive a small reliability score bonus. Primary HTTPS
 validation is always required. This rotates the Best50 pool instead of repeatedly
 offering the same globally fast but locally inaccessible endpoints. Protocol
-types do not receive artificial preference.
+types do not receive artificial preference. Feedback is applied before the
+finalist limit, so familiar rejects cannot exclude unseen alternatives from
+final testing. Canonical IDs hash the complete protocol engine configuration,
+independent of display labels.
 
 The workflow runs every two hours and on code/config pushes. It caches discovery
 reputation even on failed builds. Any positive result may publish up to50;
@@ -123,15 +148,21 @@ Publication validates complete service evidence, sample medians, input membershi
 freshness, rank and output consistency. It stages subscription and status in a
 separate temporary Git worktree and atomically pushes the regional branch.
 Normal non-forced updates protect concurrent writers; bounded retries refetch
-before trying again. Empty attempts update health diagnostics only, preserving
-subscription bytes and the last successful validation timestamp. Retained output
-is explicitly reported as unverified by the latest attempt, never refreshed to
-look newly validated. Happ retains its normal hourly update setting.
+before trying again. Empty attempts update health and mark the retained profile
+title `STALE - no verified servers`, preserving every connection URI, its order,
+parameters and original generation time. The cloud workflow also applies this
+marker when local evidence expires, including while the Mac cannot run. Fresh
+successful publication restores the normal title. A newer successful result is
+protected from an older failed attempt. Happ retains its hourly update setting.
 
 Installation is automated by `scripts/install_local_automation.py --load` after
 the clean runtime contains this version. The installer updates only this
 BestLocal launch agent and launcher, preserving existing authentication variables
 and refusing to interrupt an active job. No new daemon or VPN component is used.
+Install the additional research job with
+`scripts/install_source_research.py --repo ~/best50-vpn-regional-runtime --load --defer-hours 1`.
+The initial quota wait affects only new state; subsequent installations preserve
+retry and success state. Both jobs use the dedicated runtime and existing auth.
 
 ## Diagnostics and verification
 
@@ -146,13 +177,19 @@ and refusing to interrupt an active job. No new daemon or VPN component is used.
   including failure/zero results, without replacing the subscription.
 * GitHub workflow summary/logs and `output/status.json`: source counts, primary
   gate results, current Best50 generation timestamp and publication status.
+* `~/Library/Logs/best50-vpn/source-research.log` and `...-error.log`, plus
+  `~/Library/Application Support/best50-vpn/source-research-status.json`:
+  research cadence, model, quota/backoff, pending replay and catalog counts.
 
 Run `python3 -m unittest discover -s tests -v`. Tests include unknown-source
 search, disappearance/recovery/replenishment, mixed protocol normalization and
 real sing-box config checks, strict service bodies and500ms boundary, isolated
 outbounds, crash/timeout/overlap recovery, unchanged-input scheduling, publication
 retry, stale-result rejection, and atomic/idempotent publication against a real
-local bare Git repository. Tests never require changing a system VPN.
+local bare Git repository. Corrupt state, duplicate-feed exhaustion, finalist
+starvation, research quota recovery, pending replay, model verification and stale
+profile annotation are covered by controlled simulations. Tests never require
+changing a system VPN or spending live Grok quota.
 
 ## External constraints
 

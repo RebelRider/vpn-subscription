@@ -59,6 +59,7 @@ SING_BOX = "sing-box"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from source_discovery import SourcePool, safe_get, decode_subscription, extract_links, public_host
 from local_feedback import load_regional_feedback, apply_feedback
+from source_catalog import load_regional_sources
 import protocols
 
 
@@ -272,32 +273,10 @@ def normalized_fingerprint(node: dict) -> str:
     can have a different local reachability result.
     """
 
-    if node.get("protocol", "vless") != "vless":
-        # The adapter's complete outbound representation captures every
-        # protocol-specific credential and transport semantic, excluding tags.
-        return sha(json.dumps(protocols.to_singbox(node, tag="node"), sort_keys=True))
-
-    value = "|".join(
-        [
-            node.get("protocol", "vless"),
-            node["server"], str(node["port"]),
-            node["uuid"],
-            node["transport"],
-            node["security"],
-            node["sni"],
-            node["host"],
-            node["path"],
-            node["flow"],
-            node["fp"],
-            node["public_key"],
-            node["short_id"],
-            node.get("service_name", ""),
-            node.get("header_type", "none"),
-            ",".join(node.get("alpn", [])),
-        ]
-    )
-
-    return sha(value)
+    # Hash the actual complete engine representation for every protocol. JSON
+    # preserves field boundaries even when paths/service names contain '|', and
+    # ignores presentation/unused URI parameters that cannot affect a connection.
+    return sha(json.dumps(vless_to_singbox(node, tag="node"), sort_keys=True))
 
 
 def endpoint_family(node: dict) -> str:
@@ -3735,6 +3714,10 @@ async def main_async() -> int:
     # -----------------------------------------------------
 
     pool = SourcePool(CFG["sources"], OUT / "discovery-state.json", now=now)
+    catalog_urls, catalog_status = load_regional_sources(ROOT, now=now)
+    for url in catalog_urls:
+        pool.add(url, origin="grok-research")
+    stats["source_catalog"] = catalog_status
     all_links, source_stats = await asyncio.to_thread(pool.collect)
     stats["discovery"] = pool.stats
 
@@ -4094,6 +4077,19 @@ async def main_async() -> int:
             item[1],
         )
     )
+
+    # Mac rejection evidence must influence admission to expensive final tests,
+    # before the 500-candidate cap. Otherwise the same known local rejects can
+    # permanently exclude unseen first-pass-functional alternatives.
+    finalist_feedback_now = now_ts()
+    finalist_feedback, finalist_feedback_status = load_regional_feedback(ROOT, now=finalist_feedback_now)
+    finalist_nodes = {node["link"]: node for node in parsed}
+    nominee_rows = [{"score": priority, "latency": latency, "link": link,
+                     "normalized": normalized_fingerprint(finalist_nodes[link])}
+                    for priority, latency, link in finalist_candidates]
+    nominees, nominee_counts = apply_feedback(nominee_rows, finalist_feedback, now=finalist_feedback_now)
+    stats["finalist_local_feedback"] = {**finalist_feedback_status, **nominee_counts}
+    finalist_candidates = [(item["score"], item["latency"], item["link"]) for item in nominees]
 
     finalist_candidates = finalist_candidates[
         : CFG["final_pass"][

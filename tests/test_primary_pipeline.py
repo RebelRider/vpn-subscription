@@ -73,6 +73,8 @@ class PrimaryPolicyTests(unittest.TestCase):
         with contextlib.ExitStack() as stack:
             stack.enter_context(patch.object(build, "OUT", Path(directory)))
             stack.enter_context(patch.object(build, "SourcePool", Pool))
+            stack.enter_context(patch.object(build, "load_regional_sources", return_value=([], {"status": "fixture", "active": 0})))
+            stack.enter_context(patch.object(build, "load_regional_feedback", return_value=({}, {"status": "fixture", "records": 0})))
             stack.enter_context(patch.object(build, "classify_countries_batch", AsyncMock(return_value=[node])))
             stack.enter_context(patch.object(build, "run_first_pass", AsyncMock(return_value=[(LINK, 100.0)])))
             stack.enter_context(patch.object(build, "run_final_pass", AsyncMock(return_value=final_results)))

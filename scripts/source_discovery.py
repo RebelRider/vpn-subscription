@@ -12,6 +12,7 @@ import hashlib
 import http.client
 import ipaddress
 import json
+import math
 import re
 import queue
 import socket
@@ -21,6 +22,7 @@ import time
 import urllib.error
 import urllib.robotparser
 from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from urllib.parse import quote, urlencode, urljoin, urlsplit, urlunsplit, parse_qsl
 
@@ -35,6 +37,8 @@ MAX_CANDIDATES = 8000
 MAX_SOURCES = 160
 MAX_FETCH_SOURCES = 72
 MAX_STATE_BYTES = 2_000_000
+MAX_RETIRED_SOURCES = 320
+RETIREMENT_COOLDOWN = 7 * 86400
 _DNS_SLOTS = threading.BoundedSemaphore(8)
 
 
@@ -106,6 +110,51 @@ class RateLimited(RuntimeError):
         super().__init__("public source rate limited")
 
 
+class SourceBudgetExhausted(RuntimeError):
+    """Our own scheduling limit, never evidence that a public feed failed."""
+    def __init__(self, stop_collection: bool = True):
+        self.stop_collection = stop_collection
+        super().__init__("discovery resource budget exhausted")
+
+
+class SourcePolicyUnavailable(RuntimeError):
+    """A missing/temporary policy response forbids fetching until retry_at."""
+    def __init__(self, retry_at=0, *, now=None):
+        now = int(time.time() if now is None else now)
+        if type(retry_at) not in (int, float) or (type(retry_at) is float and not math.isfinite(retry_at)):
+            retry_at = 0
+        self.retry_at = min(now + 86400, max(now + 60, int(retry_at) if retry_at else now + 1800))
+        super().__init__("public source policy temporarily unavailable")
+
+
+def rate_limit_retry_at(headers: dict, now: int | None = None) -> int:
+    """Honor both HTTP Retry-After forms, with bounded malformed-header fallback."""
+    now = int(time.time() if now is None else now)
+    deadlines = [now + 60]
+    reset = headers.get("x-ratelimit-reset")
+    if reset is not None:
+        if isinstance(reset, str) and re.fullmatch(r"[0-9]{1,15}", reset.strip()):
+            deadlines.append(int(reset.strip()))
+        else:
+            deadlines.append(now + 3600)
+    retry = headers.get("retry-after")
+    if retry is not None:
+        try:
+            if not isinstance(retry, str) or len(retry) > 128:
+                raise ValueError("invalid retry header")
+            retry = retry.strip()
+            if re.fullmatch(r"[0-9]{1,15}", retry):
+                deadlines.append(now + int(retry))
+            else:
+                date = parsedate_to_datetime(retry)
+                if date.tzinfo is None or date.utcoffset() is None:
+                    raise ValueError("retry HTTP date has no timezone")
+                deadlines.append(int(date.timestamp()))
+        except (ValueError, TypeError, OverflowError):
+            deadlines.append(now + 3600)
+    return min(now + 86400, max(deadlines))
+
+
 def safe_get(url: str, max_bytes: int = MAX_SOURCE_BYTES, timeout: float = 12, redirect_policy=None) -> tuple[bytes, dict]:
     """Fetch bounded HTTPS without env proxies, revalidating every redirect.
 
@@ -168,12 +217,7 @@ def safe_get(url: str, max_bytes: int = MAX_SOURCE_BYTES, timeout: float = 12, r
                     raise ValueError("redirect disallowed by source policy")
                 continue
             if response.status in {403, 429}:
-                now = int(time.time())
-                try:
-                    retry_at = max(now + 60, int(headers.get("x-ratelimit-reset", "0")), now + int(headers.get("retry-after", "60")))
-                except ValueError:
-                    retry_at = now + 3600
-                raise RateLimited(min(retry_at, now + 86400))
+                raise RateLimited(rate_limit_retry_at(headers))
             if response.status != 200:
                 raise RuntimeError(f"source HTTP {response.status}")
             if int(headers.get("content-length", "0") or 0) > max_bytes:
@@ -247,17 +291,43 @@ def feed_urls(text: str) -> list[str]:
 class SourcePool:
     def __init__(self, seeds: list[dict], state_path: Path, now: int | None = None):
         self.path = Path(state_path)
-        self.now = int(now or time.time())
-        self.state = {"version": 1, "sources": {}, "repositories": {}, "last_discovery": 0, "last_qualified": 0}
+        self.now = int(time.time() if now is None else now)
+        self.state = {"version": 1, "sources": {}, "repositories": {}, "retired_sources": {}, "last_discovery": 0, "last_qualified": 0}
         try:
             if self.path.stat().st_size <= MAX_STATE_BYTES:
                 value = json.loads(self.path.read_text())
-                if isinstance(value.get("sources"), dict):
-                    self.state.update(value)
-        except (OSError, ValueError, TypeError):
+                if isinstance(value, dict) and type(value.get("version", 1)) is int and value.get("version", 1) == 1:
+                    self._restore_state(value)
+        except (OSError, ValueError, TypeError, RecursionError):
             pass
         self.sources = self.state["sources"]
+        seed_keys = set()
         for seed in seeds:
+            try:
+                url = canonical_url(seed.get("url", "")) if isinstance(seed, dict) else ""
+                if url:
+                    seed_keys.add(hashlib.sha256(url.encode()).hexdigest()[:24])
+            except (ValueError, TypeError):
+                pass
+        for key, item in self.sources.items():
+            if item["origin"] == "seed" and key not in seed_keys:
+                item["origin"] = "public-feed-link"
+        for seed in seeds:
+            if not isinstance(seed, dict):
+                continue
+            # A corrupt/full registry must never evict configured working seeds.
+            try:
+                seed_url = canonical_url(seed.get("url", ""))
+            except (ValueError, TypeError):
+                continue
+            key = hashlib.sha256(seed_url.encode()).hexdigest()[:24]
+            if key in self.sources:
+                self.sources[key]["origin"] = "seed"
+                continue
+            if len(self.sources) >= MAX_SOURCES:
+                removable = next((key for key, item in reversed(self.sources.items()) if item["origin"] != "seed"), None)
+                if removable is not None:
+                    del self.sources[removable]
             self.add(seed.get("url", ""), origin="seed")
         self.requests = 0
         self.started = time.monotonic()
@@ -266,12 +336,80 @@ class SourcePool:
         self.stats = {"discovered_sources": 0, "fetched_sources": 0, "source_failures": 0, "rate_limited": False}
         self.link_sources: dict[str, set[str]] = {}
 
+    @staticmethod
+    def _integer(value, default=0, maximum=1_000_000):
+        if type(value) not in (int, float) or value < 0:
+            return default
+        if type(value) is float and (not math.isfinite(value) or int(value) != value):
+            return default
+        return min(int(value), maximum)
+
+    def _restore_state(self, value: dict) -> None:
+        """Retain only typed, bounded public metadata from a cached registry."""
+        restored = {}
+        raw_sources = value.get("sources", {})
+        if isinstance(raw_sources, dict):
+            for item in raw_sources.values():
+                if not isinstance(item, dict):
+                    continue
+                try:
+                    url = canonical_url(item.get("url", ""))
+                except (ValueError, TypeError):
+                    continue
+                key = hashlib.sha256(url.encode()).hexdigest()[:24]
+                if key in restored:
+                    continue
+                origin = item.get("origin")
+                if not isinstance(origin, str) or origin not in {"seed", "github-search", "public-feed-link", "grok-research"}:
+                    origin = "public-feed-link"
+                clean = {"url": url, "origin": origin}
+                clean["first_seen"] = self._integer(item.get("first_seen"), self.now, self.now)
+                for name in ("last_fetch", "last_changed", "last_success", "last_tested"):
+                    clean[name] = self._integer(item.get(name), maximum=self.now)
+                clean["next_fetch"] = self._integer(item.get("next_fetch"), maximum=self.now + 86400)
+                for name in ("empty_runs", "validation_runs"):
+                    clean[name] = self._integer(item.get(name))
+                clean["failures"] = self._integer(item.get("failures"), maximum=16)
+                for name in ("candidate_count", "last_tested_count", "last_functional_count"):
+                    clean[name] = self._integer(item.get(name), maximum=MAX_LINKS_PER_SOURCE)
+                reputation = item.get("functional_ema", 0)
+                clean["functional_ema"] = (float(reputation) if type(reputation) in (int, float)
+                                           and 0 <= reputation <= 1 and math.isfinite(reputation) else 0.0)
+                digest = item.get("content_sha256")
+                if isinstance(digest, str) and re.fullmatch(r"[0-9a-f]{64}", digest):
+                    clean["content_sha256"] = digest
+                restored[key] = clean
+                if len(restored) >= MAX_SOURCES:
+                    break
+        self.state["sources"] = restored
+        for name in ("last_discovery", "updated_at"):
+            self.state[name] = self._integer(value.get(name), maximum=self.now)
+        self.state["api_retry_at"] = self._integer(value.get("api_retry_at"), maximum=self.now + 86400)
+        self.state["last_qualified"] = self._integer(value.get("last_qualified"), maximum=500)
+        self.state["discovery_round"] = self._integer(value.get("discovery_round"), maximum=1_000_000_000)
+        repositories = value.get("repositories", {})
+        if isinstance(repositories, dict):
+            repositories = {name: self._integer(seen, maximum=self.now) for name, seen in repositories.items()
+                            if isinstance(name, str) and re.fullmatch(r"[A-Za-z0-9_.-]{1,100}/[A-Za-z0-9_.-]{1,100}", name)}
+            self.state["repositories"] = dict(sorted(repositories.items(), key=lambda pair: pair[1], reverse=True)[:200])
+        retired = value.get("retired_sources", {})
+        if isinstance(retired, dict):
+            retired = {key: self._integer(until, maximum=self.now + RETIREMENT_COOLDOWN)
+                       for key, until in retired.items()
+                       if isinstance(key, str) and re.fullmatch(r"[0-9a-f]{24}", key)}
+            self.state["retired_sources"] = dict(sorted(
+                ((key, until) for key, until in retired.items() if until > self.now),
+                key=lambda pair: pair[1], reverse=True,
+            )[:MAX_RETIRED_SOURCES])
+
     def add(self, url: str, origin: str) -> bool:
         try:
             url = canonical_url(url)
         except (ValueError, TypeError):
             return False
         key = hashlib.sha256(url.encode()).hexdigest()[:24]
+        if origin != "seed" and self.state["retired_sources"].get(key, 0) > self.now:
+            return False
         if key in self.sources:
             return False
         if len(self.sources) >= MAX_SOURCES:
@@ -281,7 +419,7 @@ class SourcePool:
 
     def _before_request(self, url: str) -> None:
         if self.requests >= 110 or time.monotonic() - self.started > 180:
-            raise RuntimeError("discovery request/time budget exhausted")
+            raise SourceBudgetExhausted()
         origin = "https://" + urlsplit(url).netloc
         policy = self.robots.get(origin)
         delay = 0.25
@@ -293,7 +431,7 @@ class SourcePool:
         remaining = delay - (time.monotonic() - self.origin_last_request.get(origin, 0))
         if remaining > 0:
             if remaining > 15 or time.monotonic() - self.started + remaining > 180:
-                raise RuntimeError("source policy exceeds crawl time budget")
+                raise SourceBudgetExhausted(stop_collection=time.monotonic() - self.started + remaining > 180)
             time.sleep(remaining)
         self.requests += 1
         self.origin_last_request[origin] = time.monotonic()
@@ -322,13 +460,22 @@ class SourcePool:
                 raw, _ = self.get(origin + "/robots.txt", max_bytes=128000, robots_fetch=True)
                 parser.parse(raw.decode("utf-8", "replace").splitlines())
                 self.robots[origin] = parser
+            except SourceBudgetExhausted:
+                raise
+            except RateLimited as exc:
+                self.robots[origin] = SourcePolicyUnavailable(exc.retry_at, now=self.now)
             except RuntimeError as exc:
                 # Explicit 404 means no robots policy; all other uncertainty
                 # fails closed for automatic crawling.
-                self.robots[origin] = True if str(exc) == "source HTTP 404" else False
+                if str(exc) == "source HTTP 404":
+                    self.robots[origin] = True
+                else:
+                    self.robots[origin] = SourcePolicyUnavailable(now=self.now)
             except Exception:
-                self.robots[origin] = False
+                self.robots[origin] = SourcePolicyUnavailable(now=self.now)
         policy = self.robots[origin]
+        if isinstance(policy, SourcePolicyUnavailable):
+            raise policy
         return policy if isinstance(policy, bool) else policy.can_fetch(USER_AGENT, url)
 
     def discover(self) -> None:
@@ -368,15 +515,17 @@ class SourcePool:
                         if self.add(f"https://raw.githubusercontent.com/{name}/{quote(branch, safe='')}/{quote(path, safe='/')}", origin="github-search"):
                             self.stats["discovered_sources"] += 1
                     self.state.setdefault("repositories", {})[name] = self.now
-                except RateLimited:
+                except (RateLimited, SourcePolicyUnavailable):
                     raise
                 except Exception:
                     continue
             self.state["last_discovery"] = self.now
             self.state["discovery_round"] = int(self.state.get("discovery_round", 0)) + 1
-        except RateLimited as exc:
-            self.state["api_retry_at"] = exc.retry_at
+        except (RateLimited, SourcePolicyUnavailable) as exc:
+            self.state["api_retry_at"] = min(self.now + 86400, max(self.now + 60, exc.retry_at))
             self.stats["rate_limited"] = True
+        except SourceBudgetExhausted:
+            self.stats["budget_exhausted"] = True
         except Exception as exc:
             self.stats["discovery_error"] = type(exc).__name__
             # Retry on the next scheduled run; existing feeds still operate.
@@ -395,7 +544,7 @@ class SourcePool:
         selected = list({key: item for key, item in explore + due}.items())[:MAX_FETCH_SOURCES]
         batches = []
         source_stats = {}
-        for key, item in selected:
+        for selected_index, (key, item) in enumerate(selected):
             try:
                 if not self.allowed(item["url"]):
                     raise ValueError("source policy disallows discovery")
@@ -419,21 +568,34 @@ class SourcePool:
                         self.stats["discovered_sources"] += 1
                 self.stats["fetched_sources"] += 1
                 print(f"Source {key}: {len(links)} candidates ({item['origin']})")
+            except SourceBudgetExhausted as exc:
+                source_stats[key] = {"deferred": "discovery-budget"}
+                self.stats["deferred_sources"] = self.stats.get("deferred_sources", 0) + 1
+                if exc.stop_collection:
+                    self.stats["budget_exhausted"] = True
+                    self.stats["deferred_sources"] += len(selected) - selected_index - 1
+                    break
             except Exception as exc:
                 failures = min(int(item.get("failures", 0)) + 1, 16)
                 delay = min(86400, 1800 * 2 ** min(failures - 1, 6))
                 item.update({"last_fetch": self.now, "failures": failures, "next_fetch": self.now + delay})
-                if isinstance(exc, RateLimited):
-                    item["next_fetch"] = max(item["next_fetch"], exc.retry_at)
+                if isinstance(exc, (RateLimited, SourcePolicyUnavailable)):
+                    item["next_fetch"] = max(item["next_fetch"], min(self.now + 86400, max(self.now + 60, exc.retry_at)))
+                    self.stats["rate_limited"] = True
                 source_stats[key] = {"error": type(exc).__name__, "retry_at": item["next_fetch"]}
                 self.stats["source_failures"] += 1
                 print(f"Source {key}: {type(exc).__name__}; retry in {item['next_fetch'] - self.now}s")
         # Round-robin candidates prevents one large feed exhausting the pool.
         all_links = []
+        seen_links = set()
         for index in range(max((len(batch) for batch in batches), default=0)):
             for batch in batches:
                 if index < len(batch):
-                    all_links.append(batch[index])
+                    link = batch[index]
+                    if link in seen_links:
+                        continue
+                    seen_links.add(link)
+                    all_links.append(link)
                     if len(all_links) >= MAX_CANDIDATES:
                         self.save()
                         return all_links, source_stats
@@ -456,13 +618,16 @@ class SourcePool:
 
     def save(self) -> None:
         # Retire failed, unused discovered feeds so the pool continually replenishes.
+        retired = {key: until for key, until in self.state["retired_sources"].items() if until > self.now}
         for key, item in list(self.sources.items()):
             age = self.now - int(item.get("first_seen", self.now))
             failed = int(item.get("failures", 0)) >= 5 and self.now - int(item.get("last_success", item.get("first_seen", self.now))) > 7 * 86400
             empty = int(item.get("empty_runs", 0)) >= 3 and age > 3 * 86400
             unproductive = int(item.get("validation_runs", 0)) >= 6 and float(item.get("functional_ema", 0)) == 0 and age > 7 * 86400
             if item.get("origin") != "seed" and (failed or empty or unproductive):
+                retired[key] = self.now + RETIREMENT_COOLDOWN
                 del self.sources[key]
+        self.state["retired_sources"] = dict(sorted(retired.items(), key=lambda pair: pair[1], reverse=True)[:MAX_RETIRED_SOURCES])
         self.state["repositories"] = dict(sorted(self.state.get("repositories", {}).items(), key=lambda pair: pair[1], reverse=True)[:200])
         self.state["updated_at"] = self.now
         self.path.parent.mkdir(parents=True, exist_ok=True)

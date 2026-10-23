@@ -25,7 +25,8 @@ _ID = re.compile(r"(?:[a-fA-F0-9]{32}|[a-fA-F0-9]{64})")
 
 
 def _epoch(value) -> bool:
-    return type(value) in (int, float) and math.isfinite(value) and value > 0
+    return ((type(value) is int and 0 < value <= 10 ** 12)
+            or (type(value) is float and math.isfinite(value) and 0 < value <= 10 ** 12))
 
 
 def parse_health(raw: bytes, now: float | None = None) -> tuple[dict, dict]:

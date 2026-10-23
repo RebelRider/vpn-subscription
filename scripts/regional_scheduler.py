@@ -26,6 +26,8 @@ REPLENISH_SECONDS = 6 * 3600
 VALIDATION_DUE_SECONDS = REVALIDATE_SECONDS - JOB_DEADLINE_SECONDS - POLL_SECONDS
 LOW_POOL_SIZE = 10
 MAX_OUTPUT_BYTES = 4 * 1024 * 1024
+MAX_STATE_BYTES = 1024 * 1024
+MAX_RETRY_FUTURE_SECONDS = 3600 + 300
 
 
 def redact(value: str) -> str:
@@ -68,7 +70,7 @@ def atomic_json(path: Path, data: dict) -> None:
     fd, temporary = tempfile.mkstemp(prefix=path.name + ".", dir=path.parent)
     try:
         with os.fdopen(fd, "w") as handle:
-            json.dump(data, handle, sort_keys=True, indent=2)
+            json.dump(data, handle, sort_keys=True, indent=2, allow_nan=False)
             handle.write("\n")
             handle.flush()
             os.fsync(handle.fileno())
@@ -88,12 +90,101 @@ def rotate_logs(directory: Path, limit: int = 5 * 1024 * 1024) -> None:
             os.replace(path, previous)
 
 
+def _read_state(path: Path):
+    with path.open("rb") as stream:
+        raw = stream.read(MAX_STATE_BYTES + 1)
+    if len(raw) > MAX_STATE_BYTES:
+        raise ValueError("state exceeds size limit")
+    return json.loads(raw)
+
+
 def load_state(path: Path) -> dict:
     try:
-        value = json.loads(path.read_text())
+        value = _read_state(path)
         return value if isinstance(value, dict) else {}
-    except (OSError, ValueError):
+    except (OSError, ValueError, UnicodeError, RecursionError):
         return {}
+
+
+def normalize_scheduler_state(value, now: float | None = None) -> tuple[dict, list[str]]:
+    """Recover diagnostic state without inventing validation/publication evidence.
+
+    Past event times must be finite positive epochs, permitting at most five
+    minutes of clock skew. Retry deadlines may be zero or at most one hour plus
+    that skew in the future. Invalid fields are discarded, so corrupted retry
+    state cannot suppress future work. Unknown fields are not trusted.
+    """
+    now = time.time() if now is None else now
+    if not isinstance(value, dict):
+        return {}, ["state-object"]
+    timestamps = {
+        "last_validated_at", "last_published_at", "last_published_validation_at",
+        "last_local_result_at", "last_attempt_at", "last_failure_at",
+        "last_scheduler_started_at", "last_scheduler_finished_at",
+        "last_input_checked_at", "input_generated_at", "recovered_interrupted_at",
+        "last_replenishment_dispatched_at", "last_replenishment_attempt_at",
+        "state_recovered_at",
+    }
+    retries = {"next_retry_at", "next_replenishment_retry_at"}
+    counters = {"consecutive_failures": 1000, "replenishment_consecutive_failures": 1000,
+                "last_local_qualified": 50, "last_published_count": 50,
+                "pid": 2 ** 31 - 1, "poll_seconds": 86400,
+                "revalidate_seconds": 7 * 86400, "validation_due_seconds": 7 * 86400,
+                "state_recovery_count": 1000000}
+    strings = {"last_validated_signature", "last_attempt_signature", "input_signature",
+               "health", "last_error", "last_replenishment_error"}
+    ages = {"published_age_seconds", "published_validation_age_seconds", "input_age_seconds"}
+    normalized, recovered = {}, []
+    for name, item in value.items():
+        valid = False
+        number = (isinstance(item, int) and not isinstance(item, bool)) or (isinstance(item, float) and math.isfinite(item))
+        if name in timestamps:
+            valid = number and 0 < item <= now + 300
+        elif name in retries:
+            valid = number and 0 <= item <= now + MAX_RETRY_FUTURE_SECONDS
+        elif name in counters:
+            valid = isinstance(item, int) and not isinstance(item, bool) and 0 <= item <= counters[name]
+        elif name in strings:
+            maximum = 3000 if "error" in name else 256
+            valid = isinstance(item, str) and len(item) <= maximum and not any(ord(char) < 32 for char in item)
+        elif name in {"running", "published_stale"}:
+            valid = isinstance(item, bool)
+        elif name in ages:
+            valid = item is None or (number and -300 <= item <= now)
+        elif name == "last_service_totals":
+            valid = isinstance(item, dict) and set(item) == {"chatgpt", "youtube", "instagram"}
+            if valid:
+                for total in item.values():
+                    if (not isinstance(total, dict) or set(total) != {"attempts", "passed", "all_round_candidates"}
+                            or any(not isinstance(count, int) or isinstance(count, bool) for count in total.values())
+                            or not 0 <= total["passed"] <= total["attempts"] <= 250
+                            or not 0 <= total["all_round_candidates"] <= 50):
+                        valid = False
+                        break
+        if valid:
+            normalized[name] = item
+        else:
+            recovered.append(name if name in timestamps | retries | set(counters) | strings | ages | {"running", "published_stale", "last_service_totals"} else "unknown-field")
+    # This is derived evidence, never a trusted persisted assertion of freshness.
+    validation = normalized.get("last_published_validation_at")
+    normalized["published_stale"] = not validation or now - validation > REVALIDATE_SECONDS
+    return normalized, sorted(set(recovered))
+
+
+def load_scheduler_state(path: Path, now: float | None = None) -> dict:
+    now = time.time() if now is None else now
+    try:
+        value = _read_state(path)
+    except FileNotFoundError:
+        return {}
+    except (OSError, ValueError, UnicodeError, RecursionError):
+        value = None
+    state, recovered = normalize_scheduler_state(value, now)
+    if recovered:
+        state["state_recovered_at"] = now
+        state["state_recovery_count"] = min(state.get("state_recovery_count", 0) + 1, 1000000)
+        log("Recovered invalid scheduler state fields: " + ", ".join(recovered))
+    return state
 
 
 def retry_delay(failures: int, jitter: float | None = None) -> float:
@@ -284,8 +375,8 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
             return 0
         if state_dir == (Path.home() / "Library/Application Support/best50-vpn").resolve():
             rotate_logs(Path.home() / "Library/Logs/best50-vpn")
-        state = load_state(state_path)
         now = time.time()
+        state = load_scheduler_state(state_path, now)
         if state.get("running"):
             log("Recovering interrupted prior run; process supervision already bounds owned children")
             state["recovered_interrupted_at"] = now
@@ -378,7 +469,7 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
             state.update({"running": False, "last_scheduler_finished_at": time.time()})
             published = state.get("last_published_at")
             state["published_age_seconds"] = time.time() - published if published else None
-            validation_time = state.get("last_published_validation_at", state.get("last_validated_at"))
+            validation_time = state.get("last_published_validation_at")
             state["published_validation_age_seconds"] = time.time() - validation_time if validation_time else None
             state["published_stale"] = not validation_time or time.time() - validation_time > REVALIDATE_SECONDS
             atomic_json(state_path, state)

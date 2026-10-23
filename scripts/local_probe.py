@@ -92,6 +92,72 @@ ALLOWED_ACTUAL_EXIT_COUNTRIES = frozenset({
 # reach this number.
 MAX_LOCAL_PUBLISHED_NODES = 12
 MAX_LOCAL_MEDIAN_LATENCY_MS = 500.0
+MAX_PERSISTED_JSON_BYTES = 1024 * 1024
+MAX_RELIABILITY_RECORDS = 5000
+MAX_RELIABILITY_AGE_SECONDS = 28 * 86400
+
+
+def read_bounded_json(path: Path):
+    with path.open("rb") as stream:
+        raw = stream.read(MAX_PERSISTED_JSON_BYTES + 1)
+    if len(raw) > MAX_PERSISTED_JSON_BYTES:
+        raise ValueError("Persisted JSON exceeds size limit")
+    return json.loads(raw)
+
+
+def load_local_reliability(path: Path | None = None, now: float | None = None) -> dict:
+    """Read optional hash-only history; corrupt diagnostics never stop validation.
+
+    Each retained record has a complete SHA-256 ID, finite recent last_seen,
+    integer counts 0 <= passes <= runs <= 100, and a boolean qualification flag.
+    Discard invalid records rather than guessing successful historical checks.
+    """
+    path = STATE_DIR / "local-reliability.json" if path is None else path
+    now = time.time() if now is None else now
+    try:
+        value = read_bounded_json(path)
+        if not isinstance(value, dict):
+            raise ValueError("History must be an object")
+    except FileNotFoundError:
+        return {}
+    except (OSError, ValueError, UnicodeError, RecursionError):
+        print("Recovered invalid local reliability history; current validation will rebuild it", flush=True)
+        return {}
+    records = {}
+    for key, record in value.items():
+        if not isinstance(key, str) or not re.fullmatch(r"[0-9a-f]{64}", key) or not isinstance(record, dict):
+            continue
+        stamp, runs, passes, qualified = (record.get(field) for field in ("last_seen", "runs", "passes", "qualified"))
+        number = (isinstance(stamp, int) and not isinstance(stamp, bool)) or (isinstance(stamp, float) and math.isfinite(stamp))
+        if (not number or not now - MAX_RELIABILITY_AGE_SECONDS <= stamp <= now + 300
+                or not isinstance(runs, int) or isinstance(runs, bool) or not 0 <= runs <= 100
+                or not isinstance(passes, int) or isinstance(passes, bool) or not 0 <= passes <= runs
+                or not isinstance(qualified, bool) or (qualified and passes == 0)):
+            continue
+        records[key] = {"last_seen": stamp, "runs": runs, "passes": passes, "qualified": qualified}
+    records = dict(sorted(records.items(), key=lambda item: (-item[1]["last_seen"], item[0]))[:MAX_RELIABILITY_RECORDS])
+    if len(records) != len(value):
+        print(f"Recovered local reliability history: retained {len(records)} of {len(value)} records", flush=True)
+    return records
+
+
+def previous_health_timestamp(path: Path, now: float | None = None) -> float | None:
+    """Only a well-formed, plausible old report can prevent a newer write."""
+    now = time.time() if now is None else now
+    try:
+        previous = read_bounded_json(path)
+        if not isinstance(previous, dict):
+            return None
+        raw_stamp = previous.get("latest_attempt_at")
+        if not isinstance(raw_stamp, str):
+            return None
+        stamp = datetime.fromisoformat(raw_stamp.replace("Z", "+00:00"))
+        if stamp.tzinfo is None:
+            return None
+        epoch = stamp.timestamp()
+        return epoch if math.isfinite(epoch) and 0 < epoch <= now + 300 else None
+    except (OSError, ValueError, TypeError, OverflowError, UnicodeError, RecursionError):
+        return None
 
 
 def load_build_module():
@@ -1238,12 +1304,8 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
     )
     build._local_reports = reports
     history_path = STATE_DIR / "local-reliability.json"
-    try:
-        history = json.loads(history_path.read_text())
-    except (OSError, ValueError):
-        history = {}
     now = int(time.time())
-    history = {k: v for k, v in history.items() if isinstance(v, dict) and now - v.get("last_seen", 0) < 28 * 86400}
+    history = load_local_reliability(history_path, now)
     gate_counts = {name: 0 for name in ("chatgpt", "youtube", "instagram")}
     qualified = []
     diagnostics = []
@@ -1699,12 +1761,12 @@ def _publish_regional_once(
             REGIONAL_REMOTE,
             REGIONAL_BRANCH,
         )
-        base_ref = (
-            f"{REGIONAL_REMOTE}/"
-            f"{REGIONAL_BRANCH}"
-        )
+        # The freshness check and worktree must refer to one immutable snapshot.
+        # A concurrent fetch may move origin/regional after the check; using its
+        # old commit makes the ordinary push reject any newer publication.
+        base_ref = git_output("rev-parse", f"{REGIONAL_REMOTE}/{REGIONAL_BRANCH}")
     else:
-        base_ref = DEFAULT_UPSTREAM_REF
+        base_ref = git_output("rev-parse", DEFAULT_UPSTREAM_REF)
 
     if regional_exists:
         try:
@@ -1913,6 +1975,15 @@ def publish_regional_result(subscription_path: Path, status_path: Path, tested_s
 
 def publish_regional_health(status: dict) -> None:
     """Publish latest-attempt diagnostics without replacing the retained subscription."""
+    if not isinstance(status, dict) or not isinstance(status.get("stability"), dict):
+        raise RuntimeError("Invalid current local health status")
+    require_fresh_timestamp(status.get("generated_at"), 6, "local health validation")
+    qualified = status.get("stability", {}).get("qualified")
+    if isinstance(qualified, bool) or not isinstance(qualified, int) or not 0 <= qualified <= 50:
+        raise RuntimeError("Invalid current local health qualification count")
+    spec = importlib.util.spec_from_file_location("bestlocal_subscription_state", Path(__file__).with_name("subscription_state.py"))
+    subscription_state = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(subscription_state)
     health = {
         "schema": 1, "policy": "bestlocal-strict-services-v6",
         "generated_at": datetime.fromisoformat(status["generated_at"].replace("Z", "+00:00")).timestamp(),
@@ -1925,10 +1996,7 @@ def publish_regional_health(status: dict) -> None:
         "gates": status.get("gates"), "latency_method": status.get("latency_method"),
         "diagnostics": status.get("diagnostics", []),
     }
-    try:
-        recent = json.loads((STATE_DIR / "local-reliability.json").read_text())
-    except (OSError, ValueError):
-        recent = {}
+    recent = load_local_reliability()
     health["recent_results"] = {
         key: {"last_seen": value["last_seen"], "qualified": value["qualified"]}
         for key, value in recent.items()
@@ -1945,14 +2013,33 @@ def publish_regional_health(status: dict) -> None:
                 try:
                     git_output("worktree", "add", "--detach", str(worktree), f"{REGIONAL_REMOTE}/{REGIONAL_BRANCH}")
                     target = worktree / "output/local-health.json"
-                    if target.is_file():
-                        previous = json.loads(target.read_text())
-                        previous_stamp = datetime.fromisoformat(previous["latest_attempt_at"].replace("Z", "+00:00"))
-                        if previous_stamp > datetime.fromisoformat(health["latest_attempt_at"].replace("Z", "+00:00")):
-                            print("A newer regional health report exists; retaining it")
-                            return
+                    previous_stamp = previous_health_timestamp(target)
+                    if previous_stamp is None and target.is_file():
+                        print("Recovered invalid prior regional health; replacing diagnostics with current validation", flush=True)
+                    if previous_stamp is not None and previous_stamp > health["generated_at"]:
+                        print("A newer regional health report exists; retaining it")
+                        return
+                    staged_paths = ["output/local-health.json"]
+                    if not qualified:
+                        published_status = subscription_state.read_status(worktree / REGIONAL_STATUS_PATH)
+                        if subscription_state.is_fresh_strict_status(published_status):
+                            published_stamp = datetime.fromisoformat(published_status["generated_at"].replace("Z", "+00:00")).timestamp()
+                            if published_stamp > health["generated_at"]:
+                                print("A newer validated regional subscription exists; retaining it and its health")
+                                return
+                        subscription = worktree / REGIONAL_SUBSCRIPTION_PATH
+                        if subscription.is_file():
+                            try:
+                                original = subscription_state.read_text(subscription)
+                                marked = subscription_state.mark_stale_text(original)
+                            except (OSError, ValueError, UnicodeError):
+                                print("Retained subscription could not be annotated; publishing failed-validation diagnostics only", flush=True)
+                            else:
+                                if marked != original:
+                                    subscription.write_text(marked, encoding="utf-8")
+                                    staged_paths.append(REGIONAL_SUBSCRIPTION_PATH)
                     write_status(target, health)
-                    git_output("add", "-f", "output/local-health.json", cwd=worktree)
+                    git_output("add", "-f", *staged_paths, cwd=worktree)
                     diff = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=worktree, timeout=30)
                     if diff.returncode == 0:
                         return
@@ -2208,11 +2295,7 @@ async def async_main() -> int:
     )
 
     geo_allowed = {node["id"] for node in status["nodes"]}
-    try:
-        recent_path = STATE_DIR / "local-reliability.json"
-        recent = json.loads(recent_path.read_text())
-    except (OSError, ValueError):
-        recent = {}
+    recent = load_local_reliability()
     for diagnostic in status.get("diagnostics", []):
         if diagnostic["qualified"] and diagnostic["id"] not in geo_allowed:
             diagnostic["qualified"] = False

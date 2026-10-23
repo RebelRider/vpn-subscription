@@ -1,0 +1,1984 @@
+{
+  "schema": 1,
+  "policy": "bestlocal-strict-services-v6",
+  "generated_at": 1792782183.465969,
+  "latest_attempt_at": "2026-10-23T19:03:03.465969+00:00",
+  "input": {
+    "path": "origin/main:output/best50.txt",
+    "nodes": 50,
+    "mode": "origin-main-best50"
+  },
+  "upstream_sha": "3ada952c4ce7158e889330ae0e6a6e020771f465",
+  "upstream_generated_at": "2026-10-23 18:13:23 UTC",
+  "qualified": 0,
+  "artifact_status": "last-known-good-retained; latest strict validation found no qualifiers",
+  "current_policy_validated": false,
+  "gates": {
+    "preliminary": {},
+    "mandatory": {
+      "chatgpt": 0,
+      "youtube": 0,
+      "instagram": 0
+    }
+  },
+  "latency_method": "median of 3..5 fresh HTTPS gstatic generate_204 completion times in milliseconds via the candidate authenticated SOCKS/VLESS path; includes SOCKS, transport and TLS; strictly below 500ms",
+  "diagnostics": [
+    {
+      "id": "9889b3748caccf38cf25ae114a3d7a1803fe2e9cac382e978299857954ae07cb",
+      "upstream_rank": 1,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "77ab7746882ff51c0d005b1fcf07ac56683b0974758cda335cd21b96d52aea11",
+      "upstream_rank": 2,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "7c0ad9d859ad158080cd2493e8f7a0658371e72dcb50ed18842428846ee6fded",
+      "upstream_rank": 3,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "access-denied-inconclusive"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "access-denied-inconclusive"
+          ]
+        },
+        "instagram": {
+          "passed": 1,
+          "attempts": 1,
+          "reasons": [
+            "ok"
+          ]
+        }
+      },
+      "latency_samples_ms": [
+        257.199
+      ],
+      "median_latency": null,
+      "rejection_reasons": [
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "aaefa3151d637cd8dd25a7ee41652c6dcdf47928876e53769c5cf7e9eeb80b77",
+      "upstream_rank": 4,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "2dacc0d23c6e2dec8321c7963dfd067d110b7f66b1c3d36f2cd826a5f39db600",
+      "upstream_rank": 5,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "1a8de29aed93174704a850805dc9b170788eea46655156b7d550c6b6b57f3f00",
+      "upstream_rank": 6,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "78d0052c26b8e5cb73431a788ba88d746bc1c1383c3576a48fd2d298c793c161",
+      "upstream_rank": 7,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "190cefe544267e8bf18c7386f5595107956cdd73c4b86dfb35b6a27fd4f7dacf",
+      "upstream_rank": 8,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "0ee830d927912155c42067ce27687fc2b41cd99184fa65e87ce032c4a798f2e9",
+      "upstream_rank": 9,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "access-denied-inconclusive"
+          ]
+        },
+        "youtube": {
+          "passed": 1,
+          "attempts": 1,
+          "reasons": [
+            "ok"
+          ]
+        },
+        "instagram": {
+          "passed": 1,
+          "attempts": 1,
+          "reasons": [
+            "ok"
+          ]
+        }
+      },
+      "latency_samples_ms": [
+        1095.2759999999998
+      ],
+      "median_latency": null,
+      "rejection_reasons": [
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "2dccf0b0a4cf0a641a781ac3c7e1b9b66debbcd3f02081ee93a8360d572ba628",
+      "upstream_rank": 10,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "35157489be94374543cc2932e177e2dfd425ca40f73d6bd8da716a5926724597",
+      "upstream_rank": 11,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "3dcedbfb86f5b9683654b7fed022c040cb917b38e9ebfcc2b070bb96b32aa76c",
+      "upstream_rank": 12,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "f5501827c7e181141cae52f02094baefe482af3c7e6a81ccda9d3ea977c7ca2d",
+      "upstream_rank": 13,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "1ebd93789550a9ebfb1edd299de5dba097ec9260e5a37ae7a2e3aa34b946ca06",
+      "upstream_rank": 14,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "ee73aff11a7c7ec4fcd9fadcc524281ccb0fcfdffa869b106b6811ef83cb36d7",
+      "upstream_rank": 15,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "34a792e605de213acc0391127e977f4f047e977139fa82dd459d109972698bd4",
+      "upstream_rank": 16,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "5217d48c47c9e85f1477e7a15d48626a8dbedf7eccdd6414c8fda0a8b917fc41",
+      "upstream_rank": 17,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "650993580af63065c575174fed8a70324438c383b81996568814ad016fa3d66c",
+      "upstream_rank": 18,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "215df72a8f1e55a0b73d84e6c90eef24113f2e5d20af86ea18394b60b7a62525",
+      "upstream_rank": 19,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "daa12d6bfca65be8c156214c24c8210630d3071fcd916af40e03066966c53764",
+      "upstream_rank": 20,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "09f7db48b663383b4bf6177ef23975aa89ef983f3f1281c23b5785f7ce645f10",
+      "upstream_rank": 21,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "e786a061aa0073c91a133b3fdce602af018faf474fe6aa5477c6ad8998eb6f96",
+      "upstream_rank": 22,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "b097b12126a9c14b2fa2c8473af8f3189fd1a569f82907e6fd38ab2f69e587da",
+      "upstream_rank": 23,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "85f2caa43699b1005a1478c86abf9b628316ba561fd28032e37edb5c8ac76c31",
+      "upstream_rank": 24,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "26df425d2f658b9dfd62274c22035374d24314165d0ba9b19926ef57af040f33",
+      "upstream_rank": 25,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "41e65521accdc6ae43a85aef3d2ea3f07604143fd94da49253be34f81df0d9d9",
+      "upstream_rank": 26,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "4d7020e635f171125ceceefa936ae317c700f05ee8680be6a42ebba0b2999bd1",
+      "upstream_rank": 27,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "9cf00234a1d6af1da6727bae455e8dafa6184a284ba5ea9dd7fce6af5babfcf5",
+      "upstream_rank": 28,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "access-denied-inconclusive"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "access-denied-inconclusive"
+          ]
+        },
+        "instagram": {
+          "passed": 1,
+          "attempts": 1,
+          "reasons": [
+            "ok"
+          ]
+        }
+      },
+      "latency_samples_ms": [
+        214.54500000000002
+      ],
+      "median_latency": null,
+      "rejection_reasons": [
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "f520f3797a07b1edf0af5882579057573753fdf82f6ee38e9ea67440aaf8a833",
+      "upstream_rank": 29,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "03e007107991f06d21e274de2b078e26863e1cf33d95b8d88572994d36d0e1e8",
+      "upstream_rank": 30,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "ef156ea367914debf7fd87668e2590a704cbc14d3894a5a876de6f64ca94f45d",
+      "upstream_rank": 31,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "8fab00f830fe8539bbf4ad2fb893c1ffac9b3a364c5e20f9a53fabddbd184f30",
+      "upstream_rank": 32,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "629f9f6fd210cbe9eafd8859baa737cae89159ff407fc44390624a05aaa6abf3",
+      "upstream_rank": 33,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "33a152454146b7495eb5d13a4b8406af539e981064ccf04eda3b3755e8eaa0bf",
+      "upstream_rank": 34,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "8c8918b486682bccdab1b7bc664e5546226816de9c765577f1c3b04a7211a7df",
+      "upstream_rank": 35,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "b8c399541f1d12df83edd580c52f8edd65f4814ffb7b90f82bcb37f41e5d53a5",
+      "upstream_rank": 36,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "9bc80c8a47e24b3c862bf2b96dfd00feb0d77ab8b86a2efae97e0e01461fbadb",
+      "upstream_rank": 37,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "ebf1924a5d865fb092c5930f494b697820c48eb80f6021743b8c3e3f8cd6f32b",
+      "upstream_rank": 38,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "access-denied-inconclusive"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "access-denied-inconclusive"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [
+        704.061
+      ],
+      "median_latency": null,
+      "rejection_reasons": [
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "302167b6b7fc100c34390f86773765945f3b51a1cd490f9970a4988fd4bfc0cf",
+      "upstream_rank": 39,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "f50cd8cb6d383df4031ff6c4bd30d3e31d674fe6e7c08e979c34dc405de362e1",
+      "upstream_rank": 40,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "061c93b4a8d113ae3537211216263663ad78124bbff4e2766965e1ef6d14b2f2",
+      "upstream_rank": 41,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "dfe4a5a21ff3b9d2dba156d926fd1c60f0b702545c6d8e8faad6581cd5a29c6b",
+      "upstream_rank": 42,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "129da24a77484c18ddf3aa539c84fd1542c6ced01cef92b2fb8c4b7834a31778",
+      "upstream_rank": 43,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "85a3b9f07d7b7570ba094badd211504e01df791275228e18e8b7378db45c3a9e",
+      "upstream_rank": 44,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "access-denied-inconclusive"
+          ]
+        },
+        "youtube": {
+          "passed": 1,
+          "attempts": 1,
+          "reasons": [
+            "ok"
+          ]
+        },
+        "instagram": {
+          "passed": 1,
+          "attempts": 1,
+          "reasons": [
+            "ok"
+          ]
+        }
+      },
+      "latency_samples_ms": [
+        538.9979999999999
+      ],
+      "median_latency": null,
+      "rejection_reasons": [
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "6be9222c123bf479f7958d60c995ed2c50ecc71a9fd8aa59bb573fb01426d1f3",
+      "upstream_rank": 45,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "fdb78d44564da0599ebbf9111c97f0b0b9bf8f54a8db5f12d60ba7ccc2a14005",
+      "upstream_rank": 46,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "99569bc012c1c97939703c210ddaefc7db7b9d3eccd5fcae73eb7460948b2181",
+      "upstream_rank": 47,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "609fb4ff0991a04c7e938fe6dedcc805c5ee9a5b2f1770559ab7cb5be86145bc",
+      "upstream_rank": 48,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "79efa06555c2343217f0ee0be1a888804a83817589be387c3c6565c3da8b13b6",
+      "upstream_rank": 49,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "a370b133d0af2554940069c1bb4ae1c8d36c375fcbbad2bb42d261a71ee3e8a2",
+      "upstream_rank": 50,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    }
+  ],
+  "recent_results": {
+    "9889b3748caccf38cf25ae114a3d7a1803fe2e9cac382e978299857954ae07cb": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "77ab7746882ff51c0d005b1fcf07ac56683b0974758cda335cd21b96d52aea11": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "7c0ad9d859ad158080cd2493e8f7a0658371e72dcb50ed18842428846ee6fded": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "aaefa3151d637cd8dd25a7ee41652c6dcdf47928876e53769c5cf7e9eeb80b77": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "2dacc0d23c6e2dec8321c7963dfd067d110b7f66b1c3d36f2cd826a5f39db600": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "1a8de29aed93174704a850805dc9b170788eea46655156b7d550c6b6b57f3f00": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "78d0052c26b8e5cb73431a788ba88d746bc1c1383c3576a48fd2d298c793c161": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "190cefe544267e8bf18c7386f5595107956cdd73c4b86dfb35b6a27fd4f7dacf": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "0ee830d927912155c42067ce27687fc2b41cd99184fa65e87ce032c4a798f2e9": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "2dccf0b0a4cf0a641a781ac3c7e1b9b66debbcd3f02081ee93a8360d572ba628": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "35157489be94374543cc2932e177e2dfd425ca40f73d6bd8da716a5926724597": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "3dcedbfb86f5b9683654b7fed022c040cb917b38e9ebfcc2b070bb96b32aa76c": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "f5501827c7e181141cae52f02094baefe482af3c7e6a81ccda9d3ea977c7ca2d": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "1ebd93789550a9ebfb1edd299de5dba097ec9260e5a37ae7a2e3aa34b946ca06": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "ee73aff11a7c7ec4fcd9fadcc524281ccb0fcfdffa869b106b6811ef83cb36d7": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "34a792e605de213acc0391127e977f4f047e977139fa82dd459d109972698bd4": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "5217d48c47c9e85f1477e7a15d48626a8dbedf7eccdd6414c8fda0a8b917fc41": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "650993580af63065c575174fed8a70324438c383b81996568814ad016fa3d66c": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "215df72a8f1e55a0b73d84e6c90eef24113f2e5d20af86ea18394b60b7a62525": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "daa12d6bfca65be8c156214c24c8210630d3071fcd916af40e03066966c53764": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "09f7db48b663383b4bf6177ef23975aa89ef983f3f1281c23b5785f7ce645f10": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "e786a061aa0073c91a133b3fdce602af018faf474fe6aa5477c6ad8998eb6f96": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "b097b12126a9c14b2fa2c8473af8f3189fd1a569f82907e6fd38ab2f69e587da": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "85f2caa43699b1005a1478c86abf9b628316ba561fd28032e37edb5c8ac76c31": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "26df425d2f658b9dfd62274c22035374d24314165d0ba9b19926ef57af040f33": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "41e65521accdc6ae43a85aef3d2ea3f07604143fd94da49253be34f81df0d9d9": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "4d7020e635f171125ceceefa936ae317c700f05ee8680be6a42ebba0b2999bd1": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "9cf00234a1d6af1da6727bae455e8dafa6184a284ba5ea9dd7fce6af5babfcf5": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "f520f3797a07b1edf0af5882579057573753fdf82f6ee38e9ea67440aaf8a833": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "03e007107991f06d21e274de2b078e26863e1cf33d95b8d88572994d36d0e1e8": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "ef156ea367914debf7fd87668e2590a704cbc14d3894a5a876de6f64ca94f45d": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "8fab00f830fe8539bbf4ad2fb893c1ffac9b3a364c5e20f9a53fabddbd184f30": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "629f9f6fd210cbe9eafd8859baa737cae89159ff407fc44390624a05aaa6abf3": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "33a152454146b7495eb5d13a4b8406af539e981064ccf04eda3b3755e8eaa0bf": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "8c8918b486682bccdab1b7bc664e5546226816de9c765577f1c3b04a7211a7df": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "b8c399541f1d12df83edd580c52f8edd65f4814ffb7b90f82bcb37f41e5d53a5": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "9bc80c8a47e24b3c862bf2b96dfd00feb0d77ab8b86a2efae97e0e01461fbadb": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "ebf1924a5d865fb092c5930f494b697820c48eb80f6021743b8c3e3f8cd6f32b": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "302167b6b7fc100c34390f86773765945f3b51a1cd490f9970a4988fd4bfc0cf": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "f50cd8cb6d383df4031ff6c4bd30d3e31d674fe6e7c08e979c34dc405de362e1": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "061c93b4a8d113ae3537211216263663ad78124bbff4e2766965e1ef6d14b2f2": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "dfe4a5a21ff3b9d2dba156d926fd1c60f0b702545c6d8e8faad6581cd5a29c6b": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "129da24a77484c18ddf3aa539c84fd1542c6ced01cef92b2fb8c4b7834a31778": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "85a3b9f07d7b7570ba094badd211504e01df791275228e18e8b7378db45c3a9e": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "6be9222c123bf479f7958d60c995ed2c50ecc71a9fd8aa59bb573fb01426d1f3": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "fdb78d44564da0599ebbf9111c97f0b0b9bf8f54a8db5f12d60ba7ccc2a14005": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "99569bc012c1c97939703c210ddaefc7db7b9d3eccd5fcae73eb7460948b2181": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "609fb4ff0991a04c7e938fe6dedcc805c5ee9a5b2f1770559ab7cb5be86145bc": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "79efa06555c2343217f0ee0be1a888804a83817589be387c3c6565c3da8b13b6": {
+      "last_seen": 1792782183,
+      "qualified": false
+    },
+    "a370b133d0af2554940069c1bb4ae1c8d36c375fcbbad2bb42d261a71ee3e8a2": {
+      "last_seen": 1792782183,
+      "qualified": false
+    }
+  }
+}

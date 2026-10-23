@@ -86,6 +86,26 @@ class DiscoveryTests(unittest.TestCase):
             self.assertEqual(recovered, [LINK])
             self.assertEqual(next(iter(restored.sources.values()))["failures"], 0)
 
+    def test_immediate_replenishment_reuses_successful_sources(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            seed = {"url": "https://raw.githubusercontent.com/public/feed/main/config.txt"}
+            pool = discovery.SourcePool([seed], path, now=2_000_000_000)
+            pool.state["last_discovery"] = pool.now
+            with patch.object(pool, "get", return_value=(LINK.encode(), {})):
+                first, _ = pool.collect()
+            saved = json.loads(path.read_text())
+            # Compatibility with the successful-fetch cooldown cached by the
+            # previous implementation must not make expedited builds empty.
+            next(iter(saved["sources"].values()))["next_fetch"] = pool.now + 1800
+            path.write_text(json.dumps(saved))
+            restored = discovery.SourcePool([seed], path, now=pool.now + 10)
+            with patch.object(restored, "get", return_value=(LINK.encode(), {})) as fetch:
+                second, _ = restored.collect()
+            self.assertEqual(first, [LINK])
+            self.assertEqual(second, first)
+            self.assertEqual(fetch.call_count, 1)
+
     def test_rate_limit_stops_discovery_and_is_persisted(self):
         with tempfile.TemporaryDirectory() as directory:
             pool = discovery.SourcePool([], Path(directory) / "state.json", now=2_000_000_000)

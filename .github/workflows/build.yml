@@ -10,6 +10,7 @@ on:
       - .github/workflows/build.yml
       - tests/test_primary_pipeline.py
       - tests/test_source_discovery.py
+      - tests/test_local_feedback.py
   schedule:
     - cron: "17 */2 * * *"
 
@@ -31,6 +32,17 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
+
+      - name: Retrieve authoritative local availability feedback
+        shell: bash
+        run: |
+          set -euo pipefail
+          if timeout --kill-after=5s 45s git fetch --no-tags origin \
+            regional:refs/remotes/origin/regional >/dev/null 2>&1; then
+            echo "Regional feedback is available; the builder validates its policy and freshness."
+          else
+            echo "Regional feedback is unavailable; primary validation continues without local ranking hints."
+          fi
 
       - name: Install Python
         uses: actions/setup-python@v7

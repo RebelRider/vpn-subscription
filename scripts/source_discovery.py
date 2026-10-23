@@ -384,7 +384,11 @@ class SourcePool:
     def collect(self) -> tuple[list[str], dict]:
         self.save()  # Retire unusable feeds before admitting new discoveries.
         self.discover()
-        due = [(key, item) for key, item in self.sources.items() if self.now >= int(item.get("next_fetch", 0))]
+        # Successful feeds are inputs to every explicit build, including an
+        # expedited replenishment immediately after the previous run. Only real
+        # source failures/rate limits carry a persistent retry cooldown.
+        due = [(key, item) for key, item in self.sources.items()
+               if int(item.get("failures", 0)) == 0 or self.now >= int(item.get("next_fetch", 0))]
         # Favor proven useful feeds, retaining one quarter of slots for exploration.
         due.sort(key=lambda pair: (-float(pair[1].get("functional_ema", 0)), int(pair[1].get("last_fetch", 0)), pair[0]))
         explore = sorted(due, key=lambda pair: (int(pair[1].get("last_fetch", 0)), pair[0]))[:MAX_FETCH_SOURCES // 4]
@@ -405,7 +409,7 @@ class SourcePool:
                 digest = hashlib.sha256(raw).hexdigest()
                 if digest != item.get("content_sha256"):
                     item["last_changed"] = self.now
-                item.update({"last_fetch": self.now, "last_success": self.now, "content_sha256": digest, "candidate_count": len(links), "empty_runs": 0 if links else int(item.get("empty_runs", 0)) + 1, "failures": 0, "next_fetch": self.now + 1800})
+                item.update({"last_fetch": self.now, "last_success": self.now, "content_sha256": digest, "candidate_count": len(links), "empty_runs": 0 if links else int(item.get("empty_runs", 0)) + 1, "failures": 0, "next_fetch": self.now})
                 batches.append(links)
                 for link in links:
                     self.link_sources.setdefault(link, set()).add(key)

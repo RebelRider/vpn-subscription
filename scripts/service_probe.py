@@ -291,7 +291,12 @@ async def _http_once(build, url: str, port: int, username: str, password: str) -
             await process.wait()
         await asyncio.wait_for(read_response(), REQUEST_TIMEOUT + 2)
         if process.returncode != 0:
-            return {"error": "proxy-request-failed", "url": url}
+            reason = {5: "proxy-name-resolution-failed", 6: "destination-name-resolution-failed",
+                      7: "loopback-proxy-unavailable", 28: "proxy-request-timeout",
+                      35: "destination-tls-failed", 51: "destination-certificate-invalid",
+                      60: "destination-certificate-invalid", 56: "proxy-receive-failed",
+                      63: "response-too-large", 97: "socks-connection-failed"}.get(process.returncode, "proxy-request-failed")
+            return {"error": reason, "curl_exit": process.returncode, "url": url}
         data, marker, elapsed_raw = bytes(output).rpartition(b"\nBESTLOCAL_TIME_TOTAL:")
         if not marker:
             return {"error": "missing-request-timing", "url": url}

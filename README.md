@@ -36,6 +36,12 @@ Both outbound `bind_interface` and route `default_interface` bind to en0.
 Endpoint DNS is checked for public addresses, then pinned; TLS retains original
 SNI. Destination DNS is sent through SOCKS/VLESS or the other candidate protocol.
 Endpoint lookup uses the existing macOS resolver without changing its settings.
+GitHub fetch/push/API commands use a separate ephemeral authenticated SOCKS
+proxy with a direct outbound bound to en0 and explicit HTTPS DNS. Its environment
+and Git proxy override apply only to the owned command; existing GitHub/keychain
+authentication is preserved. This avoids failures in the active system tunnel
+without changing that tunnel or any system settings. Candidate HTTPS checks
+always override this control proxy with their own candidate connection.
 At most four candidates and sixteen HTTPS requests run concurrently. Kernel
 locks cover direct validation and scheduled jobs. Watchdogs and cancellation
 cleanup target only children/process groups created by this system.
@@ -81,6 +87,13 @@ GeoIP country policy, performance history and infrastructure/country diversity.
 Actual HTTPS responses prove proxy functionality: empty204, Cloudflare trace
 fields, and exact1MB payload. A 403 from ChatGPT is not global functional proof;
 service acceptance belongs exclusively to the authoritative Mac stage.
+
+Recent authoritative Mac results feed back into primary selection. Already
+locally rejected candidates move behind untested functional alternatives for a
+bounded cooldown; recent local successes receive a small reliability score bonus. Primary HTTPS
+validation is always required. This rotates the Best50 pool instead of repeatedly
+offering the same globally fast but locally inaccessible endpoints. Protocol
+types do not receive artificial preference.
 
 The workflow runs every two hours and on code/config pushes. It caches discovery
 reputation even on failed builds. Any positive result may publish up to50;

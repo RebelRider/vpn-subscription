@@ -58,6 +58,7 @@ SING_BOX = "sing-box"
 # Also support importlib loading by local_probe without relying on cwd.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from source_discovery import SourcePool, safe_get, decode_subscription, extract_links, public_host
+from local_feedback import load_regional_feedback, apply_feedback
 import protocols
 
 
@@ -3091,15 +3092,20 @@ def select_diverse(
     # -----------------------------------------------------
 
     remaining = list(ranked)
+    strict_count = 0
 
     while remaining and len(selected) < target:
 
         best_index = None
         best_effective = -1.0
+        availability = min(item.get("_local_feedback_group", 1) for item in remaining)
 
         for index, item in enumerate(
             remaining
         ):
+
+            if item.get("_local_feedback_group", 1) != availability:
+                continue
 
             infra = item[
                 "infrastructure"
@@ -3141,7 +3147,13 @@ def select_diverse(
                 best_index = index
 
         if best_index is None:
-            break
+            # Exhaust already validated alternatives in this availability group
+            # before admitting a recent local reject, even if diversity caps
+            # require the existing quality-qualified fallback.
+            best_index = next(index for index, item in enumerate(remaining)
+                              if item.get("_local_feedback_group", 1) == availability)
+        else:
+            strict_count += 1
 
         item = remaining.pop(
             best_index
@@ -3163,8 +3175,6 @@ def select_diverse(
         family_counts[
             item["endpoint_family"]
         ] += 1
-
-    strict_count = len(selected)
 
     # -----------------------------------------------------
     # Stage 2 — quality-qualified fallback
@@ -3860,7 +3870,7 @@ async def main_async() -> int:
     )
 
     if not parsed:
-        pool.feedback([], set(), 0)
+        pool.feedback(all_links, set(), 0)
         print(
             "ERROR: no valid VLESS candidates"
         )
@@ -4196,6 +4206,12 @@ async def main_async() -> int:
             ],
         )
     )
+
+    feedback_now = now_ts()
+    feedback_records, feedback_status = load_regional_feedback(ROOT, now=feedback_now)
+    ranked, feedback_counts = apply_feedback(ranked, feedback_records, now=feedback_now)
+    stats["local_feedback"] = {**feedback_status, **feedback_counts}
+    print("Local availability feedback: " + json.dumps(stats["local_feedback"], sort_keys=True))
 
     # -----------------------------------------------------
     # Diversity-aware publications

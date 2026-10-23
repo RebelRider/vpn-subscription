@@ -1218,6 +1218,20 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
     if not 3 <= final_rounds <= 5 or minimum_successes != final_rounds:
         raise RuntimeError("Local validation requires 3..5 rounds and every round must succeed")
     service_probe = load_service_probe()
+    identities = {}
+    seen = set()
+    unique_links = []
+    for link in links:
+        try:
+            identity = build.normalized_fingerprint(build.parse_vless(link))
+        except (ValueError, KeyError, TypeError):
+            identity = hashlib.sha256(link.split("#", 1)[0].encode()).hexdigest()
+        if identity not in seen:
+            seen.add(identity)
+            identities[link] = identity
+            unique_links.append(link)
+    print(f"Local equivalent configurations removed: {len(links) - len(unique_links)}", flush=True)
+    links = unique_links
     reports = await service_probe.validate_candidates(
         build, links, rounds=final_rounds,
         interface=build.CFG.get("_probe_default_interface", "en0"),
@@ -1236,7 +1250,7 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
     for rank, link in enumerate(links, 1):
         result = reports.get(link, {})
         services = result.get("services", {})
-        key = hashlib.sha256(link.split("#", 1)[0].encode()).hexdigest()
+        key = identities[link]
         sample = history.setdefault(key, {"runs": 0, "passes": 0})
         sample["runs"] = min(sample.get("runs", 0), 99) + 1
         passed = bool(result.get("qualified")) and all(
@@ -1249,12 +1263,13 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
         passed = passed and len(measurements) == final_rounds and isinstance(latency, (int, float)) and not isinstance(latency, bool) and 0 <= latency < MAX_LOCAL_MEDIAN_LATENCY_MS
         sample["passes"] = min(sample.get("passes", 0), sample["runs"] - 1) + int(passed)
         sample["last_seen"] = now
+        sample["qualified"] = passed
         reliability = (sample["passes"] + 1) / (sample["runs"] + 2)
         for name in gate_counts:
             gate_counts[name] += int(services.get(name, {}).get("passed") == final_rounds)
         if passed:
             qualified.append((link, result, rank, reliability))
-        diagnostic = {"id": key[:12], "upstream_rank": rank, "qualified": passed,
+        diagnostic = {"id": key, "upstream_rank": rank, "qualified": passed,
                       "services": services, "latency_samples_ms": measurements,
                       "median_latency": latency if isinstance(latency, (float, int)) and math.isfinite(latency) else None,
                       "rejection_reasons": result.get("rejection_reasons", ["missing-result"] if not result else [])}
@@ -1274,7 +1289,7 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
         "stability": {"rounds": final_rounds, "minimum_successes": minimum_successes,
                       "first_pass_survivors": len(qualified), "round_survivors": [len(qualified)] * final_rounds, "qualified": len(qualified)},
         "countries": {}, "diagnostics": diagnostics,
-        "nodes": [{"rank": index, "country": country_from_link(link), "link": link,
+        "nodes": [{"rank": index, "id": identities[link], "country": country_from_link(link), "link": link,
                    "successful_final_rounds": final_rounds, "latency_samples": len(result["latency_samples_ms"]),
                    "latency_samples_ms": result["latency_samples_ms"],
                    "median_latency": result["median_ms"], "p95_latency": result["p95_ms"],
@@ -1900,6 +1915,7 @@ def publish_regional_health(status: dict) -> None:
     """Publish latest-attempt diagnostics without replacing the retained subscription."""
     health = {
         "schema": 1, "policy": "bestlocal-strict-services-v6",
+        "generated_at": datetime.fromisoformat(status["generated_at"].replace("Z", "+00:00")).timestamp(),
         "latest_attempt_at": status["generated_at"],
         "input": status.get("input"), "upstream_sha": status.get("upstream_sha"),
         "upstream_generated_at": status.get("upstream_generated_at"),
@@ -1908,6 +1924,18 @@ def publish_regional_health(status: dict) -> None:
         "current_policy_validated": bool(status["stability"]["qualified"]),
         "gates": status.get("gates"), "latency_method": status.get("latency_method"),
         "diagnostics": status.get("diagnostics", []),
+    }
+    try:
+        recent = json.loads((STATE_DIR / "local-reliability.json").read_text())
+    except (OSError, ValueError):
+        recent = {}
+    health["recent_results"] = {
+        key: {"last_seen": value["last_seen"], "qualified": value["qualified"]}
+        for key, value in recent.items()
+        if re.fullmatch(r"[0-9a-f]{64}", key) and isinstance(value, dict)
+        and isinstance(value.get("qualified"), bool)
+        and isinstance(value.get("last_seen"), (int, float))
+        and health["generated_at"] - 28 * 86400 <= value["last_seen"] <= health["generated_at"] + 300
     }
     for attempt in range(3):
         try:
@@ -2179,10 +2207,20 @@ async def async_main() -> int:
         exit_metadata,
     )
 
-    qualified = finalize_local_selection(
-        qualified,
-        status,
-    )
+    geo_allowed = {node["id"] for node in status["nodes"]}
+    try:
+        recent_path = STATE_DIR / "local-reliability.json"
+        recent = json.loads(recent_path.read_text())
+    except (OSError, ValueError):
+        recent = {}
+    for diagnostic in status.get("diagnostics", []):
+        if diagnostic["qualified"] and diagnostic["id"] not in geo_allowed:
+            diagnostic["qualified"] = False
+            diagnostic["rejection_reasons"].append("exit-country-unverified-or-disallowed")
+            if diagnostic["id"] in recent:
+                recent[diagnostic["id"]]["qualified"] = False
+    write_status(STATE_DIR / "local-reliability.json", recent)
+    qualified = finalize_local_selection(qualified, status)
 
     geo_summary = status[
         "exit_geography"

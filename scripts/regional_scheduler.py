@@ -166,6 +166,11 @@ class Runner:
             for key in list(environment):
                 if key.lower() in {"http_proxy", "https_proxy", "all_proxy", "no_proxy"}:
                     environment.pop(key)
+        helper = self.repo / "scripts/control_plane.py"
+        if sys.platform == "darwin" and helper.is_file() and (
+            Path(command[0]).name in {"git", "gh"} or "scripts/local_probe.py" in command
+        ):
+            command = [sys.executable, str(helper), "--", *command]
         with tempfile.TemporaryFile() as output:
             process = subprocess.Popen(
                 [sys.executable, str(Path(__file__).resolve()), "--supervise", str(os.getpid()), str(remaining), "--", *command],

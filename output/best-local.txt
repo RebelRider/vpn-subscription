@@ -5,18 +5,17 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-10-24 08:27:14 UTC
+# generated: 2026-10-24 11:36:39 UTC
 #
 # Local filtering: ChatGPT providers JSON + YouTube video metadata + Instagram application HTML; median proxy HTTPS latency <500 ms
 # Local final stability: 5/5 complete rounds required
 # upstream_nodes: 100
-# local_qualified: 5
+# local_qualified: 4
 # local_ranking: stability, median latency, p95 latency
 #
 # Generated from Best50 and re-tested through the current local network.
 #
-vless://8a1f8853-9a71-4ef2-a64c-4f0a94c2e14b@147.45.47.83:443?encryption=none&flow=xtls-rprx-vision&type=tcp&security=reality&sni=ozon.ru&pbk=SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc&fp=chrome#%F0%9F%87%AB%F0%9F%87%B7%20FR%20%7C%201
-vless://3d87029f-b55b-487d-aea6-6049c8668ff1@5.175.161.230:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=UdBGJ1I5lzeteEjn5sLZfVTUcUidtjTx3cF92rPzgGk&security=reality&sid=3eed9b237e5e5baf&sni=wifi13.jzxc.digital&type=tcp#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%202
-vless://3d87029f-b55b-487d-aea6-6049c8668ff1@5.175.161.228:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=UZc4OlyX-cYmQh5FJtjzoSuVqtbiGJCNQGF_MN8CxA4&security=reality&sid=748e4f563dd9bd02&sni=www.bmw.com&type=tcp#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%203
+vless://605dea9b-b485-45c9-af9b-cc2b0195023c@nl3.mycloud1.org:2053?fp=edge&pbk=Su5ULcRQKF-0DJIHZeTNEnXHBpyQtizmUrcNIYhZI0E&security=reality&serviceName=api&sid=afee962d&sni=nl3.mycloud1.org&type=grpc#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%201
+vless://22e6604e-0481-411f-8028-ffbd65f624b6@vpn.kovira.site:443?alpn=http%2F1.1&encryption=none&fp=firefox&host=vpn.kovira.site&path=%2Fws-738d2d0c5eba7609f3c37de2&security=tls&sni=vpn.kovira.site&type=ws#%F0%9F%87%AC%F0%9F%87%A7%20GB%20%7C%20London%20%7C%202
+trojan://humanity@172.66.40.99:443?path=/assignment&security=tls&alpn=http/1.1&insecure=0&host=www.trusteeforward.com&fp=chrome&type=ws&allowInsecure=0&sni=www.trusteeforward.com#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Haarlem%20%7C%203
 trojan://humanity@172.66.40.99:443?allowInsecure=0&sni=www.trusteeforward.com&alpn=http/1.1&type=ws&host=www.trusteeforward.com&path=%2Fassignment#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Haarlem%20%7C%204
-trojan://humanity@172.66.40.99:443?path=/assignment&security=tls&alpn=http/1.1&insecure=0&host=www.trusteeforward.com&fp=chrome&type=ws&allowInsecure=0&sni=www.trusteeforward.com#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Haarlem%20%7C%205

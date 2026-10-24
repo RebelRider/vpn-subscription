@@ -1,212 +1,1180 @@
 {
-  "generated_at": "2026-10-23T01:43:49.442213+00:00",
-  "algorithm": "v5-local-network-functional-filter-ranking",
+  "generated_at": "2026-10-24T07:58:49.595014+00:00",
+  "algorithm": "bestlocal-strict-services-v6",
   "input": {
-    "path": "origin/main:output/qualified-all.txt",
-    "nodes": 257,
-    "mode": "origin-main-qualified-all"
-  },
-  "network": {
-    "system_route_interface": "en0",
-    "probe_default_interface": "en0"
-  },
-  "gates": {
-    "preliminary": {
-      "gstatic": 27
+    "path": "public historical Best50 rechecks; frozen current baseline",
+    "nodes": 2,
+    "mode": "regional-historical-public-recheck",
+    "baseline_best50_nodes": 50,
+    "historical_source": {
+      "sha": "135ea72",
+      "path": "output/best50.txt"
     },
-    "mandatory": {
-      "cloudflare": 26,
-      "youtube": 26,
-      "chatgpt": 25,
-      "payload-1mb": 24
+    "regional_manifest": {
+      "file": "regional-input-manifest.json",
+      "digest": "dac46c19fc91a0e941f390c46f754552205e466c40a9cf9938aec89de9060ae3"
     }
   },
+  "network": {
+    "system_route_interface": "utun5",
+    "probe_default_interface": "en0",
+    "system_network_modified": false
+  },
+  "gates": {
+    "preliminary": {},
+    "mandatory": {
+      "chatgpt": 2,
+      "youtube": 2,
+      "instagram": 2
+    }
+  },
+  "latency_method": "median of 3..5 fresh HTTPS gstatic generate_204 completion times in milliseconds via the candidate authenticated proxy path; includes SOCKS, transport and TLS; strictly below 500ms",
   "stability": {
     "rounds": 5,
     "minimum_successes": 5,
-    "first_pass_survivors": 24,
+    "first_pass_survivors": 2,
     "round_survivors": [
-      24,
-      20,
-      21,
-      21,
-      18
+      2,
+      2,
+      2,
+      2,
+      2
     ],
-    "qualified": 5,
-    "pre_country_qualified": 17,
-    "country_qualified": 10
+    "qualified": 2,
+    "pre_country_qualified": 2,
+    "country_qualified": 2
   },
   "countries": {
-    "NL": 3,
-    "PL": 2
+    "DE": 2
   },
+  "diagnostics": [
+    {
+      "id": "d2950709f879b118c221ccefa03af0d940331451f355a883c80892f1a6208c00",
+      "upstream_rank": 1,
+      "qualified": true,
+      "services": {
+        "chatgpt": {
+          "passed": 5,
+          "attempts": 5,
+          "reasons": [
+            "browser-functional-access",
+            "browser-functional-access",
+            "browser-functional-access",
+            "browser-functional-access",
+            "browser-functional-access"
+          ],
+          "evidence": [
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:30.957000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:31.639000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:32.517000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:33.617000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:34.140000+00:00"
+              }
+            }
+          ]
+        },
+        "youtube": {
+          "passed": 5,
+          "attempts": 5,
+          "reasons": [
+            "ok",
+            "ok",
+            "ok",
+            "ok",
+            "ok"
+          ],
+          "evidence": [
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            }
+          ]
+        },
+        "instagram": {
+          "passed": 5,
+          "attempts": 5,
+          "reasons": [
+            "ok",
+            "ok",
+            "ok",
+            "ok",
+            "ok"
+          ],
+          "evidence": [
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            }
+          ]
+        }
+      },
+      "latency_samples_ms": [
+        430.761,
+        318.711,
+        340.355,
+        471.264,
+        352.537
+      ],
+      "median_latency": 352.537,
+      "rejection_reasons": [],
+      "protocol": "vless",
+      "engine_errors": {},
+      "latency_checks": [
+        {
+          "outcome": "pass",
+          "reason": "ok",
+          "http_reason": "ok",
+          "http_status": 204,
+          "curl_exit": 0,
+          "cf_challenge": false,
+          "geo_restricted": false,
+          "transport_errors": {}
+        },
+        {
+          "outcome": "pass",
+          "reason": "ok",
+          "http_reason": "ok",
+          "http_status": 204,
+          "curl_exit": 0,
+          "cf_challenge": false,
+          "geo_restricted": false,
+          "transport_errors": {}
+        },
+        {
+          "outcome": "pass",
+          "reason": "ok",
+          "http_reason": "ok",
+          "http_status": 204,
+          "curl_exit": 0,
+          "cf_challenge": false,
+          "geo_restricted": false,
+          "transport_errors": {}
+        },
+        {
+          "outcome": "pass",
+          "reason": "ok",
+          "http_reason": "ok",
+          "http_status": 204,
+          "curl_exit": 0,
+          "cf_challenge": false,
+          "geo_restricted": false,
+          "transport_errors": {}
+        },
+        {
+          "outcome": "pass",
+          "reason": "ok",
+          "http_reason": "ok",
+          "http_status": 204,
+          "curl_exit": 0,
+          "cf_challenge": false,
+          "geo_restricted": false,
+          "transport_errors": {}
+        }
+      ],
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "attempt": 1,
+          "address_id": "4ed51ef03351ca8b",
+          "https_response": true,
+          "engine_errors": {},
+          "rejection_reasons": []
+        }
+      ],
+      "browser_check": {
+        "attempted": true,
+        "qualified": true,
+        "rounds": 5,
+        "reason": "browser-functional-proof"
+      },
+      "outcome": "pass"
+    },
+    {
+      "id": "2a0f8b831547dfb96b4a06280319abea182e6e308636fadb0b83c5a519cc0097",
+      "upstream_rank": 2,
+      "qualified": true,
+      "services": {
+        "chatgpt": {
+          "passed": 5,
+          "attempts": 5,
+          "reasons": [
+            "browser-functional-access",
+            "browser-functional-access",
+            "browser-functional-access",
+            "browser-functional-access",
+            "browser-functional-access"
+          ],
+          "evidence": [
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:42.069000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:42.626000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:43.473000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:44.482000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:45.415000+00:00"
+              }
+            }
+          ]
+        },
+        "youtube": {
+          "passed": 5,
+          "attempts": 5,
+          "reasons": [
+            "ok",
+            "ok",
+            "ok",
+            "ok",
+            "ok"
+          ],
+          "evidence": [
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            }
+          ]
+        },
+        "instagram": {
+          "passed": 5,
+          "attempts": 5,
+          "reasons": [
+            "ok",
+            "ok",
+            "ok",
+            "ok",
+            "ok"
+          ],
+          "evidence": [
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            }
+          ]
+        }
+      },
+      "latency_samples_ms": [
+        298.01800000000003,
+        275.292,
+        252.79600000000002,
+        319.199,
+        283.37800000000004
+      ],
+      "median_latency": 283.37800000000004,
+      "rejection_reasons": [],
+      "protocol": "vless",
+      "engine_errors": {},
+      "latency_checks": [
+        {
+          "outcome": "pass",
+          "reason": "ok",
+          "http_reason": "ok",
+          "http_status": 204,
+          "curl_exit": 0,
+          "cf_challenge": false,
+          "geo_restricted": false,
+          "transport_errors": {}
+        },
+        {
+          "outcome": "pass",
+          "reason": "ok",
+          "http_reason": "ok",
+          "http_status": 204,
+          "curl_exit": 0,
+          "cf_challenge": false,
+          "geo_restricted": false,
+          "transport_errors": {}
+        },
+        {
+          "outcome": "pass",
+          "reason": "ok",
+          "http_reason": "ok",
+          "http_status": 204,
+          "curl_exit": 0,
+          "cf_challenge": false,
+          "geo_restricted": false,
+          "transport_errors": {}
+        },
+        {
+          "outcome": "pass",
+          "reason": "ok",
+          "http_reason": "ok",
+          "http_status": 204,
+          "curl_exit": 0,
+          "cf_challenge": false,
+          "geo_restricted": false,
+          "transport_errors": {}
+        },
+        {
+          "outcome": "pass",
+          "reason": "ok",
+          "http_reason": "ok",
+          "http_status": 204,
+          "curl_exit": 0,
+          "cf_challenge": false,
+          "geo_restricted": false,
+          "transport_errors": {}
+        }
+      ],
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "attempt": 1,
+          "address_id": "6e655f713087c54c",
+          "https_response": true,
+          "engine_errors": {},
+          "rejection_reasons": []
+        }
+      ],
+      "browser_check": {
+        "attempted": true,
+        "qualified": true,
+        "rounds": 5,
+        "reason": "browser-functional-proof"
+      },
+      "outcome": "pass"
+    }
+  ],
   "nodes": [
     {
       "rank": 1,
-      "country": "NL",
+      "id": "2a0f8b831547dfb96b4a06280319abea182e6e308636fadb0b83c5a519cc0097",
+      "country": "DE",
+      "link": "vless://3d87029f-b55b-487d-aea6-6049c8668ff1@5.175.161.230:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=UdBGJ1I5lzeteEjn5sLZfVTUcUidtjTx3cF92rPzgGk&security=reality&sid=3eed9b237e5e5baf&sni=wifi13.jzxc.digital&type=tcp#DE",
       "successful_final_rounds": 5,
-      "latency_samples": 19,
-      "median_latency": 397.79970794916153,
-      "p95_latency": 728.1222499441355,
-      "upstream_rank": 114,
-      "link": "vless://9c794bb7-54fe-4acd-844a-a26209af36c3@152.53.107.241:443?security=reality&fp=chrome&flow=xtls-rprx-vision&sid=7271129440ade8fa&encryption=none&headerType=none&sni=news.moscowvibe.fyi&type=tcp&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ#NL",
-      "source_country": "NL",
-      "exit_ip": "2a09:bac1:5540::3e4:2e",
-      "exit_country": "NL",
+      "latency_samples": 5,
+      "latency_samples_ms": [
+        298.01800000000003,
+        275.292,
+        252.79600000000002,
+        319.199,
+        283.37800000000004
+      ],
+      "median_latency": 283.37800000000004,
+      "p95_latency": 319.199,
+      "services": {
+        "chatgpt": {
+          "passed": 5,
+          "attempts": 5,
+          "reasons": [
+            "browser-functional-access",
+            "browser-functional-access",
+            "browser-functional-access",
+            "browser-functional-access",
+            "browser-functional-access"
+          ],
+          "evidence": [
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:42.069000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:42.626000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:43.473000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:44.482000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:45.415000+00:00"
+              }
+            }
+          ]
+        },
+        "youtube": {
+          "passed": 5,
+          "attempts": 5,
+          "reasons": [
+            "ok",
+            "ok",
+            "ok",
+            "ok",
+            "ok"
+          ],
+          "evidence": [
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            }
+          ]
+        },
+        "instagram": {
+          "passed": 5,
+          "attempts": 5,
+          "reasons": [
+            "ok",
+            "ok",
+            "ok",
+            "ok",
+            "ok"
+          ],
+          "evidence": [
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            }
+          ]
+        }
+      },
+      "historical_reliability": 0.4,
+      "validated_at": "2026-10-24T07:58:21.778355+00:00",
+      "upstream_rank": 2,
+      "source_country": "DE",
+      "exit_ip": "5.175.161.230",
+      "exit_country": "DE",
       "exit_country_source": "cloudflare-trace",
-      "exit_city": "Amsterdam",
-      "exit_region": "North Holland",
-      "exit_db_country": "NL",
+      "exit_city": "Frankfurt am Main",
+      "exit_region": "Hesse",
+      "exit_db_country": "DE",
       "exit_geo_status": "trace-ok",
-      "exit_geo_attempts": 1,
-      "country_gate": "passed"
+      "country_gate": "metadata-only"
     },
     {
       "rank": 2,
-      "country": "PL",
+      "id": "d2950709f879b118c221ccefa03af0d940331451f355a883c80892f1a6208c00",
+      "country": "DE",
+      "link": "vless://3d87029f-b55b-487d-aea6-6049c8668ff1@5.175.161.228:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=UZc4OlyX-cYmQh5FJtjzoSuVqtbiGJCNQGF_MN8CxA4&security=reality&sid=748e4f563dd9bd02&sni=www.bmw.com&type=tcp#DE",
       "successful_final_rounds": 5,
-      "latency_samples": 19,
-      "median_latency": 400.6925830617547,
-      "p95_latency": 746.3049169164151,
-      "upstream_rank": 98,
-      "link": "vless://9c794bb7-54fe-4acd-844a-a26209af36c3@144.31.0.140:443?&security=reality&flow=xtls-rprx-vision&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ&sid=7271129440ade8fa&fp=chrome&sni=api.sakhalin.fyi&type=tcp&headerType=none&host=api.sakhalin.fyi&path=%2F#PL",
-      "source_country": "PL",
-      "exit_ip": "2a09:bac1:5be0:40::3a5:1e",
-      "exit_country": "PL",
+      "latency_samples": 5,
+      "latency_samples_ms": [
+        430.761,
+        318.711,
+        340.355,
+        471.264,
+        352.537
+      ],
+      "median_latency": 352.537,
+      "p95_latency": 471.264,
+      "services": {
+        "chatgpt": {
+          "passed": 5,
+          "attempts": 5,
+          "reasons": [
+            "browser-functional-access",
+            "browser-functional-access",
+            "browser-functional-access",
+            "browser-functional-access",
+            "browser-functional-access"
+          ],
+          "evidence": [
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:30.957000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:31.639000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:32.517000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:33.617000+00:00"
+              }
+            },
+            {
+              "outcome": "pass",
+              "reason": "browser-functional-access",
+              "http_reason": "cloudflare-challenge-inconclusive",
+              "http_status": 403,
+              "curl_exit": 0,
+              "cf_challenge": true,
+              "geo_restricted": false,
+              "transport_errors": {},
+              "http_outcome": "inconclusive",
+              "browser": {
+                "passed": true,
+                "checked_at": "2026-10-24T07:58:34.140000+00:00"
+              }
+            }
+          ]
+        },
+        "youtube": {
+          "passed": 5,
+          "attempts": 5,
+          "reasons": [
+            "ok",
+            "ok",
+            "ok",
+            "ok",
+            "ok"
+          ],
+          "evidence": [
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            }
+          ]
+        },
+        "instagram": {
+          "passed": 5,
+          "attempts": 5,
+          "reasons": [
+            "ok",
+            "ok",
+            "ok",
+            "ok",
+            "ok"
+          ],
+          "evidence": [
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            },
+            {
+              "outcome": "pass",
+              "reason": "ok",
+              "http_reason": "ok",
+              "http_status": 200,
+              "curl_exit": 0,
+              "cf_challenge": false,
+              "geo_restricted": false,
+              "transport_errors": {}
+            }
+          ]
+        }
+      },
+      "historical_reliability": 0.4,
+      "validated_at": "2026-10-24T07:58:21.773561+00:00",
+      "upstream_rank": 1,
+      "source_country": "DE",
+      "exit_ip": "5.175.161.228",
+      "exit_country": "DE",
       "exit_country_source": "cloudflare-trace",
-      "exit_city": "Warsaw",
-      "exit_region": "Mazovia",
-      "exit_db_country": "PL",
+      "exit_city": "Frankfurt am Main",
+      "exit_region": "Hesse",
+      "exit_db_country": "DE",
       "exit_geo_status": "trace-ok",
-      "exit_geo_attempts": 1,
-      "country_gate": "passed"
-    },
-    {
-      "rank": 3,
-      "country": "PL",
-      "successful_final_rounds": 5,
-      "latency_samples": 19,
-      "median_latency": 423.0773749295622,
-      "p95_latency": 868.7942079268396,
-      "upstream_rank": 50,
-      "link": "vless://9c794bb7-54fe-4acd-844a-a26209af36c3@144.31.0.140:443?security=reality&encryption=none&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=api.sakhalin.fyi&sid=7271129440ade8fa#PL",
-      "source_country": "PL",
-      "exit_ip": "2a09:bac1:5be0:40::3a5:1e",
-      "exit_country": "PL",
-      "exit_country_source": "cloudflare-trace",
-      "exit_city": "Warsaw",
-      "exit_region": "Mazovia",
-      "exit_db_country": "PL",
-      "exit_geo_status": "trace-ok",
-      "exit_geo_attempts": 1,
-      "country_gate": "passed"
-    },
-    {
-      "rank": 4,
-      "country": "US",
-      "successful_final_rounds": 5,
-      "latency_samples": 19,
-      "median_latency": 472.21820801496506,
-      "p95_latency": 563.2947499398142,
-      "upstream_rank": 89,
-      "link": "vless://dd688bb9-41d9-4eb7-b5eb-6175f612cdb6@n1.fazelino.site:443?alpn=http/1.1&encryption=none&fp=chrome&host=api.fazelino.site&path=/api/get&security=tls&sni=api.fazelino.site&type=ws#US",
-      "source_country": "US",
-      "exit_ip": "2a13:7c00:11:2:f816:3eff:fe56:aaea",
-      "exit_country": "NL",
-      "exit_country_source": "cloudflare-trace",
-      "exit_city": "Amsterdam",
-      "exit_region": "North Holland",
-      "exit_db_country": "NL",
-      "exit_geo_status": "trace-ok",
-      "exit_geo_attempts": 1,
-      "country_gate": "passed"
-    },
-    {
-      "rank": 5,
-      "country": "NL",
-      "successful_final_rounds": 5,
-      "latency_samples": 19,
-      "median_latency": 474.6684171259403,
-      "p95_latency": 649.4242500048131,
-      "upstream_rank": 39,
-      "link": "vless://9c794bb7-54fe-4acd-844a-a26209af36c3@152.53.107.241:443?security=reality&fp=firefox&flow=xtls-rprx-vision&sid=7271129440ade8fa&encryption=none&headerType=none&sni=news.moscowvibe.fyi&type=tcp&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ#NL",
-      "source_country": "NL",
-      "exit_ip": "2a09:bac1:5540::3e4:2e",
-      "exit_country": "NL",
-      "exit_country_source": "cloudflare-trace",
-      "exit_city": "Amsterdam",
-      "exit_region": "North Holland",
-      "exit_db_country": "NL",
-      "exit_geo_status": "trace-ok",
-      "exit_geo_attempts": 1,
-      "country_gate": "passed"
+      "country_gate": "metadata-only"
     }
   ],
   "exit_geography": {
-    "mode": "actual-vpn-exit-strict-country-gate",
-    "affects_qualification": true,
-    "allowed_countries": [
-      "DE",
-      "GB",
-      "NL",
-      "PL",
-      "US"
-    ],
+    "mode": "actual-vpn-exit-metadata-only",
+    "affects_qualification": false,
+    "allowed_countries": [],
     "trace_url": "https://www.cloudflare.com/cdn-cgi/trace",
     "ipv4_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv4.csv.gz",
     "ipv6_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv6.csv.gz",
     "observed_countries": {
-      "RU": 1,
-      "NL": 3,
-      "PL": 3,
-      "DE": 2,
-      "FR": 1,
-      "GB": 1,
-      "US": 1,
-      "FI": 1,
-      "RO": 1,
-      "SG": 2,
-      "CA": 1
+      "DE": 2
     },
     "accepted_countries": {
-      "NL": 3,
-      "PL": 3,
-      "DE": 2,
-      "GB": 1,
-      "US": 1
+      "DE": 2
     },
-    "rejected_countries": {
-      "RU": 1,
-      "FR": 1,
-      "FI": 1,
-      "RO": 1,
-      "SG": 2,
-      "CA": 1
-    },
-    "complete": 9,
-    "country_only": 1,
+    "rejected_countries": {},
+    "complete": 2,
+    "country_only": 0,
     "unknown_rejected": 0,
-    "disallowed_country_rejected": 7,
-    "country_qualified": 10
+    "disallowed_country_rejected": 0,
+    "country_qualified": 2
   },
   "selection": {
-    "policy": "strict-actual-exit-and-local-stability",
-    "allowed_actual_exit_countries": [
-      "DE",
-      "GB",
-      "NL",
-      "PL",
-      "US"
-    ],
+    "policy": "strict-services-and-local-stability",
+    "allowed_actual_exit_countries": [],
     "maximum_published_nodes": 12,
     "maximum_median_latency_ms": 500.0,
-    "country_qualified": 10,
-    "latency_qualified": 5,
-    "published": 5,
+    "country_qualified": 2,
+    "latency_qualified": 2,
+    "published": 2,
     "padding": false
   },
-  "upstream_sha": "f4c61368dd5e97d780cd4b8cdd4be67e7a4180d2",
-  "upstream_generated_at": "2026-10-23 00:41:07 UTC",
+  "upstream_sha": "2921403ffcc6856d22239d321f35021fbe7f31e7",
+  "upstream_generated_at": "2026-10-24T07:10:39+00:00",
   "publication": {
     "enabled": true,
     "remote": "origin",

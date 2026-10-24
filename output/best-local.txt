@@ -1,24 +1,19 @@
-#profile-title: Best Local VPN [STALE - no verified servers]
-#bestlocal-status: stale; retained configurations are not currently verified
-#bestlocal-health-url: https://raw.githubusercontent.com/RebelRider/vpn-subscription/regional/output/local-health.json
-# v5.0 — LOCAL NETWORK VERIFIED VLESS
+# v6.0 — LOCAL NETWORK VERIFIED PROXIES
+#profile-title: Best Local VPN
 #profile-update-interval: 1
 #subscription-ping-onopen-enabled: 1
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-10-23 01:47:04 UTC
+# generated: 2026-10-24 07:58:49 UTC
 #
-# Local filtering: gstatic + cloudflare + youtube + chatgpt + payload-1mb
+# Local filtering: ChatGPT providers JSON + YouTube video metadata + Instagram application HTML; median proxy HTTPS latency <500 ms
 # Local final stability: 5/5 complete rounds required
-# upstream_nodes: 257
-# local_qualified: 5
+# upstream_nodes: 2
+# local_qualified: 2
 # local_ranking: stability, median latency, p95 latency
 #
-# Generated from the globally quality-qualified pool and re-tested through the current local network.
+# Generated from Best50 and re-tested through the current local network.
 #
-vless://9c794bb7-54fe-4acd-844a-a26209af36c3@152.53.107.241:443?security=reality&fp=chrome&flow=xtls-rprx-vision&sid=7271129440ade8fa&encryption=none&headerType=none&sni=news.moscowvibe.fyi&type=tcp&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Amsterdam%20%7C%201
-vless://9c794bb7-54fe-4acd-844a-a26209af36c3@144.31.0.140:443?&security=reality&flow=xtls-rprx-vision&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ&sid=7271129440ade8fa&fp=chrome&sni=api.sakhalin.fyi&type=tcp&headerType=none&host=api.sakhalin.fyi&path=%2F#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%202
-vless://9c794bb7-54fe-4acd-844a-a26209af36c3@144.31.0.140:443?security=reality&encryption=none&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=api.sakhalin.fyi&sid=7271129440ade8fa#%F0%9F%87%B5%F0%9F%87%B1%20PL%20%7C%20Warsaw%20%7C%203
-vless://dd688bb9-41d9-4eb7-b5eb-6175f612cdb6@n1.fazelino.site:443?alpn=http/1.1&encryption=none&fp=chrome&host=api.fazelino.site&path=/api/get&security=tls&sni=api.fazelino.site&type=ws#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Amsterdam%20%7C%204
-vless://9c794bb7-54fe-4acd-844a-a26209af36c3@152.53.107.241:443?security=reality&fp=firefox&flow=xtls-rprx-vision&sid=7271129440ade8fa&encryption=none&headerType=none&sni=news.moscowvibe.fyi&type=tcp&pbk=13nLTYkdBEFR-A4CfK2beOx-5LKEsXh1QHPq8Kt52BQ#%F0%9F%87%B3%F0%9F%87%B1%20NL%20%7C%20Amsterdam%20%7C%205
+vless://3d87029f-b55b-487d-aea6-6049c8668ff1@5.175.161.230:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=UdBGJ1I5lzeteEjn5sLZfVTUcUidtjTx3cF92rPzgGk&security=reality&sid=3eed9b237e5e5baf&sni=wifi13.jzxc.digital&type=tcp#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%201
+vless://3d87029f-b55b-487d-aea6-6049c8668ff1@5.175.161.228:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=UZc4OlyX-cYmQh5FJtjzoSuVqtbiGJCNQGF_MN8CxA4&security=reality&sid=748e4f563dd9bd02&sni=www.bmw.com&type=tcp#%F0%9F%87%A9%F0%9F%87%AA%20DE%20%7C%20Frankfurt%20am%20Main%20%7C%202

@@ -24,6 +24,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote, unquote, urlsplit
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_PATH = ROOT / "scripts" / "build.py"
@@ -135,6 +137,8 @@ def load_local_reliability(path: Path | None = None, now: float | None = None) -
                 or not isinstance(qualified, bool) or (qualified and passes == 0)):
             continue
         records[key] = {"last_seen": stamp, "runs": runs, "passes": passes, "qualified": qualified}
+        if isinstance(record.get("outcome"), str) and record["outcome"] in {"pass", "fail", "inconclusive"}:
+            records[key]["outcome"] = record["outcome"]
     records = dict(sorted(records.items(), key=lambda item: (-item[1]["last_seen"], item[0]))[:MAX_RELIABILITY_RECORDS])
     if len(records) != len(value):
         print(f"Recovered local reliability history: retained {len(records)} of {len(value)} records", flush=True)
@@ -688,6 +692,7 @@ def _lookup_city_database(
 def apply_exit_geography(
     status: dict,
     metadata: dict[str, dict],
+    *, strict_country_gate: bool = True,
 ) -> None:
     ipv4: list[str] = []
     ipv6: list[str] = []
@@ -899,8 +904,9 @@ def apply_exit_geography(
                 exit_country
             ] += 1
 
-        # Absolute country gate.
-        if not exit_country:
+        # Geography enriches production results; legacy callers may explicitly
+        # retain their region filter. It is not a substitute for service tests.
+        if not exit_country and strict_country_gate:
             node["country_gate"] = (
                 "rejected-unknown-actual-exit"
             )
@@ -908,7 +914,7 @@ def apply_exit_geography(
             continue
 
         if (
-            exit_country
+            strict_country_gate and exit_country
             not in ALLOWED_ACTUAL_EXIT_COUNTRIES
         ):
             node["country_gate"] = (
@@ -920,7 +926,9 @@ def apply_exit_geography(
             rejected_country += 1
             continue
 
-        node["country_gate"] = "passed"
+        node["country_gate"] = "passed" if strict_country_gate else "metadata-only"
+        if not strict_country_gate and not exit_country:
+            node["exit_country"] = "ZZ"
 
         if city:
             complete += 1
@@ -942,12 +950,12 @@ def apply_exit_geography(
 
     status["exit_geography"] = {
         "mode":
-            "actual-vpn-exit-strict-country-gate",
+            "actual-vpn-exit-strict-country-gate" if strict_country_gate else "actual-vpn-exit-metadata-only",
         "affects_qualification":
-            True,
+            strict_country_gate,
         "allowed_countries":
             sorted(
-                ALLOWED_ACTUAL_EXIT_COUNTRIES
+                ALLOWED_ACTUAL_EXIT_COUNTRIES if strict_country_gate else []
             ),
         "trace_url":
             EXIT_TRACE_URL,
@@ -1089,10 +1097,10 @@ def finalize_local_selection(
 
     status["selection"] = {
         "policy":
-            "strict-actual-exit-and-local-stability",
+            "strict-services-and-local-stability",
         "allowed_actual_exit_countries":
             sorted(
-                ALLOWED_ACTUAL_EXIT_COUNTRIES
+                ALLOWED_ACTUAL_EXIT_COUNTRIES if status.get("exit_geography", {}).get("affects_qualification", True) else []
             ),
         "maximum_published_nodes":
             MAX_LOCAL_PUBLISHED_NODES,
@@ -1253,9 +1261,9 @@ def ensure_probe_network(
         )
 
     print(
-        "Probe VLESS transport sockets are forced "
+        "Candidate transport sockets are forced "
         f"through physical interface {forced_interface}; "
-        "the active Happ tunnel is bypassed for the "
+        "the active system tunnel is bypassed for the "
         "underlying test connection."
     )
 
@@ -1309,6 +1317,7 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
     gate_counts = {name: 0 for name in ("chatgpt", "youtube", "instagram")}
     qualified = []
     diagnostics = []
+    from local_feedback import classify_diagnostic
     for rank, link in enumerate(links, 1):
         result = reports.get(link, {})
         services = result.get("services", {})
@@ -1335,6 +1344,11 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
                       "services": services, "latency_samples_ms": measurements,
                       "median_latency": latency if isinstance(latency, (float, int)) and math.isfinite(latency) else None,
                       "rejection_reasons": result.get("rejection_reasons", ["missing-result"] if not result else [])}
+        for field in ("protocol", "engine_errors", "latency_checks", "attempted_address_count", "endpoint_attempts", "browser_check"):
+            if field in result:
+                diagnostic[field] = result[field]
+        diagnostic["outcome"] = classify_diagnostic(diagnostic)
+        sample["outcome"] = diagnostic["outcome"]
         diagnostics.append(diagnostic)
         print("Candidate", diagnostic["id"], json.dumps({k: v for k, v in diagnostic.items() if k not in {"id", "upstream_rank"}}, allow_nan=False), flush=True)
     STATE_DIR.mkdir(parents=True, exist_ok=True)
@@ -1347,7 +1361,7 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
         "input": {"path": input_description, "nodes": len(links)},
         "network": {"system_route_interface": route_interface(), "probe_default_interface": build.CFG.get("_probe_default_interface", "en0"), "system_network_modified": False},
         "gates": {"preliminary": {}, "mandatory": gate_counts},
-        "latency_method": "median of 3..5 fresh HTTPS gstatic generate_204 completion times in milliseconds via the candidate authenticated SOCKS/VLESS path; includes SOCKS, transport and TLS; strictly below 500ms",
+        "latency_method": "median of 3..5 fresh HTTPS gstatic generate_204 completion times in milliseconds via the candidate authenticated proxy path; includes SOCKS, transport and TLS; strictly below 500ms",
         "stability": {"rounds": final_rounds, "minimum_successes": minimum_successes,
                       "first_pass_survivors": len(qualified), "round_survivors": [len(qualified)] * final_rounds, "qualified": len(qualified)},
         "countries": {}, "diagnostics": diagnostics,
@@ -1482,6 +1496,7 @@ def write_status(
         + "\n"
     )
 
+    os.chmod(temp, 0o600)
     temp.replace(path)
 
 
@@ -1582,7 +1597,7 @@ def validate_generated_result(
         require_fresh_timestamp(node.get("validated_at"), 6, "candidate validation")
         if not valid_node_evidence(node, rounds):
             raise RuntimeError("A node lacks required service or latency evidence")
-        if node.get("exit_country") not in ALLOWED_ACTUAL_EXIT_COUNTRIES:
+        if status.get("exit_geography", {}).get("affects_qualification", True) and node.get("exit_country") not in ALLOWED_ACTUAL_EXIT_COUNTRIES:
             raise RuntimeError("A node lacks an allowed actual exit country")
 
     ranks = [
@@ -1693,6 +1708,36 @@ def remote_branch_exists(
     )
 
 
+def validate_publication_membership(build, status: dict, tested_sha: str) -> None:
+    tested = read_links_text(run_git("show", f"{tested_sha}:{DEFAULT_UPSTREAM_PATH}"), "tested Best50")
+    allowed = {build.normalized_fingerprint(build.parse_vless(link)) for link in tested}
+    manifest = status.get("input", {}).get("regional_manifest")
+    if manifest is not None:
+        from regional_pool import validate_manifest_membership
+        if (not isinstance(manifest, dict) or not isinstance(manifest.get("digest"), str)
+                or manifest.get("file") != "regional-input-manifest.json"):
+            raise RuntimeError("Invalid frozen regional publication inputs")
+        validate_manifest_membership(
+            build, status["nodes"], STATE_DIR / manifest["file"], expected_digest=manifest["digest"],
+            expected_best50_sha=tested_sha,
+            expected_best50_digest=hashlib.sha256("\n".join(tested).encode()).hexdigest(),
+        )
+    else:
+        # Legacy Best50-only results still obey the live managed export policy.
+        # The same guard runs again before commit and push, so a newly private
+        # canonical collision cannot bypass opt-out by omitting a manifest.
+        from regional_pool import _managed
+        managed, _ = _managed(build, STATE_DIR)
+        private = {entry["id"] for entry in managed if not entry["public_publish_allowed"]}
+        for node in status["nodes"]:
+            identifier = build.normalized_fingerprint(build.parse_vless(node["link"]))
+            if identifier in private:
+                raise RuntimeError("Refusing publication of a private managed candidate")
+            if identifier not in allowed:
+                raise RuntimeError("Refusing publication of a node absent from tested Best50")
+
+
+
 def _publish_regional_once(
     subscription_path: Path,
     status_path: Path,
@@ -1721,11 +1766,9 @@ def _publish_regional_once(
     )
 
     build = load_build_module()
-    tested = read_links_text(run_git("show", f"{tested_sha}:{DEFAULT_UPSTREAM_PATH}"), "tested Best50")
-    allowed = {build.normalized_fingerprint(build.parse_vless(link)) for link in tested}
+
     status = json.loads(status_path.read_text())
-    if any(build.normalized_fingerprint(build.parse_vless(node["link"])) not in allowed for node in status["nodes"]):
-        raise RuntimeError("Refusing publication of a node absent from tested Best50")
+    validate_publication_membership(build, status, tested_sha)
 
     ensure_input_still_current(
         tested_sha
@@ -1860,6 +1903,8 @@ def _publish_regional_once(
                 tested_sha
             )
 
+            validate_publication_membership(build, status, tested_sha)
+
             git_output(
                 "commit",
                 "-m",
@@ -1879,6 +1924,8 @@ def _publish_regional_once(
             # A normal non-force push is deliberate. If
             # another publisher raced us, Git refuses the
             # update rather than overwriting remote history.
+            validate_publication_membership(build, status, tested_sha)
+
             git_output(
                 "push",
                 REGIONAL_REMOTE,
@@ -1998,7 +2045,8 @@ def publish_regional_health(status: dict) -> None:
     }
     recent = load_local_reliability()
     health["recent_results"] = {
-        key: {"last_seen": value["last_seen"], "qualified": value["qualified"]}
+        key: {"last_seen": value["last_seen"], "qualified": value["qualified"],
+              **({"outcome": value["outcome"]} if value.get("outcome") in {"pass", "fail", "inconclusive"} else {})}
         for key, value in recent.items()
         if re.fullmatch(r"[0-9a-f]{64}", key) and isinstance(value, dict)
         and isinstance(value.get("qualified"), bool)
@@ -2225,6 +2273,10 @@ async def async_main() -> int:
     #
     # Keep production settings untouched and reduce concurrency only
     # for this local regional validator.
+    from install_browser_runtime import ensure as ensure_browser
+    browser_ready = await asyncio.to_thread(ensure_browser)
+    print("Browser functional validator:", "ready" if browser_ready else "unavailable; ambiguous ChatGPT checks remain inconclusive", flush=True)
+
     probe_engine = build.CFG.setdefault(
         "probe_engine",
         {},
@@ -2236,6 +2288,14 @@ async def async_main() -> int:
     build.CFG["_probe_default_interface"] = (
         args.interface
     )
+
+    regional_manifest = None
+    if upstream_sha:
+        from regional_pool import collect_regional
+        links, regional_manifest = await asyncio.to_thread(
+            collect_regional, build, links, STATE_DIR, best50_sha=upstream_sha,
+        )
+        print("Frozen regional inputs:", json.dumps(regional_manifest["summary"], sort_keys=True), flush=True)
 
     print(
         "Local probe engine: "
@@ -2265,19 +2325,7 @@ async def async_main() -> int:
         "========================================"
     )
 
-    print(
-        "Actual VPN exit geography is an authoritative "
-        "final country gate."
-    )
-
-    print(
-        "Allowed actual exit countries: "
-        + ", ".join(
-            sorted(
-                ALLOWED_ACTUAL_EXIT_COUNTRIES
-            )
-        )
-    )
+    print("Actual exit geography is optional metadata; service access and latency determine acceptance.")
 
     # Use the trace captured by the very same isolated candidate process.
     # Do not start the legacy fixed-port enrichment engine.
@@ -2292,17 +2340,23 @@ async def async_main() -> int:
     apply_exit_geography(
         status,
         exit_metadata,
+        strict_country_gate=False,
     )
 
-    geo_allowed = {node["id"] for node in status["nodes"]}
-    recent = load_local_reliability()
-    for diagnostic in status.get("diagnostics", []):
-        if diagnostic["qualified"] and diagnostic["id"] not in geo_allowed:
-            diagnostic["qualified"] = False
-            diagnostic["rejection_reasons"].append("exit-country-unverified-or-disallowed")
-            if diagnostic["id"] in recent:
-                recent[diagnostic["id"]]["qualified"] = False
-    write_status(STATE_DIR / "local-reliability.json", recent)
+    if regional_manifest is not None:
+        from regional_pool import apply_local_feedback
+        status["regional_source_feedback"] = apply_local_feedback(STATE_DIR, status["diagnostics"])
+        permissions = {node["id"]: node["public_publish_allowed"] for node in regional_manifest["nodes"]}
+        private_nodes = [node for node in status["nodes"] if not permissions.get(node["id"], False)]
+        if private_nodes:
+            write_status(STATE_DIR / "private-qualified.json", {"generated_at": status["generated_at"], "nodes": private_nodes})
+        public_nodes = [node for node in status["nodes"] if permissions.get(node["id"], False)]
+        status["private_pool"] = {"qualified": len(private_nodes), "public_exported": 0}
+        status["nodes"] = public_nodes
+        public_ids = {node["id"] for node in public_nodes}
+        qualified = [link for link in qualified if build.normalized_fingerprint(build.parse_vless(link)) in public_ids]
+        status["input"]["regional_manifest"] = {"file": "regional-input-manifest.json", "digest": regional_manifest["manifest_digest"]}
+        status["input"]["regional_summary"] = regional_manifest["summary"]
     qualified = finalize_local_selection(qualified, status)
 
     geo_summary = status[

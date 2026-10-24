@@ -196,7 +196,7 @@ class ReliabilityRecoveryTests(unittest.TestCase):
             self.assertEqual(qualified, [link])
             self.assertEqual(local.load_local_reliability(path)[key],
                              {"last_seen": int(json.loads(path.read_text())[key]["last_seen"]),
-                              "runs": 1, "passes": 1, "qualified": True})
+                      "runs": 1, "passes": 1, "qualified": True, "outcome": "pass"})
 
 
 class HealthRecoveryTests(unittest.TestCase):

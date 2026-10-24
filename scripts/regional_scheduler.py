@@ -157,8 +157,8 @@ def normalize_scheduler_state(value, now: float | None = None) -> tuple[dict, li
                 for total in item.values():
                     if (not isinstance(total, dict) or set(total) != {"attempts", "passed", "all_round_candidates"}
                             or any(not isinstance(count, int) or isinstance(count, bool) for count in total.values())
-                            or not 0 <= total["passed"] <= total["attempts"] <= 250
-                            or not 0 <= total["all_round_candidates"] <= 50):
+                            or not 0 <= total["passed"] <= total["attempts"] <= 750
+                            or not 0 <= total["all_round_candidates"] <= 150):
                         valid = False
                         break
         if valid:

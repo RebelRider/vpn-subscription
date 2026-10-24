@@ -14,8 +14,16 @@ Missing, blocked, challenged, rate-limited or malformed responses never qualify.
 No padding, fallback candidates or waiver of a service is allowed. Up to twelve
 entries are published, preserving the previous small-list policy.
 
-* ChatGPT: `https://chatgpt.com/api/auth/providers`, HTTPS200 JSON containing an
-  OpenAI OAuth/OIDC provider and its correct ChatGPT sign-in/callback URLs.
+* ChatGPT: the lightweight HTTPS providers request is a fast path, never the
+  sole authority. Cloudflare, changed/empty provider JSON and unavailable auth
+  routes remain inconclusive. When other services and a valid latency sample
+  work, a stock headed Chromium instance uses that candidate's authenticated
+  HTTP CONNECT proxy. Each of five reloads must expose a visible, editable
+  ChatGPT composer and a fresh, validated application JSON response (anonymous
+  model catalogue or genuine auth-provider metadata). No prompt, login, CAPTCHA
+  solving, stealth or copied browser state is used. A challenge never passes.
+  The composer uses semantic selectors because current ChatGPT no longer uses
+  the old fixed ID. Browser API fetches bypass their own HTTP cache.
 * YouTube: the public oEmbed response for the official iframe API example video
   `M7lc1UVf-VE`, validating provider, video type, title and matching embed URL.
 * Instagram: the public login application HTML, requiring its actual login
@@ -26,6 +34,15 @@ entries are published, preserving the previous small-list policy.
   SOCKS, candidate transport, remote DNS, TLS and request completion. The median
   of all five must be below500; exactly500 fails. Service response transfer
   times are recorded separately from this consistent lightweight measurement.
+
+A separate positive control uses the unchanged active system connection and an
+isolated browser profile. It calibrates the method; its result cannot qualify a
+candidate. Candidate browser processes are additionally constrained by macOS
+Seatbelt to their exact owned loopback proxy TCP port; other TCP and UDP are
+denied. A real local isolation self-test must pass before browser checks run.
+One global kernel lock serializes browsers. All profiles and processes are owned,
+ephemeral and supervised; system networking and existing browser data are untouched.
+The pinned browser runtime is installed/repaired only in BestLocal-owned caches.
 
 These are public unauthenticated application reachability checks. They do not
 prove account login, video playback or unrestricted authenticated features.
@@ -115,7 +132,11 @@ service acceptance belongs exclusively to the authoritative Mac stage.
 
 Recent authoritative Mac results feed back into primary selection. Already
 locally rejected candidates move behind untested functional alternatives for a
-bounded cooldown; recent local successes receive a small reliability score bonus. Primary HTTPS
+bounded cooldown; recent local successes receive a small reliability score bonus.
+Challenges and other inconclusive application responses do not receive a twelve-hour
+hard rejection. Service evidence retains HTTP status, challenge/geographic flags,
+curl codes and credential-free engine error categories. At most two public endpoint
+addresses are attempted after complete transport failure, never after an HTTP denial. Primary HTTPS
 validation is always required. This rotates the Best50 pool instead of repeatedly
 offering the same globally fast but locally inaccessible endpoints. Protocol
 types do not receive artificial preference. Feedback is applied before the
@@ -144,11 +165,32 @@ Best50 older than18hours or with invalid timestamps is rejected. Fewer than10
 qualifiers or stale input requests a new GitHub build. Empty pools may request
 hourly replenishment; other supplemental requests are throttled to six hours.
 The15minute poll retries failures; new input bypasses old-input retry backoff.
-Weekly exit geography caches remain optional enrichment, with the existing
-actual-exit allowed-country policy preserved (GB/US/DE/NL/PL).
+Exit geography is optional metadata. BestLocal eligibility depends on the three
+service proofs and latency; unknown or different exit geography cannot reject an
+otherwise qualifying candidate. The existing cloud Best50 geography policy remains.
+
+The Mac also performs independent bounded public-source discovery using the same
+safe source collector. Best50 stays first, followed by up to fifty rotating regional
+candidates, including up to twelve previous strict publications for rechecking.
+Cloud geography, download speed and preliminary cloud failures do not gate these
+regional inputs. Source/protocol/endpoint diversity and actual local source yield
+guide selection; uncertain challenges never poison source reputation. Discovery
+failure still permits Best50 and managed testing. Every input is unverified until
+it passes the same complete local checks.
+
+An optional `~/Library/Application Support/best50-vpn/managed-pool.json` must be
+user-owned, mode0600, with schema `{"schema":1,"servers":[{"uri":"...","publish_public":false}]}`.
+Up to fifty compatible managed entries can be tested independently. Private entries
+never enter public status, discovery or GitHub. Public export requires explicit
+`publish_public:true`, and a private designation overrides any matching public feed
+entry. The exact managed policy hash is checked again at publication so revoked
+permission cannot be reused. No credentials or synthetic managed servers are created.
 
 Publication validates complete service evidence, sample medians, input membership,
-freshness, rank and output consistency. It stages subscription and status in a
+freshness, rank and output consistency. A private frozen manifest pins the original
+Best50 commit/content, every independently collected candidate and its export policy.
+Its exact digest and current managed policy are checked before publication; the full
+manifest is never published because it may contain private managed credentials. It stages subscription and status in a
 separate temporary Git worktree and atomically pushes the regional branch.
 Normal non-forced updates protect concurrent writers; bounded retries refetch
 before trying again. Empty attempts update health and mark the retained profile

@@ -1,5 +1,7 @@
 import asyncio
 import copy
+from collections import Counter
+from datetime import datetime, timedelta, timezone
 import importlib.util
 import json
 from pathlib import Path
@@ -60,6 +62,67 @@ def build_stub():
 
 
 class ResponseValidationTests(unittest.TestCase):
+    def test_cloudflare_evidence_precedes_http_denial(self):
+        for changes in ({"status": 403, "body": b"<html>Just a moment cf-chl-widget</html>"},
+                        {"status": 403, "cf_mitigated": "challenge"}):
+            item = probe.service_evidence("chatgpt", response("chatgpt", **changes))
+            self.assertEqual(item["outcome"], "inconclusive")
+            self.assertEqual(item["reason"], "cloudflare-challenge-inconclusive")
+            self.assertTrue(item["cf_challenge"])
+            self.assertFalse(item["geo_restricted"])
+            self.assertEqual(item["http_status"], 403)
+
+    def test_geographic_restriction_requires_specific_evidence(self):
+        denial = probe.service_evidence("chatgpt", response("chatgpt", status=403, body=b"Forbidden"))
+        self.assertFalse(denial["geo_restricted"])
+        explicit = probe.service_evidence("chatgpt", response("chatgpt", status=403,
+            body=b'{"error":{"code":"unsupported_country_region_territory"}}'))
+        self.assertEqual(explicit["outcome"], "fail")
+        self.assertEqual(explicit["reason"], "geographic-restriction")
+        self.assertTrue(explicit["geo_restricted"])
+        self.assertFalse(explicit["cf_challenge"])
+
+    def test_chatgpt_probe_method_changes_remain_inconclusive(self):
+        for changes in ({"body": b"{}"}, {"body": b"[]"},
+                        {"body": b"<html>ChatGPT application</html>", "content_type": "text/html"},
+                        {"status": 404}, {"status": 410}):
+            item = probe.service_evidence("chatgpt", response("chatgpt", **changes))
+            self.assertEqual(item["outcome"], "inconclusive")
+            self.assertEqual(item["http_reason"], item["reason"])
+            self.assertFalse(probe.validate_response("chatgpt", response("chatgpt", **changes))[0])
+
+    def test_browser_failure_metadata_uses_closed_reason_allowlist(self):
+        diagnostic = probe.browser_diagnostic({"qualified": False, "rounds": [
+            {"passed": False, "reason": "cloudflare-challenge-inconclusive", "http_status": 403,
+             "composer": False, "application_json": False, "body": "private-token"}]}, None)
+        self.assertEqual(diagnostic["reason"], "cloudflare-challenge-inconclusive")
+        self.assertEqual(diagnostic["first_failed_http_status"], 403)
+        self.assertIs(diagnostic["first_failed_composer"], False)
+        self.assertIs(diagnostic["first_failed_application_json"], False)
+        self.assertNotIn("private-token", json.dumps(diagnostic))
+        self.assertEqual(probe.browser_diagnostic({"reason": "private-token", "rounds": []}, None)["reason"], "browser-proof-inconclusive")
+
+    def test_error_messages_are_reduced_to_enums_without_credentials(self):
+        secret = b"vless://private-token@example.com:443 "
+        self.assertEqual(probe.classify_error(secret + b"no route to host"), "routing-no-route")
+        self.assertEqual(probe.classify_error(secret + b"authentication failed"), "protocol-authentication-failed")
+        self.assertEqual(probe.classify_error(secret + b"x509: invalid certificate"), "tls-certificate-invalid")
+        self.assertNotIn("private-token", probe.classify_error(secret))
+
+    def test_browser_proof_requires_every_fresh_round(self):
+        checked = datetime.now(timezone.utc).isoformat()
+        valid = {"qualified": True, "rounds": [{"passed": True, "checked_at": checked}] * 3}
+        self.assertEqual(len(probe.fresh_browser_rounds(valid, 3)), 3)
+        self.assertIsNone(probe.fresh_browser_rounds(valid, 3, 12345))
+        self.assertIsNone(probe.fresh_browser_rounds({**valid, "control": True, "proxy_port": 12345}, 3, 12345))
+        self.assertIsNone(probe.fresh_browser_rounds({**valid, "control": False, "proxy_port": 12346}, 3, 12345))
+        for bad in ({"qualified": True}, {**valid, "qualified": "true"},
+                    {**valid, "rounds": valid["rounds"][:1]},
+                    {**valid, "rounds": [{"passed": True, "checked_at": "2020-01-01T00:00:00+00:00"}] * 3},
+                    {**valid, "rounds": [{"passed": True, "checked_at": "2026-01-01T00:00:00"}] * 3},
+                    {**valid, "rounds": [{"passed": False, "checked_at": checked}] * 3}):
+            self.assertIsNone(probe.fresh_browser_rounds(bad, 3))
+
     def test_real_application_shapes_pass(self):
         for service in probe.SERVICE_URLS:
             with self.subTest(service=service):
@@ -142,6 +205,7 @@ class IsolationTests(unittest.TestCase):
         self.assertEqual(config["outbounds"][0]["bind_interface"], "en0")
         self.assertEqual(config["route"], {"default_interface": "en0", "final": "candidate"})
         self.assertEqual(config["inbounds"][0]["listen"], "127.0.0.1")
+        self.assertEqual(config["inbounds"][0]["type"], "mixed")
         self.assertEqual(config["inbounds"][0]["users"], [{"username": "random-user", "password": "random-pass"}])
         self.assertNotIn('"tun"', json.dumps(config))
         self.assertNotIn('"direct"', json.dumps(config))
@@ -184,6 +248,233 @@ class IsolationTests(unittest.TestCase):
 
 
 class AsyncProbeTests(unittest.IsolatedAsyncioTestCase):
+    async def test_second_public_address_recovers_transport_after_first_process_cleanup(self):
+        build = build_stub()
+        children = [SimpleNamespace(returncode=None), SimpleNamespace(returncode=None)]
+        started = 0
+        async def create(*args, **kwargs):
+            nonlocal started
+            if started:
+                build._stop_owned_probe_process.assert_awaited_once_with(children[0])
+            child = children[started]
+            started += 1
+            return child
+        async def request(_build, service, *args):
+            return {"error": "socks-connection-failed", "curl_exit": 97} if started == 1 else response(service)
+        with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8", "9.9.9.9"])), \
+                patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(side_effect=create)), \
+                patch.object(probe, "_wait_authenticated", AsyncMock()), \
+                patch.object(probe, "_request", AsyncMock(side_effect=request)):
+            result = await probe._validate_one(build, LINK, 3, "en0")
+        self.assertTrue(result["qualified"])
+        self.assertEqual(result["attempted_address_count"], 2)
+        self.assertEqual([item["https_response"] for item in result["endpoint_attempts"]], [False, True])
+        self.assertEqual([call.args[0] for call in build._stop_owned_probe_process.await_args_list], children)
+        self.assertNotIn("8.8.8.8", json.dumps(result["endpoint_attempts"]))
+        self.assertNotIn("9.9.9.9", json.dumps(result["endpoint_attempts"]))
+
+    async def test_cloudflare_http_response_does_not_rotate_public_addresses(self):
+        build, child = build_stub(), SimpleNamespace(returncode=None)
+        async def request(_build, service, *args):
+            return (response(service, status=403, cf_mitigated="challenge") if service == "chatgpt"
+                    else {"error": "proxy-request-timeout"})
+        with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8", "9.9.9.9"])), \
+                patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(return_value=child)) as create, \
+                patch.object(probe, "_wait_authenticated", AsyncMock()), \
+                patch.object(probe, "_request", AsyncMock(side_effect=request)):
+            result = await probe._validate_one(build, LINK, 3, "en0")
+        self.assertFalse(result["qualified"])
+        self.assertEqual(result["attempted_address_count"], 1)
+        self.assertTrue(result["endpoint_attempts"][0]["https_response"])
+        create.assert_awaited_once()
+
+    async def test_address_retry_is_bounded_to_two(self):
+        failed = probe.empty_report(LINK)
+        failed["rejection_reasons"] = ["proxy-start-or-network-failure"]
+        with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8", "9.9.9.9", "1.1.1.1"])), \
+                patch.object(probe, "_validate_address", AsyncMock(return_value=failed)) as validate:
+            result = await probe._validate_one(build_stub(), LINK, 3, "en0")
+        self.assertFalse(result["qualified"])
+        self.assertEqual(result["attempted_address_count"], 2)
+        self.assertEqual(validate.await_count, 2)
+
+    async def test_cancellation_during_second_address_reaps_both_owned_processes(self):
+        build = build_stub()
+        children = [SimpleNamespace(returncode=None), SimpleNamespace(returncode=None)]
+        ready = asyncio.Event()
+        async def wait_start(port, username, password, process):
+            if process is children[1]:
+                build._stop_owned_probe_process.assert_awaited_once_with(children[0])
+                ready.set()
+                await asyncio.Event().wait()
+        with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8", "9.9.9.9"])), \
+                patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(side_effect=children)), \
+                patch.object(probe, "_wait_authenticated", side_effect=wait_start), \
+                patch.object(probe, "_request", AsyncMock(return_value={"error": "socks-connection-failed"})):
+            task = asyncio.create_task(probe._validate_one(build, LINK, 3, "en0"))
+            await ready.wait()
+            task.cancel()
+            with self.assertRaises(asyncio.CancelledError):
+                await task
+        self.assertTrue(all(any(call.args == (child,) for call in build._stop_owned_probe_process.await_args_list)
+                            for child in children))
+
+    async def test_all_public_addresses_remain_available_for_retry(self):
+        infos = [(2, 1, 6, "", ("9.9.9.9", 443)), (2, 1, 6, "", ("8.8.8.8", 443)),
+                 (2, 1, 6, "", ("9.9.9.9", 443))]
+        with patch.object(asyncio.get_running_loop(), "getaddrinfo", AsyncMock(return_value=infos)):
+            self.assertEqual(await probe._resolve_public_servers("example.com", 443), ["8.8.8.8", "9.9.9.9"])
+
+    async def test_stderr_is_bounded_and_only_classified_counts_survive(self):
+        reader = asyncio.StreamReader()
+        reader.feed_data(b"secret-password authentication failed\n" * 10000)
+        reader.feed_eof()
+        counters = Counter()
+        await probe.drain_error_classes(reader, counters)
+        self.assertIn("protocol-authentication-failed", counters)
+        self.assertEqual(counters["diagnostic-output-truncated"], 1)
+        self.assertNotIn("secret-password", json.dumps(counters))
+        self.assertTrue(all(0 < count <= 999 for count in counters.values()))
+
+    async def test_browser_proof_rescues_only_challenged_chatgpt_rounds(self):
+        build, child = build_stub(), SimpleNamespace(returncode=None)
+        checked = datetime.now(timezone.utc).isoformat()
+        browser = {"qualified": True, "rounds": [{"passed": True, "checked_at": checked}] * 3}
+        async def browser_check(_build, port, *args):
+            return {**browser, "proxy_port": port, "control": False}
+        async def request(_build, service, *args):
+            return response(service, **({"status": 403, "cf_mitigated": "challenge"} if service == "chatgpt" else {}))
+        with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8"])), \
+                patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(return_value=child)), \
+                patch.object(probe, "_wait_authenticated", AsyncMock()), \
+                patch.object(probe, "_request", AsyncMock(side_effect=request)), \
+                patch.object(probe, "check_chatgpt", AsyncMock(side_effect=browser_check)) as fallback:
+            result = await probe._validate_one(build, LINK, 3, "en0")
+        self.assertTrue(result["qualified"])
+        fallback.assert_awaited_once()
+        self.assertEqual(fallback.await_args.args[-1], 3)
+        self.assertTrue(all(item["http_status"] == 403 and item["cf_challenge"] for item in result["services"]["chatgpt"]["evidence"]))
+        self.assertTrue(all(item["http_reason"] == "cloudflare-challenge-inconclusive" and item["browser"]["passed"] is True
+                            for item in result["services"]["chatgpt"]["evidence"]))
+        self.assertEqual(result["services"]["chatgpt"]["passed"], 3)
+
+    async def test_incomplete_browser_proof_never_passes(self):
+        build, child = build_stub(), SimpleNamespace(returncode=None)
+        async def request(_build, service, *args):
+            return response(service, **({"status": 403, "cf_mitigated": "challenge"} if service == "chatgpt" else {}))
+        with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8"])), \
+                patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(return_value=child)), \
+                patch.object(probe, "_wait_authenticated", AsyncMock()), \
+                patch.object(probe, "_request", AsyncMock(side_effect=request)), \
+                patch.object(probe, "check_chatgpt", AsyncMock(return_value={"qualified": True})):
+            result = await probe._validate_one(build, LINK, 3, "en0")
+        self.assertFalse(result["qualified"])
+        self.assertEqual(result["services"]["chatgpt"]["passed"], 0)
+
+    async def test_browser_is_not_attempted_for_bad_other_service_or_latency_or_geography(self):
+        for changes in ({"youtube": {"status": 403}}, {"latency": {"status": 200}},
+                        {"latency": {"latency_ms": float("nan")}},
+                        {"chatgpt": {"status": 403, "body": b"unsupported_country_region_territory"}},
+                        {"chatgpt": {"status": 429}},
+                        {"chatgpt": {"status": 429, "cf_mitigated": "challenge"}}):
+            build, child = build_stub(), SimpleNamespace(returncode=None)
+            async def request(_build, service, *args):
+                delta = {"status": 403} if service == "chatgpt" else {}
+                return response(service, **{**delta, **changes.get(service, {})})
+            with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8"])), \
+                    patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(return_value=child)), \
+                    patch.object(probe, "_wait_authenticated", AsyncMock()), \
+                    patch.object(probe, "_request", AsyncMock(side_effect=request)), \
+                    patch.object(probe, "check_chatgpt", AsyncMock()) as fallback:
+                result = await probe._validate_one(build, LINK, 3, "en0")
+            self.assertFalse(result["qualified"])
+            fallback.assert_not_awaited()
+
+    async def test_changed_chatgpt_endpoint_needs_working_browser_proof(self):
+        for chatgpt_changes in ({"body": b"{}"}, {"status": 404}, {"status": 401},
+                                {"body": b"<html>application</html>", "content_type": "text/html"}):
+            for browser_success in (False, True):
+                build, child = build_stub(), SimpleNamespace(returncode=None)
+                checked = datetime.now(timezone.utc).isoformat()
+                async def request(_build, service, *args):
+                    return response(service, **(chatgpt_changes if service == "chatgpt" else {}))
+                async def browser(_build, port, *args):
+                    return ({"qualified": True, "rounds": [{"passed": True, "checked_at": checked}] * 5,
+                             "proxy_port": port, "control": False} if browser_success else
+                            {"qualified": False, "rounds": [{"passed": False, "reason": "browser-api-proof-missing",
+                             "http_status": 200, "composer": True, "application_json": False}]})
+                with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8"])), \
+                        patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(return_value=child)), \
+                        patch.object(probe, "_wait_authenticated", AsyncMock()), \
+                        patch.object(probe, "_request", AsyncMock(side_effect=request)), \
+                        patch.object(probe, "check_chatgpt", AsyncMock(side_effect=browser)) as fallback:
+                    result = await probe._validate_one(build, LINK, 5, "en0")
+                fallback.assert_awaited_once()
+                self.assertEqual(result["qualified"], browser_success)
+                if browser_success:
+                    self.assertTrue(all(item["http_reason"].endswith("inconclusive")
+                                        for item in result["services"]["chatgpt"]["evidence"]))
+                    self.assertEqual(result["services"]["chatgpt"]["passed"], 5)
+                else:
+                    self.assertEqual(result["services"]["chatgpt"]["passed"], 0)
+                    self.assertEqual(result["browser_check"]["reason"], "browser-api-proof-missing")
+                    self.assertEqual(result["browser_check"]["first_failed_http_status"], 200)
+
+    async def test_browser_first_sample_outlier_uses_strict_final_median(self):
+        for samples in ([700, 100, 110, 120, 130], [500, 100, 110, 120, 130], [500] * 5):
+            build, child = build_stub(), SimpleNamespace(returncode=None)
+            checked = datetime.now(timezone.utc).isoformat()
+            sequence = iter(samples)
+            async def request(_build, service, *args):
+                changes = {"status": 403, "cf_mitigated": "challenge"} if service == "chatgpt" else {}
+                if service == "latency":
+                    changes["latency_ms"] = next(sequence)
+                return response(service, **changes)
+            async def browser(_build, port, *args):
+                return {"qualified": True, "rounds": [{"passed": True, "checked_at": checked}] * 5,
+                        "proxy_port": port, "control": False}
+            with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8"])), \
+                    patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(return_value=child)), \
+                    patch.object(probe, "_wait_authenticated", AsyncMock()), \
+                    patch.object(probe, "_request", AsyncMock(side_effect=request)), \
+                    patch.object(probe, "check_chatgpt", AsyncMock(side_effect=browser)) as fallback:
+                result = await probe._validate_one(build, LINK, 5, "en0")
+            fallback.assert_awaited_once()
+            self.assertEqual(result["latency_samples_ms"], samples)
+            self.assertEqual(result["qualified"], samples != [500] * 5)
+            self.assertEqual(result["median_ms"], 500 if samples == [500] * 5 else 120)
+
+    async def test_browser_queue_deadline_preserves_http_proofs_and_is_inconclusive(self):
+        build, child = build_stub(), SimpleNamespace(returncode=None)
+        async def request(_build, service, *args):
+            return response(service, **({"status": 403, "cf_mitigated": "challenge"} if service == "chatgpt" else {}))
+        async def queued(*args):
+            await asyncio.Event().wait()
+        with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8", "9.9.9.9"])), \
+                patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(return_value=child)), \
+                patch.object(probe, "_wait_authenticated", AsyncMock()), \
+                patch.object(probe, "_request", AsyncMock(side_effect=request)), \
+                patch.object(probe, "check_chatgpt", AsyncMock(side_effect=queued)), \
+                patch.object(probe, "MAX_CANDIDATE_SECONDS", 0.03):
+            result = await probe._validate_one(build, LINK, 5, "en0")
+        self.assertFalse(result["qualified"])
+        self.assertEqual(result["validation_outcome"], "inconclusive")
+        self.assertIn("browser-queue-or-runtime-deadline-inconclusive", result["rejection_reasons"])
+        self.assertEqual(result["services"]["youtube"]["passed"], 1)
+        self.assertEqual(result["services"]["instagram"]["passed"], 1)
+        self.assertTrue(result["services"]["chatgpt"]["evidence"][0]["cf_challenge"])
+        self.assertEqual(result["latency_samples_ms"], [150.0])
+        self.assertEqual(result["attempted_address_count"], 1)
+        self.assertTrue(result["endpoint_attempts"][0]["https_response"])
+        build._stop_owned_probe_process.assert_awaited_once_with(child)
+
+    async def test_browser_adapter_errors_are_inconclusive(self):
+        # Missing/browser dependency errors never become a successful proof.
+        with patch.dict("sys.modules", {"browser_probe": SimpleNamespace(check_chatgpt=AsyncMock(side_effect=RuntimeError("secret")))}):
+            result = await probe.check_chatgpt(build_stub(), 12345, "user", "secret", 3)
+        self.assertFalse(result["qualified"])
+        self.assertNotIn("secret", json.dumps(result))
+
     async def test_public_dual_stack_prefers_physical_ipv4_path(self):
         loop = asyncio.get_running_loop()
         infos = [(10, 1, 6, "", ("2606:4700:4700::1111", 443, 0, 0)),
@@ -212,7 +503,7 @@ class AsyncProbeTests(unittest.IsolatedAsyncioTestCase):
         build, child = build_stub(), SimpleNamespace(returncode=None)
         async def request(_build, service, *args):
             return response(service)
-        with patch.object(probe, "_resolve_public_server", AsyncMock(return_value="8.8.8.8")), \
+        with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8"])), \
                 patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(return_value=child)), \
                 patch.object(probe, "_wait_authenticated", AsyncMock()), \
                 patch.object(probe, "_request", AsyncMock(side_effect=request)) as requests:
@@ -229,7 +520,7 @@ class AsyncProbeTests(unittest.IsolatedAsyncioTestCase):
         build, child = build_stub(), SimpleNamespace(returncode=None)
         async def request(_build, service, *args):
             return response(service, **({"status": 429} if service == "instagram" else {}))
-        with patch.object(probe, "_resolve_public_server", AsyncMock(return_value="8.8.8.8")), \
+        with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8"])), \
                 patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(return_value=child)), \
                 patch.object(probe, "_wait_authenticated", AsyncMock()), \
                 patch.object(probe, "_request", AsyncMock(side_effect=request)):
@@ -245,7 +536,7 @@ class AsyncProbeTests(unittest.IsolatedAsyncioTestCase):
         async def wait_start(*args):
             ready.set()
             await asyncio.Event().wait()
-        with patch.object(probe, "_resolve_public_server", AsyncMock(return_value="8.8.8.8")), \
+        with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8"])), \
                 patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(return_value=child)), \
                 patch.object(probe, "_wait_authenticated", side_effect=wait_start):
             task = asyncio.create_task(probe._validate_one(build, LINK, 3, "en0"))
@@ -272,6 +563,8 @@ class AsyncProbeTests(unittest.IsolatedAsyncioTestCase):
         for kwargs in ({"rounds": 1}, {"rounds": 6}, {"interface": "utun4"}, {"interface": "en0;route"}):
             with self.assertRaises(ValueError):
                 await probe.validate_candidates(None, [], **kwargs)
+        with self.assertRaises(ValueError):
+            await probe.validate_candidates(None, ["unused"] * 151)
 
     async def test_bounded_http_parser_uses_curl_measured_time(self):
         build = build_stub()

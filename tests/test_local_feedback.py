@@ -47,6 +47,38 @@ class FeedbackParserTests(unittest.TestCase):
         self.assertEqual(records[identifier(1)], {"last_seen": NOW - 100, "qualified": False})
         self.assertEqual(records[identifier(2)], {"last_seen": NOW, "qualified": True})
 
+    def test_optional_valid_outcomes_are_retained_without_changing_legacy_records(self):
+        records, _ = feedback.parse_health(health({
+            identifier(1): {"last_seen": NOW, "qualified": False, "outcome": "inconclusive"},
+            identifier(2): {"last_seen": NOW, "qualified": False, "outcome": "fail"},
+            identifier(3): {"last_seen": NOW, "qualified": True, "outcome": "pass"},
+            identifier(4): {"last_seen": NOW, "qualified": False},
+        }), now=NOW)
+        self.assertEqual(records[identifier(1)]["outcome"], "inconclusive")
+        self.assertEqual(records[identifier(2)]["outcome"], "fail")
+        self.assertEqual(records[identifier(3)]["outcome"], "pass")
+        self.assertNotIn("outcome", records[identifier(4)])
+
+    def test_malformed_and_contradictory_optional_outcomes_are_ignored(self):
+        for value in ([], {}, 1, True, "unknown", "pass"):
+            records, _ = feedback.parse_health(health({identifier(1): {
+                "last_seen": NOW, "qualified": False, "outcome": value}}), now=NOW)
+            self.assertEqual(records[identifier(1)], {"last_seen": NOW, "qualified": False})
+
+    def test_only_rich_diagnostics_infer_inconclusive_and_definitive_outcomes(self):
+        diagnostics = [
+            {"id": identifier(1), "qualified": False,
+             "services": {"chatgpt": {"evidence": [{"outcome": "inconclusive", "cf_challenge": True}]}}},
+            {"id": identifier(2), "qualified": False, "engine_errors": {"dns-failed": 2}},
+            {"id": identifier(3), "qualified": False, "rejection_reasons": ["service-requirements-failed"]},
+            {"id": identifier(4), "qualified": True, "services": {"chatgpt": {"evidence": []}}},
+        ]
+        records, _ = feedback.parse_health(health(diagnostics=diagnostics), now=NOW)
+        self.assertEqual(records[identifier(1)]["outcome"], "inconclusive")
+        self.assertEqual(records[identifier(2)]["outcome"], "fail")
+        self.assertNotIn("outcome", records[identifier(3)])
+        self.assertEqual(records[identifier(4)]["outcome"], "pass")
+
     def test_missing_corrupt_oversize_schema_and_policy_fail_closed(self):
         for raw in (b"", b"broken", b"[]", b"[" * 2000 + b"]" * 2000, b"x" * (feedback.MAX_BYTES + 1),
                     health(schema=True), health(schema=2), health(policy="old-weak-policy"),
@@ -113,6 +145,26 @@ class FeedbackParserTests(unittest.TestCase):
 
 
 class FeedbackRankingTests(unittest.TestCase):
+    def test_inconclusive_candidates_are_not_twelve_hour_demoted(self):
+        ranked = candidates(4)
+        records = {ranked[0]["normalized"]: {"last_seen": NOW - 1, "qualified": False, "outcome": "inconclusive"},
+                   ranked[1]["normalized"]: {"last_seen": NOW - 1, "qualified": False, "outcome": "fail"}}
+        ordered, summary = feedback.apply_feedback(ranked, records, now=NOW)
+        self.assertEqual([item["link"] for item in ordered], [ranked[i]["link"] for i in (0, 2, 3, 1)])
+        self.assertEqual(summary["inconclusive"], 1)
+        self.assertEqual(summary["rejected"], 1)
+        self.assertEqual(summary["applied"], 1)
+        self.assertEqual(ordered[0]["score"], ranked[0]["score"])
+        self.assertEqual(ordered[0]["_local_feedback_group"], 1)
+
+    def test_explicit_recent_strict_pass_retains_same_bounded_bonus(self):
+        ranked = candidates(4)
+        records = {ranked[3]["normalized"]: {"last_seen": NOW - 1, "qualified": True, "outcome": "pass"}}
+        ordered, summary = feedback.apply_feedback(ranked, records, now=NOW)
+        self.assertEqual(ordered[0]["link"], ranked[3]["link"])
+        self.assertAlmostEqual(ordered[0]["score"], ranked[3]["score"] * 1.05)
+        self.assertEqual((summary["passed"], summary["rejected"], summary["inconclusive"]), (1, 0, 0))
+
     def test_fifty_rejected_are_replaced_by_next_fifty_validated(self):
         ranked = candidates(100)
         original = copy.deepcopy(ranked)
@@ -179,6 +231,50 @@ class FeedbackRankingTests(unittest.TestCase):
         baseline = build.select_diverse(ranked, 50)
         ordered, _ = feedback.apply_feedback(ranked, {}, now=NOW)
         self.assertEqual([item["link"] for item in build.select_diverse(ordered, 50)], [item["link"] for item in baseline])
+
+
+class DiagnosticClassifierTests(unittest.TestCase):
+    def test_strict_qualified_pass_is_authoritative(self):
+        self.assertEqual(feedback.classify_diagnostic({"qualified": True, "engine_errors": {"timeout": 1}}), "pass")
+
+    def test_challenge_http_rate_limit_and_unavailable_browser_take_precedence(self):
+        for uncertain in (
+            {"browser_check": {"reason": "browser-check-unavailable"}},
+            {"control": {"reason": "positive-control-failed"}},
+            {"services": {"chatgpt": {"evidence": [{"cf_challenge": True}]}}},
+            {"services": {"chatgpt": {"evidence": [{"http_status": 403}]}}},
+            {"services": {"chatgpt": {"evidence": [{"http_status": 429}]}}},
+            {"services": {"chatgpt": {"evidence": [{"http_status": 503}]}}},
+            {"services": {"chatgpt": {"reasons": ["cloudflare-challenge-inconclusive"]}}},
+        ):
+            diagnostic = {"qualified": False, "engine_errors": {"timeout": 2}, **uncertain}
+            self.assertEqual(feedback.classify_diagnostic(diagnostic), "inconclusive")
+
+    def test_definitive_dns_tls_protocol_socket_and_timeout_failures(self):
+        for reason in ("invalid-or-unsafe-config", "server-dns-failed", "protocol-authentication-failed",
+                       "protocol-handshake-failed", "routing-no-route", "destination-certificate-invalid",
+                       "destination-tls-failed", "socks-connection-failed", "socket-error",
+                       "proxy-request-timeout", "candidate-deadline-or-dns-timeout", "latency-not-below-500ms"):
+            self.assertEqual(feedback.classify_diagnostic({"qualified": False, "rejection_reasons": [reason]}), "fail", reason)
+        for code in (5, 6, 7, 28, 35, 60, 97):
+            self.assertEqual(feedback.classify_diagnostic({"qualified": False,
+                "services": {"chatgpt": {"evidence": [{"curl_exit": code}]}}}), "fail")
+
+    def test_resolved_chatgpt_challenge_does_not_hide_another_service_failure(self):
+        diagnostic = {"qualified": False, "services": {
+            "chatgpt": {"evidence": [{"outcome": "pass", "reason": "browser-functional-access",
+                "cf_challenge": True, "http_status": 403,
+                "http_reason": "cloudflare-challenge-inconclusive", "http_outcome": "inconclusive"}]},
+            "youtube": {"evidence": [{"outcome": "fail", "reason": "proxy-request-timeout", "curl_exit": 28}]},
+        }}
+        self.assertEqual(feedback.classify_diagnostic(diagnostic), "fail")
+
+    def test_unknown_or_malformed_diagnostics_remain_inconclusive(self):
+        for value in (None, [], "failed", {}, {"qualified": False},
+                      {"qualified": False, "services": []},
+                      {"qualified": False, "outcome": [], "engine_errors": {"timeout": "not-a-count"}},
+                      {"qualified": False, "rejection_reasons": ["service-requirements-failed"]}):
+            self.assertEqual(feedback.classify_diagnostic(value), "inconclusive")
 
 
 if __name__ == "__main__":

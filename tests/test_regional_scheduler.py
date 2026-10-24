@@ -28,6 +28,28 @@ installer = load("install_local_automation", ROOT / "scripts/install_local_autom
 
 
 class SchedulerTests(unittest.TestCase):
+    def test_inactivity_disabled_workflow_recovers_with_existing_auth(self):
+        runner = mock.Mock()
+        runner.run.side_effect = [scheduler.CommandFailure("dispatch", 1, "workflow disabled"),
+                                  (0, "disabled_inactivity\n"), (0, ""), (0, "")]
+        with tempfile.TemporaryDirectory() as temporary:
+            state = {"last_local_qualified": 1}
+            scheduler.dispatch_replenishment(runner, state, Path(temporary) / "state.json", time.time(), "small pool")
+        self.assertEqual(runner.run.call_count, 4)
+        self.assertEqual(runner.run.call_args_list[2].args[0], ["gh", "workflow", "enable", "build.yml"])
+        self.assertIn("last_replenishment_dispatched_at", state)
+
+    def test_manual_workflow_disable_and_unavailable_recovery_are_not_overridden(self):
+        for result in ((0, "disabled_manually"), scheduler.CommandFailure("status", 1, "GitHub unavailable")):
+            with self.subTest(result=result), tempfile.TemporaryDirectory() as temporary:
+                runner = mock.Mock()
+                runner.run.side_effect = [scheduler.CommandFailure("dispatch", 1, "unavailable"), result]
+                state = {"last_local_qualified": 1}
+                scheduler.dispatch_replenishment(runner, state, Path(temporary) / "state.json", time.time(), "small pool")
+                self.assertEqual(runner.run.call_count, 2)
+                self.assertNotIn("last_replenishment_dispatched_at", state)
+                self.assertGreater(state["next_replenishment_retry_at"], 0)
+
     def test_small_pool_accelerates_unchanged_input_without_bypassing_backoff(self):
         state = {"last_validated_signature": "same", "last_attempt_signature": "same", "last_validated_at": 100}
         for count, interval in ((0, 3600), (1, 3600), (2, 3600), (3, 7200), (9, 7200), (10, scheduler.VALIDATION_DUE_SECONDS)):
@@ -269,7 +291,8 @@ class SchedulerTests(unittest.TestCase):
 
     def test_failed_replenishment_retries_before_six_hours_and_then_throttles_success(self):
         runner = mock.Mock()
-        runner.run.side_effect = [scheduler.CommandFailure("dispatch", 1, "temporary GitHub error"), (0, ""), (0, "")]
+        runner.run.side_effect = [scheduler.CommandFailure("dispatch", 1, "temporary GitHub error"),
+                                  (0, "active"), (0, ""), (0, "")]
         now = time.time()
         with tempfile.TemporaryDirectory() as temporary, mock.patch.object(scheduler.random, "random", return_value=0.5):
             path = Path(temporary) / "state.json"
@@ -278,16 +301,16 @@ class SchedulerTests(unittest.TestCase):
             self.assertNotIn("last_replenishment_dispatched_at", state)
             self.assertEqual(state["next_replenishment_retry_at"], now + 60)
             scheduler.dispatch_replenishment(runner, state, path, now + 30, "empty")
-            self.assertEqual(runner.run.call_count, 1)
-            scheduler.dispatch_replenishment(runner, state, path, now + 61, "empty")
             self.assertEqual(runner.run.call_count, 2)
+            scheduler.dispatch_replenishment(runner, state, path, now + 61, "empty")
+            self.assertEqual(runner.run.call_count, 3)
             self.assertEqual(state["last_replenishment_dispatched_at"], now + 61)
             self.assertEqual(state["next_replenishment_retry_at"], 0)
             self.assertNotIn("last_replenishment_error", state)
             scheduler.dispatch_replenishment(runner, state, path, now + 100, "empty")
-            self.assertEqual(runner.run.call_count, 2)
-            scheduler.dispatch_replenishment(runner, state, path, now + 61 + 6 * 3600, "empty")
             self.assertEqual(runner.run.call_count, 3)
+            scheduler.dispatch_replenishment(runner, state, path, now + 61 + 6 * 3600, "empty")
+            self.assertEqual(runner.run.call_count, 4)
 
     def test_unchanged_successful_input_retries_pending_low_pool_dispatch(self):
         now = time.time()

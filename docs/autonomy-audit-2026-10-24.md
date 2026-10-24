@@ -113,3 +113,10 @@ history are never reset. Reliability history is byte-bounded to its reader's lim
 so full twenty-result windows cannot eventually erase history through oversize.
 
 A critical pool of at most two unique servers now triggers hourly local revalidation and bounded hourly cloud replenishment. Three to nine qualifiers use two-hour local revalidation; healthier pools retain the 4h15m lead time before the six-hour freshness limit. Retry deadlines and source policies always apply.
+
+GitHub can disable public scheduled workflows after prolonged inactivity
+([official documentation](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/disable-and-enable-workflows?tool=cli)).
+If a replenishment dispatch fails, the Mac checks the workflow state. Only
+`disabled_inactivity` permits bounded re-enabling with existing authentication and
+one repeated dispatch. A deliberately manually disabled workflow is respected;
+network/permission failures retain ordinary backoff without advancing success.

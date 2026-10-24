@@ -473,7 +473,21 @@ def dispatch_replenishment(runner: Runner, state: dict, state_path: Path, now: f
     state["last_replenishment_attempt_at"] = now
     atomic_json(state_path, state)
     try:
-        runner.run(["gh", "workflow", "run", "build.yml", "--ref", "main"], "candidate replenishment dispatch", 60)
+        command = ["gh", "workflow", "run", "build.yml", "--ref", "main"]
+        try:
+            runner.run(command, "candidate replenishment dispatch", 60)
+        except CommandFailure:
+            # A long-lived public repository can have its schedule disabled by
+            # GitHub inactivity policy. Respect deliberate manual disabling.
+            _, workflow_state = runner.run(
+                ["gh", "api", "repos/{owner}/{repo}/actions/workflows/build.yml", "--jq", ".state"],
+                "primary workflow recovery status", 60,
+            )
+            if workflow_state.strip() != "disabled_inactivity":
+                raise
+            runner.run(["gh", "workflow", "enable", "build.yml"], "primary workflow inactivity recovery", 60)
+            runner.run(command, "recovered candidate replenishment dispatch", 60)
+            log("Recovered primary workflow disabled by GitHub inactivity policy")
         state.update({"last_replenishment_dispatched_at": now, "replenishment_consecutive_failures": 0, "next_replenishment_retry_at": 0})
         state.pop("last_replenishment_error", None)
         log(f"Candidate replenishment requested: {reason}")

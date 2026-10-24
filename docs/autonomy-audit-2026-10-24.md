@@ -111,3 +111,5 @@ confirm no open handle, and inode/mtime must remain unchanged. Active, fresh,
 symlinked, ambiguous or foreign locks are retained. Dirty working files and Git
 history are never reset. Reliability history is byte-bounded to its reader's limit
 so full twenty-result windows cannot eventually erase history through oversize.
+
+A critical pool of at most two unique servers now triggers hourly local revalidation and bounded hourly cloud replenishment. Three to nine qualifiers use two-hour local revalidation; healthier pools retain the 4h15m lead time before the six-hour freshness limit. Retry deadlines and source policies always apply.

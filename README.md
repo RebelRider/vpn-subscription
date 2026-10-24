@@ -168,6 +168,9 @@ Best50 older than18hours or with invalid timestamps is rejected. Fewer than10
 qualifiers or stale input requests a new GitHub build. Empty pools may request
 hourly replenishment; other supplemental requests are throttled to six hours.
 The15minute poll retries failures; new input bypasses old-input retry backoff.
+With at most two unique qualifiers, unchanged input is revalidated hourly and
+cloud replenishment may be requested hourly; pools of three to nine revalidate
+every two hours. All failure backoff and source rate limits remain in force.
 Exit geography is optional metadata. BestLocal eligibility depends on the three
 service proofs and latency; unknown or different exit geography cannot reject an
 otherwise qualifying candidate. The existing cloud Best50 geography policy remains.

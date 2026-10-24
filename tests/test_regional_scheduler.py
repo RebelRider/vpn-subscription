@@ -28,6 +28,28 @@ installer = load("install_local_automation", ROOT / "scripts/install_local_autom
 
 
 class SchedulerTests(unittest.TestCase):
+    def test_small_pool_accelerates_unchanged_input_without_bypassing_backoff(self):
+        state = {"last_validated_signature": "same", "last_attempt_signature": "same", "last_validated_at": 100}
+        for count, interval in ((0, 3600), (1, 3600), (2, 3600), (3, 7200), (9, 7200), (10, scheduler.VALIDATION_DUE_SECONDS)):
+            with self.subTest(count=count):
+                state["last_local_qualified"] = count
+                self.assertFalse(scheduler.validation_due(state, "same", 100 + interval - 1))
+                self.assertTrue(scheduler.validation_due(state, "same", 100 + interval))
+                state["next_retry_at"] = 100 + interval + 60
+                self.assertFalse(scheduler.validation_due(state, "same", 100 + interval))
+                state.pop("next_retry_at")
+
+    def test_two_remaining_servers_receive_hourly_bounded_replenishment(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "state.json";runner = mock.Mock()
+            now = time.time();state = {"last_local_qualified": 2, "last_replenishment_dispatched_at": now}
+            scheduler.dispatch_replenishment(runner, state, path, now + 3599, "small pool")
+            runner.run.assert_not_called()
+            scheduler.dispatch_replenishment(runner, state, path, now + 3600, "small pool")
+            self.assertEqual(runner.run.call_count, 1)
+            scheduler.dispatch_replenishment(runner, state, path, now + 3601, "small pool")
+            self.assertEqual(runner.run.call_count, 1)
+
     def test_validator_javascript_update_revalidates_unchanged_best50(self):
         with tempfile.TemporaryDirectory() as temporary:
             repo = Path(temporary);(repo / "scripts").mkdir()

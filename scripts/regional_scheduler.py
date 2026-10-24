@@ -306,10 +306,17 @@ def retry_delay(failures: int, jitter: float | None = None) -> float:
     return min(3600, base * (0.8 + 0.4 * (random.random() if jitter is None else jitter)))
 
 
+def validation_interval(state: dict) -> int:
+    count = state.get("last_local_qualified")
+    if type(count) is int and 0 <= count < LOW_POOL_SIZE:
+        return 3600 if count <= 2 else 2 * 3600
+    return VALIDATION_DUE_SECONDS
+
+
 def validation_due(state: dict, signature: str, now: float) -> bool:
     if signature != state.get("last_validated_signature"):
         return now >= state.get("next_retry_at", 0) or signature != state.get("last_attempt_signature")
-    return now - state.get("last_validated_at", 0) >= VALIDATION_DUE_SECONDS and now >= state.get("next_retry_at", 0)
+    return now - state.get("last_validated_at", 0) >= validation_interval(state) and now >= state.get("next_retry_at", 0)
 
 
 class CommandFailure(RuntimeError):
@@ -454,10 +461,11 @@ def input_metadata(runner: Runner) -> tuple[str, float]:
 
 
 def dispatch_replenishment(runner: Runner, state: dict, state_path: Path, now: float, reason: str) -> None:
-    # Empty local pools need faster exploration; successful small pools retain
-    # the conservative six-hour dispatch limit. The ordinary two-hour schedule
-    # remains independent of these supplemental requests.
-    interval = 3600 if state.get("last_local_qualified") == 0 else REPLENISH_SECONDS
+    # Critical pools (at most two unique servers) need hourly exploration.
+    # Other supplemental dispatches retain the six-hour limit; the ordinary
+    # two-hour cloud schedule remains independent.
+    count = state.get("last_local_qualified")
+    interval = 3600 if type(count) is int and 0 <= count <= 2 else REPLENISH_SECONDS
     if now - state.get("last_replenishment_dispatched_at", 0) < interval:
         return
     if now < state.get("next_replenishment_retry_at", 0):
@@ -590,6 +598,7 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
             return 1
         finally:
             runner.stop()
+            state["validation_due_seconds"] = validation_interval(state)
             state.update({"running": False, "last_scheduler_finished_at": time.time()})
             published = state.get("last_published_at")
             state["published_age_seconds"] = time.time() - published if published else None

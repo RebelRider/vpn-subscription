@@ -51,6 +51,12 @@ def report(samples):
             "rejection_reasons": [], "qualified": False}
 
 
+def browser_round(checked_at):
+    return {"passed": True, "reason": "ok", "checked_at": checked_at,
+            "http_status": 200, "composer": True, "application_json": True,
+            "actionable": True, "restriction_free": True}
+
+
 def build_stub():
     return SimpleNamespace(
         SING_BOX="/test/sing-box", parse_vless=Mock(return_value=copy.deepcopy(NODE)),
@@ -62,6 +68,34 @@ def build_stub():
 
 
 class ResponseValidationTests(unittest.TestCase):
+    def test_inert_html_bundles_and_video_titles_are_not_active_restrictions(self):
+        original = response("instagram")
+        inert = b'<script type="application/json">{"errors":{"challenge_required":"unused","login_required":"unused","cf-chl-":"unused","access denied":"label"}}</script>'
+        hidden = b'<div hidden>Verify you are human</div><div style="display: none">Access denied</div>'
+        self.assertEqual(probe.validate_response("instagram", {**original, "body": original["body"] + inert + hidden}), (True, "ok"))
+        video = response("youtube")
+        data = json.loads(video["body"]);data["title"] = "Access denied — YouTube API example"
+        self.assertEqual(probe.validate_response("youtube", {**video, "body": json.dumps(data).encode()}), (True, "ok"))
+
+    def test_visible_restriction_cannot_hide_behind_real_app_markers(self):
+        original = response("instagram")
+        for blocker in (b'<h1>Verify you are human</h1>', b'<div role="alert">Access denied</div>', b'<h1>Unusual traffic</h1>'):
+            with self.subTest(blocker=blocker):
+                self.assertFalse(probe.validate_response("instagram", {**original, "body": original["body"] + blocker})[0])
+
+    def test_real_content_from_unrelated_paths_cannot_qualify(self):
+        for name in probe.SERVICE_URLS:
+            original = response(name)
+            url = original["url"].split("/", 3)[:3]
+            self.assertFalse(probe.validate_response(name, {**original, "url": "/".join(url) + "/help/examples"})[0])
+        self.assertFalse(probe.validate_response("latency", response("latency", url="https://www.gstatic.com/unrelated"))[0])
+
+    def test_summary_requires_all_named_services_and_numeric_measurements(self):
+        for services in ({}, {"chatgpt": {"passed": 3, "attempts": 3}}):
+            candidate = report([100, 100, 100]);candidate["services"] = services
+            self.assertFalse(probe.summarize_report(candidate, 3)["qualified"])
+        self.assertFalse(probe.summarize_report(report([True, True, True]), 3)["qualified"])
+
     def test_cloudflare_evidence_precedes_http_denial(self):
         for changes in ({"status": 403, "body": b"<html>Just a moment cf-chl-widget</html>"},
                         {"status": 403, "cf_mitigated": "challenge"}):
@@ -111,7 +145,7 @@ class ResponseValidationTests(unittest.TestCase):
 
     def test_browser_proof_requires_every_fresh_round(self):
         checked = datetime.now(timezone.utc).isoformat()
-        valid = {"qualified": True, "rounds": [{"passed": True, "checked_at": checked}] * 3}
+        valid = {"qualified": True, "rounds": [browser_round(checked)] * 3}
         self.assertEqual(len(probe.fresh_browser_rounds(valid, 3)), 3)
         self.assertIsNone(probe.fresh_browser_rounds(valid, 3, 12345))
         self.assertIsNone(probe.fresh_browser_rounds({**valid, "control": True, "proxy_port": 12345}, 3, 12345))
@@ -339,7 +373,7 @@ class AsyncProbeTests(unittest.IsolatedAsyncioTestCase):
     async def test_browser_proof_rescues_only_challenged_chatgpt_rounds(self):
         build, child = build_stub(), SimpleNamespace(returncode=None)
         checked = datetime.now(timezone.utc).isoformat()
-        browser = {"qualified": True, "rounds": [{"passed": True, "checked_at": checked}] * 3}
+        browser = {"qualified": True, "rounds": [browser_round(checked)] * 3}
         async def browser_check(_build, port, *args):
             return {**browser, "proxy_port": port, "control": False}
         async def request(_build, service, *args):
@@ -399,7 +433,7 @@ class AsyncProbeTests(unittest.IsolatedAsyncioTestCase):
                 async def request(_build, service, *args):
                     return response(service, **(chatgpt_changes if service == "chatgpt" else {}))
                 async def browser(_build, port, *args):
-                    return ({"qualified": True, "rounds": [{"passed": True, "checked_at": checked}] * 5,
+                    return ({"qualified": True, "rounds": [browser_round(checked)] * 5,
                              "proxy_port": port, "control": False} if browser_success else
                             {"qualified": False, "rounds": [{"passed": False, "reason": "browser-api-proof-missing",
                              "http_status": 200, "composer": True, "application_json": False}]})
@@ -431,7 +465,7 @@ class AsyncProbeTests(unittest.IsolatedAsyncioTestCase):
                     changes["latency_ms"] = next(sequence)
                 return response(service, **changes)
             async def browser(_build, port, *args):
-                return {"qualified": True, "rounds": [{"passed": True, "checked_at": checked}] * 5,
+                return {"qualified": True, "rounds": [browser_round(checked)] * 5,
                         "proxy_port": port, "control": False}
             with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8"])), \
                     patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(return_value=child)), \
@@ -496,7 +530,9 @@ class AsyncProbeTests(unittest.IsolatedAsyncioTestCase):
         first = response("chatgpt", status=302, location="https://example.org/blocked")
         with patch.object(probe, "_http_once", AsyncMock(return_value=first)) as request:
             result = await probe._request(None, "chatgpt", probe.SERVICE_URLS["chatgpt"], 12345, "user", "pass")
-            self.assertEqual(result["error"], "unexpected-redirect")
+            self.assertEqual(result["error"], "service-redirect-restriction-inconclusive")
+            self.assertEqual(result["status"], 302)
+            self.assertEqual(probe.service_evidence("chatgpt", result)["outcome"], "inconclusive")
             self.assertEqual(request.await_count, 1)
 
     async def test_full_candidate_success_and_same_proxy_trace(self):

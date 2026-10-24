@@ -201,4 +201,29 @@ def relabel(link: str, label: str) -> str:
         obj = json.loads(b64(link.split('://', 1)[1].split('#', 1)[0]))
         obj['ps'] = label
         return 'vmess://' + base64.b64encode(json.dumps(obj, separators=(',', ':'), ensure_ascii=False).encode()).decode()
+    if link.lower().startswith('trojan://'):
+        # The runtime always validates Trojan over TLS. Make that essential
+        # option explicit for Happ, including WS links whose source omitted it.
+        # Preserve the original encoded userinfo/query byte-for-byte otherwise.
+        parse_node(link)
+        base = link.split('#', 1)[0]
+        if 'security' not in parse_qs(urlsplit(base).query, keep_blank_values=True):
+            link = base + ('&' if '?' in base else '?') + 'security=tls'
     return link.split('#', 1)[0] + '#' + quote(label, safe='')
+
+
+def connection_identity(build, link: str) -> str:
+    """Group validated connection variants without conflating credentials or TLS."""
+    outbound = json.loads(json.dumps(build.vless_to_singbox(build.parse_vless(link), tag="candidate"), allow_nan=False))
+    if not isinstance(outbound, dict):
+        raise ValueError("Invalid candidate outbound")
+    outbound.pop("tag", None)
+    tls = outbound.get("tls")
+    if isinstance(tls, dict) and isinstance(tls.get("utls"), dict):
+        # These two fields select the ClientHello fingerprint mechanism, not
+        # another server/account. Keep any future independent uTLS semantics.
+        tls["utls"].pop("fingerprint", None)
+        tls["utls"].pop("enabled", None)
+        if not tls["utls"]:
+            del tls["utls"]
+    return hashlib.sha256(json.dumps(outbound, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()

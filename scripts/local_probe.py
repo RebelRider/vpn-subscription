@@ -18,13 +18,13 @@ import re
 import statistics
 import subprocess
 import sys
-import tempfile
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote, unquote, urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from owned_temporary import temporary_directory as owned_temporary_directory
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -139,10 +139,23 @@ def load_local_reliability(path: Path | None = None, now: float | None = None) -
         records[key] = {"last_seen": stamp, "runs": runs, "passes": passes, "qualified": qualified}
         if isinstance(record.get("outcome"), str) and record["outcome"] in {"pass", "fail", "inconclusive"}:
             records[key]["outcome"] = record["outcome"]
+        definitive = record.get("definitive_history")
+        if (isinstance(definitive, list) and len(definitive) <= 20
+                and all(type(result) is bool for result in definitive)
+                and len(definitive) <= runs and sum(definitive) <= passes):
+            records[key]["definitive_history"] = definitive
     records = dict(sorted(records.items(), key=lambda item: (-item[1]["last_seen"], item[0]))[:MAX_RELIABILITY_RECORDS])
     if len(records) != len(value):
         print(f"Recovered local reliability history: retained {len(records)} of {len(value)} records", flush=True)
     return records
+
+
+def save_local_reliability(path: Path, history: dict) -> None:
+    """Keep temporal history within the same byte bound used by its reader."""
+    ordered = sorted(history.items(), key=lambda item: (-item[1]["last_seen"], item[0]))[:MAX_RELIABILITY_RECORDS]
+    while ordered and len((json.dumps(dict(ordered), indent=2, allow_nan=False) + "\n").encode()) > MAX_PERSISTED_JSON_BYTES:
+        ordered = ordered[:-max(1, len(ordered) // 10)]
+    write_status(path, dict(ordered))
 
 
 def previous_health_timestamp(path: Path, now: float | None = None) -> float | None:
@@ -987,25 +1000,172 @@ def apply_exit_geography(
     }
 
 
-def valid_node_evidence(node: dict, rounds: int) -> bool:
-    if rounds not in (3, 4, 5):
+def valid_node_evidence(node: dict, rounds: int, *, require_round_evidence: bool = False) -> bool:
+    if not isinstance(node, dict) or type(rounds) is not int or rounds not in (3, 4, 5):
         return False
     services = node.get("services", {})
-    if any(services.get(name, {}).get("passed") != rounds or services.get(name, {}).get("attempts") != rounds
-           for name in ("chatgpt", "youtube", "instagram")):
+    names = ("chatgpt", "youtube", "instagram")
+    if not isinstance(services, dict):
         return False
+    for name in names:
+        service = services.get(name)
+        if (not isinstance(service, dict) or type(service.get("passed")) is not int
+                or type(service.get("attempts")) is not int
+                or service["passed"] != rounds or service["attempts"] != rounds):
+            return False
+        if not require_round_evidence and "evidence" not in service:
+            continue
+        evidence = service.get("evidence")
+        if not isinstance(evidence, list) or len(evidence) != rounds:
+            return False
+        reasons = service.get("reasons")
+        if reasons is not None and (not isinstance(reasons, list) or len(reasons) != rounds):
+            return False
+        for index, proof in enumerate(evidence):
+            if not isinstance(proof, dict) or proof.get("outcome") != "pass":
+                return False
+            reason = proof.get("reason")
+            if reasons is not None and reasons[index] != reason:
+                return False
+            code = proof.get("http_status")
+            exit_code = proof.get("curl_exit")
+            if exit_code is not None and (type(exit_code) is not int or exit_code != 0):
+                return False
+            if reason == "browser-functional-access" and name == "chatgpt":
+                browser = proof.get("browser")
+                if (not isinstance(browser, dict) or browser.get("passed") is not True
+                        or browser.get("actionable") is not True or browser.get("restriction_free") is not True):
+                    return False
+                try:
+                    require_fresh_timestamp(browser.get("checked_at"), 6, "browser service evidence")
+                except RuntimeError:
+                    return False
+                # Only an otherwise inconclusive HTTP application response may
+                # be resolved by this same candidate's independent browser proof.
+                if (proof.get("http_outcome") != "inconclusive"
+                        or not isinstance(proof.get("http_reason"), str)
+                        or not proof["http_reason"].endswith("inconclusive")
+                        or type(code) is not int or not 100 <= code <= 599 or code == 429
+                        or proof.get("geo_restricted") is not False):
+                    return False
+            elif (reason != "ok" or type(code) is not int or code != 200
+                    or proof.get("cf_challenge") is not False or proof.get("geo_restricted") is not False
+                    or proof.get("http_reason", "ok") != "ok"):
+                return False
     samples = node.get("latency_samples_ms", [])
-    if len(samples) != rounds or any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0 for v in samples):
+    if (not isinstance(samples, list) or len(samples) != rounds
+            or any(type(v) not in (int, float) or not 0 <= v <= 10 ** 12
+                   or (isinstance(v, float) and not math.isfinite(v)) for v in samples)):
         return False
     median = node.get("median_latency")
+    measured_median = statistics.median(samples)
     return (not isinstance(median, bool) and isinstance(median, (int, float))
+            and measured_median < MAX_LOCAL_MEDIAN_LATENCY_MS
             and 0 <= median < MAX_LOCAL_MEDIAN_LATENCY_MS
-            and math.isclose(median, statistics.median(samples), abs_tol=0.001))
+            and math.isclose(median, measured_median, abs_tol=0.001))
+
+
+def connection_identity(build, link: str) -> str:
+    return load_protocols().connection_identity(build, link)
+
+
+def _previous_published_order(repo: Path | None = None) -> list[str]:
+    """Optional order from one bounded immutable cached public Git snapshot."""
+    repo = ROOT if repo is None else repo
+    def git(*arguments):
+        return subprocess.check_output(["git", *arguments], cwd=repo, stderr=subprocess.DEVNULL, timeout=5)
+    try:
+        commit = git("rev-parse", "--verify", "refs/remotes/origin/regional").strip().decode("ascii")
+        if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit):
+            return []
+        blob = git("rev-parse", "--verify", commit + ":" + REGIONAL_STATUS_PATH).strip().decode("ascii")
+        if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", blob):
+            return []
+        size = int(git("cat-file", "-s", blob))
+        if not 0 <= size <= MAX_PERSISTED_JSON_BYTES:
+            return []
+        raw = git("cat-file", "blob", blob)
+        if len(raw) != size:
+            return []
+        status = json.loads(raw)
+        nodes = status.get("nodes") if isinstance(status, dict) else None
+        if (not isinstance(status, dict) or status.get("algorithm") != "bestlocal-strict-services-v6"
+                or not isinstance(nodes, list) or not 1 <= len(nodes) <= MAX_LOCAL_PUBLISHED_NODES):
+            return []
+        ids = [node.get("id") for node in nodes if isinstance(node, dict)]
+        if (len(ids) != len(nodes) or any(not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value) for value in ids)
+                or len(set(ids)) != len(ids)):
+            return []
+        return ids
+    except (OSError, ValueError, TypeError, UnicodeError, OverflowError, RecursionError, subprocess.SubprocessError):
+        return []
+
+
+def update_definitive_history(record: dict, outcome: str) -> float:
+    """Keep uncertainty out of the bounded temporal reliability estimate."""
+    history = record.get("definitive_history", [])
+    if (not isinstance(history, list) or len(history) > 20
+            or any(type(value) is not bool for value in history)):
+        history = []
+    if outcome in {"pass", "fail"}:
+        history = [*history[-19:], outcome == "pass"]
+    record["definitive_history"] = history
+    return (sum(history) + 1) / (len(history) + 2)
+
+
+def rank_local_qualifiers(qualified: list, identities: dict[str, str], previous_order: list[str]) -> list:
+    """Prefer measured stability; suppress harmless latency-order oscillation."""
+    previous = {identifier: index for index, identifier in enumerate(previous_order)}
+    bands = {}
+    for value in qualified:
+        bands.setdefault(math.floor(value[3] * 20), []).append(value)
+    ranked = []
+    for band in sorted(bands, reverse=True):
+        values = sorted(bands[band], key=lambda value: (
+            0 if identities[value[0]] in previous else 1,
+            previous.get(identities[value[0]], 0), value[1]["median_ms"], value[1]["p95_ms"], value[2]))
+        # Every swap removes a latency inversion. N passes bound the adjacent
+        # comparisons to N², even for a completely reversed previous order.
+        for _ in range(len(values)):
+            changed = False
+            for index in range(1, len(values)):
+                incumbent, challenger = values[index - 1], values[index]
+                margin = min(50.0, max(25.0, 0.1 * incumbent[1]["median_ms"]))
+                if incumbent[1]["median_ms"] - challenger[1]["median_ms"] > margin:
+                    values[index - 1], values[index] = challenger, incumbent
+                    changed = True
+            if not changed:
+                break
+        ranked.extend(values)
+    return ranked
+
+
+def validate_publication_nodes(build, nodes: list[dict]) -> None:
+    """Recheck identity and connection uniqueness at every publication boundary."""
+    if not isinstance(nodes, list) or not 1 <= len(nodes) <= MAX_LOCAL_PUBLISHED_NODES:
+        raise RuntimeError("Invalid publication node count")
+    canonical, connections = set(), set()
+    for node in nodes:
+        if not isinstance(node, dict) or not isinstance(node.get("link"), str):
+            raise RuntimeError("Malformed publication candidate")
+        try:
+            identifier = build.normalized_fingerprint(build.parse_vless(node["link"]))
+            connection = connection_identity(build, node["link"])
+        except (ValueError, KeyError, TypeError, OverflowError, RecursionError):
+            raise RuntimeError("Invalid publication configuration") from None
+        if (not isinstance(identifier, str) or not re.fullmatch(r"[0-9a-f]{64}", identifier)
+                or node.get("id") != identifier):
+            raise RuntimeError("Publication candidate identity does not match its configuration")
+        if identifier in canonical or connection in connections:
+            raise RuntimeError("Duplicate or equivalent publication connection")
+        canonical.add(identifier)
+        connections.add(connection)
 
 
 def finalize_local_selection(
     qualified: list[str],
     status: dict,
+    *, build=None,
 ) -> list[str]:
     allowed_nodes = status.get(
         "nodes",
@@ -1047,7 +1207,18 @@ def finalize_local_selection(
         and valid_node_evidence(next(node for node in allowed_nodes if node["link"] == link), status.get("stability", {}).get("rounds", 0))
     ]
 
-    selected = latency_qualified[
+    if latency_qualified and build is None:
+        build = load_build_module()
+    unique_connections, unique_links = set(), []
+    for link in latency_qualified:
+        try:
+            connection = connection_identity(build, link)
+        except (ValueError, KeyError, TypeError, OverflowError, RecursionError):
+            continue
+        if connection not in unique_connections:
+            unique_connections.add(connection)
+            unique_links.append(link)
+    selected = unique_links[
         :MAX_LOCAL_PUBLISHED_NODES
     ]
 
@@ -1110,6 +1281,9 @@ def finalize_local_selection(
             len(country_qualified),
         "latency_qualified":
             len(latency_qualified),
+        "equivalent_connections_removed":
+            len(latency_qualified) - len(unique_links),
+        "ranking": "definitive-reliability-bands; stable previous order unless 25..50ms material improvement",
         "published":
             len(selected),
         "padding":
@@ -1332,14 +1506,15 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
         latency = result.get("median_ms")
         measurements = result.get("latency_samples_ms", [])
         passed = passed and len(measurements) == final_rounds and isinstance(latency, (int, float)) and not isinstance(latency, bool) and 0 <= latency < MAX_LOCAL_MEDIAN_LATENCY_MS
+        passed = passed and valid_node_evidence(
+            {"services": services, "latency_samples_ms": measurements, "median_latency": latency},
+            final_rounds, require_round_evidence=True,
+        )
         sample["passes"] = min(sample.get("passes", 0), sample["runs"] - 1) + int(passed)
         sample["last_seen"] = now
         sample["qualified"] = passed
-        reliability = (sample["passes"] + 1) / (sample["runs"] + 2)
         for name in gate_counts:
             gate_counts[name] += int(services.get(name, {}).get("passed") == final_rounds)
-        if passed:
-            qualified.append((link, result, rank, reliability))
         diagnostic = {"id": key, "upstream_rank": rank, "qualified": passed,
                       "services": services, "latency_samples_ms": measurements,
                       "median_latency": latency if isinstance(latency, (float, int)) and math.isfinite(latency) else None,
@@ -1349,12 +1524,15 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
                 diagnostic[field] = result[field]
         diagnostic["outcome"] = classify_diagnostic(diagnostic)
         sample["outcome"] = diagnostic["outcome"]
+        reliability = update_definitive_history(sample, diagnostic["outcome"])
+        if passed:
+            qualified.append((link, result, rank, reliability))
         diagnostics.append(diagnostic)
         print("Candidate", diagnostic["id"], json.dumps({k: v for k, v in diagnostic.items() if k not in {"id", "upstream_rank"}}, allow_nan=False), flush=True)
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     # Hash-only history is diagnostic; no candidate credentials are stored here.
-    write_status(history_path, dict(sorted(history.items(), key=lambda item: item[1]["last_seen"], reverse=True)[:5000]))
-    qualified.sort(key=lambda item: (-item[3], item[1]["median_ms"], item[1]["p95_ms"], item[2]))
+    save_local_reliability(history_path, history)
+    qualified = rank_local_qualifiers(qualified, identities, _previous_published_order())
     status = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "algorithm": "bestlocal-strict-services-v6",
@@ -1552,9 +1730,9 @@ def validate_generated_result(
         status_path.read_text()
     )
 
-    qualified = int(
-        status["stability"]["qualified"]
-    )
+    qualified = status["stability"]["qualified"]
+    if type(qualified) is not int or not 1 <= qualified <= MAX_LOCAL_PUBLISHED_NODES:
+        raise RuntimeError("Invalid qualified publication count")
 
     expected_published_links = [
         published_link(
@@ -1586,6 +1764,10 @@ def validate_generated_result(
 
     if len(links) > MAX_LOCAL_PUBLISHED_NODES:
         raise RuntimeError("Regional result exceeds publication cap")
+    ids = [node.get("id") for node in status["nodes"]]
+    if (any(not isinstance(identifier, str) or not re.fullmatch(r"[0-9a-f]{64}", identifier) for identifier in ids)
+            or len(set(ids)) != len(ids)):
+        raise RuntimeError("Missing or duplicate publication candidate identities")
     if status.get("algorithm") != "bestlocal-strict-services-v6":
         raise RuntimeError("Missing strict service validation policy")
     require_fresh_timestamp(status.get("generated_at"), 6, "local validation")
@@ -1595,7 +1777,7 @@ def validate_generated_result(
         raise RuntimeError("Incomplete validation rounds")
     for node in status["nodes"]:
         require_fresh_timestamp(node.get("validated_at"), 6, "candidate validation")
-        if not valid_node_evidence(node, rounds):
+        if not valid_node_evidence(node, rounds, require_round_evidence=True):
             raise RuntimeError("A node lacks required service or latency evidence")
         if status.get("exit_geography", {}).get("affects_qualification", True) and node.get("exit_country") not in ALLOWED_ACTUAL_EXIT_COUNTRIES:
             raise RuntimeError("A node lacks an allowed actual exit country")
@@ -1607,7 +1789,7 @@ def validate_generated_result(
 
     if ranks != list(
         range(1, len(ranks) + 1)
-    ):
+    ) or any(type(rank) is not int for rank in ranks):
         raise RuntimeError(
             "Status ranking is not contiguous"
         )
@@ -1709,6 +1891,7 @@ def remote_branch_exists(
 
 
 def validate_publication_membership(build, status: dict, tested_sha: str) -> None:
+    validate_publication_nodes(build, status.get("nodes"))
     tested = read_links_text(run_git("show", f"{tested_sha}:{DEFAULT_UPSTREAM_PATH}"), "tested Best50")
     allowed = {build.normalized_fingerprint(build.parse_vless(link)) for link in tested}
     manifest = status.get("input", {}).get("regional_manifest")
@@ -1728,13 +1911,40 @@ def validate_publication_membership(build, status: dict, tested_sha: str) -> Non
         # canonical collision cannot bypass opt-out by omitting a manifest.
         from regional_pool import _managed
         managed, _ = _managed(build, STATE_DIR)
-        private = {entry["id"] for entry in managed if not entry["public_publish_allowed"]}
+        private = {connection_identity(build, entry["link"]) for entry in managed if not entry["public_publish_allowed"]}
         for node in status["nodes"]:
             identifier = build.normalized_fingerprint(build.parse_vless(node["link"]))
-            if identifier in private:
+            if connection_identity(build, node["link"]) in private:
                 raise RuntimeError("Refusing publication of a private managed candidate")
             if identifier not in allowed:
                 raise RuntimeError("Refusing publication of a node absent from tested Best50")
+
+
+def previous_publication_timestamp(status: object, now: float | None = None) -> float | None:
+    """Only a plausible strict published result may suppress a newer writer."""
+    now = time.time() if now is None else now
+    try:
+        if not isinstance(status, dict) or status.get("algorithm") != "bestlocal-strict-services-v6":
+            return None
+        raw = status.get("generated_at")
+        if not isinstance(raw, str):
+            return None
+        generated = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        if generated.tzinfo is None:
+            return None
+        epoch = generated.timestamp()
+        if not math.isfinite(epoch) or not 0 < epoch <= now + 300 or now - epoch > 6 * 3600:
+            return None
+        nodes, stability = status.get("nodes"), status.get("stability")
+        if (not isinstance(nodes, list) or not 1 <= len(nodes) <= MAX_LOCAL_PUBLISHED_NODES
+                or not isinstance(stability, dict) or type(stability.get("qualified")) is not int
+                or stability["qualified"] != len(nodes) or type(stability.get("rounds")) is not int
+                or stability.get("minimum_successes") != stability["rounds"]
+                or not all(valid_node_evidence(node, stability["rounds"]) for node in nodes)):
+            return None
+        return epoch
+    except (ValueError, TypeError, OverflowError, RecursionError):
+        return None
 
 
 
@@ -1814,23 +2024,17 @@ def _publish_regional_once(
     if regional_exists:
         try:
             previous_status = json.loads(git_output("show", f"{base_ref}:{REGIONAL_STATUS_PATH}"))
-            previous_time = datetime.fromisoformat(previous_status["generated_at"].replace("Z", "+00:00"))
-            current_time = datetime.fromisoformat(status["generated_at"].replace("Z", "+00:00"))
-        except (RuntimeError, KeyError, TypeError, ValueError):
+            previous_time = previous_publication_timestamp(previous_status)
+            current_time = datetime.fromisoformat(status["generated_at"].replace("Z", "+00:00")).timestamp()
+        except (RuntimeError, KeyError, TypeError, ValueError, OverflowError, RecursionError):
             previous_time = current_time = None
         if previous_time is not None and current_time is not None and previous_time > current_time:
             raise RuntimeError("A newer regional validation already exists; refusing older result")
 
-    with tempfile.TemporaryDirectory(
-        prefix="best50-regional-publish-"
-    ) as temporary_directory:
-        worktree = Path(
-            temporary_directory
-        )
-
-        # TemporaryDirectory creates the path, while git
-        # worktree requires the target path not to exist.
-        worktree.rmdir()
+    with owned_temporary_directory(
+        prefix="best50-regional-publish-", parent=STATE_DIR / "temporary", repo=ROOT,
+    ) as directory:
+        worktree = Path(directory) / "checkout"
 
         try:
             git_output(
@@ -2056,7 +2260,7 @@ def publish_regional_health(status: dict) -> None:
     for attempt in range(3):
         try:
             git_output("fetch", REGIONAL_REMOTE, REGIONAL_BRANCH)
-            with tempfile.TemporaryDirectory(prefix="bestlocal-health-") as directory:
+            with owned_temporary_directory(prefix="bestlocal-health-", parent=STATE_DIR / "temporary", repo=ROOT) as directory:
                 worktree = Path(directory) / "checkout"
                 try:
                     git_output("worktree", "add", "--detach", str(worktree), f"{REGIONAL_REMOTE}/{REGIONAL_BRANCH}")

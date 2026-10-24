@@ -1,6 +1,7 @@
 import importlib.util
 from pathlib import Path
 import unittest
+import uuid
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -13,6 +14,10 @@ spec = importlib.util.spec_from_file_location(
 local_probe = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 spec.loader.exec_module(local_probe)
+
+
+def candidate_link(name):
+    return f"vless://{uuid.uuid5(uuid.NAMESPACE_DNS, str(name))}@1.1.1.1:443?security=tls&sni=example.com"
 
 
 def make_status(links):
@@ -44,7 +49,7 @@ class StrictPolicyTests(unittest.TestCase):
         )
 
     def test_disallowed_actual_exit_is_removed(self):
-        links = ["vless://a", "vless://b"]
+        links = [candidate_link("a"), candidate_link("b")]
         status = make_status(links)
 
         metadata = {
@@ -78,7 +83,7 @@ class StrictPolicyTests(unittest.TestCase):
         )
 
     def test_unknown_actual_exit_is_removed(self):
-        links = ["vless://a"]
+        links = [candidate_link("a")]
         status = make_status(links)
 
         local_probe.apply_exit_geography(
@@ -99,7 +104,7 @@ class StrictPolicyTests(unittest.TestCase):
         )
 
     def test_xx_is_unknown_not_a_country(self):
-        links = ["vless://a"]
+        links = [candidate_link("a")]
         status = make_status(links)
 
         local_probe.apply_exit_geography(
@@ -119,7 +124,7 @@ class StrictPolicyTests(unittest.TestCase):
 
     def test_final_selection_caps_at_twelve(self):
         links = [
-            f"vless://{i}"
+            candidate_link(i)
             for i in range(20)
         ]
 
@@ -162,10 +167,10 @@ class StrictPolicyTests(unittest.TestCase):
 
     def test_final_selection_rejects_median_over_500ms(self):
         links = [
-            "vless://fast",
-            "vless://boundary",
-            "vless://slow",
-            "vless://missing",
+            candidate_link("fast"),
+            candidate_link("boundary"),
+            candidate_link("slow"),
+            candidate_link("missing"),
         ]
 
         status = {
@@ -178,27 +183,27 @@ class StrictPolicyTests(unittest.TestCase):
                     "country": "US",
                     "exit_country": "DE",
                     "median_latency": 250.0,
-                    "link": "vless://fast",
+                    "link": candidate_link("fast"),
                 },
                 {
                     "rank": 2,
                     "country": "US",
                     "exit_country": "GB",
                     "median_latency": 500.0,
-                    "link": "vless://boundary",
+                    "link": candidate_link("boundary"),
                 },
                 {
                     "rank": 3,
                     "country": "US",
                     "exit_country": "NL",
                     "median_latency": 500.1,
-                    "link": "vless://slow",
+                    "link": candidate_link("slow"),
                 },
                 {
                     "rank": 4,
                     "country": "US",
                     "exit_country": "PL",
-                    "link": "vless://missing",
+                    "link": candidate_link("missing"),
                 },
             ],
         }
@@ -217,7 +222,7 @@ class StrictPolicyTests(unittest.TestCase):
         self.assertEqual(
             selected,
             [
-                "vless://fast",
+                candidate_link("fast"),
             ],
         )
 
@@ -243,9 +248,9 @@ class StrictPolicyTests(unittest.TestCase):
 
     def test_final_selection_never_pads(self):
         links = [
-            "vless://a",
-            "vless://b",
-            "vless://c",
+            candidate_link("a"),
+            candidate_link("b"),
+            candidate_link("c"),
         ]
 
         status = {

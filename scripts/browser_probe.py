@@ -18,10 +18,10 @@ import re
 import socket
 import subprocess
 import sys
-import tempfile
 import time
 
 from install_browser_runtime import CACHE, RUNTIME, VERSION, find_node, package_version
+from owned_temporary import temporary_directory
 
 MAX_SECONDS = 120
 MAX_OUTPUT = 64 * 1024
@@ -120,11 +120,12 @@ def validate_evidence(value: object, rounds: int, now: datetime | None = None) -
         code = item.get("http_status")
         if isinstance(code, int) and not isinstance(code, bool) and 0 <= code <= 599:
             clean_item["http_status"] = code
-        for key in ("composer", "application_json"):
+        for key in ("composer", "actionable", "restriction_free", "application_json"):
             if isinstance(item.get(key), bool):
                 clean_item[key] = item[key]
-        if item.get("api_kind") in {None, "openai-auth-providers", "chatgpt-model-catalog"}:
-            clean_item["api_kind"] = item.get("api_kind")
+        kind = item.get("api_kind")
+        if kind is None or (isinstance(kind, str) and kind in {"openai-auth-providers", "chatgpt-model-catalog"}):
+            clean_item["api_kind"] = kind
         clean.append(clean_item)
         diagnostics = item.get("diagnostics")
         if isinstance(diagnostics, dict):
@@ -138,7 +139,7 @@ def validate_evidence(value: object, rounds: int, now: datetime | None = None) -
             for key in ("login_gate", "application_error", "loading", "guest_action", "rejected_optional_cookies"):
                 if isinstance(diagnostics.get(key), bool):
                     metadata[key] = diagnostics[key]
-            if diagnostics.get("final_path") in {"/", "other"}:
+            if isinstance(diagnostics.get("final_path"), str) and diagnostics["final_path"] in {"/", "other"}:
                 metadata["final_path"] = diagnostics["final_path"]
             category = diagnostics.get("category")
             if isinstance(category, str) and re.fullmatch("[a-z-]{1,100}", category):
@@ -161,6 +162,8 @@ def validate_evidence(value: object, rounds: int, now: datetime | None = None) -
             clean[-1]["diagnostics"] = metadata
     passed = (len(clean) == rounds and all(item["passed"] is True and item.get("reason") == "ok"
               and item.get("composer") is True and item.get("application_json") is True
+              and item.get("actionable") is True and item.get("restriction_free") is True
+              and item.get("api_kind") in {"openai-auth-providers", "chatgpt-model-catalog"}
               and item.get("http_status") == 200 for item in clean))
     if value["qualified"] and not passed:
         return _failure("browser-invalid-evidence")
@@ -204,7 +207,7 @@ async def check_chatgpt(build, port: int | None, username: str | None, password:
         configuration = {"control": control, "port": port, "username": username, "password": password,
                          "rounds": rounds, "headless": headless}
         process = None
-        with tempfile.TemporaryDirectory(prefix="bestlocal-browser-") as directory:
+        with temporary_directory(prefix="bestlocal-browser-", parent=RUNTIME.parent / "temporary") as directory:
             configuration["profile"] = str(Path(directory) / "profile")
             configuration_path = Path(directory) / "configuration.json"
             with configuration_path.open("x", encoding="utf-8") as stream:

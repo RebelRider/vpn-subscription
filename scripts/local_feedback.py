@@ -156,6 +156,10 @@ def parse_health(raw: bytes, now: float | None = None) -> tuple[dict, dict]:
         if seen >= records.get(identifier, {}).get("last_seen", 0):
             record = {"last_seen": seen, "qualified": value}
             outcome = _valid_outcome(outcome, value)
+            if outcome is None and not value:
+                # Old qualification booleans cannot distinguish a dead server
+                # from a Cloudflare challenge or a validator infrastructure issue.
+                outcome = "inconclusive"
             if outcome is not None:
                 record["outcome"] = outcome
             records[identifier] = record
@@ -171,9 +175,8 @@ def parse_health(raw: bytes, now: float | None = None) -> tuple[dict, dict]:
                 continue
             # Diagnostics describe the latest completed attempt. Historical
             # entries retain their own last_seen timestamp in recent_results.
-            outcome = _valid_outcome(result.get("outcome"), result.get("qualified"))
-            if outcome is None and _rich_diagnostic(result):
-                outcome = classify_diagnostic(result)
+            outcome = (classify_diagnostic(result) if _rich_diagnostic(result)
+                       else _valid_outcome(result.get("outcome"), result.get("qualified")))
             add(result.get("id"), result.get("qualified"), generated, outcome)
     except ValueError:
         return {}, summary
@@ -233,7 +236,7 @@ def apply_feedback(ranked: list[dict], records: dict, now: float | None = None) 
         if result:
             matched.add(identifier)
             age = now - result["last_seen"]
-            if not result["qualified"] and result.get("outcome") == "inconclusive":
+            if not result["qualified"] and result.get("outcome") != "fail":
                 # Keep uncertainty eligible: it must neither boost the score nor
                 # poison the twelve-hour hard-failure group.
                 summary["inconclusive" if 0 <= age < MAX_HEALTH_AGE else "expired"] += 1

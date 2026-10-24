@@ -16,10 +16,10 @@ from pathlib import Path
 import re
 import subprocess
 import sys
-import tempfile
 import time
 
 from source_discovery import SourcePool, canonical_url, decode_subscription, extract_links, RateLimited, SourcePolicyUnavailable
+from owned_temporary import temporary_directory
 
 CATALOG_PATH = "sources/primary-sources.json"
 CATALOG_REF = "refs/remotes/origin/regional:" + CATALOG_PATH
@@ -185,7 +185,7 @@ def publish_catalog(repo: Path, state_dir: Path, updates: list[dict], now: float
                 merged = _merge_catalog(current, updates, now)
                 if merged == current:
                     return False
-                with tempfile.TemporaryDirectory(prefix="bestlocal-source-publish-") as directory:
+                with temporary_directory(prefix="bestlocal-source-publish-", parent=state_dir / "temporary", repo=repo) as directory:
                     worktree = Path(directory) / "checkout"
                     try:
                         # Read and commit against the same immutable snapshot.
@@ -234,7 +234,7 @@ def process_research_result(result_text: str, repo: Path, state_dir: Path, now: 
         current = {"schema": 1, "generated_at": 0, "sources": []}
     known = {entry["url"]: entry for entry in current["sources"]}
     updates, accepted, transient, retry_at = [], 0, 0, 0
-    with tempfile.TemporaryDirectory(prefix="bestlocal-feed-check-") as temporary:
+    with temporary_directory(prefix="bestlocal-feed-check-", parent=state_dir / "temporary") as temporary:
         pool = SourcePool([], Path(temporary) / "state.json", now=int(now))
         for item in proposals:
             previous = known.get(item["url"])

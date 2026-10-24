@@ -13,12 +13,12 @@ import re
 import shutil
 import signal
 import sys
-import tempfile
 import time
 from urllib.parse import unquote, urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from regional_scheduler import Runner, atomic_json
+from regional_scheduler import Runner, atomic_json, rotate_logs
+from owned_temporary import cleanup_owned_temporary, temporary_directory
 
 DAY = 24 * 3600
 MODELS_TIMEOUT = 15
@@ -288,8 +288,10 @@ def existing_source_context(repo: Path) -> str:
 
 
 def research(agent: str, state_dir: Path, prompt_context: str = "") -> tuple[str, str]:
-    with tempfile.TemporaryDirectory(prefix="source-research-workspace-", dir=state_dir) as temporary:
-        runner = Runner(Path(temporary), time.monotonic() + MODELS_TIMEOUT + RESEARCH_TIMEOUT + 15)
+    with temporary_directory(prefix="source-research-workspace-", parent=state_dir / "temporary") as temporary:
+        workspace = Path(temporary) / "workspace"
+        workspace.mkdir(mode=0o700)
+        runner = Runner(workspace, time.monotonic() + MODELS_TIMEOUT + RESEARCH_TIMEOUT + 15)
         try:
             with cursor_environment():
                 code, models = runner.run([agent, "models"], "source research model inventory", MODELS_TIMEOUT, check=False)
@@ -335,6 +337,14 @@ def run_once(repo: Path, state_dir: Path, *, now: float | None = None, agent: st
         except BlockingIOError:
             log("Another source researcher is active; overlap skipped")
             return 0
+        try:
+            cleanup = cleanup_owned_temporary(state_dir / "temporary", repos=[repo], now=clock())
+            if cleanup["removed"] or cleanup["failed"]:
+                log(f"Owned temporary recovery: removed={cleanup['removed']} deferred={cleanup['failed']}")
+            if state_dir == (Path.home() / "Library/Application Support/best50-vpn").resolve():
+                rotate_logs(Path.home() / "Library/Logs/best50-vpn", names=("source-research.log", "source-research-error.log"))
+        except (OSError, ValueError, RuntimeError):
+            log("Optional owned temporary/log cleanup deferred")
         if defer_hours and not state_path.exists():
             seed_initial_state(state_dir, clock(), defer_hours)
             log("Initial quota wait recorded; no agent call attempted")
@@ -366,10 +376,6 @@ def run_once(repo: Path, state_dir: Path, *, now: float | None = None, agent: st
             raise KeyboardInterrupt
         handlers = {sig: signal.signal(sig, interrupted) for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP)}
         try:
-            # Only remove old workspaces belonging to this job after acquiring its lock.
-            for path in state_dir.glob("source-research-workspace-*"):
-                if path.is_dir() and not path.is_symlink() and clock() - path.stat().st_mtime > 2 * 3600:
-                    shutil.rmtree(path)
             if pending is None:
                 selected_agent = agent or shutil.which("agent")
                 if not selected_agent:

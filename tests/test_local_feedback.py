@@ -44,10 +44,10 @@ class FeedbackParserTests(unittest.TestCase):
             diagnostics=[{"id": identifier(2), "qualified": True, "ignored_external_payload": "not propagated"}],
         ), now=NOW)
         self.assertEqual(summary["status"], "fresh")
-        self.assertEqual(records[identifier(1)], {"last_seen": NOW - 100, "qualified": False})
+        self.assertEqual(records[identifier(1)], {"last_seen": NOW - 100, "qualified": False, "outcome": "inconclusive"})
         self.assertEqual(records[identifier(2)], {"last_seen": NOW, "qualified": True})
 
-    def test_optional_valid_outcomes_are_retained_without_changing_legacy_records(self):
+    def test_valid_outcomes_are_retained_and_legacy_negatives_remain_inconclusive(self):
         records, _ = feedback.parse_health(health({
             identifier(1): {"last_seen": NOW, "qualified": False, "outcome": "inconclusive"},
             identifier(2): {"last_seen": NOW, "qualified": False, "outcome": "fail"},
@@ -57,13 +57,13 @@ class FeedbackParserTests(unittest.TestCase):
         self.assertEqual(records[identifier(1)]["outcome"], "inconclusive")
         self.assertEqual(records[identifier(2)]["outcome"], "fail")
         self.assertEqual(records[identifier(3)]["outcome"], "pass")
-        self.assertNotIn("outcome", records[identifier(4)])
+        self.assertEqual(records[identifier(4)]["outcome"], "inconclusive")
 
     def test_malformed_and_contradictory_optional_outcomes_are_ignored(self):
         for value in ([], {}, 1, True, "unknown", "pass"):
             records, _ = feedback.parse_health(health({identifier(1): {
                 "last_seen": NOW, "qualified": False, "outcome": value}}), now=NOW)
-            self.assertEqual(records[identifier(1)], {"last_seen": NOW, "qualified": False})
+            self.assertEqual(records[identifier(1)], {"last_seen": NOW, "qualified": False, "outcome": "inconclusive"})
 
     def test_only_rich_diagnostics_infer_inconclusive_and_definitive_outcomes(self):
         diagnostics = [
@@ -76,7 +76,7 @@ class FeedbackParserTests(unittest.TestCase):
         records, _ = feedback.parse_health(health(diagnostics=diagnostics), now=NOW)
         self.assertEqual(records[identifier(1)]["outcome"], "inconclusive")
         self.assertEqual(records[identifier(2)]["outcome"], "fail")
-        self.assertNotIn("outcome", records[identifier(3)])
+        self.assertEqual(records[identifier(3)]["outcome"], "inconclusive")
         self.assertEqual(records[identifier(4)]["outcome"], "pass")
 
     def test_missing_corrupt_oversize_schema_and_policy_fail_closed(self):
@@ -145,6 +145,27 @@ class FeedbackParserTests(unittest.TestCase):
 
 
 class FeedbackRankingTests(unittest.TestCase):
+    def test_legacy_negative_and_old_403_cannot_poison_twelve_hour_cooldown(self):
+        ranked = candidates(4)
+        raw = health({ranked[0]["normalized"]: {"last_seen": NOW, "qualified": False}}, diagnostics=[
+            {"id": ranked[1]["normalized"], "qualified": False, "outcome": "fail",
+             "services": {"chatgpt": {"evidence": [{"http_status": 403, "cf_challenge": True}]}}},
+            {"id": ranked[2]["normalized"], "qualified": False,
+             "engine_errors": {"connection-refused": 1}},
+        ])
+        records, _ = feedback.parse_health(raw, now=NOW)
+        ordered, summary = feedback.apply_feedback(ranked, records, now=NOW)
+        self.assertEqual(records[ranked[0]["normalized"]]["outcome"], "inconclusive")
+        self.assertEqual(records[ranked[1]["normalized"]]["outcome"], "inconclusive")
+        self.assertEqual(records[ranked[2]["normalized"]]["outcome"], "fail")
+        self.assertEqual([item["link"] for item in ordered], [ranked[i]["link"] for i in (0, 1, 3, 2)])
+        self.assertEqual((summary["inconclusive"], summary["rejected"]), (2, 1))
+        # Direct callers cannot turn an untyped historical boolean into failure.
+        direct, summary = feedback.apply_feedback(ranked, {
+            ranked[0]["normalized"]: {"last_seen": NOW, "qualified": False}}, now=NOW)
+        self.assertEqual([item["link"] for item in direct], [item["link"] for item in ranked])
+        self.assertEqual((summary["inconclusive"], summary["rejected"]), (1, 0))
+
     def test_inconclusive_candidates_are_not_twelve_hour_demoted(self):
         ranked = candidates(4)
         records = {ranked[0]["normalized"]: {"last_seen": NOW - 1, "qualified": False, "outcome": "inconclusive"},
@@ -168,7 +189,7 @@ class FeedbackRankingTests(unittest.TestCase):
     def test_fifty_rejected_are_replaced_by_next_fifty_validated(self):
         ranked = candidates(100)
         original = copy.deepcopy(ranked)
-        records = {item["normalized"]: {"last_seen": NOW - 60, "qualified": False} for item in ranked[:50]}
+        records = {item["normalized"]: {"last_seen": NOW - 60, "qualified": False, "outcome": "fail"} for item in ranked[:50]}
         ordered, summary = feedback.apply_feedback(ranked, records, now=NOW)
         chosen = build.select_diverse(ordered, 50)
         self.assertEqual({item["link"] for item in chosen}, {item["link"] for item in ranked[50:]})
@@ -177,7 +198,7 @@ class FeedbackRankingTests(unittest.TestCase):
 
     def test_insufficient_alternatives_still_exhausts_untested_first(self):
         ranked = candidates(70)
-        records = {item["normalized"]: {"last_seen": NOW - 1, "qualified": False} for item in ranked[:50]}
+        records = {item["normalized"]: {"last_seen": NOW - 1, "qualified": False, "outcome": "fail"} for item in ranked[:50]}
         ordered, _ = feedback.apply_feedback(ranked, records, now=NOW)
         chosen = build.select_diverse(ordered, 50)
         self.assertEqual({item["link"] for item in chosen[:20]}, {item["link"] for item in ranked[50:]})
@@ -186,7 +207,7 @@ class FeedbackRankingTests(unittest.TestCase):
 
     def test_expired_rejections_are_eligible_again_at_twelve_hours(self):
         ranked = candidates(10)
-        records = {ranked[0]["normalized"]: {"last_seen": NOW - feedback.REJECT_COOLDOWN, "qualified": False}}
+        records = {ranked[0]["normalized"]: {"last_seen": NOW - feedback.REJECT_COOLDOWN, "qualified": False, "outcome": "fail"}}
         ordered, summary = feedback.apply_feedback(ranked, records, now=NOW)
         self.assertEqual([item["link"] for item in ordered], [item["link"] for item in ranked])
         self.assertEqual(summary["expired"], 1)
@@ -195,7 +216,7 @@ class FeedbackRankingTests(unittest.TestCase):
     def test_recent_local_pass_and_score_order_inside_groups(self):
         ranked = candidates(6)
         records = {ranked[4]["normalized"]: {"last_seen": NOW - 60, "qualified": True},
-                   ranked[1]["normalized"]: {"last_seen": NOW - 60, "qualified": False}}
+                   ranked[1]["normalized"]: {"last_seen": NOW - 60, "qualified": False, "outcome": "fail"}}
         ordered, summary = feedback.apply_feedback(ranked, records, now=NOW)
         self.assertEqual([item["link"] for item in ordered], [ranked[i]["link"] for i in (4, 0, 2, 3, 5, 1)])
         self.assertEqual((summary["passed"], summary["rejected"]), (1, 1))

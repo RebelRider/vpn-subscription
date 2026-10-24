@@ -10,8 +10,10 @@ import signal
 import socket
 import subprocess
 import sys
-import tempfile
 import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from owned_temporary import temporary_directory
 
 
 def configuration(port: int, username: str, password: str) -> dict:
@@ -109,7 +111,7 @@ def run(command: list[str], *, engine: str = "/opt/homebrew/bin/sing-box") -> in
         raise KeyboardInterrupt
     handlers = {sig: signal.signal(sig, interrupted) for sig in (signal.SIGTERM, signal.SIGINT)}
     try:
-        with tempfile.TemporaryDirectory(prefix="bestlocal-control-") as temporary:
+        with temporary_directory(prefix="bestlocal-control-") as temporary:
             with socket.socket() as reservation:
                 reservation.bind(("127.0.0.1", 0))
                 port = reservation.getsockname()[1]

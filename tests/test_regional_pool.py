@@ -43,6 +43,24 @@ class FakePool:
 
 
 class RegionalPoolTests(unittest.TestCase):
+    def test_private_tls_fingerprint_variant_blocks_equivalent_public_connection(self):
+        public = "trojan://secret@8.8.8.8:443?type=ws&sni=example.com"
+        private = public + "&fp=chrome"
+        private_json(self.state / "managed-pool.json", {"schema": 1, "servers": [{"uri": private}]})
+        links, manifest = self.collect([public])
+        self.assertEqual(len(links), 2)
+        self.assertTrue(all(node["public_publish_allowed"] is False for node in manifest["nodes"]))
+        with self.assertRaises(ValueError):
+            regional.validate_manifest_membership(build, [{"link": public}], manifest["manifest_path"], now=NOW)
+        # A manifest from an older canonical-only permission implementation
+        # cannot bypass the current live equivalent-connection private policy.
+        data = json.loads(Path(manifest["manifest_path"]).read_text())
+        for node in data["nodes"]:
+            node["public_publish_allowed"] = True
+        private_json(Path(manifest["manifest_path"]), data)
+        with self.assertRaises(ValueError):
+            regional.validate_manifest_membership(build, [{"link": public}], manifest["manifest_path"], now=NOW)
+
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.state = Path(self.directory.name)

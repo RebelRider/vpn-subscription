@@ -15,6 +15,7 @@ import asyncio
 from collections import Counter
 from datetime import datetime, timezone
 import hashlib
+from html.parser import HTMLParser
 import ipaddress
 import json
 import math
@@ -25,10 +26,13 @@ import secrets
 import shutil
 import socket
 import statistics
-import tempfile
+import sys
 import time
-from urllib.parse import urljoin, urlsplit
 import uuid
+from urllib.parse import urljoin, urlsplit
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from owned_temporary import temporary_directory
 
 
 MAX_CONCURRENT = 4
@@ -48,6 +52,9 @@ BROWSER_REASON_CODES = frozenset({
     "browser-timeout-inconclusive", "browser-tls-failed", "cloudflare-challenge-inconclusive",
     "anti-automation-inconclusive", "access-denied-inconclusive", "geographic-restriction",
     "rate-limited-inconclusive",
+    "browser-composer-not-actionable-inconclusive", "browser-document-proof-missing-inconclusive",
+    "browser-document-changed-inconclusive", "browser-document-http-error-inconclusive",
+    "authentication-required-inconclusive", "browser-visible-application-error-inconclusive",
 })
 ALLOWED_OUTBOUND_TYPES = frozenset({"vless", "vmess", "trojan", "shadowsocks", "hysteria2", "socks"})
 YOUTUBE_VIDEO = "M7lc1UVf-VE"
@@ -82,18 +89,84 @@ GEO_RESTRICTION_MARKERS = (
 )
 
 
+class _VisibleText(HTMLParser):
+    """Bounded HTML text, excluding inert bundles and explicitly hidden nodes."""
+    VOID = frozenset({"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"})
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.stack = []
+        self.parts = []
+        self.size = 0
+
+    def handle_starttag(self, tag, attrs):
+        values = dict(attrs)
+        style = re.sub(r"\s+", "", values.get("style") or "").lower()
+        hidden = ((self.stack and self.stack[-1][1]) or tag in {"script", "style", "template", "noscript"}
+                  or "hidden" in values or (values.get("aria-hidden") or "").lower() == "true"
+                  or "display:none" in style or "visibility:hidden" in style)
+        if tag not in self.VOID:
+            if len(self.stack) >= 256:
+                raise ValueError("HTML nesting exceeds probe limit")
+            self.stack.append((tag, bool(hidden)))
+
+    def handle_endtag(self, tag):
+        for index in range(len(self.stack) - 1, -1, -1):
+            if self.stack[index][0] == tag:
+                del self.stack[index:]
+                break
+
+    def handle_data(self, data):
+        if not (self.stack and self.stack[-1][1]) and self.size < 65536:
+            value = data[:65536 - self.size]
+            self.parts.append(value)
+            self.size += len(value)
+
+
+def _restriction_text(response: dict) -> bytes:
+    body = response.get("body", b"")
+    if not isinstance(body, bytes) or len(body) > MAX_RESPONSE_BYTES:
+        return b""
+    content_type = response.get("content_type", "")
+    if isinstance(content_type, str) and "application/json" in content_type.lower():
+        try:
+            payload = json.loads(body)
+        except (ValueError, UnicodeError, RecursionError):
+            payload = None
+        if isinstance(payload, dict):
+            parts = []
+            # Error values are evidence; arbitrary titles, source strings and
+            # translation dictionaries are not an active service restriction.
+            for key in ("error", "error_description", "error_type", "message", "detail", "code"):
+                value = payload.get(key)
+                if isinstance(value, str):
+                    parts.append(value[:4096])
+                elif isinstance(value, dict):
+                    parts.extend(value[name][:4096] for name in ("message", "code", "type") if isinstance(value.get(name), str))
+            parts.extend(key for key in ("challenge_required", "login_required", "consent_required") if payload.get(key) is True)
+            return " ".join(parts).lower().encode()
+    parser = _VisibleText()
+    try:
+        parser.feed(body.decode("utf-8", errors="replace"))
+        parser.close()
+    except (ValueError, RecursionError):
+        return b""
+    return " ".join(parser.parts).lower().encode()
+
+
 def response_restrictions(response: dict) -> tuple[bool, bool]:
     """Return only explicit challenge/geography evidence, never infer it from 403."""
     body = response.get("body", b"")
     if not isinstance(body, bytes) or len(body) > MAX_RESPONSE_BYTES:
         body = b""
-    lowered = body.lower()
+    lowered = _restriction_text(response)
     challenge = response.get("cf_mitigated") == "challenge" or any(marker in lowered for marker in CF_CHALLENGE_MARKERS)
     # A translated/static app bundle may mention unsupported countries without
     # restricting this request. Require an actual error response or JSON error.
     geographic = any(marker in lowered for marker in GEO_RESTRICTION_MARKERS) and (
         response.get("status") in (400, 401, 403, 451)
-        or ("application/json" in response.get("content_type", "").lower() and b'"error"' in lowered)
+        or (isinstance(response.get("content_type"), str) and "application/json" in response["content_type"].lower()
+            and b'"error"' in body.lower())
     )
     return bool(challenge), bool(geographic)
 
@@ -186,17 +259,25 @@ def validate_response(service: str, response: dict) -> tuple[bool, str]:
     if code == 403:
         return False, "access-denied-inconclusive"
     if service == "latency":
+        if urlsplit(response["url"]).path != "/generate_204":
+            return False, "unexpected-latency-path"
         return (True, "ok") if code == 204 and not body else (False, "expected-empty-204")
     if service == "chatgpt" and code in (404, 410):
         return False, "chatgpt-endpoint-unavailable-inconclusive"
     if code != 200:
         return False, "http-" + str(code)
-    lowered = body.lower()
-    # Match visible challenge responses rather than scripts mentioning the word
-    # captcha: real Instagram applications may preload captcha code on login.
+    lowered = _restriction_text(response)
     if any(marker in lowered for marker in ANTI_AUTOMATION if marker != b"captcha"):
         return False, "challenge-inconclusive"
-    content_type = response.get("content_type", "").lower()
+    content_type = response.get("content_type", "")
+    if not isinstance(content_type, str):
+        return False, "invalid-response-content-type"
+    content_type = content_type.lower()
+    path = urlsplit(response["url"]).path.rstrip("/")
+    paths = {"chatgpt": {"/api/auth/providers"}, "youtube": {"/oembed"},
+             "instagram": {"", "/accounts/login"}, "trace": {"/cdn-cgi/trace"}}
+    if service in paths and path not in paths[service]:
+        return False, "unexpected-application-path-inconclusive"
     if service in ("chatgpt", "youtube"):
         if "application/json" not in content_type:
             return False, "chatgpt-endpoint-unexpected-content-inconclusive" if service == "chatgpt" else "expected-json"
@@ -468,17 +549,27 @@ async def _request(build, service: str, url: str, port: int, username: str, pass
             return response
         if hop == 3 or not response.get("location"):
             return {"error": "redirect-limit", "url": url}
-        url = urljoin(url, response["location"])
+        destination = urljoin(url, response["location"])
+        if not _safe_url(destination, service):
+            # A real HTTPS service redirect is application/endpoint ambiguity,
+            # not an endpoint transport failure. Never follow an unsafe target.
+            return {**response, "error": "service-redirect-restriction-inconclusive"}
+        url = destination
     return {"error": "redirect-limit", "url": url}
 
 
 def summarize_report(report: dict, rounds: int) -> dict:
     samples = report["latency_samples_ms"]
-    valid = len(samples) == rounds and all(isinstance(value, (int, float)) and math.isfinite(value) and value >= 0 for value in samples)
+    valid = len(samples) == rounds and all(type(value) in (int, float) and math.isfinite(value) and value >= 0 for value in samples)
     if valid:
         report["median_ms"] = statistics.median(samples)
         report["p95_ms"] = sorted(samples)[max(0, math.ceil(.95 * len(samples)) - 1)]
-    all_services = all(result["passed"] == rounds and result["attempts"] == rounds for result in report["services"].values())
+    services = report.get("services", {})
+    all_services = (isinstance(services, dict) and set(services) == set(SERVICE_URLS)
+                    and all(isinstance(result, dict) and type(result.get("passed")) is int
+                            and type(result.get("attempts")) is int
+                            and result["passed"] == rounds and result["attempts"] == rounds
+                            for result in services.values()))
     if not all_services:
         report["rejection_reasons"].append("service-requirements-failed")
     if not valid:
@@ -514,7 +605,9 @@ def fresh_browser_rounds(result: dict, rounds: int, port: int | None = None) -> 
     now = datetime.now(timezone.utc)
     clean = []
     for item in values:
-        if not isinstance(item, dict) or item.get("passed") is not True:
+        if (not isinstance(item, dict) or item.get("passed") is not True or item.get("reason") != "ok"
+                or type(item.get("http_status")) is not int or item["http_status"] != 200
+                or any(item.get(field) is not True for field in ("composer", "application_json", "actionable", "restriction_free"))):
             return None
         try:
             value = item["checked_at"]
@@ -525,7 +618,8 @@ def fresh_browser_rounds(result: dict, rounds: int, port: int | None = None) -> 
                 return None
         except (KeyError, TypeError, ValueError, OverflowError):
             return None
-        clean.append({"passed": True, "checked_at": checked.isoformat()})
+        clean.append({"passed": True, "checked_at": checked.isoformat(), "actionable": True,
+                      "restriction_free": True, "composer": True, "application_json": True, "http_status": 200})
     return clean
 
 
@@ -588,7 +682,7 @@ async def _validate_address(build, link: str, rounds: int, interface: str, serve
             reserved.bind(("127.0.0.1", 0))
             port = reserved.getsockname()[1]
         config = make_config(build, node, server_ip, interface, port, username, password)
-        with tempfile.TemporaryDirectory(prefix="bestlocal-service-") as directory:
+        with temporary_directory(prefix="bestlocal-service-") as directory:
             path = Path(directory) / "config.json"
             with path.open("x", encoding="utf-8") as stream:
                 os.chmod(path, 0o600)

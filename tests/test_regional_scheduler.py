@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from types import SimpleNamespace
 import unittest
 from unittest import mock
 
@@ -27,6 +28,19 @@ installer = load("install_local_automation", ROOT / "scripts/install_local_autom
 
 
 class SchedulerTests(unittest.TestCase):
+    def test_validator_javascript_update_revalidates_unchanged_best50(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            repo = Path(temporary);(repo / "scripts").mkdir()
+            (repo / "config.json").write_text("{}")
+            path = repo / "scripts/browser_probe.js";path.write_text("version1")
+            runner = mock.Mock(repo=repo)
+            runner.git.side_effect = lambda *args: json.dumps({"generated_at": time.time() - 10}) if args[0] == "show" else "same-pool"
+            first, _ = scheduler.input_metadata(runner)
+            path.write_text("version2")
+            second, _ = scheduler.input_metadata(runner)
+            self.assertNotEqual(first, second)
+            self.assertTrue(scheduler.validation_due({"last_validated_signature": first, "last_validated_at": time.time()}, second, time.time()))
+
     def test_six_hour_revalidation_and_changed_input(self):
         state = {"last_validated_signature": "same", "last_validated_at": 100, "last_attempt_signature": "same"}
         self.assertFalse(scheduler.validation_due(state, "same", 101))
@@ -309,6 +323,159 @@ class SchedulerTests(unittest.TestCase):
             launcher = home / "Library/Application Support/best50-vpn/regional-bootstrap.sh"
             self.assertIn("regional_scheduler.py", launcher.read_text())
             self.assertNotIn("git fetch", launcher.read_text())
+
+
+class OrphanGitLockRecoveryTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.repo = Path(self.temporary.name) / "runtime"
+        self.repo.mkdir()
+        subprocess.run(["git", "init", "-b", "main"], cwd=self.repo, check=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        self.gitdir = (self.repo / ".git").resolve()
+        self.now = time.time()
+        self.actual_run = subprocess.run
+
+    def old_lock(self, relative, content=b"orphan\n"):
+        path = self.gitdir / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+        os.utime(path, (self.now - 3 * 3600,) * 2)
+        return path
+
+    def lsof_only(self, action):
+        def run(command, **kwargs):
+            if command[0] == "/usr/sbin/lsof":
+                return action(command, kwargs)
+            return self.actual_run(command, **kwargs)
+        return mock.patch.object(scheduler.subprocess, "run", side_effect=run)
+
+    @unittest.skipUnless(scheduler._system_lsof(), "system lsof is not installed")
+    def test_verified_orphan_recovers_real_git_operation_without_discarding_changes(self):
+        tracked = self.repo / "tracked.txt"
+        tracked.write_text("original\n")
+        self.actual_run(["git", "add", "tracked.txt"], cwd=self.repo, check=True)
+        tracked.write_text("working change\n")
+        lock = self.old_lock("index.lock")
+        blocked = self.actual_run(["git", "add", "tracked.txt"], cwd=self.repo,
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertNotEqual(blocked.returncode, 0)
+        result = scheduler.recover_orphan_git_locks(self.repo, now=self.now)
+        self.assertEqual(result["removed"], 1)
+        self.assertFalse(lock.exists())
+        self.actual_run(["git", "add", "tracked.txt"], cwd=self.repo, check=True)
+        self.assertEqual(tracked.read_text(), "working change\n")
+        self.assertEqual(subprocess.check_output(["git", "show", ":tracked.txt"], cwd=self.repo), b"working change\n")
+
+    @unittest.skipUnless(scheduler._system_lsof(), "system lsof is not installed")
+    def test_real_open_handle_is_preserved_even_when_older_than_deadline(self):
+        path = self.old_lock("index.lock")
+        with path.open("rb"):
+            result = scheduler.recover_orphan_git_locks(self.repo, now=self.now)
+        self.assertEqual(result["removed"], 0)
+        self.assertEqual(result["active"], 1)
+        self.assertTrue(path.exists())
+
+    def test_active_fresh_symlink_foreign_hardlinked_oversized_and_unknown_locks_survive(self):
+        active = self.old_lock("index.lock")
+        fresh = self.old_lock("shallow.lock")
+        os.utime(fresh, (self.now,) * 2)
+        outside = Path(self.temporary.name) / "unrelated-user-file"
+        outside.write_bytes(b"keep")
+        symlink = self.gitdir / "refs/heads/main.lock"
+        symlink.symlink_to(outside)
+        foreign = self.old_lock("packed-refs.lock")
+        foreign_identity = (foreign.stat().st_dev, foreign.stat().st_ino)
+        hardlinked = self.old_lock("FETCH_HEAD.lock")
+        os.link(hardlinked, Path(self.temporary.name) / "second-link")
+        huge = self.old_lock("refs/remotes/origin/main.lock")
+        with huge.open("r+b") as stream:
+            stream.truncate(4 * 1024 * 1024 + 1)
+        os.utime(huge, (self.now - 3 * 3600,) * 2)
+        unknown = self.old_lock("config.lock")
+        real_fstat = os.fstat
+        def foreign_owner(descriptor):
+            item = real_fstat(descriptor)
+            if (item.st_dev, item.st_ino) == foreign_identity:
+                return SimpleNamespace(st_mode=item.st_mode, st_uid=os.getuid() + 1,
+                                       st_nlink=item.st_nlink, st_size=item.st_size,
+                                       st_mtime=item.st_mtime, st_mtime_ns=item.st_mtime_ns)
+            return item
+        def open_handle(command, kwargs):
+            self.assertEqual(Path(command[-1]), active)
+            self.assertEqual(command[1:5], ["-nP", "-t", "--", str(active)])
+            self.assertEqual(kwargs["timeout"], 5)
+            return subprocess.CompletedProcess(command, 0, b"12345\n", b"")
+        with mock.patch.object(scheduler, "_system_lsof", return_value="/usr/sbin/lsof"), \
+             mock.patch.object(scheduler.os, "fstat", side_effect=foreign_owner), self.lsof_only(open_handle):
+            result = scheduler.recover_orphan_git_locks(self.repo, now=self.now)
+        self.assertEqual(result["removed"], 0)
+        self.assertEqual(result["active"], 1)
+        for path in (active, fresh, symlink, foreign, hardlinked, huge, unknown):
+            self.assertTrue(path.exists())
+        self.assertEqual(outside.read_bytes(), b"keep")
+
+    def test_only_explicit_allowlist_can_be_reclaimed(self):
+        allowed = [self.old_lock(name) for name in scheduler.RECOVERABLE_GIT_LOCKS]
+        unknown = self.old_lock("refs/heads/user-branch.lock")
+        def no_handles(command, kwargs):
+            return subprocess.CompletedProcess(command, 1, b"", b"")
+        with mock.patch.object(scheduler, "_system_lsof", return_value="/usr/sbin/lsof"), self.lsof_only(no_handles):
+            result = scheduler.recover_orphan_git_locks(self.repo, now=self.now)
+        self.assertEqual(result["removed"], len(allowed))
+        self.assertTrue(all(not path.exists() for path in allowed))
+        self.assertTrue(unknown.exists())
+
+    def test_lsof_unavailable_timeout_error_or_ambiguous_result_preserves_lock(self):
+        path = self.old_lock("index.lock")
+        with mock.patch.object(scheduler, "_system_lsof", return_value=None):
+            self.assertEqual(scheduler.recover_orphan_git_locks(self.repo, now=self.now)["removed"], 0)
+        for outcome in ((2, b"", b"permission denied"), (1, b"", b"warning"), "timeout"):
+            def unavailable(command, kwargs):
+                if outcome == "timeout":
+                    raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+                return subprocess.CompletedProcess(command, *outcome)
+            with self.subTest(outcome=outcome), \
+                 mock.patch.object(scheduler, "_system_lsof", return_value="/usr/sbin/lsof"), self.lsof_only(unavailable):
+                result = scheduler.recover_orphan_git_locks(self.repo, now=self.now)
+                self.assertEqual(result["removed"], 0)
+                self.assertTrue(path.exists())
+
+    def test_inode_or_mtime_change_during_handle_check_is_not_removed(self):
+        for change in ("inode", "mtime"):
+            path = self.old_lock("index.lock")
+            original = path.stat()
+            def concurrent_change(command, kwargs):
+                if change == "inode":
+                    path.rename(path.with_suffix(".preserved"))
+                    path.write_bytes(b"orphan\n")
+                    os.utime(path, ns=(original.st_atime_ns, original.st_mtime_ns))
+                else:
+                    os.utime(path, (self.now,) * 2)
+                return subprocess.CompletedProcess(command, 1, b"", b"")
+            with self.subTest(change=change), \
+                 mock.patch.object(scheduler, "_system_lsof", return_value="/usr/sbin/lsof"), self.lsof_only(concurrent_change):
+                result = scheduler.recover_orphan_git_locks(self.repo, now=self.now)
+                self.assertEqual(result["removed"], 0)
+                self.assertTrue(path.exists())
+            path.unlink()
+
+    def test_linked_metadata_and_ambient_git_dir_override_are_not_cleaned(self):
+        path = self.old_lock("index.lock")
+        foreign = Path(self.temporary.name) / "other"
+        foreign.mkdir()
+        self.actual_run(["git", "init", "-b", "main"], cwd=foreign, check=True,
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        with mock.patch.object(scheduler, "_system_lsof", return_value="/usr/sbin/lsof"), \
+             mock.patch.dict(os.environ, {"GIT_DIR": str(foreign / ".git")}):
+            self.assertEqual(scheduler.recover_orphan_git_locks(self.repo, now=self.now)["removed"], 0)
+        self.assertTrue(path.exists())
+        self.gitdir.rename(self.repo / "owned-metadata")
+        (self.repo / ".git").write_text("gitdir: owned-metadata\n")
+        with mock.patch.object(scheduler, "_system_lsof", return_value="/usr/sbin/lsof"):
+            self.assertEqual(scheduler.recover_orphan_git_locks(self.repo, now=self.now)["removed"], 0)
+        self.assertTrue((self.repo / "owned-metadata/index.lock").exists())
 
 
 if __name__ == "__main__":

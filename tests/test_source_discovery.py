@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import json
 import tempfile
 import threading
@@ -11,6 +12,151 @@ from scripts import source_discovery as discovery
 
 UUID = "11111111-1111-4111-8111-111111111111"
 LINK = f"vless://{UUID}@1.1.1.1:443?security=tls&sni=example.com#public"
+
+
+class DormantSourceRecoveryTests(unittest.TestCase):
+    NOW = 2_000_000_000
+
+    @staticmethod
+    def dormant(url, retry_at):
+        key = hashlib.sha256(url.encode()).hexdigest()[:24]
+        return key, {"url": url, "origin": "public-feed-link",
+                     "retired_at": retry_at - discovery.RETIREMENT_COOLDOWN,
+                     "retry_at": retry_at}
+
+    def test_one_off_discovered_source_returns_without_parent_or_manual_add(self):
+        parent = "https://raw.githubusercontent.com/public/parent/main/config.txt"
+        child = "https://raw.githubusercontent.com/one-off/public/main/subscription.txt"
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            pool = discovery.SourcePool([{"url": parent}], path, now=self.NOW)
+            with patch.object(pool, "discover"), patch.object(pool, "get", return_value=(
+                    (LINK + "\n" + child).encode(), {})):
+                pool.collect()
+            key, item = next((key, item) for key, item in pool.sources.items() if item["url"] == child)
+            self.assertEqual(item["origin"], "public-feed-link")
+            item.update(first_seen=self.NOW - 8 * 86400, failures=5,
+                        last_success=self.NOW - 8 * 86400)
+            for parent_key in [source for source, value in pool.sources.items() if value["url"] == parent]:
+                del pool.sources[parent_key]
+            pool.save()
+            self.assertNotIn(key, pool.sources)
+            self.assertEqual(pool.state["dormant_sources"][key]["url"], child)
+
+            before = discovery.SourcePool([], path, now=self.NOW + discovery.RETIREMENT_COOLDOWN - 1)
+            with patch.object(before, "discover"), patch.object(before, "get") as fetch:
+                self.assertEqual(before.collect()[0], [])
+                fetch.assert_not_called()
+
+            restored = discovery.SourcePool([], path, now=self.NOW + discovery.RETIREMENT_COOLDOWN + 1)
+            # No caller supplies the source URL again and its parent is gone.
+            with patch.object(restored, "discover"), patch.object(restored, "get", return_value=(LINK.encode(), {})) as fetch:
+                links, _ = restored.collect()
+            self.assertEqual(links, [LINK])
+            self.assertEqual([call.args[0] for call in fetch.call_args_list], [child])
+            self.assertEqual(restored.stats["dormant_reprobes"], 1)
+            self.assertEqual(restored.sources[key]["failures"], 0)
+            self.assertEqual(restored.sources[key]["last_success"], restored.now)
+            self.assertNotIn(key, restored.state["dormant_sources"])
+            self.assertNotIn(parent, [item["url"] for item in restored.sources.values()])
+
+    def test_reprobe_preserves_normal_retry_after_and_failure_backoff(self):
+        url = "https://raw.githubusercontent.com/public/returning/main/config.txt"
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            pool = discovery.SourcePool([], path, now=self.NOW)
+            key, record = self.dormant(url, self.NOW - 1)
+            pool.state["dormant_sources"][key] = record
+            deadline = self.NOW + 10 * 3600
+            with patch.object(pool, "discover"), patch.object(pool, "get", side_effect=discovery.RateLimited(deadline)):
+                self.assertEqual(pool.collect()[0], [])
+            self.assertEqual(pool.sources[key]["failures"], 1)
+            self.assertEqual(pool.sources[key]["next_fetch"], deadline)
+            self.assertNotIn(key, pool.state["dormant_sources"])
+            later = discovery.SourcePool([], path, now=self.NOW + 3600)
+            with patch.object(later, "discover"), patch.object(later, "get") as fetch:
+                self.assertEqual(later.collect()[0], [])
+                fetch.assert_not_called()
+
+    def test_never_successful_trial_ages_from_discovery_not_epoch_after_reload(self):
+        url = "https://raw.githubusercontent.com/public/fresh/main/config.txt"
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            pool = discovery.SourcePool([], path, now=self.NOW)
+            pool.add(url, "public-feed-link")
+            key, item = next(iter(pool.sources.items()))
+            first_seen = self.NOW - 15 * 3600
+            item.update(first_seen=first_seen, failures=5)
+            pool.save()
+            restored = discovery.SourcePool([], path, now=self.NOW)
+            self.assertEqual(restored.sources[key]["last_success"], 0)
+            restored.save()
+            self.assertIn(key, restored.sources)
+            self.assertNotIn(key, restored.state["dormant_sources"])
+            # It still retires and receives a new retry deadline after the
+            # genuine seven-day failure period, rather than avoiding rotation.
+            old = discovery.SourcePool([], path, now=first_seen + 7 * 86400 + 1)
+            old.save()
+            self.assertNotIn(key, old.sources)
+            self.assertEqual(old.state["dormant_sources"][key]["retired_at"], old.now)
+            self.assertEqual(old.state["dormant_sources"][key]["retry_at"], old.now + discovery.RETIREMENT_COOLDOWN)
+
+    def test_full_registry_admits_two_reprobes_and_leaves_fresh_discovery_capacity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            pool = discovery.SourcePool([], Path(directory) / "state.json", now=self.NOW)
+            for index in range(discovery.MAX_SOURCES):
+                pool.add(f"https://example.com/established-{index}.txt", "github-search")
+                item = next(reversed(pool.sources.values()))
+                item.update(first_seen=self.NOW - 2 * 86400, functional_ema=(index + 1) / 200)
+            protected = {key for index, key in enumerate(pool.sources) if index >= discovery.MAX_SOURCES // 5}
+            returning = [f"https://returning.example/source-{index}.txt" for index in range(3)]
+            for index, url in enumerate(returning):
+                key, record = self.dormant(url, self.NOW - (3 - index) * 100)
+                pool.state["dormant_sources"][key] = record
+            new = [f"https://new.example/source-{index}.txt" for index in range(3)]
+            admitted = []
+            def new_discovery():
+                self.assertTrue(set(returning[:2]).issubset(item["url"] for item in pool.sources.values()))
+                admitted.extend(pool.add(url, "github-search") for url in new)
+            with patch.object(pool, "discover", side_effect=new_discovery), \
+                 patch.object(pool, "allowed", return_value=True), \
+                 patch.object(pool, "get", return_value=(LINK.encode(), {})) as fetch:
+                pool.collect()
+            self.assertEqual(pool.stats["dormant_reprobes"], 2)
+            self.assertEqual(admitted, [True, True, False])
+            self.assertEqual(pool.stats["exploration_replacements"], 4)
+            self.assertEqual(len(pool.sources), discovery.MAX_SOURCES)
+            self.assertTrue(protected.issubset(pool.sources))
+            self.assertLessEqual(fetch.call_count, discovery.MAX_FETCH_SOURCES)
+            self.assertIn(returning[2], [item["url"] for item in pool.state["dormant_sources"].values()])
+
+    def test_dormant_restore_is_bounded_canonical_and_rejects_unsafe_metadata(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            records = {}
+            for index in range(discovery.MAX_DORMANT_SOURCES + 20):
+                url = f"https://example.com/dormant-{index}.txt"
+                key, record = self.dormant(url, self.NOW + discovery.RETIREMENT_COOLDOWN - index)
+                records[key] = record
+            for index, url in enumerate(("https://127.0.0.1/private", "https://user:password@example.com/sub",
+                                         "https://example.com/sub?token=secret")):
+                key, record = self.dormant(url, self.NOW + discovery.RETIREMENT_COOLDOWN)
+                records[key] = record
+            for index, changes in enumerate(({"origin": []}, {"retired_at": self.NOW + 1},
+                                             {"retry_at": float("nan")}, {"retired_at": True},
+                                             {"retry_at": self.NOW + 30}, {"extra": "unsupported"})):
+                key, record = self.dormant(f"https://example.com/invalid-{index}.txt", self.NOW + discovery.RETIREMENT_COOLDOWN)
+                records[key] = {**record, **changes}
+            records["not-a-source-key"] = {"url": "https://example.com/fake.txt"}
+            path.write_text(json.dumps({"version": 1, "sources": {}, "dormant_sources": records}))
+            pool = discovery.SourcePool([], path, now=self.NOW)
+            self.assertEqual(len(pool.state["dormant_sources"]), discovery.MAX_DORMANT_SOURCES)
+            self.assertEqual({item["url"] for item in pool.state["dormant_sources"].values()},
+                             {f"https://example.com/dormant-{index}.txt" for index in range(discovery.MAX_DORMANT_SOURCES)})
+            pool.save()
+            self.assertNotIn("password", path.read_text())
+            self.assertNotIn("secret", path.read_text())
+            self.assertNotIn("127.0.0.1", path.read_text())
 
 
 class DiscoveryTests(unittest.TestCase):

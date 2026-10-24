@@ -1,4 +1,6 @@
 import importlib.util
+import copy
+import hashlib
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -15,9 +17,13 @@ spec.loader.exec_module(m)
 
 
 def evidence(latency=100):
-    return {'validated_at':datetime.now(timezone.utc).isoformat(), 'link': 'vless://test', 'rank': 1, 'country': 'DE', 'exit_country': 'DE',
+    return {'id': hashlib.sha256(b'vless://test').hexdigest(), 'validated_at':datetime.now(timezone.utc).isoformat(), 'link': 'vless://test', 'rank': 1, 'country': 'DE', 'exit_country': 'DE',
             'median_latency': latency, 'latency_samples_ms': [latency] * 5,
-            'services': {name: {'passed': 5, 'attempts': 5} for name in ('chatgpt', 'youtube', 'instagram')}}
+            'services': {name: {'passed': 5, 'attempts': 5, 'reasons': ['ok'] * 5,
+                               'evidence': [{'outcome': 'pass', 'reason': 'ok', 'http_reason': 'ok',
+                                             'http_status': 200, 'curl_exit': None,
+                                             'cf_challenge': False, 'geo_restricted': False} for _ in range(5)]}
+                         for name in ('chatgpt', 'youtube', 'instagram')}}
 
 
 class EvidenceTests(unittest.TestCase):
@@ -41,6 +47,56 @@ class EvidenceTests(unittest.TestCase):
         node = evidence()
         node['services']['chatgpt']['attempts'] = 6
         self.assertFalse(m.valid_node_evidence(node, 5))
+
+    def test_true_sample_median_at_boundary_cannot_round_below_threshold(self):
+        node = evidence(500.0)
+        node['median_latency'] = 499.9999
+        self.assertFalse(m.valid_node_evidence(node, 5))
+
+    def test_contradictory_or_missing_round_evidence_cannot_publish(self):
+        node = evidence()
+        self.assertTrue(m.valid_node_evidence(node, 5, require_round_evidence=True))
+        bad_rounds = ({'outcome': 'inconclusive', 'http_status': 403, 'reason': 'access-denied-inconclusive'},
+                      {'outcome': 'pass', 'http_status': 403}, {'outcome': 'pass', 'cf_challenge': True},
+                      {'outcome': 'pass', 'geo_restricted': True}, {'outcome': 'pass', 'curl_exit': 28})
+        for change in bad_rounds:
+            malformed = copy.deepcopy(node)
+            malformed['services']['instagram']['evidence'][0].update(change)
+            with self.subTest(change=change):
+                self.assertFalse(m.valid_node_evidence(malformed, 5))
+        for name in ('chatgpt', 'youtube', 'instagram'):
+            del node['services'][name]['evidence']
+        self.assertTrue(m.valid_node_evidence(node, 5))
+        self.assertFalse(m.valid_node_evidence(node, 5, require_round_evidence=True))
+
+    def test_browser_resolution_requires_fresh_actionable_restriction_free_proof(self):
+        node = evidence()
+        service = node['services']['chatgpt']
+        service['reasons'] = ['browser-functional-access'] * 5
+        for item in service['evidence']:
+            item.update(reason='browser-functional-access', http_reason='cloudflare-challenge-inconclusive',
+                        http_outcome='inconclusive', http_status=403, cf_challenge=True,
+                        browser={'passed': True, 'checked_at': datetime.now(timezone.utc).isoformat(),
+                                 'actionable': True, 'restriction_free': True})
+        self.assertTrue(m.valid_node_evidence(node, 5, require_round_evidence=True))
+        for changes in ({'passed': False}, {'actionable': False}, {'restriction_free': False},
+                        {'checked_at': '2020-01-01T00:00:00+00:00'}, {'checked_at': 'not-a-date'},
+                        {'checked_at': (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()}):
+            malformed = copy.deepcopy(node)
+            malformed['services']['chatgpt']['evidence'][0]['browser'].update(changes)
+            with self.subTest(changes=changes):
+                self.assertFalse(m.valid_node_evidence(malformed, 5, require_round_evidence=True))
+
+    def test_previous_status_guard_ignores_poisoned_metadata_and_preserves_newer_valid_result(self):
+        now = int(datetime.now(timezone.utc).timestamp())
+        status = {'algorithm': 'bestlocal-strict-services-v6', 'generated_at': datetime.fromtimestamp(now, timezone.utc).isoformat(),
+                  'nodes': [evidence()], 'stability': {'qualified': 1, 'rounds': 5, 'minimum_successes': 5}}
+        self.assertEqual(m.previous_publication_timestamp(status, now), now)
+        for value in ('2099-01-01T00:00:00+00:00', '2026-10-24T12:00:00', 'bad', float('nan'), 10 ** 400):
+            with self.subTest(value=value):
+                self.assertIsNone(m.previous_publication_timestamp({**status, 'generated_at': value}, now))
+        self.assertIsNone(m.previous_publication_timestamp({**status, 'algorithm': 'legacy'}, now))
+        self.assertIsNone(m.previous_publication_timestamp({**status, 'nodes': []}, now))
 
     def test_stale_missing_and_future_input_fail_closed(self):
         for value in (None, 'bad', '2025-01-01 00:00:00 UTC', (datetime.now(timezone.utc)+timedelta(hours=1)).isoformat()):
@@ -80,7 +136,7 @@ class GitPublicationTests(unittest.TestCase):
                       'stability': {'rounds': 5, 'minimum_successes': 5, 'qualified': 1}}
             m.write_subscription(output, ['vless://test'], status)
             m.write_status(status_path, status)
-            parser = SimpleNamespace(parse_vless=lambda x: x.split('#')[0], normalized_fingerprint=lambda x: x)
+            parser = SimpleNamespace(parse_vless=lambda x: x.split('#')[0], normalized_fingerprint=lambda x:hashlib.sha256(x.encode()).hexdigest(), vless_to_singbox=lambda x, tag: {'type': 'vless', 'server': x, 'tag': tag})
             with patch.multiple(m, ROOT=root, DEFAULT_OUTPUT=output, DEFAULT_STATUS=status_path), \
                     patch.object(m, 'load_build_module', return_value=parser):
                 tested = git('rev-parse', 'HEAD')
@@ -141,7 +197,7 @@ class GitPublicationTests(unittest.TestCase):
                       'input':{'nodes':1}, 'nodes':[evidence()], 'stability':{'rounds':5,'minimum_successes':5,'qualified':1}}
             m.write_subscription(output, ['vless://test'], status)
             m.write_status(status_path, status)
-            parser = SimpleNamespace(parse_vless=lambda x: x.split('#')[0], normalized_fingerprint=lambda x:x)
+            parser = SimpleNamespace(parse_vless=lambda x: x.split('#')[0], normalized_fingerprint=lambda x:hashlib.sha256(x.encode()).hexdigest(), vless_to_singbox=lambda x, tag: {'type': 'vless', 'server': x, 'tag': tag})
             with patch.multiple(m, ROOT=root, DEFAULT_OUTPUT=output, DEFAULT_STATUS=status_path), patch.object(m, 'load_build_module', return_value=parser):
                 tested = git('rev-parse', 'HEAD')
                 m._publish_regional_once(output, status_path, tested)

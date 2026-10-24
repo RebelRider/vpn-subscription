@@ -141,6 +141,20 @@ class SchedulerRecoveryTests(unittest.TestCase):
 
 
 class ReliabilityRecoveryTests(unittest.TestCase):
+    def test_full_temporal_windows_are_byte_bounded_and_remain_readable(self):
+        now = time.time()
+        history = {identifier(index): record(now, last_seen=now - index, runs=20, passes=20,
+                                            qualified=True, outcome="pass", definitive_history=[True] * 20)
+                   for index in range(local.MAX_RELIABILITY_RECORDS)}
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "history.json"
+            local.save_local_reliability(path, history)
+            self.assertLessEqual(path.stat().st_size, local.MAX_PERSISTED_JSON_BYTES)
+            restored = local.load_local_reliability(path, now)
+            self.assertGreater(len(restored), 0)
+            self.assertIn(identifier(0), restored)
+            self.assertEqual(restored[identifier(0)]["definitive_history"], [True] * 20)
+
     def test_invalid_record_fields_and_expired_records_are_discarded(self):
         now = time.time()
         invalid = [record(now, last_seen="yesterday"), record(now, last_seen=True),
@@ -179,7 +193,10 @@ class ReliabilityRecoveryTests(unittest.TestCase):
     def test_corrupt_history_is_rebuilt_by_subsequent_healthy_validation(self):
         now = time.time()
         link, key = "vless://test#DE-test", identifier(1)
-        services = {name: {"passed": 3, "attempts": 3, "reasons": ["ok"] * 3}
+        services = {name: {"passed": 3, "attempts": 3, "reasons": ["ok"] * 3,
+                          "evidence": [{"outcome": "pass", "reason": "ok", "http_reason": "ok",
+                                        "http_status": 200, "curl_exit": 0,
+                                        "cf_challenge": False, "geo_restricted": False}] * 3}
                     for name in ("chatgpt", "youtube", "instagram")}
         report = {"qualified": True, "services": services, "median_ms": 100,
                   "p95_ms": 100, "latency_samples_ms": [100, 100, 100],
@@ -196,7 +213,7 @@ class ReliabilityRecoveryTests(unittest.TestCase):
             self.assertEqual(qualified, [link])
             self.assertEqual(local.load_local_reliability(path)[key],
                              {"last_seen": int(json.loads(path.read_text())[key]["last_seen"]),
-                      "runs": 1, "passes": 1, "qualified": True, "outcome": "pass"})
+                      "runs": 1, "passes": 1, "qualified": True, "outcome": "pass", "definitive_history": [True]})
 
 
 class HealthRecoveryTests(unittest.TestCase):

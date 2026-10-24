@@ -74,6 +74,59 @@ function classify(body, title, status) {
   if (status === 401 || status === 403) return 'access-denied-inconclusive';
   return 'browser-application-proof-missing';
 }
+function visibleRestriction(text, status) {
+  const value = String(text || '').replace(/\s+/g, ' ').toLowerCase();
+  if (/unsupported[_ ]country|country.{0,35}(?:not supported|unsupported)|not available in your (?:country|region)|region.{0,25}not supported/.test(value)) return 'geographic-restriction';
+  if (/verify (?:that )?you are human|checking your browser|just a moment|complete (?:the )?(?:security|verification) (?:check|challenge)/.test(value)) return 'cloudflare-challenge-inconclusive';
+  if (/(?:complete|solve|enter).{0,25}captcha|captcha.{0,25}(?:required|verification)|unusual (?:activity|traffic)/.test(value)) return 'anti-automation-inconclusive';
+  if (/too many requests|you are being rate limited|rate limit (?:reached|exceeded)/.test(value) || status === 429) return 'rate-limited-inconclusive';
+  if (/(?:log|sign) in (?:or sign up )?to continue|please (?:log|sign) in to (?:continue|use)/.test(value)) return 'authentication-required-inconclusive';
+  if (/something went wrong|unable to load chatgpt|application error|an error occurred/.test(value)) return 'browser-visible-application-error-inconclusive';
+  if (status === 401 || status === 403) return 'access-denied-inconclusive';
+  if (status !== 200) return 'browser-document-http-error-inconclusive';
+  return null;
+}
+function visibleTextSnapshot() {
+  // Read rendered text nodes only. Bundles, hidden translations, offscreen
+  // accessibility text and transparent elements cannot become blockers.
+  if (!document.body) return '';
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const parts = []; let node, visited = 0, total = 0;
+  while ((node = walker.nextNode()) && visited++ < 5000 && total < 65536) {
+    const parent = node.parentElement;
+    if (!parent || !node.textContent.trim() || parent.closest('script,style,noscript,template,[hidden],[aria-hidden="true"]')) continue;
+    let visible = true, ancestor = parent, depth = 0;
+    while (ancestor && depth++ < 64) {
+      const style = getComputedStyle(ancestor);
+      if (style.display === 'none' || ['hidden', 'collapse'].includes(style.visibility) || Number(style.opacity) === 0
+          || /rect\(0px,?\s*0px,?\s*0px,?\s*0px\)/.test(style.clip) || style.clipPath === 'inset(50%)') { visible = false; break; }
+      ancestor = ancestor.parentElement;
+    }
+    if (!visible) continue;
+    const range = document.createRange(); range.selectNodeContents(node);
+    const onScreen = [...range.getClientRects()].some(rect => rect.width > 1 && rect.height > 1 && rect.bottom > 0 && rect.right > 0 && rect.top < innerHeight && rect.left < innerWidth);
+    if (!onScreen) continue;
+    const text = node.textContent.slice(0, 65536 - total); parts.push(text); total += text.length;
+  }
+  return parts.join(' ');
+}
+function mainDocumentResponse(response, page) {
+  try {
+    const request = response.request();
+    if (!request.isNavigationRequest() || request.resourceType() !== 'document' || request.frame() !== page.mainFrame()) return null;
+    const status = response.status(), url = response.url();
+    return Number.isInteger(status) && status >= 100 && status <= 599 && typeof url === 'string' ? {status, url} : null;
+  } catch { return null; }
+}
+function matchingDocument(document, currentUrl) {
+  if (!document) return false;
+  try {
+    const actual = new URL(document.url), current = new URL(currentUrl);
+    return current.protocol === 'https:' && ['chatgpt.com', 'www.chatgpt.com'].includes(current.hostname)
+      && ['', '443'].includes(current.port) && !current.username && !current.password && current.pathname === '/'
+      && actual.origin === current.origin && actual.pathname === current.pathname && actual.search === current.search;
+  } catch { return false; }
+}
 async function ordinaryGuestNavigation(page) {
   // Only explicit public guest/optional-cookie actions. Never interact with
   // login forms, authentication providers, prompts or challenge widgets.
@@ -147,6 +200,7 @@ async function main() {
   const rounds = [];
   for (let index = 0; index < config.rounds; index++) {
     let status = 0, apiProof = false, apiKind = null;
+    let document = null, documentSequence = 0;
     const counters = {page_errors: 0, failed_requests: 0, service_json_responses: 0, script_failures: 0, api_observations: [],
       auth_providers_status: 0, anon_models_status: 0, api_models_status: 0};
     const pageError = () => { counters.page_errors = Math.min(1000, counters.page_errors + 1); };
@@ -157,6 +211,8 @@ async function main() {
     page.on('pageerror', pageError); page.on('requestfailed', requestFailed);
     const tasks = new Set();
     const observe = response => {
+      const navigation = mainDocumentResponse(response, page);
+      if (navigation) document = {...navigation, sequence: ++documentSequence};
       let url;
       try { url = new URL(response.url()); } catch { return; }
       if (url.protocol !== 'https:' || !['chatgpt.com', 'www.chatgpt.com'].includes(url.hostname)) return;
@@ -183,7 +239,11 @@ async function main() {
     try {
       const response = index === 0 ? await page.goto('https://chatgpt.com/', {waitUntil: 'domcontentloaded', timeout: 22000}) :
         await page.reload({waitUntil: 'domcontentloaded', timeout: 22000});
-      status = response ? response.status() : 0;
+      if (!document) {
+        const navigation = mainDocumentResponse(response, page);
+        if (navigation) document = {...navigation, sequence: ++documentSequence};
+      }
+      status = document ? document.status : 0;
       if (index === 0) Object.assign(counters, await ordinaryGuestNavigation(page));
       const knownComposer = page.locator('#prompt-textarea:visible, [data-testid="prompt-textarea"]:visible, textarea[name="prompt-textarea"]:visible, [contenteditable="true"][role="textbox"]:visible, [contenteditable="plaintext-only"][role="textbox"]:visible');
       const semanticComposer = page.getByPlaceholder(COMPOSER_HINT).and(page.locator('textarea:visible'));
@@ -200,22 +260,33 @@ async function main() {
         }).catch(() => false);
       // Both reads use ordinary browser cookies/headers generated in this
       // fresh, unauthenticated page. No authentication material is reused.
+      const apiDocument = document && document.sequence;
       const freshProof = await freshApplicationProof(page);
       apiProof = freshProof.passed; apiKind = freshProof.kind;
       let timer;
       try { await Promise.race([Promise.allSettled([...tasks]), new Promise(resolve => { timer = setTimeout(resolve, 2000); })]); }
       finally { clearTimeout(timer); }
-      const current = new URL(page.url());
-      const finalAllowed = current.protocol === 'https:' && ['chatgpt.com', 'www.chatgpt.com'].includes(current.hostname) && current.pathname === '/';
-      const passed = rendered && apiProof && finalAllowed && status === 200;
+      let actionable = false;
+      if (rendered) {
+        try { await composer.click({trial: true, timeout: 3000}); actionable = true; }
+        catch {}
+      }
+      status = document ? document.status : 0;
+      const visible = await page.evaluate(visibleTextSnapshot);
+      const restriction = visibleRestriction(visible, status);
+      const restrictionFree = restriction === null;
+      const finalAllowed = matchingDocument(document, page.url());
+      const sameDocument = document !== null && document.sequence === apiDocument;
+      const passed = rendered && actionable && restrictionFree && apiProof && finalAllowed && sameDocument && status === 200;
       let reason = 'ok';
       if (!passed) {
-        const visible = await page.locator('body').innerText({timeout: 2000}).catch(() => '');
-        reason = classify(visible.slice(0, 65536), await page.title().catch(() => ''), status);
+        reason = restriction || (!finalAllowed ? 'browser-document-proof-missing-inconclusive' :
+          !sameDocument ? 'browser-document-changed-inconclusive' :
+          rendered && !actionable ? 'browser-composer-not-actionable-inconclusive' : 'browser-application-proof-missing');
         if (rendered && !apiProof && reason === 'browser-application-proof-missing') reason = 'browser-api-proof-missing';
       }
       result = {passed, reason, checked_at: new Date().toISOString(), http_status: status,
-        composer: rendered, application_json: apiProof, api_kind: apiKind,
+        composer: rendered, actionable, restriction_free: restrictionFree, application_json: apiProof, api_kind: apiKind,
         diagnostics: await diagnostics(page, status, counters)};
     } catch (error) {
       const message = String(error && error.message || '');
@@ -231,6 +302,6 @@ async function main() {
   console.log(JSON.stringify({qualified: rounds.length === config.rounds && rounds.every(item => item.passed), rounds,
     method: 'isolated-browser-composer-and-application-json'}));
 }
-module.exports = {compatibleProviders, modelCatalog, classify, ordinaryGuestNavigation, freshApplicationJson, freshApplicationProof};
+module.exports = {compatibleProviders, modelCatalog, classify, visibleRestriction, visibleTextSnapshot, mainDocumentResponse, matchingDocument, ordinaryGuestNavigation, freshApplicationJson, freshApplicationProof};
 if (require.main === module) main().catch(async () => { await stop(); console.log(JSON.stringify({qualified: false, rounds: [],
   method: 'isolated-browser', reason: 'browser-runtime-failed'})); process.exitCode = 1; });

@@ -13,10 +13,14 @@ from pathlib import Path
 import random
 import re
 import signal
+import stat
 import subprocess
 import sys
 import tempfile
 import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from owned_temporary import cleanup_owned_temporary
 
 POLL_SECONDS = 900
 REVALIDATE_SECONDS = 6 * 3600
@@ -28,6 +32,10 @@ LOW_POOL_SIZE = 10
 MAX_OUTPUT_BYTES = 4 * 1024 * 1024
 MAX_STATE_BYTES = 1024 * 1024
 MAX_RETRY_FUTURE_SECONDS = 3600 + 300
+RECOVERABLE_GIT_LOCKS = (
+    "index.lock", "shallow.lock", "FETCH_HEAD.lock", "packed-refs.lock",
+    "refs/heads/main.lock", "refs/remotes/origin/main.lock", "refs/remotes/origin/regional.lock",
+)
 
 
 def redact(value: str) -> str:
@@ -80,14 +88,120 @@ def atomic_json(path: Path, data: dict) -> None:
             os.unlink(temporary)
 
 
-def rotate_logs(directory: Path, limit: int = 5 * 1024 * 1024) -> None:
+def rotate_logs(directory: Path, limit: int = 5 * 1024 * 1024, *, names=None) -> None:
     # launchd opens the new path next run; the current descriptor keeps writing
     # its rotated inode. Only these two BestLocal-owned files are eligible.
-    for name in ("regional-refresh.log", "regional-refresh-error.log"):
+    selected = ("regional-refresh.log", "regional-refresh-error.log") if names is None else names
+    allowed = {"regional-refresh.log", "regional-refresh-error.log", "source-research.log", "source-research-error.log"}
+    if any(name not in allowed for name in selected):
+        raise ValueError("Only BestLocal operational logs may be rotated")
+    for name in selected:
         path = directory / name
         if path.is_file() and path.stat().st_size > limit:
             previous = directory / (name + ".1")
             os.replace(path, previous)
+
+
+def _system_lsof() -> str | None:
+    # Use the OS tool, never an executable supplied by a source or shell PATH.
+    for name in ("/usr/sbin/lsof", "/usr/bin/lsof", "/sbin/lsof", "/bin/lsof"):
+        if Path(name).is_file() and os.access(name, os.X_OK):
+            return name
+    return None
+
+
+def recover_orphan_git_locks(repo: Path, *, now: float | None = None) -> dict:
+    """Reclaim only verified orphan metadata in the dedicated normal clone.
+
+    Caller holds the scheduler's kernel lock. Dirty files and Git history are
+    never repaired or discarded. Unknown or inconclusive lock state is retained.
+    """
+    result = {"examined": 0, "removed": 0, "active": 0, "skipped": 0, "failed": 0}
+    now = time.time() if now is None else now
+    lsof = _system_lsof()
+    if not lsof or not math.isfinite(now):
+        result["skipped"] = len(RECOVERABLE_GIT_LOCKS)
+        return result
+    try:
+        expected = repo / ".git"
+        info = expected.lstat()
+        # Shared/linked worktrees and ambient GIT_DIR overrides are outside
+        # this dedicated-runtime recovery scope.
+        if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid():
+            return result
+        resolved = subprocess.run(["git", "rev-parse", "--absolute-git-dir"], cwd=repo,
+                                  stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=5, check=False)
+        if resolved.returncode or len(resolved.stdout) > 4096:
+            return result
+        gitdir = Path(os.fsdecode(resolved.stdout.strip()))
+        if not gitdir.is_absolute() or gitdir != expected.resolve():
+            return result
+    except (OSError, ValueError, subprocess.SubprocessError):
+        result["failed"] += 1
+        return result
+
+    def safe_parents(relative):
+        current = gitdir.lstat()
+        if (not stat.S_ISDIR(current.st_mode) or current.st_uid != os.getuid()
+                or (current.st_dev, current.st_ino) != (info.st_dev, info.st_ino)):
+            return False
+        parent = gitdir
+        for part in Path(relative).parts[:-1]:
+            parent = parent / part
+            item = parent.lstat()
+            if not stat.S_ISDIR(item.st_mode) or item.st_uid != os.getuid():
+                return False
+        return True
+
+    def snapshot(path):
+        descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        try:
+            item = os.fstat(descriptor)
+        finally:
+            os.close(descriptor)
+        if (not stat.S_ISREG(item.st_mode) or item.st_uid != os.getuid() or item.st_nlink != 1
+                or item.st_size > 4 * 1024 * 1024 or now - item.st_mtime <= 2 * 3600):
+            return None
+        return item.st_dev, item.st_ino, item.st_uid, item.st_nlink, item.st_size, item.st_mtime_ns
+
+    for relative in RECOVERABLE_GIT_LOCKS:
+        path = gitdir / relative
+        try:
+            if not safe_parents(relative):
+                continue
+            before = snapshot(path)
+            result["examined"] += 1
+            if before is None:
+                result["skipped"] += 1
+                continue
+            # Our inspection descriptor is already closed, so it cannot make
+            # an orphan appear active to lsof.
+            handles = subprocess.run([lsof, "-nP", "-t", "--", str(path)],
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5, check=False)
+            if handles.returncode == 0 or handles.stdout.strip():
+                result["active"] += 1
+                continue
+            if handles.returncode != 1 or handles.stderr.strip():
+                result["failed"] += 1
+                continue
+            if not safe_parents(relative) or snapshot(path) != before:
+                result["skipped"] += 1
+                continue
+            final = path.lstat()
+            if (not stat.S_ISREG(final.st_mode)
+                    or (final.st_dev, final.st_ino, final.st_uid, final.st_nlink,
+                        final.st_size, final.st_mtime_ns) != before):
+                result["skipped"] += 1
+                continue
+            path.unlink()
+            result["removed"] += 1
+        except FileNotFoundError:
+            continue
+        except OSError:
+            result["skipped"] += 1
+        except (ValueError, subprocess.SubprocessError):
+            result["failed"] += 1
+    return result
 
 
 def _read_state(path: Path):
@@ -331,7 +445,8 @@ def input_metadata(runner: Runner) -> tuple[str, float]:
     generated = parse_timestamp(status.get("generated_at"), "Best50 generated_at")
     # Relevant code changes also require validation even if Best50 stays the same.
     digest = hashlib.sha256(blob.encode())
-    for path in sorted((runner.repo / "scripts").glob("*.py")):
+    scripts = runner.repo / "scripts"
+    for path in sorted([*scripts.glob("*.py"), *scripts.glob("*.js")]):
         digest.update(path.name.encode())
         digest.update(path.read_bytes())
     digest.update((runner.repo / "config.json").read_bytes())
@@ -373,8 +488,17 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
         except BlockingIOError:
             log("Another scheduler owns the runtime; skipped overlap")
             return 0
-        if state_dir == (Path.home() / "Library/Application Support/best50-vpn").resolve():
-            rotate_logs(Path.home() / "Library/Logs/best50-vpn")
+        try:
+            git_locks = recover_orphan_git_locks(repo)
+            if git_locks["removed"] or git_locks["failed"]:
+                log(f"Owned Git lock recovery: removed={git_locks['removed']} deferred={git_locks['failed']}")
+            cleanup = cleanup_owned_temporary(state_dir / "temporary", repos=[repo])
+            if cleanup["removed"] or cleanup["failed"]:
+                log(f"Owned temporary recovery: removed={cleanup['removed']} deferred={cleanup['failed']}")
+            if state_dir == (Path.home() / "Library/Application Support/best50-vpn").resolve():
+                rotate_logs(Path.home() / "Library/Logs/best50-vpn")
+        except (OSError, ValueError, RuntimeError):
+            log("WARNING: optional owned temporary/log cleanup deferred")
         now = time.time()
         state = load_scheduler_state(state_path, now)
         if state.get("running"):

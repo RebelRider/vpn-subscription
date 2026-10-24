@@ -9,8 +9,11 @@ import json
 import math
 from pathlib import Path
 import subprocess
-import tempfile
+import sys
 import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from owned_temporary import temporary_directory
 
 MAX_BYTES = 1024 * 1024
 MAX_AGE_SECONDS = 6 * 3600
@@ -84,7 +87,7 @@ def mark_regional(repo: Path, runner=None) -> bool:
         for attempt in range(3):
             try:
                 runner.git("fetch", "--quiet", "--no-tags", "origin", "regional")
-                with tempfile.TemporaryDirectory(prefix="bestlocal-stale-") as directory:
+                with temporary_directory(prefix="bestlocal-stale-", repo=repo) as directory:
                     worktree = Path(directory) / "checkout"
                     try:
                         runner.git("worktree", "add", "--detach", str(worktree), "origin/regional")

@@ -25,7 +25,10 @@ def verified_node(link, latency=123.0, rank=1):
             "validated_at": datetime.now(timezone.utc).isoformat(),
             "median_latency": latency, "p95_latency": latency,
             "latency_samples_ms": [latency] * 5, "successful_final_rounds": 5,
-            "services": {name: {"passed": 5, "attempts": 5}
+            "services": {name: {"passed": 5, "attempts": 5, "reasons": ["ok"] * 5,
+                                "evidence": [{"outcome": "pass", "reason": "ok", "http_reason": "ok",
+                                              "http_status": 200, "curl_exit": None,
+                                              "cf_challenge": False, "geo_restricted": False} for _ in range(5)]}
                          for name in ("chatgpt", "youtube", "instagram")}}
 
 
@@ -214,6 +217,20 @@ class RegionalPublicationIntegrationTests(unittest.TestCase):
                 local._publish_regional_once(self.output, self.status_path, self.sha)
         self.assertEqual(committed, [True])
         self.assertFalse(self.git("ls-remote", "--heads", "origin", "regional"))
+
+    def test_future_poisoned_old_status_cannot_block_fresh_strict_publication(self):
+        self.output.write_text("# retained original\n" + BEST50 + "\n")
+        self.status_path.write_text(json.dumps({"algorithm": "bestlocal-strict-services-v6",
+                                               "generated_at": "2099-01-01T00:00:00+00:00"}))
+        self.git("add", "-f", "output/best-local.txt", "output/local-status.json")
+        self.git("commit", "-m", "private corrupted historical timestamp fixture")
+        self.git("push", "origin", "HEAD:regional")
+        status = verified_status([verified_node(BEST50)])
+        status["exit_geography"] = {"affects_qualification": False}
+        local.write_subscription(self.output, [BEST50], status)
+        local.write_status(self.status_path, status)
+        local._publish_regional_once(self.output, self.status_path, self.sha)
+        self.assertEqual(json.loads(self.git("show", "origin/regional:output/local-status.json")), status)
 
     def test_two_public_local_qualifiers_survive_source_disappearance_as_recheck_inputs(self):
         second = "hy2://public-second@8.8.4.4:443?sni=example.com"

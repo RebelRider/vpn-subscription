@@ -22,9 +22,11 @@ import time
 try:
     from .source_discovery import SourcePool
     from .source_catalog import load_regional_sources
+    from .protocols import connection_identity
 except ImportError:
     from source_discovery import SourcePool
     from source_catalog import load_regional_sources
+    from protocols import connection_identity
 
 
 MAX_BYTES = 4 * 1024 * 1024
@@ -303,6 +305,7 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
             selected.append(candidate)
             by_id[candidate["id"]] = candidate
     managed, managed_digest = _managed(build, state_dir)
+    private_connections = {connection_identity(build, node["link"]) for node in managed if not node["public_publish_allowed"]}
     for candidate in managed:
         if candidate["id"] not in by_id:
             selected.append(candidate)
@@ -358,6 +361,9 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
             candidate["source_ids"] = source_ids
             candidates[identifier] = candidate
     selected.extend(_select(list(candidates.values()), history, limit - recheck_count))
+    for candidate in selected:
+        if connection_identity(build, candidate["link"]) in private_connections:
+            candidate["public_publish_allowed"] = False
     history["candidates"] = dict(sorted(history["candidates"].items(), key=lambda pair: pair[1]["last_seen"], reverse=True)[:MAX_PROVENANCE])
     try:
         _write_private(state_dir / HISTORY_NAME, history)
@@ -427,6 +433,8 @@ def validate_manifest_membership(build, nodes, manifest_path, *, expected_digest
         current_managed_digest = hashlib.sha256(managed_raw).hexdigest() if managed_raw is not None else None
         if managed_digest != current_managed_digest:
             raise ValueError
+        managed, _ = _managed(build, Path(manifest_path).parent)
+        private_connections = {connection_identity(build, entry["link"]) for entry in managed if not entry["public_publish_allowed"]}
         allowed = {}
         for entry in entries:
             if not isinstance(entry, dict) or type(entry.get("public_publish_allowed")) is not bool:
@@ -441,6 +449,8 @@ def validate_manifest_membership(build, nodes, manifest_path, *, expected_digest
             if candidate is None or candidate["id"] not in allowed:
                 raise ValueError
             if require_public and not allowed[candidate["id"]]["public_publish_allowed"]:
+                raise ValueError
+            if require_public and connection_identity(build, candidate["link"]) in private_connections:
                 raise ValueError
         return True
     except (ValueError, TypeError, KeyError, UnicodeError, RecursionError):

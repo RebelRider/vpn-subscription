@@ -38,6 +38,8 @@ MAX_SOURCES = 160
 MAX_FETCH_SOURCES = 72
 MAX_STATE_BYTES = 2_000_000
 MAX_RETIRED_SOURCES = 320
+MAX_DORMANT_SOURCES = 2 * MAX_SOURCES
+MAX_DORMANT_REPROBES = 2
 RETIREMENT_COOLDOWN = 7 * 86400
 _DNS_SLOTS = threading.BoundedSemaphore(8)
 
@@ -292,7 +294,8 @@ class SourcePool:
     def __init__(self, seeds: list[dict], state_path: Path, now: int | None = None):
         self.path = Path(state_path)
         self.now = int(time.time() if now is None else now)
-        self.state = {"version": 1, "sources": {}, "repositories": {}, "retired_sources": {}, "last_discovery": 0, "last_qualified": 0}
+        self.state = {"version": 1, "sources": {}, "repositories": {}, "retired_sources": {},
+                      "dormant_sources": {}, "last_discovery": 0, "last_qualified": 0}
         try:
             if self.path.stat().st_size <= MAX_STATE_BYTES:
                 value = json.loads(self.path.read_text())
@@ -327,8 +330,13 @@ class SourcePool:
             if len(self.sources) >= MAX_SOURCES:
                 removable = next((key for key, item in reversed(self.sources.items()) if item["origin"] != "seed"), None)
                 if removable is not None:
+                    self._remember_dormant(self.sources[removable])
+                    self.state["retired_sources"][removable] = self.now + RETIREMENT_COOLDOWN
                     del self.sources[removable]
             self.add(seed.get("url", ""), origin="seed")
+        self.state["retired_sources"] = dict(sorted(
+            self.state["retired_sources"].items(), key=lambda pair: pair[1], reverse=True,
+        )[:MAX_RETIRED_SOURCES])
         self.requests = 0
         self.started = time.monotonic()
         self.robots = {}
@@ -401,6 +409,61 @@ class SourcePool:
                 ((key, until) for key, until in retired.items() if until > self.now),
                 key=lambda pair: pair[1], reverse=True,
             )[:MAX_RETIRED_SOURCES])
+        dormant = value.get("dormant_sources", {})
+        if isinstance(dormant, dict):
+            restored_dormant = {}
+            for key, record in dormant.items():
+                try:
+                    if (not isinstance(record, dict)
+                            or set(record) != {"url", "origin", "retired_at", "retry_at"}):
+                        continue
+                    url = canonical_url(record["url"])
+                    expected = hashlib.sha256(url.encode()).hexdigest()[:24]
+                    retired_at, retry_at = record["retired_at"], record["retry_at"]
+                    if (key != expected or key in restored
+                            or record["origin"] not in {"github-search", "public-feed-link", "grok-research"}
+                            or type(retired_at) not in (int, float) or type(retry_at) not in (int, float)
+                            or not math.isfinite(retired_at) or not math.isfinite(retry_at)
+                            or not 0 < retired_at <= self.now
+                            or retry_at != retired_at + RETIREMENT_COOLDOWN):
+                        continue
+                    # A newer surviving hash ledger always keeps its cooldown,
+                    # including caches written by an earlier implementation.
+                    retry_at = max(retry_at, self.state["retired_sources"].get(key, 0))
+                    restored_dormant[key] = {"url": url, "origin": record["origin"],
+                                            "retired_at": retry_at - RETIREMENT_COOLDOWN,
+                                            "retry_at": retry_at}
+                except (ValueError, KeyError, TypeError, OverflowError):
+                    continue
+            self.state["dormant_sources"] = dict(sorted(
+                restored_dormant.items(), key=lambda pair: (-pair[1]["retired_at"], pair[0]),
+            )[:MAX_DORMANT_SOURCES])
+
+    def _remember_dormant(self, item: dict) -> None:
+        """Keep bounded public URLs so retirement does not depend on rediscovery."""
+        try:
+            url = canonical_url(item["url"])
+        except (KeyError, ValueError, TypeError):
+            return
+        key = hashlib.sha256(url.encode()).hexdigest()[:24]
+        origin = item.get("origin")
+        if not isinstance(origin, str) or origin not in {"github-search", "public-feed-link", "grok-research"}:
+            origin = "public-feed-link"
+        self.state["dormant_sources"][key] = {"url": url, "origin": origin,
+                                               "retired_at": self.now,
+                                               "retry_at": self.now + RETIREMENT_COOLDOWN}
+        self.state["dormant_sources"] = dict(sorted(
+            self.state["dormant_sources"].items(), key=lambda pair: (-pair[1]["retired_at"], pair[0]),
+        )[:MAX_DORMANT_SOURCES])
+
+    def _reprobe_dormant(self) -> None:
+        due = sorted(((key, item) for key, item in self.state["dormant_sources"].items()
+                      if self.now >= item["retry_at"]), key=lambda pair: (pair[1]["retry_at"], pair[0]))
+        for key, item in due[:MAX_DORMANT_REPROBES]:
+            if key in self.sources:
+                self.state["dormant_sources"].pop(key, None)
+            elif self.add(item["url"], item["origin"]):
+                self.stats["dormant_reprobes"] = self.stats.get("dormant_reprobes", 0) + 1
 
     def add(self, url: str, origin: str) -> bool:
         try:
@@ -429,6 +492,7 @@ class SourcePool:
             if not eligible:
                 return False
             victim = eligible[0][0]
+            self._remember_dormant(self.sources[victim])
             self.state["retired_sources"][victim] = self.now + RETIREMENT_COOLDOWN
             self.state["retired_sources"] = dict(sorted(self.state["retired_sources"].items(),
                                                         key=lambda pair: pair[1], reverse=True)[:MAX_RETIRED_SOURCES])
@@ -437,6 +501,7 @@ class SourcePool:
             if hasattr(self, "stats"):
                 self.stats["exploration_replacements"] = self._exploration_replacements
         self.sources[key] = {"url": url, "origin": origin, "first_seen": self.now, "last_fetch": 0, "last_changed": 0, "failures": 0, "functional_ema": 0.0, "next_fetch": 0}
+        self.state["dormant_sources"].pop(key, None)
         return True
 
     def _before_request(self, url: str) -> None:
@@ -554,6 +619,9 @@ class SourcePool:
 
     def collect(self) -> tuple[list[str], dict]:
         self.save()  # Retire unusable feeds before admitting new discoveries.
+        # Revisit a bounded dormant tranche before fresh discovery. At a full
+        # registry it shares, rather than expands, the four-replacement budget.
+        self._reprobe_dormant()
         self.discover()
         # Successful feeds are inputs to every explicit build, including an
         # expedited replenishment immediately after the previous run. Only real
@@ -647,10 +715,12 @@ class SourcePool:
         retired = {key: until for key, until in self.state["retired_sources"].items() if until > self.now}
         for key, item in list(self.sources.items()):
             age = self.now - int(item.get("first_seen", self.now))
-            failed = int(item.get("failures", 0)) >= 5 and self.now - int(item.get("last_success", item.get("first_seen", self.now))) > 7 * 86400
+            last_success = int(item.get("last_success", 0) or item.get("first_seen", self.now))
+            failed = int(item.get("failures", 0)) >= 5 and self.now - last_success > 7 * 86400
             empty = int(item.get("empty_runs", 0)) >= 3 and age > 3 * 86400
             unproductive = int(item.get("validation_runs", 0)) >= 6 and float(item.get("functional_ema", 0)) == 0 and age > 7 * 86400
             if item.get("origin") != "seed" and (failed or empty or unproductive):
+                self._remember_dormant(item)
                 retired[key] = self.now + RETIREMENT_COOLDOWN
                 del self.sources[key]
         self.state["retired_sources"] = dict(sorted(retired.items(), key=lambda pair: pair[1], reverse=True)[:MAX_RETIRED_SOURCES])

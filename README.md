@@ -74,7 +74,8 @@ currently documented by Happ: VLESS, VMess, Trojan, Shadowsocks, Hysteria2
 are detected automatically; share URIs embedded in source text are extracted.
 VMess JSON presentation is rewritten inside its `ps` field; other URI fragments
 are presentation only. Essential credentials, transport, TLS, SNI, ALPN and
-obfuscation fields are preserved. Unsupported options fail closed.
+obfuscation fields are preserved. Trojan publication makes `security=tls` explicit
+when the source relied on the runtime default, so Happ imports the tested TLS mode. Unsupported options fail closed.
 
 The adapter allowlist follows [Happ's official import documentation](https://github.com/HappDev/happ_su/blob/main/faq/adding-configuration-subscription.md).
 TUIC and WireGuard are not published because that documentation does not confirm
@@ -100,7 +101,9 @@ alternatives. Source bodies, DNS resolution, redirects, requests and candidate
 counts are bounded; external HTTPS targets must resolve entirely to public IPs.
 Exact URI duplicates do not consume the candidate limit. A seven-day retirement
 cooldown prevents research or feed links from immediately reviving persistently
-unproductive sources. Resource-budget deferrals do not hurt reputation; malformed
+unproductive sources. A bounded dormant URL queue automatically retries up to two
+retired feeds per collection after their seven-day cooldown, even if their original
+parent disappears; this shares the existing replenishment and HTTP budgets. Resource-budget deferrals do not hurt reputation; malformed
 persisted state is normalized and rebuilt automatically.
 When the registry is full, up to four weak sources can be replaced per run to
 keep discovering alternatives. Configured seeds, the strongest 80% of discovered
@@ -184,7 +187,8 @@ Up to fifty compatible managed entries can be tested independently. Private entr
 never enter public status, discovery or GitHub. Public export requires explicit
 `publish_public:true`, and a private designation overrides any matching public feed
 entry. The exact managed policy hash is checked again at publication so revoked
-permission cannot be reused. No credentials or synthetic managed servers are created.
+permission cannot be reused. Private policy also covers equivalent TLS fingerprint
+variants of the same authenticated connection. No credentials or synthetic managed servers are created.
 
 Publication validates complete service evidence, sample medians, input membership,
 freshness, rank and output consistency. A private frozen manifest pins the original
@@ -251,3 +255,30 @@ Credential revocation, breaking service response changes, new undocumented Happ
 formats, or engine incompatibilities may require maintenance. The system fails
 closed on these events instead of autonomously weakening acceptance or patching
 unrelated applications/networking.
+
+## Stability and crash cleanup
+
+Only current complete service evidence can qualify a node. Publication recomputes
+the latency median from actual samples, rejects contradictory round evidence,
+checks canonical IDs and forbids equivalent connections. Different TLS fingerprints
+may be tested independently but consume only one publication slot if every other
+connection parameter is identical.
+
+A rolling window of up to twenty definitive local outcomes supplies reliability;
+inconclusive results do not count as failures. Reliability bands take priority.
+Within a band, previous published order persists until a challenger improves the
+current latency by more than 25–50ms. This ordering preference never waives a
+service requirement, freshness or the strict <500ms threshold.
+
+Owned temporary files use private, marked directories with kernel leases under
+`~/Library/Application Support/best50-vpn/temporary`. Scheduled jobs reclaim old
+unlocked remnants after crashes, including only worktrees belonging to the exact
+registered repository. Active leases, unmarked data, symlinks and unrelated Git
+checkouts are protected. Regional and source-research jobs rotate their own logs;
+test logs and one-off diagnostic files are not runtime dependencies.
+
+The joined Grok autonomy simulation covers exhausted quota, restored verified
+model output, actual feed parsing/robots validation, real rejected Git pushes,
+pending-proposal replay without another model request, catalog publication and
+SourcePool ingestion. It exercises production functions against a private local
+Git remote without changing live networking or credentials.

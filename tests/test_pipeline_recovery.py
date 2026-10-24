@@ -314,7 +314,7 @@ class FinalistRecoveryTests(unittest.TestCase):
         links = [LINK.replace(":443?", f":{443 + index}?") for index in range(551)]
         nodes = [dict(build.parse_vless(link), country="US", infrastructure=f"infra-{index}", endpoint_family=f"family-{index}")
                  for index, link in enumerate(links)]
-        records = {build.normalized_fingerprint(node): {"last_seen": NOW - 60, "qualified": False} for node in nodes[:500]}
+        records = {build.normalized_fingerprint(node): {"last_seen": NOW - 60, "qualified": False, "outcome": "fail"} for node in nodes[:500]}
         catalog_additions = []
         class Pool:
             def __init__(self, *_args, **_kwargs):

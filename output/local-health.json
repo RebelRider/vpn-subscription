@@ -1,15 +1,15 @@
 {
   "schema": 1,
   "policy": "bestlocal-strict-services-v6",
-  "generated_at": 1792818424.091126,
-  "latest_attempt_at": "2026-10-24T05:07:04.091126+00:00",
+  "generated_at": 1792822448.547129,
+  "latest_attempt_at": "2026-10-24T06:14:08.547129+00:00",
   "input": {
     "path": "origin/main:output/best50.txt",
     "nodes": 50,
     "mode": "origin-main-best50"
   },
-  "upstream_sha": "d8854e71e165a3f0b40697cfe67ab3c90646c403",
-  "upstream_generated_at": "2026-10-24 04:51:31 UTC",
+  "upstream_sha": "aef4947ab359c4782f3ec9fda5cc788bf8307f43",
+  "upstream_generated_at": "2026-10-24 05:58:35 UTC",
   "qualified": 0,
   "artifact_status": "last-known-good-retained; latest strict validation found no qualifiers",
   "current_policy_validated": false,
@@ -24,43 +24,8 @@
   "latency_method": "median of 3..5 fresh HTTPS gstatic generate_204 completion times in milliseconds via the candidate authenticated SOCKS/VLESS path; includes SOCKS, transport and TLS; strictly below 500ms",
   "diagnostics": [
     {
-      "id": "ee9ca1f3becbdfa049ea770241f93cbe0212dbe92a46a5b431ee32a4c56e6160",
+      "id": "daa4181acce3997e65b07429bb5c281bffbc7ce9f056bac130b63bbc8fa89387",
       "upstream_rank": 1,
-      "qualified": false,
-      "services": {
-        "chatgpt": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "proxy-request-timeout"
-          ]
-        },
-        "youtube": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "proxy-request-timeout"
-          ]
-        },
-        "instagram": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "proxy-request-timeout"
-          ]
-        }
-      },
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "rejection_reasons": [
-        "latency-proxy-request-timeout",
-        "service-requirements-failed",
-        "insufficient-latency-samples"
-      ]
-    },
-    {
-      "id": "acb00d1b7608ea77edfbd2969d6b3a2fb9142ad3508cdc9ed12211cad922cd78",
-      "upstream_rank": 2,
       "qualified": false,
       "services": {
         "chatgpt": {
@@ -86,7 +51,7 @@
         }
       },
       "latency_samples_ms": [
-        181.04500000000002
+        3350.402
       ],
       "median_latency": null,
       "rejection_reasons": [
@@ -95,7 +60,42 @@
       ]
     },
     {
-      "id": "c65a28d49b6da160a50f71a44db58dad3ec21aed16ccd8212b25a0a6f520fee9",
+      "id": "c9ebd7bb649a5fc62b1a41472dd839cc003f55939d963860b93e4da3d7e04beb",
+      "upstream_rank": 2,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "46f124f4e5ffe1606c3bdde81ec0c35cb4603cb15e4812b257bafc58d8ff2db3",
       "upstream_rank": 3,
       "qualified": false,
       "services": {
@@ -110,6 +110,76 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "e94574a8cd80fdf1eaf1bf1b088ee562e4afbdc778c901fbbf6bbbcb6eedb3c9",
+      "upstream_rank": 4,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "fedfe39bee8fb88fe21defa5a6a5c469aaa0c7b43b731e6d4f18e42748eb10b1",
+      "upstream_rank": 5,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
             "proxy-request-timeout"
           ]
         },
@@ -130,8 +200,8 @@
       ]
     },
     {
-      "id": "a78b7695aae34b7cc4b645f66bee78ae25fec2d4bf913de8207aaa4141f6efc1",
-      "upstream_rank": 4,
+      "id": "7f96b9c7d79baf2b07d60e579e90d3f8ba847f32a663ac0bae01a4b911d24f7c",
+      "upstream_rank": 6,
       "qualified": false,
       "services": {
         "chatgpt": {
@@ -157,7 +227,7 @@
         }
       },
       "latency_samples_ms": [
-        254.351
+        3762.616
       ],
       "median_latency": null,
       "rejection_reasons": [
@@ -166,43 +236,8 @@
       ]
     },
     {
-      "id": "cfcfd89f7b8db9dc080f5f88d6d68bae532c345aec1fda7ea3a71c62257aa90e",
-      "upstream_rank": 5,
-      "qualified": false,
-      "services": {
-        "chatgpt": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "youtube": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "instagram": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        }
-      },
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "rejection_reasons": [
-        "latency-socks-connection-failed",
-        "service-requirements-failed",
-        "insufficient-latency-samples"
-      ]
-    },
-    {
-      "id": "9b08b1e5bede0fc4b76d3bc13fe97ff6a93c05d058d62e4b5f798ea43fa37869",
-      "upstream_rank": 6,
+      "id": "efb8d315e939e00e469e02fe1f67c43c7e0e4fe7e99d99e081117436304b9d16",
+      "upstream_rank": 7,
       "qualified": false,
       "services": {
         "chatgpt": {
@@ -216,14 +251,14 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "proxy-request-timeout"
           ]
         },
         "instagram": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "proxy-request-timeout"
           ]
         }
       },
@@ -236,42 +271,7 @@
       ]
     },
     {
-      "id": "4d8a64d69a2bacc745415d82ece9a9663490ebb76a890e7db17b833bd11e4918",
-      "upstream_rank": 7,
-      "qualified": false,
-      "services": {
-        "chatgpt": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "youtube": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "instagram": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        }
-      },
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "rejection_reasons": [
-        "latency-socks-connection-failed",
-        "service-requirements-failed",
-        "insufficient-latency-samples"
-      ]
-    },
-    {
-      "id": "2e14e4acdf582aea0b72015444b2f308a68c725d1407a7f5376d199b65e0e64c",
+      "id": "d186b051187b5d393344728786a99c25bef00f126157e41bbcd591c660ddbddd",
       "upstream_rank": 8,
       "qualified": false,
       "services": {
@@ -300,13 +300,13 @@
       "latency_samples_ms": [],
       "median_latency": null,
       "rejection_reasons": [
-        "latency-socks-connection-failed",
+        "latency-proxy-request-timeout",
         "service-requirements-failed",
         "insufficient-latency-samples"
       ]
     },
     {
-      "id": "4236ac72a590c27c5299913ed1554fe4cde764ada53404921c16b2afdb15fd72",
+      "id": "b227722bb080672421319766f98741dc2e716a99077d42e0a3e44ad07bb5ea69",
       "upstream_rank": 9,
       "qualified": false,
       "services": {
@@ -314,34 +314,35 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "access-denied-inconclusive"
           ]
         },
         "youtube": {
-          "passed": 0,
+          "passed": 1,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "ok"
           ]
         },
         "instagram": {
-          "passed": 0,
+          "passed": 1,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "ok"
           ]
         }
       },
-      "latency_samples_ms": [],
+      "latency_samples_ms": [
+        285.854
+      ],
       "median_latency": null,
       "rejection_reasons": [
-        "latency-socks-connection-failed",
         "service-requirements-failed",
         "insufficient-latency-samples"
       ]
     },
     {
-      "id": "e13ee50247ddc093acc532279ce24a6f1ad6d0f9cac7c2b4c40cf0ef3de5a439",
+      "id": "36f9d64f57b3c63e0429f6a2968fcbdb206ff5f55d14217e32cb86fa23ebb530",
       "upstream_rank": 10,
       "qualified": false,
       "services": {
@@ -349,34 +350,34 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "proxy-request-timeout"
           ]
         },
         "youtube": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "proxy-request-timeout"
           ]
         },
         "instagram": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "proxy-request-timeout"
           ]
         }
       },
       "latency_samples_ms": [],
       "median_latency": null,
       "rejection_reasons": [
-        "latency-socks-connection-failed",
+        "latency-proxy-request-timeout",
         "service-requirements-failed",
         "insufficient-latency-samples"
       ]
     },
     {
-      "id": "64adf9aaccd873033bf236fcfab2f40fd1b504c5476f158a293605e6849d2efa",
+      "id": "e01e22e619fcaa7421c43116416467baf282d82085eac6f6cee3146207082e5f",
       "upstream_rank": 11,
       "qualified": false,
       "services": {
@@ -411,7 +412,7 @@
       ]
     },
     {
-      "id": "5094c1d719c150d7109929cb6c1e4c55a768f3e7213254bd9cae288319f88b46",
+      "id": "b162f71f74426f7dcbd1a37f0778692914ec2650fd1a6f5962720c615cdf0cf2",
       "upstream_rank": 12,
       "qualified": false,
       "services": {
@@ -446,7 +447,7 @@
       ]
     },
     {
-      "id": "237ecef78dd8d11f0ec473abd792fdae6c37d106d9e06b8335b3f8c2f0f80bd4",
+      "id": "aca1a03b4b4233f8f78530ea174698c457cc6a634d934432dd142e2289c4c5ac",
       "upstream_rank": 13,
       "qualified": false,
       "services": {
@@ -481,7 +482,7 @@
       ]
     },
     {
-      "id": "d3a357c22989b0904e93de180794f97ac7aa0495fabbd5f34745cca3e96ab549",
+      "id": "089e1d5409c7149f5daaa3ba93f5699552726815673ae3f8af674a4d27cef873",
       "upstream_rank": 14,
       "qualified": false,
       "services": {
@@ -489,34 +490,34 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         },
         "youtube": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         },
         "instagram": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         }
       },
       "latency_samples_ms": [],
       "median_latency": null,
       "rejection_reasons": [
-        "latency-proxy-request-timeout",
+        "latency-socks-connection-failed",
         "service-requirements-failed",
         "insufficient-latency-samples"
       ]
     },
     {
-      "id": "b3935f867f993f6c82c28d9b142ab460015754251c5d67de824aa123cd25eb0d",
+      "id": "36c8450679506767e6a35f8dc2a3a638825a0cd2151b5826b0ab703184b907a7",
       "upstream_rank": 15,
       "qualified": false,
       "services": {
@@ -524,34 +525,34 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         },
         "youtube": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         },
         "instagram": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         }
       },
       "latency_samples_ms": [],
       "median_latency": null,
       "rejection_reasons": [
-        "latency-proxy-request-timeout",
+        "latency-socks-connection-failed",
         "service-requirements-failed",
         "insufficient-latency-samples"
       ]
     },
     {
-      "id": "8c366af5d988082bf3759c3998543843929a153b66640fe1068b36dbd96ea64b",
+      "id": "144481b1d311e1701b72c75d5d5dd10ba6addf5cab8294c88589497bc3ec29c9",
       "upstream_rank": 16,
       "qualified": false,
       "services": {
@@ -586,7 +587,7 @@
       ]
     },
     {
-      "id": "9b89d49854abbc303d70e7d4cdd6a51e2187aaf65f750aa0928dd7bd37f572a2",
+      "id": "41a434fac6ba7f07ebc56fb51c783573c9a0ba3c6b9118ac49be6c4afe636a4e",
       "upstream_rank": 17,
       "qualified": false,
       "services": {
@@ -594,35 +595,34 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "access-denied-inconclusive"
+            "socks-connection-failed"
           ]
         },
         "youtube": {
-          "passed": 1,
+          "passed": 0,
           "attempts": 1,
           "reasons": [
-            "ok"
+            "proxy-request-timeout"
           ]
         },
         "instagram": {
-          "passed": 1,
+          "passed": 0,
           "attempts": 1,
           "reasons": [
-            "ok"
+            "socks-connection-failed"
           ]
         }
       },
-      "latency_samples_ms": [
-        815.64
-      ],
+      "latency_samples_ms": [],
       "median_latency": null,
       "rejection_reasons": [
+        "latency-socks-connection-failed",
         "service-requirements-failed",
         "insufficient-latency-samples"
       ]
     },
     {
-      "id": "7fc438791be421fb9fea14affeb40bd46066c77e7812deb65f7e585f7d69866a",
+      "id": "e8dc072ec5690bfd473699fd6a6b06a2f362bd6a13be4cc99b3ac5a94383e8cb",
       "upstream_rank": 18,
       "qualified": false,
       "services": {
@@ -657,185 +657,8 @@
       ]
     },
     {
-      "id": "3f499eaab90244ea62dea314c7914913fd220219aedf5f3e7f13b68feba7c953",
+      "id": "a5f00aef0b209019e67b463456c00ab14333e7d0e787e91e475ebea49c74f36b",
       "upstream_rank": 19,
-      "qualified": false,
-      "services": {
-        "chatgpt": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "youtube": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "instagram": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        }
-      },
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "rejection_reasons": [
-        "latency-socks-connection-failed",
-        "service-requirements-failed",
-        "insufficient-latency-samples"
-      ]
-    },
-    {
-      "id": "09495f6ea38b0598e87e3002a42593006aa47738eba95046369522e982ed5532",
-      "upstream_rank": 20,
-      "qualified": false,
-      "services": {
-        "chatgpt": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "access-denied-inconclusive"
-          ]
-        },
-        "youtube": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "access-denied-inconclusive"
-          ]
-        },
-        "instagram": {
-          "passed": 1,
-          "attempts": 1,
-          "reasons": [
-            "ok"
-          ]
-        }
-      },
-      "latency_samples_ms": [
-        378.09
-      ],
-      "median_latency": null,
-      "rejection_reasons": [
-        "service-requirements-failed",
-        "insufficient-latency-samples"
-      ]
-    },
-    {
-      "id": "3269d1ebb4ecff8b1aaf98e0f4e77c07ad5c0dbf5b1b4f9769a022984d603fdf",
-      "upstream_rank": 21,
-      "qualified": false,
-      "services": {
-        "chatgpt": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "youtube": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "instagram": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        }
-      },
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "rejection_reasons": [
-        "latency-socks-connection-failed",
-        "service-requirements-failed",
-        "insufficient-latency-samples"
-      ]
-    },
-    {
-      "id": "938389fab690e22a1e470d7f1f639061d4298322d610a28863231b23e3f6c7ba",
-      "upstream_rank": 22,
-      "qualified": false,
-      "services": {
-        "chatgpt": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "access-denied-inconclusive"
-          ]
-        },
-        "youtube": {
-          "passed": 1,
-          "attempts": 1,
-          "reasons": [
-            "ok"
-          ]
-        },
-        "instagram": {
-          "passed": 1,
-          "attempts": 1,
-          "reasons": [
-            "ok"
-          ]
-        }
-      },
-      "latency_samples_ms": [
-        1845.355
-      ],
-      "median_latency": null,
-      "rejection_reasons": [
-        "service-requirements-failed",
-        "insufficient-latency-samples"
-      ]
-    },
-    {
-      "id": "9f9b70be29735527f7fdc0427e6c8c5ad992510702ae5dd514c40c99926c4596",
-      "upstream_rank": 23,
-      "qualified": false,
-      "services": {
-        "chatgpt": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "youtube": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "instagram": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        }
-      },
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "rejection_reasons": [
-        "latency-socks-connection-failed",
-        "service-requirements-failed",
-        "insufficient-latency-samples"
-      ]
-    },
-    {
-      "id": "deca8a4b9dba5382ef9e4cb14ecedd23fa04ac4fceccebad6f3e4a1a7abc5816",
-      "upstream_rank": 24,
       "qualified": false,
       "services": {
         "chatgpt": {
@@ -869,7 +692,183 @@
       ]
     },
     {
-      "id": "14b0c5cbf62dc6dfb4cf4cd8347e3956a80fd04f39d8d865012e284afd285d6b",
+      "id": "1e402dc6a02e81f308f6aad4bf7f34d91113564167e2fc021c50fc259f5e2ae6",
+      "upstream_rank": 20,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "access-denied-inconclusive"
+          ]
+        },
+        "youtube": {
+          "passed": 1,
+          "attempts": 1,
+          "reasons": [
+            "ok"
+          ]
+        },
+        "instagram": {
+          "passed": 1,
+          "attempts": 1,
+          "reasons": [
+            "ok"
+          ]
+        }
+      },
+      "latency_samples_ms": [
+        398.071
+      ],
+      "median_latency": null,
+      "rejection_reasons": [
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "c3440e2838b73a8c30b248942ed1c456ec3cea98be6737d60eb8bb18e29ce805",
+      "upstream_rank": 21,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "fd820f9f8c9adfb023634d0c607d0d12163cc076be72158cd85bb82e68923989",
+      "upstream_rank": 22,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "7d9454b23882943596bc2560cbbc33db27e222b85c77784b386d1a41aa960db3",
+      "upstream_rank": 23,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "9556a25eb58fc204f65626c19a77f6c035971ebcd6a490268ab9f454c98ac0c7",
+      "upstream_rank": 24,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "af1150c7411f98c9c540ede55f2eea579277986784dbd5221162f99a29ba0d8d",
       "upstream_rank": 25,
       "qualified": false,
       "services": {
@@ -904,7 +903,7 @@
       ]
     },
     {
-      "id": "c42bcbb805a95a2c387597205afe5a355bdd071e4a995455fb282be82ffe84fc",
+      "id": "92408be6b911df6ca2de2bf03915611b07fb073915978738af4b15c135e41c9a",
       "upstream_rank": 26,
       "qualified": false,
       "services": {
@@ -912,7 +911,7 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         },
         "youtube": {
@@ -926,20 +925,20 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         }
       },
       "latency_samples_ms": [],
       "median_latency": null,
       "rejection_reasons": [
-        "latency-proxy-request-timeout",
+        "latency-socks-connection-failed",
         "service-requirements-failed",
         "insufficient-latency-samples"
       ]
     },
     {
-      "id": "0551a25c076459979756c6be1493d39b4ea204a35f7a3f910ab255ca294dfcbc",
+      "id": "4f911d59c27c2d23f74eaa888444ae686901cf608a53c41097e66dbad90da216",
       "upstream_rank": 27,
       "qualified": false,
       "services": {
@@ -974,43 +973,8 @@
       ]
     },
     {
-      "id": "7540886dd06e6cb34d286403bf1e3a8a2269759ed571c52953ba2bc616498858",
+      "id": "cfeceeea6434f989c63a58331b34b7d024ea533efe380446e88590b804931e31",
       "upstream_rank": 28,
-      "qualified": false,
-      "services": {
-        "chatgpt": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "youtube": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "proxy-request-timeout"
-          ]
-        },
-        "instagram": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        }
-      },
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "rejection_reasons": [
-        "latency-socks-connection-failed",
-        "service-requirements-failed",
-        "insufficient-latency-samples"
-      ]
-    },
-    {
-      "id": "ebb7b20c9c948f6699ee307c996adeae77e926d587cff484b16ec164239c49b4",
-      "upstream_rank": 29,
       "qualified": false,
       "services": {
         "chatgpt": {
@@ -1044,7 +1008,42 @@
       ]
     },
     {
-      "id": "00b281f94f5e5dd5ebe816362213e00f6821c9ea5df71dec94601e800cc47c60",
+      "id": "3e53de825aa76d09b1e765475979df39dc6334a7f5497554e2e837459fbbe48a",
+      "upstream_rank": 29,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "socks-connection-failed"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-socks-connection-failed",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "25af6483bb914ad8ec2f19d5780b9f377c4e941a4d730546090b7aa956ab70e1",
       "upstream_rank": 30,
       "qualified": false,
       "services": {
@@ -1079,7 +1078,7 @@
       ]
     },
     {
-      "id": "0f370b8c50810744c444187365d0a206e5733af1ced94a1c39df19ea38d1e6d4",
+      "id": "5c66a8e67a754d0f209642c48a02b1fd84831113e8c1acb6c2d199b4444550c7",
       "upstream_rank": 31,
       "qualified": false,
       "services": {
@@ -1087,34 +1086,34 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         },
         "youtube": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         },
         "instagram": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         }
       },
       "latency_samples_ms": [],
       "median_latency": null,
       "rejection_reasons": [
-        "latency-proxy-request-timeout",
+        "latency-socks-connection-failed",
         "service-requirements-failed",
         "insufficient-latency-samples"
       ]
     },
     {
-      "id": "5ad9ea78316c63a08c6c4985f1c59615e024feefb1589359d2539adb3c84fb3d",
+      "id": "e251e7bcd9a8c76e20b8741196149bdf8ce6a7190f2646d20767b3518342c6d0",
       "upstream_rank": 32,
       "qualified": false,
       "services": {
@@ -1149,7 +1148,7 @@
       ]
     },
     {
-      "id": "0f5ee9d46261419d6955b56de2fe554a6b6ec700623de216810f45c259021e41",
+      "id": "ca73e721a2e637178d30745d0c177eb269743f7700221d4034eddc44cadc5168",
       "upstream_rank": 33,
       "qualified": false,
       "services": {
@@ -1157,21 +1156,21 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         },
         "youtube": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         },
         "instagram": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         }
       },
@@ -1184,7 +1183,7 @@
       ]
     },
     {
-      "id": "d5adc602f1cc5fea439dfdccd578b01c4c33bd07bccdfe4fe91383e09eb6cc4d",
+      "id": "8de29ad6f764d3ebf9d6cf7759313ba1fc6129d7ee3ac1a4e890af4b751f92f5",
       "upstream_rank": 34,
       "qualified": false,
       "services": {
@@ -1219,78 +1218,8 @@
       ]
     },
     {
-      "id": "e9587bc7c4b9c5b8f63c2c51dd7f719f66a7f69aef9c2ae15651b1f1dbc47338",
+      "id": "26c003b405bbe58f0a34d2951d79c1c08ba5afc7ce9bbb583e3aa1c9aadd5d8d",
       "upstream_rank": 35,
-      "qualified": false,
-      "services": {
-        "chatgpt": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "youtube": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "instagram": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        }
-      },
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "rejection_reasons": [
-        "latency-socks-connection-failed",
-        "service-requirements-failed",
-        "insufficient-latency-samples"
-      ]
-    },
-    {
-      "id": "9e317bb50c8160032b9f8802a02c9921c512cf97f9d9ef2880173ff4072570df",
-      "upstream_rank": 36,
-      "qualified": false,
-      "services": {
-        "chatgpt": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "youtube": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        },
-        "instagram": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "socks-connection-failed"
-          ]
-        }
-      },
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "rejection_reasons": [
-        "latency-socks-connection-failed",
-        "service-requirements-failed",
-        "insufficient-latency-samples"
-      ]
-    },
-    {
-      "id": "31e92e63b02ceb40eacb2fceb9dd9da3a4075cd6e981d2bbea0d367274e76485",
-      "upstream_rank": 37,
       "qualified": false,
       "services": {
         "chatgpt": {
@@ -1324,8 +1253,43 @@
       ]
     },
     {
-      "id": "8a585cd3c656a7d540d55faf3e9911ccfcdb7e738fc0cc215104c142c89da2a8",
-      "upstream_rank": 38,
+      "id": "3ae39d3fad0416d4cddc521aae32476f25c57b257aff22d8360b6d31fad85f48",
+      "upstream_rank": 36,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "e0c64219d9b4c33a5af42239225f988d07c38ff4ebe585e9d8e3a80ee6de7841",
+      "upstream_rank": 37,
       "qualified": false,
       "services": {
         "chatgpt": {
@@ -1339,7 +1303,7 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         },
         "instagram": {
@@ -1359,7 +1323,42 @@
       ]
     },
     {
-      "id": "e9e816ef0f4490c61685921174fb8b3d580d9297dcdde8fd9e7c5b4757ff0908",
+      "id": "c34db42d8332017c87779fc348965ddebff8be1169a0f6b507e80b0b79462bed",
+      "upstream_rank": 38,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "cfed25add58677e8236fc36d40cd4e546fd2c2a006fbe98608dbdf161141d9a2",
       "upstream_rank": 39,
       "qualified": false,
       "services": {
@@ -1394,7 +1393,7 @@
       ]
     },
     {
-      "id": "34e7792211ee5e423142eee4b7b7acefd65c8d9290b5d1ef0482c814b1f0f67b",
+      "id": "953be6361aed62aaa71228e91b4fd8a53257d96c7895c9e7b41259ddc164bc58",
       "upstream_rank": 40,
       "qualified": false,
       "services": {
@@ -1402,34 +1401,34 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "proxy-request-timeout"
           ]
         },
         "youtube": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "proxy-request-timeout"
           ]
         },
         "instagram": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "proxy-request-timeout"
           ]
         }
       },
       "latency_samples_ms": [],
       "median_latency": null,
       "rejection_reasons": [
-        "latency-socks-connection-failed",
+        "latency-proxy-request-timeout",
         "service-requirements-failed",
         "insufficient-latency-samples"
       ]
     },
     {
-      "id": "88fcea2155c33c3e34858ff2045b546bd6074a9cacf43e28eb4aa7f7c4c68787",
+      "id": "22948b18d35ab6ae11d2c3781f99b081f50705d553e335b53e0827f781cffd42",
       "upstream_rank": 41,
       "qualified": false,
       "services": {
@@ -1464,7 +1463,7 @@
       ]
     },
     {
-      "id": "eb182496083634aee89ba7ef9af03d5ab4241e533010cd196b8ed9301fd3f0ff",
+      "id": "19a90f87d66ecab57f63bf475ba4156214859fcb8875e15e70f248abda2392c4",
       "upstream_rank": 42,
       "qualified": false,
       "services": {
@@ -1499,7 +1498,7 @@
       ]
     },
     {
-      "id": "5b9b0e7575b216cda68058f670c2c37d58f44dc2fc893f959eaeca51b0ffda15",
+      "id": "c368514f4428328486d05c777fb314f91a970e8d59408293e3a32cbef7b672f0",
       "upstream_rank": 43,
       "qualified": false,
       "services": {
@@ -1507,34 +1506,34 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         },
         "youtube": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         },
         "instagram": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         }
       },
       "latency_samples_ms": [],
       "median_latency": null,
       "rejection_reasons": [
-        "latency-proxy-request-timeout",
+        "latency-socks-connection-failed",
         "service-requirements-failed",
         "insufficient-latency-samples"
       ]
     },
     {
-      "id": "d17e32425061a6da660e962960da84ef6dcaa5f27296a10ff4bf963f1ef41c78",
+      "id": "789abf016798ab43c72a06de274af049726350d6ead5af8c5e0fca6efa3088db",
       "upstream_rank": 44,
       "qualified": false,
       "services": {
@@ -1569,7 +1568,7 @@
       ]
     },
     {
-      "id": "2aca71d8863a7382da4a4189e8cf325d673164b687b81b01a8f489921ec7a594",
+      "id": "1a8c9a79dbb0c2da6eb70932b39704946fb5acc4ddd7bde62785abd20f0e6a9d",
       "upstream_rank": 45,
       "qualified": false,
       "services": {
@@ -1577,34 +1576,34 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "proxy-request-timeout"
           ]
         },
         "youtube": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "proxy-request-timeout"
           ]
         },
         "instagram": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "proxy-request-timeout"
           ]
         }
       },
       "latency_samples_ms": [],
       "median_latency": null,
       "rejection_reasons": [
-        "latency-socks-connection-failed",
+        "latency-proxy-request-timeout",
         "service-requirements-failed",
         "insufficient-latency-samples"
       ]
     },
     {
-      "id": "30d9f7b7cacc5f4c62db118a4607e2ea3cf7c795f126cb83c0ca45bfd1a59bf7",
+      "id": "c6ff904602563d3f5a89ba3cfa55c2fade5b12970359144ba646d4e737adfb17",
       "upstream_rank": 46,
       "qualified": false,
       "services": {
@@ -1619,14 +1618,14 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "proxy-request-timeout"
           ]
         },
         "instagram": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "proxy-request-timeout"
           ]
         }
       },
@@ -1639,8 +1638,43 @@
       ]
     },
     {
-      "id": "e6f18959ff1066f5d2b763ef9d8706a004422cba4458f22d47a7d0e16b31c886",
+      "id": "db6ff60748b2009be363a3389c44a38097c15e0da397a799f1af079803cbeb8b",
       "upstream_rank": 47,
+      "qualified": false,
+      "services": {
+        "chatgpt": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "youtube": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        },
+        "instagram": {
+          "passed": 0,
+          "attempts": 1,
+          "reasons": [
+            "proxy-request-timeout"
+          ]
+        }
+      },
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "rejection_reasons": [
+        "latency-proxy-request-timeout",
+        "service-requirements-failed",
+        "insufficient-latency-samples"
+      ]
+    },
+    {
+      "id": "d6b9b85a5dd863e9ff0ca6b05a28712b71c1ab30c1298f3f7fdb79a96e4f27bc",
+      "upstream_rank": 48,
       "qualified": false,
       "services": {
         "chatgpt": {
@@ -1654,7 +1688,7 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "socks-connection-failed"
+            "proxy-request-timeout"
           ]
         },
         "instagram": {
@@ -1674,42 +1708,7 @@
       ]
     },
     {
-      "id": "b913fb6d6ed494b1cc467d8e5b8ccbe6bb49fd5c2361571b5f230c637335d684",
-      "upstream_rank": 48,
-      "qualified": false,
-      "services": {
-        "chatgpt": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "proxy-request-timeout"
-          ]
-        },
-        "youtube": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "proxy-request-timeout"
-          ]
-        },
-        "instagram": {
-          "passed": 0,
-          "attempts": 1,
-          "reasons": [
-            "proxy-request-timeout"
-          ]
-        }
-      },
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "rejection_reasons": [
-        "latency-proxy-request-timeout",
-        "service-requirements-failed",
-        "insufficient-latency-samples"
-      ]
-    },
-    {
-      "id": "b03b79baef38336b421bb564a2545cc0b4c243a64cb78146f869a84ac78d1cdb",
+      "id": "483cb25e605fc63e1be1c714390e0e8d4f2eaa99c52caad53db59b90a7991e61",
       "upstream_rank": 49,
       "qualified": false,
       "services": {
@@ -1744,7 +1743,7 @@
       ]
     },
     {
-      "id": "41dd507bfedb519e5c4f0be7c16a7b516150c246c2238864aaa0b518943feaa9",
+      "id": "931825096da1f28bcedc9931cfa29035433f08e58bbff2f06dda2e22c9252ea3",
       "upstream_rank": 50,
       "qualified": false,
       "services": {
@@ -1752,14 +1751,14 @@
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         },
         "youtube": {
           "passed": 0,
           "attempts": 1,
           "reasons": [
-            "proxy-request-timeout"
+            "socks-connection-failed"
           ]
         },
         "instagram": {
@@ -1780,6 +1779,206 @@
     }
   ],
   "recent_results": {
+    "089e1d5409c7149f5daaa3ba93f5699552726815673ae3f8af674a4d27cef873": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "144481b1d311e1701b72c75d5d5dd10ba6addf5cab8294c88589497bc3ec29c9": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "19a90f87d66ecab57f63bf475ba4156214859fcb8875e15e70f248abda2392c4": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "1a8c9a79dbb0c2da6eb70932b39704946fb5acc4ddd7bde62785abd20f0e6a9d": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "1e402dc6a02e81f308f6aad4bf7f34d91113564167e2fc021c50fc259f5e2ae6": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "22948b18d35ab6ae11d2c3781f99b081f50705d553e335b53e0827f781cffd42": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "25af6483bb914ad8ec2f19d5780b9f377c4e941a4d730546090b7aa956ab70e1": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "26c003b405bbe58f0a34d2951d79c1c08ba5afc7ce9bbb583e3aa1c9aadd5d8d": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "36c8450679506767e6a35f8dc2a3a638825a0cd2151b5826b0ab703184b907a7": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "36f9d64f57b3c63e0429f6a2968fcbdb206ff5f55d14217e32cb86fa23ebb530": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "3ae39d3fad0416d4cddc521aae32476f25c57b257aff22d8360b6d31fad85f48": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "3e53de825aa76d09b1e765475979df39dc6334a7f5497554e2e837459fbbe48a": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "41a434fac6ba7f07ebc56fb51c783573c9a0ba3c6b9118ac49be6c4afe636a4e": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "46f124f4e5ffe1606c3bdde81ec0c35cb4603cb15e4812b257bafc58d8ff2db3": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "483cb25e605fc63e1be1c714390e0e8d4f2eaa99c52caad53db59b90a7991e61": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "4f911d59c27c2d23f74eaa888444ae686901cf608a53c41097e66dbad90da216": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "5c66a8e67a754d0f209642c48a02b1fd84831113e8c1acb6c2d199b4444550c7": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "789abf016798ab43c72a06de274af049726350d6ead5af8c5e0fca6efa3088db": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "7d9454b23882943596bc2560cbbc33db27e222b85c77784b386d1a41aa960db3": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "7f96b9c7d79baf2b07d60e579e90d3f8ba847f32a663ac0bae01a4b911d24f7c": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "8de29ad6f764d3ebf9d6cf7759313ba1fc6129d7ee3ac1a4e890af4b751f92f5": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "92408be6b911df6ca2de2bf03915611b07fb073915978738af4b15c135e41c9a": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "931825096da1f28bcedc9931cfa29035433f08e58bbff2f06dda2e22c9252ea3": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "953be6361aed62aaa71228e91b4fd8a53257d96c7895c9e7b41259ddc164bc58": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "9556a25eb58fc204f65626c19a77f6c035971ebcd6a490268ab9f454c98ac0c7": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "a5f00aef0b209019e67b463456c00ab14333e7d0e787e91e475ebea49c74f36b": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "aca1a03b4b4233f8f78530ea174698c457cc6a634d934432dd142e2289c4c5ac": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "af1150c7411f98c9c540ede55f2eea579277986784dbd5221162f99a29ba0d8d": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "b162f71f74426f7dcbd1a37f0778692914ec2650fd1a6f5962720c615cdf0cf2": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "b227722bb080672421319766f98741dc2e716a99077d42e0a3e44ad07bb5ea69": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "c3440e2838b73a8c30b248942ed1c456ec3cea98be6737d60eb8bb18e29ce805": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "c34db42d8332017c87779fc348965ddebff8be1169a0f6b507e80b0b79462bed": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "c368514f4428328486d05c777fb314f91a970e8d59408293e3a32cbef7b672f0": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "c6ff904602563d3f5a89ba3cfa55c2fade5b12970359144ba646d4e737adfb17": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "c9ebd7bb649a5fc62b1a41472dd839cc003f55939d963860b93e4da3d7e04beb": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "ca73e721a2e637178d30745d0c177eb269743f7700221d4034eddc44cadc5168": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "cfeceeea6434f989c63a58331b34b7d024ea533efe380446e88590b804931e31": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "cfed25add58677e8236fc36d40cd4e546fd2c2a006fbe98608dbdf161141d9a2": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "d186b051187b5d393344728786a99c25bef00f126157e41bbcd591c660ddbddd": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "d6b9b85a5dd863e9ff0ca6b05a28712b71c1ab30c1298f3f7fdb79a96e4f27bc": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "daa4181acce3997e65b07429bb5c281bffbc7ce9f056bac130b63bbc8fa89387": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "db6ff60748b2009be363a3389c44a38097c15e0da397a799f1af079803cbeb8b": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "e01e22e619fcaa7421c43116416467baf282d82085eac6f6cee3146207082e5f": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "e0c64219d9b4c33a5af42239225f988d07c38ff4ebe585e9d8e3a80ee6de7841": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "e251e7bcd9a8c76e20b8741196149bdf8ce6a7190f2646d20767b3518342c6d0": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "e8dc072ec5690bfd473699fd6a6b06a2f362bd6a13be4cc99b3ac5a94383e8cb": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "e94574a8cd80fdf1eaf1bf1b088ee562e4afbdc778c901fbbf6bbbcb6eedb3c9": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "efb8d315e939e00e469e02fe1f67c43c7e0e4fe7e99d99e081117436304b9d16": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "fd820f9f8c9adfb023634d0c607d0d12163cc076be72158cd85bb82e68923989": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
+    "fedfe39bee8fb88fe21defa5a6a5c469aaa0c7b43b731e6d4f18e42748eb10b1": {
+      "last_seen": 1792822448,
+      "qualified": false
+    },
     "00b281f94f5e5dd5ebe816362213e00f6821c9ea5df71dec94601e800cc47c60": {
       "last_seen": 1792818424,
       "qualified": false

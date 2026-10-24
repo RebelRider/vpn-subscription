@@ -156,18 +156,18 @@ sing-box1.13.19 Linux asset is pinned to its verified official SHA256.
 ## Unattended local operation
 
 The existing `com.rebelrider.best50-regional-refresh` launch agent polls every
-15minutes and starts at login. A dedicated clean runtime at
+5minutes and starts at login. A dedicated clean runtime at
 `~/best50-vpn-regional-runtime` updates by fast-forward under a kernel lock,
 without touching the development checkout. It checks input content and code
 signatures every poll; changed input triggers validation at the next poll.
-Unchanged input is revalidated early enough to allow a15minute poll interval
-and90minute job deadline within the six-hour target. Failures use bounded
+Unchanged input is revalidated early enough to allow a5minute poll interval
+and90minute job deadline plus a five-minute recovery margin within the six-hour target. Failures use bounded
 exponential backoff, automatically released crash locks and owned-child cleanup.
 
 Best50 older than18hours or with invalid timestamps is rejected. Fewer than10
-qualifiers or stale input requests a new GitHub build. Empty pools may request
+qualifiers or stale input requests a new GitHub build. Pools with at most two unique servers may request
 hourly replenishment; other supplemental requests are throttled to six hours.
-The15minute poll retries failures; new input bypasses old-input retry backoff.
+The5minute poll retries failures; new input bypasses old-input retry backoff.
 With at most two unique qualifiers, unchanged input is revalidated hourly and
 cloud replenishment may be requested hourly; pools of three to nine revalidate
 every two hours. All failure backoff and source rate limits remain in force.

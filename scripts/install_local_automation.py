@@ -42,7 +42,7 @@ def launchd_configuration(home: Path, repo: Path, python: Path) -> dict:
             "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
         },
         "RunAtLoad": True,
-        "StartInterval": 900,
+        "StartInterval": 300,
         "ProcessType": "Background",
         "ThrottleInterval": 30,
         "ExitTimeOut": 15,

@@ -361,7 +361,7 @@ class SchedulerTests(unittest.TestCase):
                 installer.install(home, repo, Path(sys.executable), load=False)
             run.assert_not_called()
             value = plistlib.loads(plist.read_bytes())
-            self.assertEqual(value["StartInterval"], 900)
+            self.assertEqual(value["StartInterval"], 300)
             self.assertEqual(value["EnvironmentVariables"]["EXISTING_AUTH_SETTING"], "preserved")
             self.assertTrue(value["RunAtLoad"])
             self.assertEqual(value["Label"], installer.LABEL)

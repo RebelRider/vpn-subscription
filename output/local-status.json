@@ -12787,13 +12787,13 @@
       "validated_at": "2026-10-25T09:30:55.594674+00:00",
       "upstream_rank": 13,
       "source_country": "XX",
-      "exit_ip": null,
-      "exit_country": "ZZ",
-      "exit_country_source": null,
-      "exit_city": null,
-      "exit_region": null,
-      "exit_db_country": null,
-      "exit_geo_status": "not-probed",
+      "exit_ip": "193.29.139.198",
+      "exit_country": "NL",
+      "exit_country_source": "cloudflare-trace",
+      "exit_city": "Amsterdam",
+      "exit_region": "North Holland",
+      "exit_db_country": "NL",
+      "exit_geo_status": "trace-ok",
       "country_gate": "metadata-only"
     }
   ],
@@ -12805,15 +12805,14 @@
     "ipv4_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv4.csv.gz",
     "ipv6_database": "/Users/ks/Library/Application Support/best50-vpn/geoip/dbip-city-ipv6.csv.gz",
     "observed_countries": {
-      "NL": 1
+      "NL": 2
     },
     "accepted_countries": {
-      "NL": 1,
-      "ZZ": 1
+      "NL": 2
     },
     "rejected_countries": {},
-    "complete": 1,
-    "country_only": 1,
+    "complete": 2,
+    "country_only": 0,
     "unknown_rejected": 0,
     "disallowed_country_rejected": 0,
     "country_qualified": 2
@@ -12849,5 +12848,6 @@
     "branch": "regional",
     "subscription_path": "output/best-local.txt",
     "status_path": "output/local-status.json"
-  }
+  },
+  "presentation_updated_at": "2026-10-25T10:00:30.735236+00:00"
 }

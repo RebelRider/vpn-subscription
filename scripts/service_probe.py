@@ -73,9 +73,13 @@ ALLOWED_HOSTS = {
     "instagram": frozenset({"instagram.com", "www.instagram.com"}),
     "latency": frozenset({"www.gstatic.com"}),
     "trace": frozenset({"www.cloudflare.com"}),
+    "exit-ip": frozenset({"api64.ipify.org"}),
 }
 LATENCY_URL = "https://www.gstatic.com/generate_204"
 TRACE_URL = "https://www.cloudflare.com/cdn-cgi/trace"
+EXIT_IP_URL = "https://api64.ipify.org?format=json"
+EXIT_METADATA_TIMEOUT = 4
+MAX_EXIT_IP_RESPONSE_BYTES = 1024
 ANTI_AUTOMATION = (
     b"cf-chl-", b"just a moment", b"verify you are human",
     b"captcha", b"challenge_required", b"login_required",
@@ -232,6 +236,7 @@ def _safe_url(url: str, service: str) -> bool:
             and not parsed.username and not parsed.password
             and not parsed.fragment
             and not re.search(r"/(challenge|checkpoint|consent)(?:/|$)", parsed.path)
+            and (service != "exit-ip" or (parsed.path in ("", "/") and parsed.query == "format=json"))
         )
     except (TypeError, ValueError, KeyError):
         return False
@@ -346,6 +351,10 @@ def validate_response(service: str, response: dict) -> tuple[bool, str]:
     if service == "trace":
         trace = parse_exit_trace(body)
         return (True, "ok") if trace else (False, "unexpected-exit-trace")
+    if service == "exit-ip":
+        if content_type.split(";", 1)[0].strip() != "application/json":
+            return False, "expected-exit-ip-json"
+        return (True, "ok") if parse_exit_ip(body) else (False, "unexpected-exit-ip")
     return False, "unknown-service"
 
 
@@ -369,11 +378,73 @@ def parse_exit_trace(body: bytes) -> dict | None:
         fields = dict(line.split("=", 1) for line in body.decode("ascii").splitlines() if "=" in line)
         address = ipaddress.ip_address(fields.get("ip", ""))
         location = fields.get("loc", "")
-        if not address.is_global or not re.fullmatch(r"[A-Z]{2}", location):
+        if not address.is_global or address.is_multicast or not re.fullmatch(r"[A-Z]{2}", location):
             return None
         return {"ip": str(address), "loc": location}
     except (ValueError, UnicodeError):
         return None
+
+
+def parse_exit_ip(body: bytes) -> dict | None:
+    """Accept only a small public unicast IP echo, never arbitrary response text."""
+    if not isinstance(body, bytes) or len(body) > MAX_EXIT_IP_RESPONSE_BYTES:
+        return None
+    try:
+        payload = json.loads(body)
+        raw_ip = payload.get("ip") if isinstance(payload, dict) and set(payload) == {"ip"} else None
+        if not isinstance(raw_ip, str) or "%" in raw_ip:
+            return None
+        address = ipaddress.ip_address(raw_ip)
+        if not address.is_global or address.is_multicast:
+            return None
+        return {"ip": str(address), "loc": ""}
+    except (ValueError, UnicodeError, RecursionError):
+        return None
+
+
+async def observe_exit_metadata(build, port: int, username: str, password: str) -> dict:
+    """Optional egress evidence through the same proxy, at most two bounded requests.
+
+    Do not follow redirects or let metadata failure revoke completed service proof.
+    External cancellation still propagates and _http_once cleans its owned child.
+    """
+    attempts = []
+    allowed_reasons = frozenset({
+        "ok", "unexpected-final-url", "invalid-response-size", "geographic-restriction",
+        "cloudflare-challenge-inconclusive", "rate-limited-inconclusive",
+        "authentication-required-inconclusive", "access-denied-inconclusive", "challenge-inconclusive",
+        "invalid-response-content-type", "unexpected-application-path-inconclusive",
+        "unexpected-exit-trace", "expected-exit-ip-json", "unexpected-exit-ip",
+        "request-process-failed", "proxy-name-resolution-failed", "destination-name-resolution-failed",
+        "loopback-proxy-unavailable", "proxy-request-timeout", "destination-tls-failed",
+        "destination-certificate-invalid", "proxy-receive-failed", "response-too-large",
+        "socks-connection-failed", "proxy-request-failed", "missing-request-timing",
+        "invalid-request-timing", "malformed-http-headers", "malformed-http-status",
+    })
+    for service, url, source in (("trace", TRACE_URL, "cloudflare-trace"),
+                                 ("exit-ip", EXIT_IP_URL, "ipify-exit-ip")):
+        response = {}
+        try:
+            response = await asyncio.wait_for(_request(build, service, url, port, username, password), EXIT_METADATA_TIMEOUT)
+            if not isinstance(response, dict):
+                raise ValueError("invalid metadata response")
+            passed, reason = validate_response(service, response)
+        except asyncio.CancelledError:
+            raise
+        except asyncio.TimeoutError:
+            passed, reason = False, "proxy-request-timeout"
+        except (OSError, ValueError, TypeError, RuntimeError):
+            passed, reason = False, "exit-metadata-request-failed"
+        if reason not in allowed_reasons and not re.fullmatch(r"http-[1-5][0-9]{2}", reason):
+            reason = "exit-metadata-request-failed"
+        status = response.get("status") if isinstance(response, dict) else None
+        attempts.append({"endpoint": source, "reason": reason,
+                         "http_status": status if type(status) is int and 100 <= status <= 599 else None})
+        if passed:
+            trace = parse_exit_trace(response["body"]) if service == "trace" else parse_exit_ip(response["body"])
+            if trace is not None:
+                return {"exit_trace": trace, "exit_trace_source": source, "exit_geo_attempts": attempts}
+    return {"exit_trace": None, "exit_trace_reason": attempts[-1]["reason"], "exit_geo_attempts": attempts}
 
 
 async def _resolve_public_servers(host: str, port: int) -> list[str]:
@@ -545,6 +616,10 @@ async def _request(build, service: str, url: str, port: int, username: str, pass
         if not _safe_url(url, service):
             return {"error": "unexpected-redirect", "url": url}
         response = await _http_once(build, url, port, username, password)
+        # IP metadata is a maximum of two provider requests. Redirect responses
+        # remain failures instead of adding unbounded provider hops.
+        if service in ("trace", "exit-ip"):
+            return response
         if response.get("status") not in (301, 302, 303, 307, 308):
             return response
         if hop == 3 or not response.get("location"):
@@ -756,12 +831,7 @@ async def _validate_address(build, link: str, rounds: int, interface: str, serve
                         break
                 summarize_report(report, rounds)
                 if report["qualified"]:
-                    trace = await _request(build, "trace", TRACE_URL, port, username, password)
-                    trace_ok, reason = validate_response("trace", trace)
-                    if trace_ok:
-                        report["exit_trace"] = parse_exit_trace(trace["body"])
-                    else:
-                        report["exit_trace_reason"] = reason
+                    report.update(await observe_exit_metadata(build, port, username, password))
             finally:
                 await _stop(build, process)
                 process = None

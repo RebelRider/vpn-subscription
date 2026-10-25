@@ -35,10 +35,13 @@ def response(service, **changes):
                 b'"PolarisLoginPage.react"' + b" " * 1200 + b"</html>")
     elif service == "trace":
         body = b"fl=123\nip=8.8.8.8\nloc=DE\ntls=TLSv1.3\n"
+    elif service == "exit-ip":
+        body = b'{"ip":"8.8.8.8"}'
     else:
         body = b""
     result = {"status": 204 if service == "latency" else 200,
-              "url": probe.SERVICE_URLS.get(service, probe.LATENCY_URL if service == "latency" else probe.TRACE_URL),
+              "url": probe.SERVICE_URLS.get(service, probe.LATENCY_URL if service == "latency" else
+                                             probe.EXIT_IP_URL if service == "exit-ip" else probe.TRACE_URL),
               "body": body, "content_type": "text/html" if service == "instagram" else "application/json",
               "latency_ms": 150.0}
     result.update(changes)
@@ -226,6 +229,116 @@ class ResponseValidationTests(unittest.TestCase):
         self.assertEqual(probe.parse_exit_trace(b"ip=8.8.8.8\nloc=DE\n"), {"ip": "8.8.8.8", "loc": "DE"})
         self.assertIsNone(probe.parse_exit_trace(b"ip=127.0.0.1\nloc=DE\n"))
         self.assertIsNone(probe.parse_exit_trace(b"ip=8.8.8.8\nloc=unknown\n"))
+        self.assertIsNone(probe.parse_exit_trace(b"ip=224.0.0.1\nloc=DE\n"))
+
+    def test_exit_ip_echo_requires_exact_https_json_endpoint_and_public_unicast_ip(self):
+        for ip in ("8.8.8.8", "2001:4860:4860::8888"):
+            self.assertEqual(probe.validate_response("exit-ip", response("exit-ip", body=json.dumps({"ip": ip}).encode())), (True, "ok"))
+        for body in (b'{', b'[]', b'{"ip":8}', b'{"ip":"127.0.0.1"}', b'{"ip":"192.168.1.1"}',
+                     b'{"ip":"224.0.0.1"}', b'{"ip":"ff02::1"}', b'{"ip":"fe80::1%en0"}',
+                     b'{"ip":"8.8.8.8","other":"unexpected"}', b' ' * 1025):
+            with self.subTest(body=body[:60]):
+                self.assertFalse(probe.validate_response("exit-ip", response("exit-ip", body=body))[0])
+        for url in ("http://api64.ipify.org?format=json", "https://api64.ipify.org.evil.test?format=json",
+                    "https://api64.ipify.org/other?format=json", "https://api64.ipify.org?format=text",
+                    "https://api64.ipify.org?format=json&callback=x", "https://api64.ipify.org?format=json#x"):
+            self.assertFalse(probe.validate_response("exit-ip", response("exit-ip", url=url))[0])
+        self.assertFalse(probe.validate_response("exit-ip", response("exit-ip", content_type="text/html"))[0])
+        self.assertFalse(probe.validate_response("exit-ip", response("exit-ip", status=403))[0])
+        self.assertFalse(probe.validate_response("exit-ip", response("exit-ip", cf_mitigated="challenge"))[0])
+
+
+class ExitMetadataTests(unittest.IsolatedAsyncioTestCase):
+    async def test_primary_success_uses_exact_same_candidate_proxy_once(self):
+        build = build_stub()
+        with patch.object(probe, "_request", AsyncMock(return_value=response("trace"))) as request:
+            result = await probe.observe_exit_metadata(build, 12345, "owned-user", "owned-pass")
+        request.assert_awaited_once_with(build, "trace", probe.TRACE_URL, 12345, "owned-user", "owned-pass")
+        self.assertEqual(result["exit_trace"], {"ip": "8.8.8.8", "loc": "DE"})
+        self.assertEqual(result["exit_trace_source"], "cloudflare-trace")
+        self.assertEqual(result["exit_geo_attempts"], [{"endpoint": "cloudflare-trace", "reason": "ok", "http_status": 200}])
+
+    async def test_timeout_or_error_uses_one_fallback_with_same_proxy_credentials(self):
+        build = build_stub()
+        for first in (asyncio.TimeoutError(), {"error": "proxy-request-timeout"}, response("trace", body=b"not a trace")):
+            with self.subTest(first=type(first).__name__), \
+                    patch.object(probe, "_request", AsyncMock(side_effect=[first, response("exit-ip")])) as request:
+                result = await probe.observe_exit_metadata(build, 12345, "owned-user", "owned-pass")
+            self.assertEqual(result["exit_trace"], {"ip": "8.8.8.8", "loc": ""})
+            self.assertEqual(result["exit_trace_source"], "ipify-exit-ip")
+            self.assertEqual(request.await_count, 2)
+            self.assertEqual([call.args[3:] for call in request.await_args_list], [(12345, "owned-user", "owned-pass")] * 2)
+            self.assertEqual(request.await_args_list[1].args[1:3], ("exit-ip", probe.EXIT_IP_URL))
+
+    async def test_metadata_timeout_bound_cancels_each_request_and_limits_attempts(self):
+        cancelled = 0
+        async def never_finishes(*args):
+            nonlocal cancelled
+            try:
+                await asyncio.Event().wait()
+            finally:
+                cancelled += 1
+        self.assertLessEqual(probe.EXIT_METADATA_TIMEOUT, 4)
+        with patch.object(probe, "EXIT_METADATA_TIMEOUT", .01), \
+                patch.object(probe, "_request", AsyncMock(side_effect=never_finishes)) as request:
+            result = await asyncio.wait_for(probe.observe_exit_metadata(None, 12345, "user", "pass"), .5)
+        self.assertEqual(request.await_count, 2)
+        self.assertEqual(cancelled, 2)
+        self.assertIsNone(result["exit_trace"])
+        self.assertEqual(result["exit_trace_reason"], "proxy-request-timeout")
+
+    async def test_external_cancellation_propagates_without_retry(self):
+        started = asyncio.Event()
+        async def request(*args):
+            started.set()
+            await asyncio.Event().wait()
+        with patch.object(probe, "_request", AsyncMock(side_effect=request)) as mocked:
+            task = asyncio.create_task(probe.observe_exit_metadata(None, 12345, "user", "pass"))
+            await started.wait()
+            task.cancel()
+            with self.assertRaises(asyncio.CancelledError):
+                await task
+        mocked.assert_awaited_once()
+
+    async def test_metadata_deadlines_reap_both_owned_curl_children(self):
+        build = build_stub()
+        children = [SimpleNamespace(stdout=asyncio.StreamReader(), stderr=None, returncode=None,
+                                    wait=AsyncMock()) for _ in range(2)]
+        with patch.object(probe, "EXIT_METADATA_TIMEOUT", .01), \
+                patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(side_effect=children)) as launch:
+            result = await asyncio.wait_for(probe.observe_exit_metadata(build, 12345, "owned-user", "owned-pass"), .5)
+        self.assertEqual(launch.await_count, 2)
+        self.assertEqual([call.args[0] for call in build._stop_owned_probe_process.await_args_list], children)
+        self.assertEqual([call.args[0] for call in build._register_owned_probe_process.call_args_list], children)
+        for call in launch.await_args_list:
+            command = call.args
+            self.assertEqual(command[command.index("--proxy") + 1], "socks5h://127.0.0.1:12345")
+            self.assertEqual(command[command.index("--proxy-user") + 1], "owned-user:owned-pass")
+        self.assertIsNone(result["exit_trace"])
+        self.assertEqual(result["exit_trace_reason"], "proxy-request-timeout")
+
+    async def test_failed_metadata_keeps_qualification_and_safe_attempt_diagnostics(self):
+        build, child = build_stub(), SimpleNamespace(returncode=None)
+        async def request(_build, service, *args):
+            return response(service) if service in probe.SERVICE_URLS or service == "latency" else {"error": "private-user-password"}
+        with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8"])), \
+                patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(return_value=child)), \
+                patch.object(probe, "_wait_authenticated", AsyncMock()), \
+                patch.object(probe, "_request", AsyncMock(side_effect=request)):
+            result = await probe._validate_one(build, LINK, 3, "en0")
+        self.assertTrue(result["qualified"])
+        self.assertEqual(result["rejection_reasons"], [])
+        self.assertIsNone(result["exit_trace"])
+        self.assertEqual(len(result["exit_geo_attempts"]), 2)
+        self.assertEqual(result["exit_trace_reason"], "exit-metadata-request-failed")
+        self.assertNotIn("private-user-password", json.dumps(result["exit_geo_attempts"]))
+
+    async def test_metadata_redirects_do_not_add_requests_or_follow_another_host(self):
+        for service, url in (("trace", probe.TRACE_URL), ("exit-ip", probe.EXIT_IP_URL)):
+            with patch.object(probe, "_http_once", AsyncMock(return_value=response(service, status=302, location="https://example.com/"))) as request:
+                result = await probe._request(None, service, url, 12345, "user", "pass")
+            request.assert_awaited_once()
+            self.assertFalse(probe.validate_response(service, result)[0])
 
 
 class IsolationTests(unittest.TestCase):

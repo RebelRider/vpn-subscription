@@ -47,6 +47,14 @@ One global kernel lock serializes browsers. All profiles and processes are owned
 ephemeral and supervised; system networking and existing browser data are untouched.
 The pinned browser runtime is installed/repaired only in BestLocal-owned caches.
 
+Subscription names include the observed public exit IP when available, for
+example `🇳🇱 NL | Haarlem | 2 | [193.29.139.198]`. Exit country/city are optional
+metadata: Cloudflare trace is preferred; a bounded independent ipify IP echo can
+fall back to the local DB-IP database. Both observations use the candidate proxy.
+Source labels or the server's CDN endpoint are never substituted for its actual
+exit geography. Unknown geography keeps a neutral globe and does not reject a
+functionally verified connection.
+
 These are public unauthenticated application reachability checks. They do not
 prove account login, video playback or unrestricted authenticated features.
 

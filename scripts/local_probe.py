@@ -390,6 +390,7 @@ def presentation_label(
     rank: int,
     exit_country: str | None = None,
     exit_city: str | None = None,
+    exit_ip: str | None = None,
 ) -> str:
     if rank < 1:
         raise ValueError(
@@ -404,28 +405,23 @@ def presentation_label(
         exit_city
     )
 
-    if not re.fullmatch(
+    if country in {"XX", "ZZ"} or not re.fullmatch(
         r"[A-Z]{2}",
         country,
     ):
-        return f"🌐 | {rank}"
-
-    prefix = (
-        f"{country_flag(country)} "
-        f"{country}"
-    )
-
-    if city:
-        return (
-            f"{prefix} | "
-            f"{city} | "
-            f"{rank}"
-        )
-
-    return (
-        f"{prefix} | "
-        f"{rank}"
-    )
+        label = f"🌐 | {rank}"
+    else:
+        prefix = f"{country_flag(country)} {country}"
+        label = f"{prefix} | {city} | {rank}" if city else f"{prefix} | {rank}"
+    if not isinstance(exit_ip, str):
+        return label
+    try:
+        address = ipaddress.ip_address(exit_ip)
+    except (ValueError, TypeError):
+        return label
+    if address.is_global and not address.is_multicast:
+        label += f" | [{address}]"
+    return label
 
 
 def published_link(
@@ -433,6 +429,7 @@ def published_link(
     rank: int,
     exit_country: str | None = None,
     exit_city: str | None = None,
+    exit_ip: str | None = None,
 ) -> str:
     """
     Build presentation-only URI fragment.
@@ -448,9 +445,34 @@ def published_link(
         rank,
         exit_country,
         exit_city,
+        exit_ip,
     )
 
     return load_protocols().relabel(link, label)
+
+
+def exit_metadata_from_reports(links: list[str], reports: dict) -> dict[str, dict]:
+    """Retain optional exit observation failures instead of saying not-probed."""
+    metadata = {}
+    for link in links:
+        report = reports.get(link, {})
+        if not isinstance(report, dict):
+            continue
+        trace = report.get("exit_trace", {})
+        item = {}
+        if isinstance(trace, dict) and isinstance(trace.get("ip"), str):
+            parsed = _parse_cloudflare_trace(f"ip={trace['ip']}\nloc={trace.get('loc', '')}\n".encode())
+            if parsed:
+                item.update(parsed, exit_geo_status="trace-ok")
+        reason = report.get("exit_trace_reason")
+        if not item and isinstance(reason, str) and re.fullmatch(r"[a-z0-9-]{1,100}", reason):
+            item.update(exit_geo_status="trace-failed", exit_geo_error=reason)
+        attempts = report.get("exit_geo_attempts")
+        if isinstance(attempts, list):
+            item["exit_geo_attempts"] = attempts[:2]
+        if item:
+            metadata[link] = item
+    return metadata
 
 def route_interface(
     destination: str = "1.1.1.1",
@@ -520,6 +542,9 @@ def _parse_cloudflare_trace(
             )
         )
     except ValueError:
+        return None
+
+    if not address.is_global or address.is_multicast:
         return None
 
     country = values.get(
@@ -1627,6 +1652,7 @@ def write_subscription(
             int(node["rank"]),
             node.get("exit_country"),
             node.get("exit_city"),
+            node.get("exit_ip"),
         )
         for node in nodes
     ]
@@ -1740,6 +1766,7 @@ def validate_generated_result(
             int(node["rank"]),
             node.get("exit_country"),
             node.get("exit_city"),
+            node.get("exit_ip"),
         )
         for node in status["nodes"]
     ]
@@ -2533,13 +2560,7 @@ async def async_main() -> int:
 
     # Use the trace captured by the very same isolated candidate process.
     # Do not start the legacy fixed-port enrichment engine.
-    exit_metadata = {}
-    for link in qualified:
-        trace = build._local_reports.get(link, {}).get("exit_trace", {})
-        if isinstance(trace, dict) and trace.get("ip"):
-            parsed = _parse_cloudflare_trace(f"ip={trace['ip']}\nloc={trace.get('loc', '')}\n".encode())
-            if parsed:
-                exit_metadata[link] = {**parsed, "exit_geo_status": "trace-ok"}
+    exit_metadata = exit_metadata_from_reports(qualified, build._local_reports)
 
     apply_exit_geography(
         status,

@@ -17,13 +17,16 @@ entries are published, preserving the previous small-list policy.
 * ChatGPT: the lightweight HTTPS providers request is a fast path, never the
   sole authority. Cloudflare, changed/empty provider JSON and unavailable auth
   routes remain inconclusive. When other services and a valid latency sample
-  work, a stock headed Chromium instance uses that candidate's authenticated
+  work, a stock headless Chromium instance uses that candidate's authenticated
   HTTP CONNECT proxy. Each of five reloads must expose a visible, editable
   ChatGPT composer and a fresh, validated application JSON response (anonymous
   model catalogue or genuine auth-provider metadata). No prompt, login, CAPTCHA
   solving, stealth or copied browser state is used. A challenge never passes.
   The composer uses semantic selectors because current ChatGPT no longer uses
   the old fixed ID. Browser API fetches bypass their own HTTP cache.
+  This fallback has no desktop window and never activates an application.
+  Both the Python adapter and JavaScript launcher enforce headless-only operation;
+  a headless failure never retries with a visible browser.
 * YouTube: the public oEmbed response for the official iframe API example video
   `M7lc1UVf-VE`, validating provider, video type, title and matching embed URL.
 * Instagram: the public login application HTML, requiring its actual login

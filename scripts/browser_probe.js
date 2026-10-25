@@ -190,7 +190,9 @@ async function main() {
   const playwright = require(process.env.BESTLOCAL_PLAYWRIGHT);
   const args = ['--disable-quic', '--force-webrtc-ip-handling-policy=disable_non_proxied_udp', '--window-size=900,700'];
   if (!config.control) args.push('--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1', '--proxy-bypass-list=<-loopback>');
-  const options = {headless: config.headless === true, channel: 'chromium', args, ignoreHTTPSErrors: false,
+  // Scheduled validation must never create a window or activate an application.
+  // Enforce this here as well as in Python, including legacy/malformed configs.
+  const options = {headless: true, channel: 'chromium', args, ignoreHTTPSErrors: false,
     acceptDownloads: false, serviceWorkers: 'block', timeout: 20000};
   if (!config.control) options.proxy = {server: 'http://127.0.0.1:' + config.port,
     username: config.username, password: config.password, bypass: '<-loopback>'};

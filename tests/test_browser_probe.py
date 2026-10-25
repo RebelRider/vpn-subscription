@@ -5,7 +5,7 @@ from pathlib import Path
 import subprocess
 import sys
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import browser_probe as probe
@@ -44,7 +44,7 @@ class BrowserEvidenceTests(unittest.TestCase):
         code = r"""
 const fs=require('fs'),vm=require('vm'),fixture=JSON.parse(process.argv[2]);
 const source=fs.readFileSync(process.argv[1],'utf8');
-const frame={},listeners=new Map();let currentUrl='https://chatgpt.com/',inputActions=0,trialActions=0;
+const frame={},listeners=new Map();let currentUrl='https://chatgpt.com/',inputActions=0,trialActions=0,launchCount=0,launchOptions;
 const docResponse=(status,url=currentUrl,kind='document',main=true)=>({url:()=>url,status:()=>status,request:()=>({isNavigationRequest:()=>kind==='document',resourceType:()=>kind,frame:()=>main?frame:{}})});
 function emit(response){for(const fn of listeners.get('response')||[])fn(response)}
 const composer={or(){return this},and(){return this},first(){return this},async waitFor(){
@@ -65,17 +65,36 @@ const page={setDefaultTimeout(){},mainFrame:()=>frame,on(name,fn){if(!listeners.
  }};
 const moduleObject={exports:{}};
 function fakeRequire(name){
- if(name==='fs')return {readFileSync:()=>JSON.stringify({profile:'owned-test',control:true,rounds:1})};
+ if(name==='fs')return {readFileSync:()=>JSON.stringify({profile:'owned-test',control:true,rounds:1,
+  ...(Object.hasOwn(fixture,'headless')?{headless:fixture.headless}:{})})};
  if(name==='crypto')return require('crypto');
- if(name==='fake-playwright')return {chromium:{launchPersistentContext:async()=>({pages:()=>[page],close:async()=>{}})}};
+ if(name==='fake-playwright')return {chromium:{launchPersistentContext:async(_profile,options)=>{
+  launchCount++;launchOptions=options;return {pages:()=>[page],close:async()=>{}};
+ }}};
  throw Error('unexpected require');
 };fakeRequire.main=moduleObject;
 vm.runInNewContext(source,{require:fakeRequire,module:moduleObject,process:{env:{BESTLOCAL_PLAYWRIGHT:'fake-playwright'},on(){},exit(){}},
- console:{log(message){const r=JSON.parse(message);console.log(JSON.stringify({...r,inputActions,trialActions}))}},URL,setTimeout,clearTimeout,Buffer});
+ console:{log(message){const r=JSON.parse(message);console.log(JSON.stringify({...r,inputActions,trialActions,launchCount,launchOptions}))}},URL,setTimeout,clearTimeout,Buffer});
 """
         result = subprocess.run([node, "-e", code, str(Path(probe.__file__).with_suffix(".js")), json.dumps(options)],
                                 capture_output=True, text=True, check=True, timeout=5)
         return json.loads(result.stdout)
+
+    def test_launcher_is_headless_even_with_missing_or_legacy_false_configuration(self):
+        for options in ({}, {"headless": True}, {"headless": False}, {"headless": None}):
+            with self.subTest(options=options):
+                result = self.browser_fixture(**options)
+                self.assertTrue(result["qualified"])
+                self.assertIs(result["launchOptions"]["headless"], True)
+                self.assertEqual(result["launchCount"], 1)
+
+    def test_headless_challenge_remains_inconclusive_without_a_visible_retry(self):
+        result = self.browser_fixture(headless=False, visible_text="Verify you are human")
+        self.assertFalse(result["qualified"])
+        self.assertEqual(result["rounds"][0]["reason"], "cloudflare-challenge-inconclusive")
+        self.assertIs(result["launchOptions"]["headless"], True)
+        self.assertEqual(result["launchCount"], 1)
+        self.assertEqual(result["inputActions"], 0)
 
     def test_visible_challenge_or_restriction_blocks_even_working_api_and_composer(self):
         cases = {"Verify you are human": "cloudflare-challenge-inconclusive",
@@ -171,6 +190,42 @@ const visible=a.visibleTextSnapshot();console.log(JSON.stringify({visible,restri
         for rounds in (0, 6, True, "5"):
             with self.assertRaises(ValueError):
                 asyncio.run(probe.check_chatgpt(None, 20000, "user", "pass", rounds))
+
+    def test_non_true_headless_values_are_rejected_before_runtime_or_process_work(self):
+        with patch.object(probe, "find_node") as runtime, \
+                patch.object(probe.asyncio, "create_subprocess_exec", new_callable=AsyncMock) as launch:
+            for value in (False, None, 0, 1, "true", "false"):
+                with self.subTest(value=value), self.assertRaises(ValueError):
+                    asyncio.run(probe.check_chatgpt(None, None, None, None, control=True, headless=value))
+            runtime.assert_not_called()
+            launch.assert_not_awaited()
+
+    def test_default_headless_is_serialized_for_the_owned_background_process(self):
+        import tempfile
+        process = Mock(returncode=0)
+        process.stdout.read = AsyncMock(side_effect=[b'{"qualified":false,"rounds":[]}', b""])
+        process.wait = AsyncMock(return_value=0)
+        build = Mock()
+        build._stop_owned_probe_process = AsyncMock()
+        configurations = []
+
+        async def spawn(*_args, **kwargs):
+            path = Path(kwargs["env"]["BESTLOCAL_BROWSER_CONFIGURATION"])
+            configurations.append(json.loads(path.read_text()))
+            return process
+
+        with tempfile.TemporaryDirectory() as directory, \
+                patch.object(probe, "RUNTIME", Path(directory) / "runtime"), \
+                patch.object(probe, "find_node", return_value="/owned-test/node"), \
+                patch.object(probe, "package_version", return_value=probe.VERSION), \
+                patch.object(probe.asyncio, "create_subprocess_exec", new_callable=AsyncMock, side_effect=spawn) as launch:
+            result = asyncio.run(probe.check_chatgpt(build, None, None, None, control=True))
+        self.assertFalse(result["qualified"])
+        self.assertEqual(len(configurations), 1)
+        self.assertIs(configurations[0]["headless"], True)
+        launch.assert_awaited_once()
+        build._register_owned_probe_process.assert_called_once_with(process)
+        build._stop_owned_probe_process.assert_awaited_once_with(process)
 
     def test_global_browser_lock_survives_busy_and_is_not_unlinked(self):
         import tempfile

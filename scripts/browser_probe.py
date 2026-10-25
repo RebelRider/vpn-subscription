@@ -4,6 +4,7 @@
 The candidate browser can connect only to its authenticated loopback proxy.
 Control mode deliberately uses the existing system connection without changing
 any network settings. Neither mode reads existing browser state or signs in.
+Both modes are headless-only and must never create a desktop window.
 """
 from __future__ import annotations
 
@@ -175,13 +176,13 @@ def validate_evidence(value: object, rounds: int, now: datetime | None = None) -
 
 
 async def check_chatgpt(build, port: int | None, username: str | None, password: str | None,
-                      rounds: int = 1, control: bool = False, headless: bool = False) -> dict:
-    """Return bounded evidence, never browser content, cookies or credentials."""
+                      rounds: int = 1, control: bool = False, headless: bool = True) -> dict:
+    """Return bounded background evidence; a visible browser is prohibited."""
     global _ISOLATION_VERIFIED
     if not isinstance(rounds, int) or isinstance(rounds, bool) or not 1 <= rounds <= 5:
         raise ValueError("browser rounds must be 1..5")
-    if not isinstance(headless, bool):
-        raise ValueError("headless must be boolean")
+    if headless is not True:
+        raise ValueError("visible browser validation is prohibited; headless must be True")
     if not control and (not isinstance(username, str) or not isinstance(password, str)
                         or not username or not password or len(username) > 256 or len(password) > 256):
         return _failure("browser-proxy-authentication-missing")

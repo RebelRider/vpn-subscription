@@ -6,6 +6,9 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from urllib.parse import quote, unquote, urlsplit
+
+from scripts import build
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('protocol_adapters_test', ROOT/'scripts/protocols.py')
@@ -27,6 +30,45 @@ LINKS = [vmess(), 'trojan://password@1.1.1.1:443?sni=example.com',
 
 
 class ProtocolTests(unittest.TestCase):
+    def test_happ_literal_leading_flag_preserves_every_uri_connection(self):
+        label = '🇳🇱 NL | Haarlem | 1 | [51.158.161.241]'
+        links = LINKS[1:] + [
+            f'vless://{UUID}@1.1.1.1:443?security=tls&sni=example.com',
+            'trojan://public%3Apassword@1.1.1.1:443?security=tls&type=ws&host=example.com&path=%2Fws%3Fed%3D2048&sni=example.com',
+        ]
+        for original in links:
+            with self.subTest(protocol=original.split(':', 1)[0]):
+                renamed = p.relabel(original, label)
+                fragment = urlsplit(renamed).fragment
+                self.assertTrue(fragment.startswith('🇳🇱'), fragment)
+                self.assertEqual(fragment, '🇳🇱' + quote(label[2:], safe=''))
+                self.assertEqual(unquote(fragment), label)
+                before, after = build.parse_vless(original), build.parse_vless(renamed)
+                self.assertEqual(build.normalized_fingerprint(after), build.normalized_fingerprint(before))
+                self.assertEqual(build.vless_to_singbox(after), build.vless_to_singbox(before))
+                self.assertEqual(p.relabel(renamed, label), renamed)
+        explicit = links[-1]
+        self.assertEqual(p.relabel(explicit, label).split('#', 1)[0], explicit)
+
+    def test_non_flag_prefixes_remain_url_encoded(self):
+        for label in ('NL | 1', '🌐 | 2', '😎 🇳🇱 NL | 1', '🇳 incomplete', '100% / ? # &'):
+            with self.subTest(label=label):
+                fragment = urlsplit(p.relabel(LINKS[1], label)).fragment
+                self.assertEqual(fragment, quote(label, safe=''))
+                self.assertEqual(unquote(fragment), label)
+
+    def test_vmess_keeps_literal_flag_in_ps_and_connection_parameters(self):
+        original = vmess()
+        label = '🇳🇱 NL | Haarlem | 1 | [51.158.161.241]'
+        renamed = p.relabel(original, label)
+        source = json.loads(p.b64(original.split('://', 1)[1]))
+        result = json.loads(p.b64(renamed.split('://', 1)[1]))
+        self.assertEqual(result.pop('ps'), label)
+        source.pop('ps')
+        self.assertEqual(result, source)
+        self.assertEqual(p.parse_node(renamed)['normalized_key'], p.parse_node(original)['normalized_key'])
+        self.assertEqual(p.relabel(renamed, label), renamed)
+
     def test_happ_trojan_tls_is_explicit_without_changing_validated_connection(self):
         original = 'trojan://public%3Apassword@1.1.1.1:443?type=ws&host=example.com&path=%2Fws%3Fed%3D2048&sni=example.com#old'
         published = p.relabel(original, 'NL | 1')

@@ -54,6 +54,11 @@ fall back to the local DB-IP database. Both observations use the candidate proxy
 Source labels or the server's CDN endpoint are never substituted for its actual
 exit geography. Unknown geography keeps a neutral globe and does not reject a
 functionally verified connection.
+The leading country flag is emitted as a literal UTF-8 emoji in URI labels
+([Happ's supported icon format](https://www.happ.su/main/dev-docs/emoji)); the
+remaining label stays URL-encoded. VMess retains the flag in its JSON name.
+Happ manages its own active-server display cache; publication never resets that
+cache or restarts a connection merely to refresh an icon.
 
 These are public unauthenticated application reachability checks. They do not
 prove account login, video playback or unrestricted authenticated features.

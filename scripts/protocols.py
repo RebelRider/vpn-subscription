@@ -209,7 +209,13 @@ def relabel(link: str, label: str) -> str:
         base = link.split('#', 1)[0]
         if 'security' not in parse_qs(urlsplit(base).query, keep_blank_values=True):
             link = base + ('&' if '?' in base else '?') + 'security=tls'
-    return link.split('#', 1)[0] + '#' + quote(label, safe='')
+    encoded_label = quote(label, safe='')
+    if len(label) >= 2 and all(0x1F1E6 <= ord(char) <= 0x1F1FF for char in label[:2]):
+        # Happ documents literal leading flags as supported icons. Keep this
+        # prefix directly visible to protocol importers before URL decoding;
+        # continue escaping every other presentation character as before.
+        encoded_label = label[:2] + quote(label[2:], safe='')
+    return link.split('#', 1)[0] + '#' + encoded_label
 
 
 def connection_identity(build, link: str) -> str:

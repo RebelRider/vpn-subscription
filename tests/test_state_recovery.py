@@ -123,6 +123,7 @@ class SchedulerRecoveryTests(unittest.TestCase):
             (repo / "output/local-status.json").write_text(json.dumps({
                 "generated_at": stamp(now), "stability": {"qualified": 12},
                 "nodes": [{}] * 12, "diagnostics": [],
+                "publication": {"subscription_status": "published", "health_status": "published"},
             }))
             state_dir = repo / "state"
             state_dir.mkdir()

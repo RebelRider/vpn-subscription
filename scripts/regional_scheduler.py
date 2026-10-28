@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 from datetime import datetime
 import fcntl
 import hashlib
@@ -32,6 +33,14 @@ LOW_POOL_SIZE = 10
 MAX_OUTPUT_BYTES = 4 * 1024 * 1024
 MAX_STATE_BYTES = 1024 * 1024
 MAX_RETRY_FUTURE_SECONDS = 3600 + 300
+RUN_HISTORY_BYTES = 2 * 1024 * 1024
+RUN_HISTORY_RECORDS = 2000
+RUN_HISTORY_SECONDS = 30 * 86400
+LOG_BACKUPS = 7
+OUTCOME_CODES = frozenset({"published", "no_qualifiers", "publication_failed", "infrastructure_failed", "interrupted", "stale_input", "recovered_interrupted"})
+STAGE_CODES = frozenset({"scheduler", "input", "validation", "publication", "recovery"})
+CONFIRMED_HEALTH_STATUSES = frozenset({"published", "unchanged", "superseded"})
+PUBLICATION_STATUS_CODES = CONFIRMED_HEALTH_STATUSES | {"failed", "withheld_empty", "retained", "unconfirmed"}
 RECOVERABLE_GIT_LOCKS = (
     "index.lock", "shallow.lock", "FETCH_HEAD.lock", "packed-refs.lock",
     "refs/heads/main.lock", "refs/remotes/origin/main.lock", "refs/remotes/origin/regional.lock",
@@ -97,9 +106,148 @@ def rotate_logs(directory: Path, limit: int = 5 * 1024 * 1024, *, names=None) ->
         raise ValueError("Only BestLocal operational logs may be rotated")
     for name in selected:
         path = directory / name
-        if path.is_file() and path.stat().st_size > limit:
-            previous = directory / (name + ".1")
-            os.replace(path, previous)
+        if path.is_file() and not path.is_symlink() and path.stat().st_size > limit:
+            for number in range(LOG_BACKUPS, 1, -1):
+                previous = directory / (name + f".{number - 1}")
+                if previous.is_file() and not previous.is_symlink():
+                    os.replace(previous, directory / (name + f".{number}"))
+            os.replace(path, directory / (name + ".1"))
+
+
+def validation_summary(status: dict) -> dict:
+    """Closed, credential-free categories, never configuration text or source URLs."""
+    from service_probe import BROWSER_REASON_CODES
+    diagnostics = status.get("diagnostics", [])
+    diagnostics = diagnostics[:150] if isinstance(diagnostics, list) else []
+    protocols, outcomes, reasons, browsers = Counter(), Counter(), Counter(), Counter()
+    for item in diagnostics:
+        if not isinstance(item, dict):
+            continue
+        protocol = item.get("protocol")
+        protocols[protocol if isinstance(protocol, str) and protocol in {"vless", "vmess", "trojan", "shadowsocks", "hysteria2", "socks"} else "unknown"] += 1
+        outcome = item.get("outcome", item.get("validation_outcome"))
+        outcomes[outcome if isinstance(outcome, str) and outcome in {"pass", "fail", "inconclusive"} else "unknown"] += 1
+        for reason in item.get("rejection_reasons", [])[:32] if isinstance(item.get("rejection_reasons"), list) else []:
+            text = reason.lower() if isinstance(reason, str) else ""
+            category = next((category for token, category in (
+                ("timeout", "timeout"), ("deadline", "timeout"),
+                ("dns", "dns"), ("name-resolution", "dns"),
+                ("routing", "routing"), ("no-route", "routing"),
+                ("tls", "tls"), ("certificate", "tls"), ("ssl", "tls"),
+                ("config", "configuration"), ("protocol", "protocol"), ("socks", "proxy"),
+                ("proxy", "proxy"), ("browser", "browser"), ("service", "services"),
+                ("latency", "latency"),
+            ) if token in text), "other")
+            reasons[category] += 1
+        browser = item.get("browser_check")
+        if isinstance(browser, dict) and browser.get("attempted"):
+            reason = browser.get("reason")
+            browsers["passed" if browser.get("qualified") is True else reason if isinstance(reason, str) and reason in BROWSER_REASON_CODES else "other"] += 1
+        else:
+            browsers["not_attempted"] += 1
+    def count(value, maximum=100000):
+        return value if type(value) is int and 0 <= value <= maximum else 0
+    regional = status.get("input", {}).get("regional_summary", {}) if isinstance(status.get("input"), dict) else {}
+    regional = regional if isinstance(regional, dict) else {}
+    discovery = regional.get("discovery", {})
+    discovery = discovery if isinstance(discovery, dict) else {}
+    return {"tested_candidates": len(diagnostics), "input_candidates": count(status.get("input", {}).get("nodes"), 150) if isinstance(status.get("input"), dict) else 0,
+            "protocols": dict(protocols), "validation_outcomes": dict(outcomes),
+            "rejection_categories": dict(reasons), "browser_reasons": dict(browsers),
+            "sources": {"known": count(regional.get("source_count")),
+                        **{name: count(discovery.get(name)) for name in ("discovered_sources", "fetched_sources", "source_failures")}}}
+
+
+def safe_summary(value) -> dict:
+    """Rebuild persisted aggregates from a closed schema before reuse or logging."""
+    from service_probe import BROWSER_REASON_CODES
+    value = value if isinstance(value, dict) else {}
+    def counts(item, allowed):
+        return {key: count for key, count in item.items() if key in allowed and type(count) is int and 0 <= count <= 100000} if isinstance(item, dict) else {}
+    result = {name: value[name] for name in ("tested_candidates", "input_candidates") if type(value.get(name)) is int and 0 <= value[name] <= 150}
+    for name, allowed in {
+        "protocols": {"vless", "vmess", "trojan", "shadowsocks", "hysteria2", "socks", "unknown"},
+        "validation_outcomes": {"pass", "fail", "inconclusive", "unknown"},
+        "rejection_categories": {"latency", "timeout", "dns", "routing", "tls", "configuration", "protocol", "proxy", "services", "browser", "other"},
+        "browser_reasons": BROWSER_REASON_CODES | {"passed", "not_attempted", "other"},
+        "sources": {"known", "discovered_sources", "fetched_sources", "source_failures"},
+    }.items():
+        result[name] = counts(value.get(name), allowed)
+    return result
+
+
+def safe_service_totals(value) -> dict:
+    result = {}
+    for name in ("chatgpt", "youtube", "instagram"):
+        item = value.get(name) if isinstance(value, dict) else None
+        if (isinstance(item, dict) and all(type(item.get(key)) is int for key in ("attempts", "passed", "all_round_candidates"))
+                and 0 <= item["passed"] <= item["attempts"] <= 750 and 0 <= item["all_round_candidates"] <= 150):
+            result[name] = {key: item[key] for key in ("attempts", "passed", "all_round_candidates")}
+    return result
+
+
+def append_run_history(path: Path, state: dict, *, now: float | None = None) -> None:
+    """Atomic bounded ledger; only scheduler-owned nonsecret event metadata enters."""
+    now = time.time() if now is None else now
+    fresh = (state.get("last_stage") in {"validation", "publication"}
+             and type(state.get("last_completed_validation_at")) in (int, float)
+             and state["last_completed_validation_at"] >= state.get("last_scheduler_started_at", 0) - 5)
+    record = {"schema": 1, "at": now, "outcome": state.get("last_outcome", "infrastructure_failed"),
+              "stage": state.get("last_stage", "scheduler"), "qualified": state.get("last_local_qualified") if fresh else None,
+              "completed_at": state.get("last_completed_validation_at"),
+              "published_validation_at": state.get("last_published_validation_at"),
+              "services": safe_service_totals(state.get("last_service_totals")) if fresh else {},
+              "summary": safe_summary(state.get("last_validation_summary")) if fresh else {}}
+    # Rebuild, rather than copying unknown historical JSON keys or arbitrary text.
+    if record["outcome"] not in OUTCOME_CODES or record["stage"] not in STAGE_CODES:
+        raise ValueError("Unknown run ledger category")
+    for key in ("completed_at", "published_validation_at"):
+        if type(record.get(key)) not in (int, float) or not math.isfinite(record[key]) or not 0 < record[key] <= now + 300:
+            record[key] = None
+    if type(record.get("qualified")) is not int or not 0 <= record["qualified"] <= 50:
+        record["qualified"] = None
+    records = []
+    if path.is_file() and not path.is_symlink():
+        with path.open("rb") as stream:
+            stream.seek(0, os.SEEK_END)
+            size = stream.tell()
+            stream.seek(max(0, size - RUN_HISTORY_BYTES))
+            if size > RUN_HISTORY_BYTES:
+                stream.readline()
+            for raw in stream:
+                try:
+                    old = json.loads(raw)
+                    stamp = old.get("at")
+                    if (type(stamp) not in (int, float) or not math.isfinite(stamp)
+                            or not now - RUN_HISTORY_SECONDS <= stamp <= now + 300
+                            or old.get("outcome") not in OUTCOME_CODES or old.get("stage") not in STAGE_CODES):
+                        continue
+                    # Only our fixed schema survives: unknown data is discarded.
+                    if set(old) != set(record):
+                        continue
+                    old["services"] = safe_service_totals(old.get("services"))
+                    old["summary"] = safe_summary(old.get("summary"))
+                    for key in ("completed_at", "published_validation_at"):
+                        if type(old.get(key)) not in (int, float) or not math.isfinite(old[key]) or not 0 < old[key] <= now + 300:
+                            old[key] = None
+                    if type(old.get("qualified")) is not int or not 0 <= old["qualified"] <= 50:
+                        old["qualified"] = None
+                    records.append(old)
+                except (ValueError, TypeError, AttributeError, RecursionError, OverflowError):
+                    continue
+    records.append(record)
+    encoded = [json.dumps(item, sort_keys=True, separators=(",", ":"), allow_nan=False).encode() + b"\n" for item in records[-RUN_HISTORY_RECORDS:]]
+    while encoded and sum(map(len, encoded)) > RUN_HISTORY_BYTES:
+        encoded.pop(0)
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    fd, temporary = tempfile.mkstemp(prefix=path.name + ".", dir=path.parent)
+    try:
+        with os.fdopen(fd, "wb") as stream:
+            stream.writelines(encoded); stream.flush(); os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 def _system_lsof() -> str | None:
@@ -238,6 +386,7 @@ def normalize_scheduler_state(value, now: float | None = None) -> tuple[dict, li
         "last_input_checked_at", "input_generated_at", "recovered_interrupted_at",
         "last_replenishment_dispatched_at", "last_replenishment_attempt_at",
         "state_recovered_at",
+        "last_completed_validation_at",
     }
     retries = {"next_retry_at", "next_replenishment_retry_at"}
     counters = {"consecutive_failures": 1000, "replenishment_consecutive_failures": 1000,
@@ -246,7 +395,7 @@ def normalize_scheduler_state(value, now: float | None = None) -> tuple[dict, li
                 "revalidate_seconds": 7 * 86400, "validation_due_seconds": 7 * 86400,
                 "state_recovery_count": 1000000}
     strings = {"last_validated_signature", "last_attempt_signature", "input_signature",
-               "health", "last_error", "last_replenishment_error"}
+               "last_completed_validation_signature", "health", "last_error", "last_replenishment_error"}
     ages = {"published_age_seconds", "published_validation_age_seconds", "input_age_seconds"}
     normalized, recovered = {}, []
     for name, item in value.items():
@@ -275,6 +424,14 @@ def normalize_scheduler_state(value, now: float | None = None) -> tuple[dict, li
                             or not 0 <= total["all_round_candidates"] <= 150):
                         valid = False
                         break
+        elif name == "last_validation_summary":
+            valid = isinstance(item, dict) and safe_summary(item) == item
+        elif name == "last_outcome":
+            valid = item in OUTCOME_CODES if isinstance(item, str) else False
+        elif name == "last_stage":
+            valid = item in STAGE_CODES if isinstance(item, str) else False
+        elif name in {"last_health_publication_status", "last_subscription_publication_status"}:
+            valid = item in PUBLICATION_STATUS_CODES if isinstance(item, str) else False
         if valid:
             normalized[name] = item
         else:
@@ -314,6 +471,8 @@ def validation_interval(state: dict) -> int:
 
 
 def validation_due(state: dict, signature: str, now: float) -> bool:
+    if state.get("last_outcome") == "publication_failed" and now >= state.get("next_retry_at", 0):
+        return True
     if signature != state.get("last_validated_signature"):
         return now >= state.get("next_retry_at", 0) or signature != state.get("last_attempt_signature")
     return now - state.get("last_validated_at", 0) >= validation_interval(state) and now >= state.get("next_retry_at", 0)
@@ -526,12 +685,17 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
         if state.get("running"):
             log("Recovering interrupted prior run; process supervision already bounds owned children")
             state["recovered_interrupted_at"] = now
+            try:
+                append_run_history(state_dir / "regional-run-history.jsonl", {**state, "last_outcome": "recovered_interrupted", "last_stage": "recovery"}, now=now)
+            except (OSError, ValueError, TypeError):
+                log("WARNING: run history recovery record deferred")
         state.update({"running": True, "last_scheduler_started_at": now, "pid": os.getpid(), "poll_seconds": POLL_SECONDS, "revalidate_seconds": REVALIDATE_SECONDS, "validation_due_seconds": VALIDATION_DUE_SECONDS})
         atomic_json(state_path, state)
         runner = Runner(repo, time.monotonic() + JOB_DEADLINE_SECONDS)
         def interrupted(_signum, _frame):
             raise KeyboardInterrupt
         original_handlers = {s: signal.signal(s, interrupted) for s in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP)}
+        stage, failure_outcome, history_needed = "scheduler", "infrastructure_failed", False
         try:
             if runner.git("status", "--porcelain"):
                 raise RuntimeError("Production runtime is dirty; refusing self-update")
@@ -541,21 +705,25 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
             runner.git("merge", "--ff-only", "--quiet", "origin/main")
             if runner.git("rev-parse", "HEAD") != runner.git("rev-parse", "origin/main"):
                 raise RuntimeError("Runtime main differs from origin/main after fast-forward")
+            stage = "input"
             signature, generated = input_metadata(runner)
             now = time.time()
             age = now - generated
             state.update({"input_generated_at": generated, "input_age_seconds": age, "input_signature": signature, "last_input_checked_at": now})
             if age < -300 or age > MAX_INPUT_AGE_SECONDS:
+                failure_outcome = "stale_input"
                 dispatch_replenishment(runner, state, state_path, now, "stale or invalid Best50 timestamp")
                 raise RuntimeError(f"Best50 age {age / 3600:.1f}h is outside permitted freshness (18h)")
             if not validation_due(state, signature, now):
                 known_count = state.get("last_local_qualified")
                 if isinstance(known_count, int) and 0 <= known_count < LOW_POOL_SIZE:
                     dispatch_replenishment(runner, state, state_path, now, f"only {known_count} local qualifiers; retry pending dispatch")
-                state["health"] = "waiting_retry" if now < state.get("next_retry_at", 0) else "current"
-                log("Input current; next six-hour validation or changed input will trigger a run")
+                state["health"] = ("waiting_retry" if now < state.get("next_retry_at", 0) else
+                                   "no_qualifiers" if state.get("last_outcome") == "no_qualifiers" else "current")
+                log(f"Input current; state={state['health']}; validation interval={validation_interval(state)}s; changed input remains expedited")
                 return 0
             state.update({"last_attempt_at": now, "last_attempt_signature": signature, "health": "validating"})
+            stage, history_needed = "validation", True
             atomic_json(state_path, state)
             geoip = state_dir / "geoip"
             runner.environment = {"BEST50_CITY_DB_IPV4": str(geoip / "dbip-city-ipv4.csv.gz"), "BEST50_CITY_DB_IPV6": str(geoip / "dbip-city-ipv6.csv.gz")}
@@ -584,7 +752,10 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
                             total["attempts"] += attempts
                             total["passed"] += passed
                             total["all_round_candidates"] += int(attempts == passed == rounds)
-                state.update({"last_local_result_at": generated_at, "last_local_qualified": qualified, "last_service_totals": service_totals})
+                state.update({"last_local_result_at": generated_at, "last_local_qualified": qualified, "last_service_totals": service_totals,
+                              "last_completed_validation_at": generated_at, "last_completed_validation_signature": signature,
+                              "last_validated_at": generated_at, "last_validated_signature": signature,
+                              "last_validation_summary": validation_summary(local_status)})
                 for name, total in service_totals.items():
                     log(f"Service {name}: {total['passed']}/{total['attempts']} successful HTTPS checks; {total['all_round_candidates']} candidates passed every round")
             except (RuntimeError, TypeError, AttributeError, ValueError):
@@ -593,13 +764,31 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
                 raise
             if qualified < LOW_POOL_SIZE:
                 dispatch_replenishment(runner, state, state_path, time.time(), f"only {qualified} local qualifiers")
-            if code not in (0, 2):
-                # A freshly completed validation remains useful even when GitHub
-                # publication fails. It never advances last-published state.
-                raise CommandFailure("local validation/publication", code, output)
-            if code == 2 or qualified == 0:
-                raise CommandFailure("local validation found no qualifying servers; last published artifact retained", 2)
-            state.update({"last_validated_at": generated_at, "last_validated_signature": signature, "last_published_validation_at": generated_at, "last_published_at": time.time(), "last_published_count": qualified, "consecutive_failures": 0, "next_retry_at": 0, "health": "published"})
+            stage, failure_outcome = "publication", "publication_failed"
+            publication = local_status.get("publication", {})
+            publication = publication if isinstance(publication, dict) else {}
+            health_status = publication.get("health_status")
+            subscription_status = publication.get("subscription_status")
+            health_status = health_status if isinstance(health_status, str) else None
+            subscription_status = subscription_status if isinstance(subscription_status, str) else None
+            state["last_health_publication_status"] = health_status if health_status in CONFIRMED_HEALTH_STATUSES | {"failed"} else "unconfirmed"
+            state["last_subscription_publication_status"] = (subscription_status if subscription_status in {"published", "failed", "retained"}
+                                                              else "withheld_empty" if qualified == 0 else "unconfirmed")
+            if qualified > 0 and code != 2 and subscription_status == "published":
+                # A verified subscription transaction is independent of whether
+                # the following diagnostic-health transaction succeeds.
+                state.update({"last_published_validation_at": generated_at, "last_published_at": time.time(), "last_published_count": qualified})
+            if code not in (0, 2) or health_status not in CONFIRMED_HEALTH_STATUSES or (qualified > 0 and subscription_status != "published"):
+                raise CommandFailure("regional publication failed or unconfirmed after completed validation", code or 1)
+            if qualified == 0:
+                state.update({"consecutive_failures": 0, "next_retry_at": 0, "health": "no_qualifiers",
+                              "last_outcome": "no_qualifiers", "last_stage": "validation"})
+                state.pop("last_error", None)
+                log("Validation completed: no qualifying servers; health published; last-known-good subscription retained")
+                return 0
+            if code == 2:
+                raise CommandFailure("inconsistent empty-result exit with nonempty validation", 2)
+            state.update({"consecutive_failures": 0, "next_retry_at": 0, "health": "published", "last_outcome": "published", "last_stage": "publication"})
             state.pop("last_error", None)
             log(f"Local validation and publication complete: {qualified} servers")
             return 0
@@ -607,7 +796,10 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
             previous_failures = state.get("consecutive_failures", 0)
             failures = previous_failures + 1 if isinstance(previous_failures, int) and 0 <= previous_failures <= 1000 else 1
             delay = retry_delay(failures)
-            state.update({"consecutive_failures": failures, "next_retry_at": time.time() + delay, "last_error": redact(str(exc) or "interrupted"), "last_failure_at": time.time(), "health": "failed"})
+            outcome = "interrupted" if isinstance(exc, KeyboardInterrupt) else failure_outcome
+            state.update({"consecutive_failures": failures, "next_retry_at": time.time() + delay, "last_error": redact(str(exc) or "interrupted"), "last_failure_at": time.time(),
+                          "health": "publication_failed" if outcome == "publication_failed" else "failed", "last_outcome": outcome, "last_stage": stage})
+            history_needed = True
             log(f"ERROR: {str(exc) or 'interrupted'}; retry eligible in {delay:.0f}s; published artifact preserved")
             return 1
         finally:
@@ -620,6 +812,11 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
             state["published_validation_age_seconds"] = time.time() - validation_time if validation_time else None
             state["published_stale"] = not validation_time or time.time() - validation_time > REVALIDATE_SECONDS
             atomic_json(state_path, state)
+            if history_needed:
+                try:
+                    append_run_history(state_dir / "regional-run-history.jsonl", state)
+                except (OSError, ValueError, TypeError):
+                    log("WARNING: compact run history write deferred; validation/publication state retained")
             for sig, handler in original_handlers.items():
                 signal.signal(sig, handler)
 

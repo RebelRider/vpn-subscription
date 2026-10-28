@@ -2251,7 +2251,7 @@ def publish_regional_result(subscription_path: Path, status_path: Path, tested_s
             time.sleep(2 ** (attempt + 1))
 
 
-def publish_regional_health(status: dict) -> None:
+def publish_regional_health(status: dict) -> str:
     """Publish latest-attempt diagnostics without replacing the retained subscription."""
     if not isinstance(status, dict) or not isinstance(status.get("stability"), dict):
         raise RuntimeError("Invalid current local health status")
@@ -2271,6 +2271,15 @@ def publish_regional_health(status: dict) -> None:
         "qualified": status["stability"]["qualified"],
         "artifact_status": "freshly-validated" if status["stability"]["qualified"] else "last-known-good-retained; latest strict validation found no qualifiers",
         "current_policy_validated": bool(status["stability"]["qualified"]),
+        "validation": {
+            "completed": True,
+            "tested_candidates": len(status.get("diagnostics", [])),
+            "outcomes": dict(Counter(
+                item.get("outcome") for item in status.get("diagnostics", [])
+                if isinstance(item, dict) and item.get("outcome") in {"pass", "fail", "inconclusive"}
+            )),
+            "interpretation": "Inconclusive candidates lack sufficient proof; they are not confirmed unreachable.",
+        },
         "gates": status.get("gates"), "latency_method": status.get("latency_method"),
         "diagnostics": status.get("diagnostics", []),
     }
@@ -2297,7 +2306,7 @@ def publish_regional_health(status: dict) -> None:
                         print("Recovered invalid prior regional health; replacing diagnostics with current validation", flush=True)
                     if previous_stamp is not None and previous_stamp > health["generated_at"]:
                         print("A newer regional health report exists; retaining it")
-                        return
+                        return "superseded"
                     staged_paths = ["output/local-health.json"]
                     if not qualified:
                         published_status = subscription_state.read_status(worktree / REGIONAL_STATUS_PATH)
@@ -2305,7 +2314,7 @@ def publish_regional_health(status: dict) -> None:
                             published_stamp = datetime.fromisoformat(published_status["generated_at"].replace("Z", "+00:00")).timestamp()
                             if published_stamp > health["generated_at"]:
                                 print("A newer validated regional subscription exists; retaining it and its health")
-                                return
+                                return "superseded"
                         subscription = worktree / REGIONAL_SUBSCRIPTION_PATH
                         if subscription.is_file():
                             try:
@@ -2321,19 +2330,59 @@ def publish_regional_health(status: dict) -> None:
                     git_output("add", "-f", *staged_paths, cwd=worktree)
                     diff = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=worktree, timeout=30)
                     if diff.returncode == 0:
-                        return
+                        return "unchanged"
                     if diff.returncode != 1:
                         raise RuntimeError("Cannot inspect regional health diff")
                     git_output("commit", "-m", "chore: record regional validation health", cwd=worktree)
                     git_output("push", REGIONAL_REMOTE, f"HEAD:refs/heads/{REGIONAL_BRANCH}", cwd=worktree)
                     print("Regional health published; subscription retained" if not health["qualified"] else "Regional health published", flush=True)
-                    return
+                    return "published"
                 finally:
                     subprocess.run(["git", "worktree", "remove", "--force", str(worktree)], cwd=ROOT, capture_output=True, timeout=30)
         except (RuntimeError, subprocess.TimeoutExpired):
             if attempt == 2:
                 raise
             time.sleep(2 ** (attempt + 1))
+
+
+def publish_validation_results(subscription_path: Path, status_path: Path,
+                               status: dict, tested_sha: str | None) -> None:
+    """Persist validation and each publication outcome independently.
+
+    A completed empty selection is useful evidence, even when diagnostics cannot
+    be uploaded. Never let its exit code imply that a Git transaction succeeded.
+    """
+    publication = status["publication"]
+    qualified = status["stability"]["qualified"]
+    if qualified:
+        if not tested_sha:
+            raise RuntimeError("Cannot publish without an origin/main upstream SHA")
+        # The local scheduler marker is written only after remote verification.
+        # A killed process or an unexpected exception must never leave a stale
+        # success marker merely because publication was about to be attempted.
+        publication.pop("subscription_status", None)
+        write_status(status_path, status)
+        try:
+            publish_regional_result(subscription_path, status_path, tested_sha)
+        except BaseException:
+            publication["subscription_status"] = "failed"
+            write_status(status_path, status)
+            raise
+        publication["subscription_status"] = "published"
+    else:
+        publication["subscription_status"] = "retained"
+    try:
+        outcome = publish_regional_health(status)
+        if outcome not in {"published", "unchanged", "superseded"}:
+            raise RuntimeError("Unconfirmed regional health publication")
+        publication["health_status"] = outcome
+    except (RuntimeError, subprocess.TimeoutExpired):
+        publication["health_status"] = "failed"
+        if qualified:
+            raise
+        print("WARNING: health publication failed; completed validation retained for retry", flush=True)
+    finally:
+        write_status(status_path, status)
 
 
 def parse_args():
@@ -2743,10 +2792,7 @@ async def async_main() -> int:
     if not qualified:
         print("WARNING: no locally qualified nodes; retained subscription is not a fresh validation.")
         if args.publish:
-            try:
-                publish_regional_health(status)
-            except (RuntimeError, subprocess.TimeoutExpired):
-                print("WARNING: health publication failed; scheduler will retry; subscription remains unchanged", flush=True)
+            publish_validation_results(args.output, args.status, status, upstream_sha)
         return 2
 
     validate_generated_result(
@@ -2765,8 +2811,7 @@ async def async_main() -> int:
                 "origin/main upstream SHA"
             )
 
-        publish_regional_result(args.output, args.status, upstream_sha)
-        publish_regional_health(status)
+        publish_validation_results(args.output, args.status, status, upstream_sha)
 
         print()
         print(

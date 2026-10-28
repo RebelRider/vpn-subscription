@@ -53,6 +53,7 @@ BROWSER_REASON_CODES = frozenset({
     "anti-automation-inconclusive", "access-denied-inconclusive", "geographic-restriction",
     "rate-limited-inconclusive",
     "browser-composer-not-actionable-inconclusive", "browser-document-proof-missing-inconclusive",
+    "browser-queue-deferred-inconclusive",
     "browser-document-changed-inconclusive", "browser-document-http-error-inconclusive",
     "authentication-required-inconclusive", "browser-visible-application-error-inconclusive",
 })
@@ -702,6 +703,12 @@ def browser_diagnostic(result: dict, proof: list[dict] | None) -> dict:
     """Expose only bounded enums and booleans from the first failed browser round."""
     diagnostic = {"attempted": True, "qualified": proof is not None, "rounds": len(proof) if proof else 0,
                   "reason": "browser-functional-proof" if proof else "browser-proof-inconclusive"}
+    if isinstance(result, dict):
+        if type(result.get("browser_started")) is bool:
+            diagnostic["browser_started"] = result["browser_started"]
+        wait = result.get("queued_wait_ms")
+        if type(wait) is int and 0 <= wait <= 180000:
+            diagnostic["queued_wait_ms"] = wait
     if proof is not None or not isinstance(result, dict):
         return diagnostic
     rounds = result.get("rounds", [])

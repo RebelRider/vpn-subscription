@@ -233,7 +233,9 @@ class SchedulerTests(unittest.TestCase):
                 now = time.time()
                 directory = Path(temporary)
                 (directory / "output").mkdir()
-                (directory / "output/local-status.json").write_text(json.dumps({"generated_at": datetime.fromtimestamp(now, timezone.utc).isoformat(), "stability": {"qualified": 12}, "nodes": [{}] * 12, "diagnostics": [{"services": {"chatgpt": {"passed": 1, "attempts": 2}}}]}))
+                (directory / "output/local-status.json").write_text(json.dumps({"generated_at": datetime.fromtimestamp(now, timezone.utc).isoformat(), "stability": {"qualified": 12}, "nodes": [{}] * 12,
+                    "publication": {"health_status": "published" if outcome == "success" else "failed", "subscription_status": "published" if outcome == "success" else "failed"},
+                    "diagnostics": [{"services": {"chatgpt": {"passed": 1, "attempts": 2}}}]}))
                 state_dir = directory / "state"
                 state_path = state_dir / "regional-scheduler-status.json"
                 scheduler.atomic_json(state_path, {"last_published_at": now - 100, "last_published_count": 3, "running": True})
@@ -264,7 +266,12 @@ class SchedulerTests(unittest.TestCase):
                     self.assertEqual(state["last_published_count"], 3)
                     self.assertEqual(state["last_published_at"], now - 100)
                     self.assertGreater(state["next_retry_at"], now)
-                    self.assertNotIn("last_validated_signature", state)
+                    if outcome == "publication-failed":
+                        self.assertEqual(state["last_completed_validation_signature"], "new")
+                        self.assertEqual(state["last_validated_signature"], "new")
+                        self.assertEqual(state["health"], "publication_failed")
+                    else:
+                        self.assertNotIn("last_completed_validation_signature", state)
 
     def test_empty_pool_replenishment_is_hourly_and_bounded(self):
         runner = mock.Mock()
@@ -368,6 +375,143 @@ class SchedulerTests(unittest.TestCase):
             launcher = home / "Library/Application Support/best50-vpn/regional-bootstrap.sh"
             self.assertIn("regional_scheduler.py", launcher.read_text())
             self.assertNotIn("git fetch", launcher.read_text())
+
+
+class CompletedValidationContractTests(unittest.TestCase):
+    def run_case(self, publication, *, qualified=0, exitcode=2, idle_check=False):
+        now = time.time()
+        calls = []
+        class FakeRunner:
+            def __init__(self, repo, deadline): self.repo = repo
+            def git(self, *args, **kwargs): return "" if args[0] == "status" else "main" if args[0] == "branch" else "sha"
+            def fetch(self): pass
+            def stop(self): pass
+            def run(self, command, *args, **kwargs):
+                calls.append(command)
+                return (exitcode, "completed") if "scripts/local_probe.py" in command else (0, "")
+        with tempfile.TemporaryDirectory() as directory:
+            repo = Path(directory); state_dir = repo / "state"; (repo / "output").mkdir()
+            artifact = repo / "output/best-local.txt"; artifact.write_text("retained")
+            status = {"generated_at": datetime.fromtimestamp(now, timezone.utc).isoformat(),
+                      "input": {"nodes": 100, "regional_summary": {"source_count": 34, "discovery": {"discovered_sources": 2, "fetched_sources": 30, "source_failures": 4}}},
+                      "stability": {"qualified": qualified, "rounds": 5}, "nodes": [{}] * qualified,
+                      "publication": publication,
+                      "diagnostics": [{"protocol": "shadowsocks", "outcome": "inconclusive",
+                          "browser_check": {"attempted": True, "qualified": False, "reason": "cloudflare-challenge-inconclusive"},
+                          "rejection_reasons": ["service-requirements-failed"],
+                          "services": {"chatgpt": {"attempts": 1, "passed": 0}}}]}
+            (repo / "output/local-status.json").write_text(json.dumps(status))
+            state_path = state_dir / "regional-scheduler-status.json"
+            scheduler.atomic_json(state_path, {"last_published_at": now - 100, "last_published_validation_at": now - 30000,
+                                               "last_published_count": 2, "consecutive_failures": 97, "next_retry_at": now - 1})
+            with mock.patch.object(scheduler, "Runner", FakeRunner), mock.patch.object(scheduler, "input_metadata", return_value=("unchanged", now)):
+                code = scheduler.run_scheduler(repo, state_dir)
+                state = scheduler.load_scheduler_state(state_path)
+                if idle_check:
+                    calls.clear()
+                    self.assertEqual(scheduler.run_scheduler(repo, state_dir), 0)
+                    self.assertFalse(any("scripts/local_probe.py" in command for command in calls))
+                    self.assertEqual(scheduler.load_scheduler_state(state_path)["health"], "no_qualifiers")
+            history = [json.loads(line) for line in (state_dir / "regional-run-history.jsonl").read_text().splitlines()]
+            self.assertEqual(artifact.read_text(), "retained")
+            return now, code, state, history
+
+    def test_completed_empty_run_resets_97_false_failures_and_keeps_hourly_cadence(self):
+        for marker in ("published", "unchanged", "superseded"):
+            with self.subTest(health=marker):
+                now, code, state, history = self.run_case({"health_status": marker, "subscription_status": "retained"}, idle_check=True)
+                self.assertEqual(code, 0)
+                self.assertEqual(state["health"], "no_qualifiers")
+                self.assertEqual(state["consecutive_failures"], 0)
+                self.assertEqual(state["next_retry_at"], 0)
+                self.assertEqual(state["last_published_count"], 2)
+                self.assertEqual(state["last_published_at"], now - 100)
+                self.assertTrue(state["published_stale"])
+                self.assertEqual(state["last_completed_validation_signature"], "unchanged")
+                completed = state["last_completed_validation_at"]
+                self.assertFalse(scheduler.validation_due(state, "unchanged", completed + 3599))
+                self.assertTrue(scheduler.validation_due(state, "unchanged", completed + 3600))
+                self.assertEqual(len(history), 1)
+                self.assertEqual(history[0]["outcome"], "no_qualifiers")
+                self.assertEqual(history[0]["summary"]["protocols"], {"shadowsocks": 1})
+                self.assertEqual(history[0]["summary"]["validation_outcomes"], {"inconclusive": 1})
+                self.assertEqual(history[0]["summary"]["browser_reasons"], {"cloudflare-challenge-inconclusive": 1})
+                self.assertEqual(history[0]["summary"]["sources"]["discovered_sources"], 2)
+
+    def test_failed_or_missing_health_publication_is_distinct_and_retryable(self):
+        for publication in ({}, {"health_status": "failed"}):
+            with self.subTest(publication=publication):
+                now, code, state, history = self.run_case(publication)
+                self.assertEqual(code, 1)
+                self.assertEqual(state["health"], "publication_failed")
+                self.assertEqual(state["last_completed_validation_signature"], "unchanged")
+                self.assertEqual(state["last_published_validation_at"], now - 30000)
+                self.assertFalse(scheduler.validation_due(state, "unchanged", state["next_retry_at"] - 1))
+                self.assertTrue(scheduler.validation_due(state, "unchanged", state["next_retry_at"]))
+                self.assertEqual(history[0]["outcome"], "publication_failed")
+
+    def test_verified_subscription_survives_following_health_publication_failure(self):
+        now, code, state, history = self.run_case({"subscription_status": "published", "health_status": "failed"}, qualified=12, exitcode=1)
+        self.assertEqual(code, 1)
+        self.assertEqual(state["last_published_count"], 12)
+        self.assertAlmostEqual(state["last_published_validation_at"], now, places=5)
+        self.assertFalse(state["published_stale"])
+        self.assertEqual(state["last_outcome"], "publication_failed")
+        self.assertEqual(state["last_health_publication_status"], "failed")
+
+    def test_exit_zero_without_verified_transaction_cannot_advance_publication(self):
+        now, code, state, history = self.run_case({"health_status": "published"}, qualified=12, exitcode=0)
+        self.assertEqual(code, 1)
+        self.assertEqual(state["last_published_count"], 2)
+        self.assertEqual(state["last_published_validation_at"], now - 30000)
+        self.assertEqual(state["last_subscription_publication_status"], "unconfirmed")
+
+    def test_history_is_bounded_retained_and_contains_only_closed_metadata(self):
+        now = time.time()
+        state = {"last_outcome": "no_qualifiers", "last_stage": "validation", "last_local_qualified": 0,
+                 "last_completed_validation_at": now, "last_scheduler_started_at": now - 1,
+                 "last_validation_summary": {"tested_candidates": 100, "protocols": {"shadowsocks": 1, "vless://secret@host": 4},
+                     "browser_reasons": {"password=secret": 2}, "raw_config": "never-store-this"},
+                 "last_service_totals": {"chatgpt": {"passed": 0, "attempts": 1, "all_round_candidates": 0, "password": "private"}}}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "history.jsonl"
+            with mock.patch.object(scheduler, "RUN_HISTORY_RECORDS", 3), mock.patch.object(scheduler, "RUN_HISTORY_BYTES", 2000):
+                for offset in (-31 * 86400, -20, -10, -5, 0):
+                    scheduler.append_run_history(path, state, now=now + offset)
+                records = [json.loads(line) for line in path.read_text().splitlines()]
+                self.assertEqual(len(records), 3)
+                self.assertTrue(all(item["at"] > now - 30 for item in records))
+                self.assertLessEqual(path.stat().st_size, 2000)
+                self.assertNotIn("secret", path.read_text())
+                self.assertNotIn("private", path.read_text())
+                self.assertNotIn("raw_config", path.read_text())
+                with mock.patch.object(scheduler, "RUN_HISTORY_BYTES", 500):
+                    scheduler.append_run_history(path, state, now=now + 1)
+                    self.assertLessEqual(path.stat().st_size, 500)
+
+    def test_rotation_keeps_seven_backups_and_protects_foreign_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            directory = Path(directory); log = directory / "regional-refresh.log"
+            for number in range(10):
+                log.write_text(str(number)); scheduler.rotate_logs(directory, limit=0)
+            self.assertEqual((directory / "regional-refresh.log.1").read_text(), "9")
+            self.assertEqual((directory / "regional-refresh.log.7").read_text(), "3")
+            self.assertFalse((directory / "regional-refresh.log.8").exists())
+
+    def test_latency_prefixed_transport_errors_keep_their_actual_cause(self):
+        summary = scheduler.validation_summary({"diagnostics": [{
+            "protocol": "trojan", "outcome": "fail",
+            "rejection_reasons": ["latency-proxy-request-timeout", "latency-candidate-deadline",
+                "latency-destination-name-resolution-failed", "latency-routing-no-route",
+                "latency-destination-tls-failed", "latency-destination-certificate-invalid",
+                "latency-configuration-invalid", "latency-protocol-handshake-failed",
+                "latency-socks-connection-failed", "latency-browser-runtime-unavailable",
+                "latency-service-requirements-failed", "latency-above-500", "latency-invalid-timing"],
+        }]})
+        self.assertEqual(summary["validation_outcomes"], {"fail": 1})
+        self.assertEqual(summary["rejection_categories"], {"timeout": 2, "dns": 1, "routing": 1,
+            "tls": 2, "configuration": 1, "protocol": 1, "proxy": 1, "browser": 1,
+            "services": 1, "latency": 2})
 
 
 class OrphanGitLockRecoveryTests(unittest.TestCase):

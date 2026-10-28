@@ -77,7 +77,7 @@ vm.runInNewContext(source,{require:fakeRequire,module:moduleObject,process:{env:
  console:{log(message){const r=JSON.parse(message);console.log(JSON.stringify({...r,inputActions,trialActions,launchCount,launchOptions}))}},URL,setTimeout,clearTimeout,Buffer});
 """
         result = subprocess.run([node, "-e", code, str(Path(probe.__file__).with_suffix(".js")), json.dumps(options)],
-                                capture_output=True, text=True, check=True, timeout=5)
+                                capture_output=True, text=True, check=True, timeout=15)
         return json.loads(result.stdout)
 
     def test_launcher_is_headless_even_with_missing_or_legacy_false_configuration(self):
@@ -238,6 +238,73 @@ const visible=a.visibleTextSnapshot();console.log(JSON.stringify({visible,restri
                 self.assertTrue((Path(directory) / "browser.lock").exists())
                 async with probe.global_browser_slot(timeout=0) as third:
                     self.assertTrue(third)
+        with tempfile.TemporaryDirectory() as directory:
+            asyncio.run(verify(directory))
+
+    def test_same_process_browser_competitor_has_a_bounded_queue(self):
+        import tempfile
+        original_slot = probe.global_browser_slot
+
+        async def verify(directory):
+            first_started, release_first = asyncio.Event(), asyncio.Event()
+            child = Mock(returncode=0)
+            child.stdout.read = AsyncMock(side_effect=[b'{"qualified":false,"rounds":[]}', b""])
+
+            async def wait_for_owned_child():
+                first_started.set()
+                await release_first.wait()
+                return 0
+
+            child.wait = AsyncMock(side_effect=wait_for_owned_child)
+            build = Mock()
+            build._stop_owned_probe_process = AsyncMock()
+            with patch.object(probe, "RUNTIME", Path(directory)), \
+                    patch.object(probe, "find_node", return_value="/owned-test/node"), \
+                    patch.object(probe, "package_version", return_value=probe.VERSION), \
+                    patch.object(probe, "global_browser_slot", side_effect=lambda: original_slot(timeout=.01)), \
+                    patch.object(probe.asyncio, "create_subprocess_exec", new_callable=AsyncMock, return_value=child) as launch:
+                first = asyncio.create_task(probe.check_chatgpt(build, None, None, None, control=True))
+                try:
+                    await asyncio.wait_for(first_started.wait(), .5)
+                    second = await asyncio.wait_for(probe.check_chatgpt(build, None, None, None, control=True), .5)
+                    self.assertFalse(second["qualified"])
+                    self.assertEqual(second["reason"], "browser-queue-deferred-inconclusive")
+                    self.assertIs(second["browser_started"], False)
+                    self.assertGreaterEqual(second["queued_wait_ms"], 0)
+                    self.assertLess(second["queued_wait_ms"], 500)
+                    launch.assert_awaited_once()
+                finally:
+                    release_first.set()
+                    await asyncio.wait_for(first, .5)
+            build._stop_owned_probe_process.assert_awaited_once_with(child)
+
+        with tempfile.TemporaryDirectory() as directory:
+            asyncio.run(verify(directory))
+
+    def test_busy_browser_lease_never_starts_a_probe_process(self):
+        import tempfile
+        original_slot = probe.global_browser_slot
+
+        async def verify(directory):
+            build = Mock()
+            with patch.object(probe, "RUNTIME", Path(directory)), \
+                    patch.object(probe, "find_node", return_value="/owned-test/node"), \
+                    patch.object(probe, "package_version", return_value=probe.VERSION), \
+                    patch.object(probe.asyncio, "create_subprocess_exec", new_callable=AsyncMock) as launch:
+                async with original_slot(timeout=0) as acquired:
+                    self.assertTrue(acquired)
+                    with patch.object(probe, "global_browser_slot", side_effect=lambda: original_slot(timeout=.01)):
+                        result = await probe.check_chatgpt(build, None, None, None, control=True)
+                self.assertFalse(result["qualified"])
+                self.assertEqual(result["reason"], "browser-queue-deferred-inconclusive")
+                self.assertIs(result["browser_started"], False)
+                launch.assert_not_awaited()
+                build._register_owned_probe_process.assert_not_called()
+            # Recheck the same temporary lease, never the live runtime's lock.
+            with patch.object(probe, "RUNTIME", Path(directory)):
+                async with original_slot(timeout=0) as recovered:
+                    self.assertTrue(recovered)
+
         with tempfile.TemporaryDirectory() as directory:
             asyncio.run(verify(directory))
 

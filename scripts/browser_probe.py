@@ -26,13 +26,12 @@ from owned_temporary import temporary_directory
 
 MAX_SECONDS = 120
 MAX_OUTPUT = 64 * 1024
-_BROWSER_LOCK = asyncio.Lock()
 _ISOLATION_VERIFIED = False
 
 
 @asynccontextmanager
 async def global_browser_slot(timeout: float = 45):
-    """Serialize control, scheduled and manual browsers across processes."""
+    """Bound and serialize browser admission across and within processes."""
     RUNTIME.mkdir(parents=True, exist_ok=True)
     descriptor = os.open(RUNTIME / "browser.lock", os.O_CREAT | os.O_WRONLY, 0o600)
     acquired = False
@@ -191,9 +190,14 @@ async def check_chatgpt(build, port: int | None, username: str | None, password:
     node = find_node()
     if not node or package_version(RUNTIME / "node_modules/playwright") != VERSION:
         return _failure("browser-runtime-unavailable")
-    async with _BROWSER_LOCK, global_browser_slot() as acquired:
+    # Separate opened lease descriptors also exclude competitors in this process.
+    # Do not queue behind an unbounded asyncio lock before the lease deadline.
+    queued_at = time.monotonic()
+    async with global_browser_slot() as acquired:
         if not acquired:
-            return _failure("browser-busy-inconclusive")
+            return {**_failure("browser-queue-deferred-inconclusive"),
+                    "queued_wait_ms": max(0, int((time.monotonic() - queued_at) * 1000)),
+                    "browser_started": False}
         if not control and not _ISOLATION_VERIFIED:
             proof = await asyncio.to_thread(isolation_self_test)
             if not proof["passed"]:

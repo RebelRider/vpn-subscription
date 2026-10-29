@@ -234,9 +234,12 @@ def _published_rechecks(build):
             return []
         status = json.loads(blob(commit, "output/local-status.json"))
         nodes = status.get("nodes") if isinstance(status, dict) else None
+        retained = status.get("retained_nodes", []) if isinstance(status, dict) else None
         if (not isinstance(status, dict) or status.get("algorithm") != "bestlocal-strict-services-v6"
-                or not isinstance(nodes, list) or not 1 <= len(nodes) <= 12):
+                or not isinstance(nodes, list) or not 1 <= len(nodes) <= 12
+                or not isinstance(retained, list) or len(retained) > 2):
             return []
+        nodes = nodes + retained
         published = {}
         for line in blob(commit, "output/best-local.txt").decode().splitlines():
             if not line.strip() or line.lstrip().startswith("#"):
@@ -316,7 +319,7 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
             by_id[candidate["id"]]["public_publish_allowed"] = False
     recheck_count = 0
     for candidate in _published_rechecks(build):
-        if recheck_count >= min(12, limit):
+        if recheck_count >= min(14, limit):
             break
         if candidate["id"] not in by_id:
             selected.append(candidate)

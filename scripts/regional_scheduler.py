@@ -391,6 +391,7 @@ def normalize_scheduler_state(value, now: float | None = None) -> tuple[dict, li
     retries = {"next_retry_at", "next_replenishment_retry_at"}
     counters = {"consecutive_failures": 1000, "replenishment_consecutive_failures": 1000,
                 "last_local_qualified": 50, "last_published_count": 50,
+                "last_published_fresh_count": 50, "last_published_retained_count": 2,
                 "pid": 2 ** 31 - 1, "poll_seconds": 86400,
                 "revalidate_seconds": 7 * 86400, "validation_due_seconds": 7 * 86400,
                 "state_recovery_count": 1000000}
@@ -777,7 +778,14 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
             if qualified > 0 and code != 2 and subscription_status == "published":
                 # A verified subscription transaction is independent of whether
                 # the following diagnostic-health transaction succeeds.
-                state.update({"last_published_validation_at": generated_at, "last_published_at": time.time(), "last_published_count": qualified})
+                retained = local_status.get("retained_nodes", [])
+                retained_count = len(retained) if isinstance(retained, list) else 0
+                total = local_status.get("published_total", qualified)
+                if type(total) is not int or total != qualified + retained_count or not 0 <= retained_count <= 2:
+                    raise RuntimeError("Invalid published fresh/retained inventory")
+                state.update({"last_published_validation_at": generated_at, "last_published_at": time.time(),
+                              "last_published_count": total, "last_published_fresh_count": qualified,
+                              "last_published_retained_count": retained_count})
             if code not in (0, 2) or health_status not in CONFIRMED_HEALTH_STATUSES or (qualified > 0 and subscription_status != "published"):
                 raise CommandFailure("regional publication failed or unconfirmed after completed validation", code or 1)
             if qualified == 0:
@@ -790,7 +798,7 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
                 raise CommandFailure("inconsistent empty-result exit with nonempty validation", 2)
             state.update({"consecutive_failures": 0, "next_retry_at": 0, "health": "published", "last_outcome": "published", "last_stage": "publication"})
             state.pop("last_error", None)
-            log(f"Local validation and publication complete: {qualified} servers")
+            log(f"Local validation and publication complete: {qualified} freshly verified; {state.get('last_published_retained_count', 0)} protected historical entries retained")
             return 0
         except (Exception, KeyboardInterrupt) as exc:
             previous_failures = state.get("consecutive_failures", 0)

@@ -660,7 +660,8 @@ async def check_chatgpt(build, port: int, username: str, password: str, rounds: 
     """Lazy browser adapter: missing dependencies and browser errors remain inconclusive."""
     try:
         from browser_probe import check_chatgpt as browser_check
-        result = await browser_check(build, port, username, password, rounds=rounds, control=False)
+        result = await browser_check(build, port, username, password, rounds=rounds, control=False,
+                                     prefer_native=getattr(build, "_local_native_webkit", False) is True)
         return result if isinstance(result, dict) else {"qualified": False, "reason": "browser-invalid-result"}
     except asyncio.CancelledError:
         raise
@@ -704,6 +705,8 @@ def browser_diagnostic(result: dict, proof: list[dict] | None) -> dict:
     diagnostic = {"attempted": True, "qualified": proof is not None, "rounds": len(proof) if proof else 0,
                   "reason": "browser-functional-proof" if proof else "browser-proof-inconclusive"}
     if isinstance(result, dict):
+        if result.get("engine") in {"native-webkit", "headless-chromium"}:
+            diagnostic["engine"] = result["engine"]
         if type(result.get("browser_started")) is bool:
             diagnostic["browser_started"] = result["browser_started"]
         wait = result.get("queued_wait_ms")
@@ -726,6 +729,16 @@ def browser_diagnostic(result: dict, proof: list[dict] | None) -> dict:
         for field in ("composer", "application_json"):
             value = failed.get(field)
             diagnostic["first_failed_" + field] = value if type(value) is bool else None
+        metadata = failed.get("diagnostics")
+        if isinstance(metadata, dict):
+            category = metadata.get("category")
+            if category in {"browser-javascript-script-exception", "browser-javascript-unsupported-result",
+                            "browser-javascript-invalid-frame", "browser-javascript-evaluation-failed"}:
+                diagnostic["first_failed_category"] = category
+            for field, maximum in (("page_errors", 10000000), ("webkit_error_code", 100), ("anon_models_status", 599)):
+                value = metadata.get(field)
+                if type(value) is int and 0 <= value <= maximum:
+                    diagnostic["first_failed_" + field] = value
     return diagnostic
 
 

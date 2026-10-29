@@ -63,7 +63,7 @@ def sandbox_profile(port: int) -> str:
             '(allow network-outbound (remote tcp "localhost:' + str(port) + '"))')
 
 
-def isolation_self_test() -> dict:
+def isolation_self_test(*, profile_factory=None) -> dict:
     """Real local-only allow/deny test. No public address is contacted."""
     if sys.platform != "darwin" or not Path("/usr/bin/sandbox-exec").is_file():
         return {"passed": False, "reason": "browser-network-isolation-unavailable"}
@@ -83,7 +83,8 @@ except OSError as e: out['udp']=e.errno
 print(json.dumps(out))
 """
         try:
-            process = subprocess.run(["/usr/bin/sandbox-exec", "-p", sandbox_profile(ports[0]), sys.executable,
+            profile = (profile_factory or sandbox_profile)(ports[0])
+            process = subprocess.run(["/usr/bin/sandbox-exec", "-p", profile, sys.executable,
                                       "-c", code, *map(str, ports)], capture_output=True, timeout=6, check=True)
             result = json.loads(process.stdout)
             # EPERM is the sandbox's refusal, rather than a missing listener.
@@ -144,6 +145,9 @@ def validate_evidence(value: object, rounds: int, now: datetime | None = None) -
             category = diagnostics.get("category")
             if isinstance(category, str) and re.fullmatch("[a-z-]{1,100}", category):
                 metadata["category"] = category
+            code = diagnostics.get("webkit_error_code")
+            if type(code) is int and 0 <= code <= 100:
+                metadata["webkit_error_code"] = code
             api_observations = diagnostics.get("api_observations")
             if isinstance(api_observations, list):
                 observations = []
@@ -175,7 +179,8 @@ def validate_evidence(value: object, rounds: int, now: datetime | None = None) -
 
 
 async def check_chatgpt(build, port: int | None, username: str | None, password: str | None,
-                      rounds: int = 1, control: bool = False, headless: bool = True) -> dict:
+                      rounds: int = 1, control: bool = False, headless: bool = True,
+                      prefer_native: bool = False) -> dict:
     """Return bounded background evidence; a visible browser is prohibited."""
     global _ISOLATION_VERIFIED
     if not isinstance(rounds, int) or isinstance(rounds, bool) or not 1 <= rounds <= 5:
@@ -187,6 +192,27 @@ async def check_chatgpt(build, port: int | None, username: str | None, password:
         return _failure("browser-proxy-authentication-missing")
     if not control:
         sandbox_profile(port)
+    if prefer_native is True and sys.platform == "darwin":
+        from native_webkit_probe import check_chatgpt as native_check
+        native = await native_check(build, port, username, password, rounds=rounds, control=control)
+        # Only an unavailable engine permits another engine attempt. A real
+        # challenge, network error or missing proof remains inconclusive.
+        if not isinstance(native, dict) or native.get("available") is not False:
+            if (isinstance(native, dict) and native.get("qualified") is True
+                    and (native.get("control") is not control
+                         or native.get("proxy_port") != (None if control else port))):
+                return _failure("browser-invalid-evidence")
+            result = validate_evidence(native, rounds)
+            result.update(proxy_port=None if control else port, control=control, engine="native-webkit")
+            if isinstance(native, dict):
+                reason = native.get("reason")
+                if (result["qualified"] is False and not native.get("rounds")
+                        and isinstance(reason, str) and re.fullmatch(r"[a-z-]{1,100}", reason)):
+                    result["reason"] = reason
+                for key in ("browser_started", "queued_wait_ms"):
+                    if key in native:
+                        result[key] = native[key]
+            return result
     node = find_node()
     if not node or package_version(RUNTIME / "node_modules/playwright") != VERSION:
         return _failure("browser-runtime-unavailable")
@@ -247,6 +273,7 @@ async def check_chatgpt(build, port: int | None, username: str | None, password:
                 result = validate_evidence(json.loads(output), rounds)
                 result["proxy_port"] = None if control else port
                 result["control"] = control
+                result["engine"] = "headless-chromium"
                 return result
             except asyncio.TimeoutError:
                 return _failure("browser-deadline")

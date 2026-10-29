@@ -45,7 +45,8 @@ def mark_stale_text(text: str) -> str:
     return "\n".join(STALE_HEADERS) + "\n" + retained
 
 
-def is_fresh_strict_status(status, now: float | None = None) -> bool:
+def has_fresh_validation(status, now: float | None = None) -> bool:
+    """Fresh subset timestamp, also used to protect newer mixed writers."""
     now = time.time() if now is None else now
     try:
         if not isinstance(status, dict) or status.get("algorithm") != "bestlocal-strict-services-v6":
@@ -66,6 +67,11 @@ def is_fresh_strict_status(status, now: float | None = None) -> bool:
         return isinstance(count, int) and not isinstance(count, bool) and count == len(nodes)
     except (ValueError, TypeError, OverflowError):
         return False
+
+
+def is_fresh_strict_status(status, now: float | None = None) -> bool:
+    """The complete artifact is fresh only when it contains no retained entries."""
+    return has_fresh_validation(status, now) and not status.get("retained_nodes")
 
 
 def read_status(path: Path) -> dict:
@@ -91,11 +97,19 @@ def mark_regional(repo: Path, runner=None) -> bool:
                     worktree = Path(directory) / "checkout"
                     try:
                         runner.git("worktree", "add", "--detach", str(worktree), "origin/regional")
-                        if is_fresh_strict_status(read_status(worktree / "output/local-status.json")):
+                        published_status = read_status(worktree / "output/local-status.json")
+                        if is_fresh_strict_status(published_status):
                             print("Regional strict validation is fresh; retained subscription unchanged")
                             return False
                         target = worktree / "output/best-local.txt"
                         original = read_text(target)
+                        retained = published_status.get("retained_nodes", [])
+                        if has_fresh_validation(published_status) and isinstance(retained, list) and 1 <= len(retained) <= 2:
+                            fresh = published_status["stability"]["qualified"]
+                            title = f"#profile-title: Best Local VPN [STALE - {fresh} verified + {len(retained)} retained]"
+                            if title in original.splitlines():
+                                print("Regional mixed inventory already discloses historical retention; title unchanged")
+                                return False
                         marked = mark_stale_text(original)
                         if marked == original:
                             print("Regional retained subscription is already marked stale")

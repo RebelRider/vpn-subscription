@@ -21,6 +21,7 @@ import sys
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
 from urllib.parse import quote, unquote, urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -1025,7 +1026,8 @@ def apply_exit_geography(
     }
 
 
-def valid_node_evidence(node: dict, rounds: int, *, require_round_evidence: bool = False) -> bool:
+def valid_node_evidence(node: dict, rounds: int, *, require_round_evidence: bool = False,
+                        reference_time: datetime | None = None) -> bool:
     if not isinstance(node, dict) or type(rounds) is not int or rounds not in (3, 4, 5):
         return False
     services = node.get("services", {})
@@ -1062,7 +1064,7 @@ def valid_node_evidence(node: dict, rounds: int, *, require_round_evidence: bool
                         or browser.get("actionable") is not True or browser.get("restriction_free") is not True):
                     return False
                 try:
-                    require_fresh_timestamp(browser.get("checked_at"), 6, "browser service evidence")
+                    require_fresh_timestamp(browser.get("checked_at"), 6, "browser service evidence", reference_time=reference_time)
                 except RuntimeError:
                     return False
                 # Only an otherwise inconclusive HTTP application response may
@@ -1165,9 +1167,9 @@ def rank_local_qualifiers(qualified: list, identities: dict[str, str], previous_
     return ranked
 
 
-def validate_publication_nodes(build, nodes: list[dict]) -> None:
+def validate_publication_nodes(build, nodes: list[dict], *, maximum: int = MAX_LOCAL_PUBLISHED_NODES) -> None:
     """Recheck identity and connection uniqueness at every publication boundary."""
-    if not isinstance(nodes, list) or not 1 <= len(nodes) <= MAX_LOCAL_PUBLISHED_NODES:
+    if not isinstance(nodes, list) or not 1 <= len(nodes) <= maximum:
         raise RuntimeError("Invalid publication node count")
     canonical, connections = set(), set()
     for node in nodes:
@@ -1475,12 +1477,13 @@ def load_service_probe():
     return module
 
 
-def require_fresh_timestamp(value: str | None, max_hours: float, description: str) -> None:
+def require_fresh_timestamp(value: str | None, max_hours: float, description: str, *,
+                            reference_time: datetime | None = None) -> None:
     try:
         stamp = datetime.fromisoformat(str(value).replace(" UTC", "+00:00").replace("Z", "+00:00"))
         if stamp.tzinfo is None:
             raise ValueError("missing timezone")
-        age = (datetime.now(timezone.utc) - stamp).total_seconds()
+        age = ((reference_time or datetime.now(timezone.utc)) - stamp).total_seconds()
     except (ValueError, TypeError):
         raise RuntimeError(f"Missing or invalid {description} timestamp") from None
     if age < -300 or age > max_hours * 3600:
@@ -1491,6 +1494,9 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
     if not 3 <= final_rounds <= 5 or minimum_successes != final_rounds:
         raise RuntimeError("Local validation requires 3..5 rounds and every round must succeed")
     service_probe = load_service_probe()
+    # A native, windowless WebKit data store uses the candidate's exact proxy.
+    # Cloud validation and callers without this explicit local flag stay as-is.
+    build._local_native_webkit = sys.platform == "darwin"
     identities = {}
     seen = set()
     unique_links = []
@@ -1579,20 +1585,31 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
     return [item[0] for item in qualified], status
 
 
+def _retention_context():
+    # Some callers load this module without registering it in sys.modules.
+    return SimpleNamespace(ROOT=ROOT, MAX_LOCAL_PUBLISHED_NODES=MAX_LOCAL_PUBLISHED_NODES,
+                           published_link=published_link, connection_identity=connection_identity,
+                           validate_publication_nodes=validate_publication_nodes,
+                           require_fresh_timestamp=require_fresh_timestamp, valid_node_evidence=valid_node_evidence)
+
+
 def write_subscription(
     output_path: Path,
     links: list[str],
     status: dict,
 ) -> None:
-    generated = datetime.now(
-        timezone.utc
-    ).strftime(
-        "%Y-%m-%d %H:%M:%S UTC"
-    )
+    try:
+        generated = datetime.fromisoformat(status["generated_at"].replace("Z", "+00:00")).astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    except (KeyError, ValueError, TypeError, AttributeError):
+        generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
+    from publication_retention import rendered_links
+    retained = len(status.get("retained_nodes", []))
+    title = (f"#profile-title: Best Local VPN [STALE - {len(links)} verified + {retained} retained]"
+             if retained else "#profile-title: Best Local VPN")
     lines = [
         "# v6.0 — LOCAL NETWORK VERIFIED PROXIES",
-        "#profile-title: Best Local VPN",
+        title,
         "#profile-update-interval: 1",
         "#subscription-ping-onopen-enabled: 1",
         "#ping-type: proxy",
@@ -1628,9 +1645,8 @@ def write_subscription(
         ),
         "#",
         (
-            "# Generated from Best50 "
-            "and re-tested through the current "
-            "local network."
+            "# Fresh entries were re-tested through the current local network; "
+            "retained entries preserve historical evidence and are not currently verified."
         ),
         "#",
     ]
@@ -1646,16 +1662,11 @@ def write_subscription(
             "qualified link count"
         )
 
-    published_links = [
-        published_link(
-            node["link"],
-            int(node["rank"]),
-            node.get("exit_country"),
-            node.get("exit_city"),
-            node.get("exit_ip"),
-        )
-        for node in nodes
-    ]
+    published_links = rendered_links(_retention_context(), status)
+    if retained:
+        lines.extend([f"# local_retained: {retained}", f"# published_total: {len(published_links)}",
+                      "#bestlocal-status: mixed; retained entries are not currently verified",
+                      "#bestlocal-health-url: https://raw.githubusercontent.com/RebelRider/vpn-subscription/regional/output/local-health.json"])
 
     lines.extend(
         published_links
@@ -1731,6 +1742,7 @@ def git_output(
 def validate_generated_result(
     subscription_path: Path,
     status_path: Path,
+    *, retention_base_ref: str | None = None,
 ) -> None:
     if not subscription_path.is_file():
         raise RuntimeError(
@@ -1760,16 +1772,9 @@ def validate_generated_result(
     if type(qualified) is not int or not 1 <= qualified <= MAX_LOCAL_PUBLISHED_NODES:
         raise RuntimeError("Invalid qualified publication count")
 
-    expected_published_links = [
-        published_link(
-            node["link"],
-            int(node["rank"]),
-            node.get("exit_country"),
-            node.get("exit_city"),
-            node.get("exit_ip"),
-        )
-        for node in status["nodes"]
-    ]
+    from publication_retention import rendered_links, validate as validate_retention, MAX_RETAINED
+    expected_published_links = rendered_links(_retention_context(), status)
+    retained = len(status.get("retained_nodes", []))
 
     if not links:
         raise RuntimeError(
@@ -1777,10 +1782,10 @@ def validate_generated_result(
             "regional subscription"
         )
 
-    if len(links) != qualified:
+    if len(links) != qualified + retained or len(status["nodes"]) != qualified:
         raise RuntimeError(
             "Subscription/status count mismatch: "
-            f"{len(links)} != {qualified}"
+            f"{len(links)} != {qualified} fresh + {retained} retained"
         )
 
     if links != expected_published_links:
@@ -1789,7 +1794,7 @@ def validate_generated_result(
             "local ranking in status"
         )
 
-    if len(links) > MAX_LOCAL_PUBLISHED_NODES:
+    if len(links) > MAX_LOCAL_PUBLISHED_NODES + MAX_RETAINED:
         raise RuntimeError("Regional result exceeds publication cap")
     ids = [node.get("id") for node in status["nodes"]]
     if (any(not isinstance(identifier, str) or not re.fullmatch(r"[0-9a-f]{64}", identifier) for identifier in ids)
@@ -1820,6 +1825,14 @@ def validate_generated_result(
         raise RuntimeError(
             "Status ranking is not contiguous"
         )
+    if retained:
+        validate_retention(_retention_context(), load_build_module(), status, base_ref=retention_base_ref)
+        title = f"#profile-title: Best Local VPN [STALE - {qualified} verified + {retained} retained]"
+        if title not in subscription_path.read_text().splitlines():
+            raise RuntimeError("Mixed subscription must disclose retained entries")
+    else:
+        # The fresh-only path still rejects malformed retention metadata.
+        validate_retention(_retention_context(), None, status)
 
 
 def qualified_pool_blob(
@@ -1917,8 +1930,17 @@ def remote_branch_exists(
     )
 
 
-def validate_publication_membership(build, status: dict, tested_sha: str) -> None:
+def validate_publication_membership(build, status: dict, tested_sha: str, *, retention_base_ref: str | None = None) -> None:
     validate_publication_nodes(build, status.get("nodes"))
+    from publication_retention import all_nodes, validate as validate_retention
+    validate_retention(_retention_context(), build, status, base_ref=retention_base_ref)
+    # A public historical result never overrides a current private-pool opt-out.
+    if status.get("retained_nodes"):
+        from regional_pool import _managed
+        managed, _ = _managed(build, STATE_DIR)
+        private = {connection_identity(build, entry["link"]) for entry in managed if not entry["public_publish_allowed"]}
+        if any(connection_identity(build, node["link"]) in private for node in all_nodes(status)):
+            raise RuntimeError("Refusing publication of a private retained candidate")
     tested = read_links_text(run_git("show", f"{tested_sha}:{DEFAULT_UPSTREAM_PATH}"), "tested Best50")
     allowed = {build.normalized_fingerprint(build.parse_vless(link)) for link in tested}
     manifest = status.get("input", {}).get("regional_manifest")
@@ -2058,6 +2080,15 @@ def _publish_regional_once(
         if previous_time is not None and current_time is not None and previous_time > current_time:
             raise RuntimeError("A newer regional validation already exists; refusing older result")
 
+        from publication_retention import prepare as prepare_retention
+        prepare_retention(_retention_context(), build, status, base_ref)
+        # Preparation uses one immutable public base and runs again on retry.
+        # It never adds a retained entry to the fresh qualification collection.
+        write_subscription(subscription_path, [node["link"] for node in status["nodes"]], status)
+        write_status(status_path, status)
+        validate_generated_result(subscription_path, status_path, retention_base_ref=base_ref)
+        validate_publication_membership(build, status, tested_sha, retention_base_ref=base_ref)
+
     with owned_temporary_directory(
         prefix="best50-regional-publish-", parent=STATE_DIR / "temporary", repo=ROOT,
     ) as directory:
@@ -2134,7 +2165,7 @@ def _publish_regional_once(
                 tested_sha
             )
 
-            validate_publication_membership(build, status, tested_sha)
+            validate_publication_membership(build, status, tested_sha, retention_base_ref=base_ref)
 
             git_output(
                 "commit",
@@ -2155,7 +2186,7 @@ def _publish_regional_once(
             # A normal non-force push is deliberate. If
             # another publisher raced us, Git refuses the
             # update rather than overwriting remote history.
-            validate_publication_membership(build, status, tested_sha)
+            validate_publication_membership(build, status, tested_sha, retention_base_ref=base_ref)
 
             git_output(
                 "push",
@@ -2259,6 +2290,7 @@ def publish_regional_health(status: dict) -> str:
     qualified = status.get("stability", {}).get("qualified")
     if isinstance(qualified, bool) or not isinstance(qualified, int) or not 0 <= qualified <= 50:
         raise RuntimeError("Invalid current local health qualification count")
+    retained_count = len(status.get("retained_nodes", []))
     spec = importlib.util.spec_from_file_location("bestlocal_subscription_state", Path(__file__).with_name("subscription_state.py"))
     subscription_state = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(subscription_state)
@@ -2269,8 +2301,12 @@ def publish_regional_health(status: dict) -> str:
         "input": status.get("input"), "upstream_sha": status.get("upstream_sha"),
         "upstream_generated_at": status.get("upstream_generated_at"),
         "qualified": status["stability"]["qualified"],
-        "artifact_status": "freshly-validated" if status["stability"]["qualified"] else "last-known-good-retained; latest strict validation found no qualifiers",
-        "current_policy_validated": bool(status["stability"]["qualified"]),
+        "artifact_status": ("mixed; historical protected entries are not currently verified" if qualified and retained_count else
+                            "freshly-validated" if qualified else "last-known-good-retained; latest strict validation found no qualifiers"),
+        "current_policy_validated": bool(qualified) and not retained_count,
+        "fresh_verified": qualified,
+        "retained": retained_count if qualified else None,
+        "published_total": qualified + retained_count if qualified else None,
         "validation": {
             "completed": True,
             "tested_candidates": len(status.get("diagnostics", [])),
@@ -2310,7 +2346,7 @@ def publish_regional_health(status: dict) -> str:
                     staged_paths = ["output/local-health.json"]
                     if not qualified:
                         published_status = subscription_state.read_status(worktree / REGIONAL_STATUS_PATH)
-                        if subscription_state.is_fresh_strict_status(published_status):
+                        if subscription_state.has_fresh_validation(published_status):
                             published_stamp = datetime.fromisoformat(published_status["generated_at"].replace("Z", "+00:00")).timestamp()
                             if published_stamp > health["generated_at"]:
                                 print("A newer validated regional subscription exists; retaining it and its health")
@@ -2369,6 +2405,14 @@ def publish_validation_results(subscription_path: Path, status_path: Path,
             write_status(status_path, status)
             raise
         publication["subscription_status"] = "published"
+        # The transaction may have added protected historical entries from its
+        # exact regional base. Keep health and scheduler inventory consistent.
+        published_status = json.loads(status_path.read_text())
+        for key in ("retained_nodes", "retained_provenance", "published_total"):
+            if key in published_status:
+                status[key] = published_status[key]
+            else:
+                status.pop(key, None)
     else:
         publication["subscription_status"] = "retained"
     try:
@@ -2553,9 +2597,17 @@ async def async_main() -> int:
     #
     # Keep production settings untouched and reduce concurrency only
     # for this local regional validator.
-    from install_browser_runtime import ensure as ensure_browser
-    browser_ready = await asyncio.to_thread(ensure_browser)
-    print("Browser functional validator:", "ready" if browser_ready else "unavailable; ambiguous ChatGPT checks remain inconclusive", flush=True)
+    native_ready = False
+    if sys.platform == "darwin":
+        from native_webkit_probe import ensure as ensure_native
+        native_ready = await asyncio.to_thread(ensure_native)
+    if not native_ready:
+        from install_browser_runtime import ensure as ensure_browser
+        browser_ready = await asyncio.to_thread(ensure_browser)
+    else:
+        browser_ready = True
+    print("Browser functional validator:", "windowless native WebKit" if native_ready else
+          "headless Chromium" if browser_ready else "unavailable; ambiguous ChatGPT checks remain inconclusive", flush=True)
 
     probe_engine = build.CFG.setdefault(
         "probe_engine",

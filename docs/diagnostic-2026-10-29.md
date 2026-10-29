@@ -98,6 +98,56 @@ forged historical evidence rejection, private-pool opt-out, recheck inclusion an
 protection of a mixed title from cloud annotation. Swift compilation and real
 network-isolation checks passed. No unverified candidate was published by tests.
 
+## Actual unattended publication after the correction
+
+Commit `34426e5` was pushed at approximately 16:05. The existing launchd poll
+fast-forwarded its clean runtime and started the new complete validation at
+**16:08:56**, without a manual kick or restart. A native probe was observed in
+that scheduled run. It collected 8,000 entries, fetched 66 sources and discovered
+four sources; input was 50 Best50 plus 50 regional exploration/recheck candidates.
+
+The full 100-candidate run completed at **16:14:32.346863**, with **two fresh
+qualifiers**, both Trojan/TLS in Passau, Germany:
+
+| Candidate ID prefix | Observed exit IP | All three services | Median fresh HTTPS completion |
+| --- | --- | --- | ---: |
+| `d17c179ed6bf` | `193.108.119.81` | 5/5 each | 270.378 ms |
+| `49121407d66e` | `193.108.119.34` | 5/5 each | 279.806 ms |
+
+Both passed current ChatGPT document/composer/fresh-JSON proof. The existing
+transaction automatically published these two and retained both protected Dutch
+connections. Subscription and health transaction markers are `published`; the
+scheduler reports `published`, with zero infrastructure failures.
+
+An independent en0 download of the actual three regional CDN files succeeded.
+The subscription contains **four distinct connections**, exactly matching the
+status ordering and formatting: **two currently verified + two historical
+protected entries**. The title is
+`Best Local VPN [STALE - 2 verified + 2 retained]`. STALE now discloses the
+historical subset; it does not describe an empty or stopped current pipeline.
+Happ's actual refreshed screen was not inspected or manipulated.
+
+GitHub run `40878781920` automatically ran the regression step successfully at
+16:14:11–16:14:44. Its subsequent Best50 build was still running at that check;
+this is distinct from the already verified local regional publication.
+
+## Queue fairness correction
+
+Four candidates in the successful scheduled run still deferred browser admission.
+Previously, feedback marked them recently tested and selection put them behind
+the entire untested pool, potentially for days. Bounded hash-only retry hints now
+reserve up to eight due exploration slots, with 15-minute to two-hour backoff,
+24-hour expiry and a 128-record cap. Published connections execute first, followed
+by due retries. Normal exploration retains its budget. A real browser result
+clears the hint; no cached response or retry hint grants qualification.
+The final complete test suite passed **432 tests**, including the 8,000-candidate
+starvation regression, bounded retry fairness, expiry and real-response handling.
+
+A separate five-pair AB/BA measurement did **not** support serializing HTTP
+service requests as a latency fix: concurrent median 522.385 ms versus serial
+803.361 ms. The existing latency methodology and strict 500 ms threshold remain
+unchanged.
+
 ## External dependencies
 
 Grok research remains quota-limited. The 12:49 failed attempt scheduled its next

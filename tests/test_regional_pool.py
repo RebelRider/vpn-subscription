@@ -100,19 +100,19 @@ class RegionalPoolTests(unittest.TestCase):
         FakePool.links = [vless("9.9.9.1"), vless("9.9.9.2")]
         with patch.object(regional, "_published_rechecks", return_value=candidates):
             links, manifest = self.collect(limit=2)
-        self.assertEqual(links, [vless(), first, second])
+        self.assertEqual(links, [first, second, vless()])
         self.assertEqual(manifest["summary"]["local_recheck"], 2)
         self.assertEqual(manifest["summary"]["exploration"], 2)
         self.assertTrue(manifest["unverified_inputs"])
-        self.assertTrue(all(node["origin"] == "local-recheck" for node in manifest["nodes"][1:]))
+        self.assertTrue(all(node["origin"] == "local-recheck" for node in manifest["nodes"][:2]))
 
     def test_managed_privacy_overrides_previously_published_recheck(self):
         link = vless("8.8.8.8")
         private_json(self.state / "managed-pool.json", {"schema": 1, "servers": [{"uri": link}]})
         with patch.object(regional, "_published_rechecks", return_value=[regional._candidate(build, link, origin="local-recheck")]):
             links, manifest = self.collect()
-        self.assertEqual(links, [vless(), link])
-        self.assertFalse(manifest["nodes"][1]["public_publish_allowed"])
+        self.assertEqual(links, [link, vless()])
+        self.assertFalse(manifest["nodes"][0]["public_publish_allowed"])
 
     def test_recheck_reader_ignores_legacy_corrupt_and_nonpublished_entries(self):
         self.patch_rechecks.stop()
@@ -152,6 +152,140 @@ class RegionalPoolTests(unittest.TestCase):
         regional.apply_local_feedback(self.state, [{"id": manifest["nodes"][1]["id"], "qualified": False, "rejection_reasons": ["connection-timeout"]}], now=NOW)
         second, _ = self.collect(limit=1, now=NOW + 1)
         self.assertNotEqual(first[1], second[1])
+
+    def retry_history(self, links, *, first_at=NOW - 3600, after=NOW - 1):
+        candidates = {}
+        for index, link in enumerate(links):
+            identifier = build.normalized_fingerprint(build.parse_vless(link))
+            candidates[identifier] = {"last_seen": NOW, "last_tested": NOW - 1000 + index,
+                                     "source_ids": [], "last_outcome": "inconclusive",
+                                     "browser_retry": {"first_at": first_at, "after": after, "attempts": 1}}
+        private_json(self.state / regional.HISTORY_NAME, {"schema": 1, "candidates": candidates})
+        return candidates
+
+    def deferred(self, identifier, reason="browser-queue-deferred-inconclusive"):
+        return {"id": identifier, "qualified": False,
+                "browser_check": {"attempted": True, "qualified": False, "reason": reason, "browser_started": False},
+                "services": {"chatgpt": {"attempts": 1, "passed": 0, "reasons": ["cloudflare-challenge-inconclusive"]},
+                             "youtube": {"attempts": 1, "passed": 1}, "instagram": {"attempts": 1, "passed": 1}},
+                "latency_samples_ms": [123.0]}
+
+    def test_browser_deferred_candidate_precedes_eight_thousand_untested_candidates(self):
+        queued = "trojan://queue-test@8.8.8.8:443?sni=example.com"
+        self.retry_history([queued])
+        FakePool.links = [queued] + [vless(f"9.{index // 65536}.{index // 256 % 256}.{index % 256}") for index in range(1, 8001)]
+        links, manifest = self.collect()
+        self.assertEqual(links[0], queued)
+        self.assertEqual(links[1], vless())
+        self.assertEqual(manifest["summary"]["browser_retry"], 1)
+        self.assertEqual(len(links), 51)
+        self.assertTrue(manifest["unverified_inputs"])
+
+    def test_retry_quota_preserves_forty_normal_slots_and_rotates_least_recent_attempts(self):
+        queued = [vless(f"8.8.8.{index}") for index in range(1, 13)]
+        normal = [vless(f"9.9.9.{index}") for index in range(1, 61)]
+        self.retry_history(queued)
+        FakePool.links = queued + normal
+        retained = [regional._candidate(build, link, origin="local-recheck")
+                    for link in (vless("1.0.0.1"), vless("1.1.1.2"))]
+        with patch.object(regional, "_published_rechecks", return_value=retained):
+            links, manifest = self.collect()
+        self.assertEqual(links[:2], [item["link"] for item in retained])
+        selected = [item for item in manifest["nodes"] if item["link"] in queued]
+        self.assertEqual(len(selected), 8)
+        self.assertEqual(sum(item in normal for item in links), 40)
+        self.assertEqual(len(links), len(set(links)))
+        regional.apply_local_feedback(self.state, [self.deferred(item["id"]) for item in selected], now=NOW)
+        later, _ = self.collect(now=NOW + regional.BROWSER_RETRY_BASE + 1)
+        unselected = set(queued) - {item["link"] for item in selected}
+        self.assertTrue(unselected <= set(later[:8]))
+
+    def test_queue_backoff_is_bounded_and_does_not_become_a_source_failure(self):
+        queued = vless("8.8.8.8")
+        FakePool.links = [queued]
+        FakePool.provenance = {queued: {SOURCE_A}}
+        _, manifest = self.collect(limit=1)
+        identifier = manifest["nodes"][1]["id"]
+        for attempt in range(1, 7):
+            at = NOW + attempt
+            feedback = regional.apply_local_feedback(self.state, [self.deferred(identifier)], now=at)
+            history = regional._load_history(self.state, at)
+            retry = history["candidates"][identifier]["browser_retry"]
+            self.assertLessEqual(retry["after"] - at, regional.BROWSER_RETRY_MAX)
+            self.assertEqual(feedback["definitive_failure"], 0)
+            self.assertEqual(history["sources"][SOURCE_A]["definitive_failure"], 0)
+        before, _ = self.collect(limit=1, now=NOW + 10)
+        self.assertEqual(before, [vless()])
+        due, _ = self.collect(limit=1, now=retry["after"])
+        self.assertEqual(due, [queued, vless()])
+        raw = (self.state / regional.HISTORY_NAME).read_text()
+        self.assertNotIn(UUID, raw)
+        self.assertNotIn("vless://", raw)
+
+    def test_admitted_browser_result_and_definitive_failure_clear_retry_priority(self):
+        queued = vless("8.8.8.8")
+        for reason in ("access-denied-inconclusive", "browser-composer-not-actionable-inconclusive", "proxy-start-or-network-failure"):
+            candidates = self.retry_history([queued])
+            identifier = next(iter(candidates))
+            diagnostic = self.deferred(identifier, reason)
+            if reason == "proxy-start-or-network-failure":
+                diagnostic = {"id": identifier, "qualified": False, "rejection_reasons": [reason]}
+            regional.apply_local_feedback(self.state, [diagnostic], now=NOW)
+            self.assertNotIn("browser_retry", regional._load_history(self.state, NOW)["candidates"][identifier])
+
+    def test_recorded_application_response_is_not_a_queue_deferral(self):
+        queued = vless("8.8.8.8")
+        candidates = self.retry_history([queued])
+        identifier = next(iter(candidates))
+        diagnostic = self.deferred(identifier, "browser-deadline")
+        diagnostic["browser_check"]["first_failed_http_status"] = 403
+        regional.apply_local_feedback(self.state, [diagnostic], now=NOW)
+        self.assertNotIn("browser_retry", regional._load_history(self.state, NOW)["candidates"][identifier])
+
+    def test_corrupt_future_and_expired_retry_metadata_returns_to_normal_exploration(self):
+        queued = vless("8.8.8.8")
+        for changes in ({"first_at": NOW + 301}, {"after": NOW + regional.BROWSER_RETRY_MAX + 301},
+                        {"attempts": True}, {"attempts": 10 ** 100}, {"first_at": NOW - regional.BROWSER_RETRY_LIFETIME - 1}):
+            candidates = self.retry_history([queued])
+            identifier = next(iter(candidates))
+            candidates[identifier]["browser_retry"].update(changes)
+            private_json(self.state / regional.HISTORY_NAME, {"schema": 1, "candidates": candidates})
+            FakePool.links = [queued]
+            links, manifest = self.collect(limit=1)
+            self.assertIn(queued, links)
+            self.assertEqual(manifest["summary"]["browser_retry"], 0)
+            self.assertNotIn("browser_retry", regional._load_history(self.state, NOW)["candidates"][identifier])
+
+    def test_retained_candidate_already_in_best50_is_first_and_not_duplicated(self):
+        retained = vless("8.8.8.8")
+        with patch.object(regional, "_published_rechecks", return_value=[regional._candidate(build, retained, origin="local-recheck")]):
+            links, _ = self.collect([vless(), retained])
+        self.assertEqual(links, [retained, vless()])
+
+    def test_disappeared_queued_source_does_not_block_normal_replenishment(self):
+        self.retry_history([vless("8.8.8.8")])
+        FakePool.links = [vless(f"9.9.9.{index}") for index in range(1, 61)]
+        links, manifest = self.collect()
+        self.assertEqual(len(links), 51)
+        self.assertEqual(manifest["summary"]["browser_retry"], 0)
+
+    def test_growing_published_recheck_pool_reduces_retry_quota_before_normal_exploration(self):
+        queued = [vless(f"8.8.8.{index}") for index in range(1, 13)]
+        normal = [vless(f"9.9.9.{index}") for index in range(1, 61)]
+        self.retry_history(queued)
+        FakePool.links = queued + normal
+        retained = [regional._candidate(build, vless(f"1.1.1.{index}"), origin="local-recheck") for index in range(2, 6)]
+        with patch.object(regional, "_published_rechecks", return_value=retained):
+            links, manifest = self.collect()
+        self.assertEqual(manifest["summary"]["browser_retry"], 6)
+        self.assertEqual(sum(link in normal for link in links), 40)
+        self.assertEqual(len(links), 51)
+
+    def test_retry_record_budget_is_bounded_even_with_corrupt_oversized_cache(self):
+        queued = [vless(f"9.9.{index // 256}.{index % 256}") for index in range(1, 201)]
+        self.retry_history(queued)
+        loaded = regional._load_history(self.state, NOW)
+        self.assertEqual(sum("browser_retry" in item for item in loaded["candidates"].values()), regional.MAX_BROWSER_RETRIES)
 
     def test_supported_protocols_and_public_endpoint_syntax_are_required(self):
         FakePool.links = ["trojan://password@8.8.8.8:443?sni=example.com", "hy2://password@8.8.4.4:443?sni=example.com", "socks://user:password@9.9.9.9:1080", "trojan://password@127.0.0.1:443", "tuic://password@8.8.8.8:443", "not-a-config"]

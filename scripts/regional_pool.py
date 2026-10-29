@@ -37,6 +37,13 @@ MAX_PROVENANCE = 8000
 MAX_SOURCE_IDS = 8
 MAX_AGE = 6 * 3600
 MAX_HISTORY_AGE = 28 * 86400
+MAX_BROWSER_RETRIES = 128
+BROWSER_RETRY_QUOTA = 8
+BROWSER_RETRY_LIFETIME = 24 * 3600
+BROWSER_RETRY_BASE = 15 * 60
+BROWSER_RETRY_MAX = 2 * 3600
+BROWSER_DEFERRED_REASONS = frozenset({"browser-queue-deferred-inconclusive", "browser-busy-inconclusive",
+                                     "browser-queue-or-runtime-deadline-inconclusive", "browser-deadline"})
 ID = re.compile(r"[0-9a-f]{64}")
 SOURCE_ID = re.compile(r"[0-9a-f]{24}")
 MANIFEST_NAME = "regional-input-manifest.json"
@@ -53,6 +60,45 @@ def _source_ids(values):
     if not isinstance(values, (list, tuple, set, frozenset)):
         return []
     return sorted({value for value in values if isinstance(value, str) and SOURCE_ID.fullmatch(value)})[:MAX_SOURCE_IDS]
+
+
+def _browser_retry(value, now):
+    if not isinstance(value, dict) or set(value) != {"first_at", "after", "attempts"}:
+        return None
+    first, after, attempts = value["first_at"], value["after"], value["attempts"]
+    if (not _number(first) or not now - BROWSER_RETRY_LIFETIME <= first <= now + 300
+            or not _number(after) or not first <= after <= now + BROWSER_RETRY_MAX + 300
+            or type(attempts) is not int or not 1 <= attempts <= 8):
+        return None
+    return {"first_at": first, "after": after, "attempts": attempts}
+
+
+def _bound_browser_retries(candidates):
+    pending = sorted((key for key, value in candidates.items() if "browser_retry" in value),
+                     key=lambda key: (candidates[key]["browser_retry"]["first_at"],
+                                      candidates[key].get("last_tested", 0), key))
+    for key in pending[MAX_BROWSER_RETRIES:]:
+        candidates[key].pop("browser_retry", None)
+
+
+def _deferred_browser_result(result):
+    browser = result.get("browser_check", {})
+    if (not isinstance(browser, dict) or not isinstance(browser.get("reason"), str)
+            or browser["reason"] not in BROWSER_DEFERRED_REASONS
+            or any(type(browser.get(field)) is int and 100 <= browser[field] <= 599
+                   for field in ("http_status", "first_failed_http_status"))):
+        return False
+    services = result.get("services", {})
+    if not isinstance(services, dict):
+        return False
+    for name in ("youtube", "instagram"):
+        service = services.get(name, {})
+        if (not isinstance(service, dict) or type(service.get("attempts")) is not int
+                or not 1 <= service["attempts"] <= 5 or type(service.get("passed")) is not int
+                or service["passed"] != service["attempts"]):
+            return False
+    samples = result.get("latency_samples_ms", [])
+    return isinstance(samples, list) and 1 <= len(samples) <= 5 and all(_number(value) for value in samples)
 
 
 def _state_directory(path):
@@ -154,6 +200,9 @@ def _load_history(state_dir: Path, now):
                 item["last_outcome"] = outcome if isinstance(outcome, str) and outcome in {"qualified", "definitive-failure", "inconclusive"} else "inconclusive"
                 tested = value.get("last_tested", 0)
                 item["last_tested"] = tested if _number(tested) and tested <= now + 300 else 0
+                retry = _browser_retry(value.get("browser_retry"), now)
+                if retry is not None:
+                    item["browser_retry"] = retry
             else:
                 for name in ("qualified", "definitive_failure", "inconclusive"):
                     count = value.get(name, 0)
@@ -161,6 +210,7 @@ def _load_history(state_dir: Path, now):
                 ema = value.get("local_ema", 0)
                 item["local_ema"] = float(ema) if _number(ema, 1) else 0.0
             clean[kind][key] = item
+    _bound_browser_retries(clean["candidates"])
     return clean
 
 
@@ -318,7 +368,9 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
             # credentials happen to exist in a public feed or another entry.
             by_id[candidate["id"]]["public_publish_allowed"] = False
     recheck_count = 0
+    recheck_order = {}
     for candidate in _published_rechecks(build):
+        recheck_order.setdefault(candidate["id"], len(recheck_order))
         if recheck_count >= min(14, limit):
             break
         if candidate["id"] not in by_id:
@@ -363,7 +415,26 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
         else:
             candidate["source_ids"] = source_ids
             candidates[identifier] = candidate
-    selected.extend(_select(list(candidates.values()), history, limit - recheck_count))
+    # Queue contention is validator uncertainty, not evidence of a dead server.
+    # Give due promising candidates a small tranche without displacing normal
+    # exploration. A retry hint never supplies cached functional proof.
+    pending = {key: value["browser_retry"] for key, value in history["candidates"].items() if "browser_retry" in value}
+    def retry_order(candidate):
+        past = history["candidates"].get(candidate["id"], {})
+        return (past.get("last_tested", 0), past["browser_retry"]["first_at"], candidate["id"])
+    due = sorted((value for key, value in candidates.items() if key in pending and pending[key]["after"] <= now), key=retry_order)
+    normal_reserve = max(0, limit - BROWSER_RETRY_QUOTA - 2)
+    quota = min(BROWSER_RETRY_QUOTA, max(0, limit - recheck_count - normal_reserve))
+    retry_selected = due[:quota]
+    selected.extend(retry_selected)
+    normal = [value for key, value in candidates.items() if key not in pending]
+    selected.extend(_select(normal, history, max(0, limit - recheck_count - len(retry_selected))))
+    due_selected = sorted((value for value in selected if value["id"] in pending and pending[value["id"]]["after"] <= now), key=retry_order)
+    retry_positions = {value["id"]: index for index, value in enumerate(due_selected)}
+    # Admission uses this list's actual order; merely recording a priority in
+    # the manifest would still leave retained nodes behind all fifty cloud nodes.
+    selected.sort(key=lambda value: (0, recheck_order[value["id"]]) if value["id"] in recheck_order else
+                  (1, retry_positions[value["id"]]) if value["id"] in retry_positions else (2, 0))
     for candidate in selected:
         if connection_identity(build, candidate["link"]) in private_connections:
             candidate["public_publish_allowed"] = False
@@ -385,6 +456,7 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
                             "managed": sum(node["origin"] == "managed" for node in nodes),
                             "exploration": sum(node["origin"] in {"regional-exploration", "local-recheck"} for node in nodes),
                             "local_recheck": recheck_count,
+                            "browser_retry": len(due_selected),
                             "collected": len(links), "invalid": invalid,
                             "discovery": discovery_stats, "source_catalog": catalog_status,
                             "provenance_persistence": provenance_persistence,
@@ -489,6 +561,15 @@ def apply_local_feedback(state_dir, diagnostics, now=None):
         if candidate is None:
             continue  # Best50-only and private candidates have no invented source attribution.
         candidate.update(last_tested=now, last_seen=now, last_outcome=outcome)
+        if outcome == "inconclusive" and _deferred_browser_result(result):
+            previous = candidate.get("browser_retry", {})
+            attempts = min(8, previous.get("attempts", 0) + 1)
+            candidate["browser_retry"] = {"first_at": previous.get("first_at", now), "attempts": attempts,
+                                          "after": now + min(BROWSER_RETRY_MAX, BROWSER_RETRY_BASE * 2 ** min(attempts - 1, 3))}
+        else:
+            # A real admitted browser response, definitive rejection or strict
+            # success completes the deferred task; no historical pass is reused.
+            candidate.pop("browser_retry", None)
         for source in candidate["source_ids"]:
             sources.setdefault(source, Counter())[outcome] += 1
     for source, counts in sources.items():
@@ -500,6 +581,7 @@ def apply_local_feedback(state_dir, diagnostics, now=None):
         if definite:
             record["local_ema"] = round(0.65 * record.get("local_ema", 0) + 0.35 * counts["qualified"] / definite, 6)
         record["last_seen"] = now
+    _bound_browser_retries(history["candidates"])
     persisted = True
     try:
         _write_private(state_dir / HISTORY_NAME, history)

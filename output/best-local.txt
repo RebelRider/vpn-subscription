@@ -1,24 +1,23 @@
 # v6.0 — LOCAL NETWORK VERIFIED PROXIES
-#profile-title: Best Local VPN [STALE - 2 verified + 1 retained]
+#profile-title: Best Local VPN [STALE - 1 verified + 1 retained]
 #profile-update-interval: 1
 #subscription-ping-onopen-enabled: 1
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-10-30 11:03:34 UTC
+# generated: 2026-10-30 12:07:13 UTC
 #
 # Local filtering: ChatGPT providers JSON + YouTube video metadata + Instagram application HTML; median proxy HTTPS latency <500 ms
 # Local final stability: 5/5 complete rounds required
 # upstream_nodes: 100
-# local_qualified: 2
+# local_qualified: 1
 # local_ranking: stability, median latency, p95 latency
 #
 # Fresh entries were re-tested through the current local network; retained entries preserve historical evidence and are not currently verified.
 #
 # local_retained: 1
-# published_total: 3
+# published_total: 2
 #bestlocal-status: mixed; retained entries are not currently verified
 #bestlocal-health-url: https://raw.githubusercontent.com/RebelRider/vpn-subscription/regional/output/local-health.json
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@193.108.119.78:443?sni=www.iloverussia2026.com&type=tcp&security=tls#🇩🇪%20DE%20%7C%20Passau%20%7C%201%20%7C%20%5B193.108.119.34%5D
-vless://7b22dce8-7ebd-425b-8ca4-7b6190321985@82.22.2.225:443?fp=qq&security=tls&serviceName=grpc&sni=b-wl.fr-2.bnc-gt.co.uk&type=grpc#🇫🇷%20FR%20%7C%20Paris%20%7C%202%20%7C%20%5B82.22.2.245%5D
-ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.192:8080#🇳🇱%20NL%20%7C%20Amsterdam%20%7C%203%20%7C%20%5B193.29.139.198%5D
+hysteria2://24266838d888d903594cc6e33910aeeb@2.28.226.197:443?sni=vpn.172908710.dpdns.org&obfs=salamander&obfs-password=27b960aa5b199a215c3a84fd4818e5d2#🇩🇪%20DE%20%7C%20Nuremberg%20%7C%201%20%7C%20%5B2.28.226.197%5D
+ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.192:8080#🇳🇱%20NL%20%7C%20Amsterdam%20%7C%202%20%7C%20%5B193.29.139.198%5D

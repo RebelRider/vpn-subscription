@@ -40,8 +40,13 @@ def all_nodes(status: dict) -> list[dict]:
 
 
 def rendered_links(local, status: dict) -> list[str]:
+    # Immutable older snapshots must keep their original renderer for evidence
+    # comparison. Only newly written status explicitly opts into version 2.
+    version = status.get("presentation_version", 1)
+    if type(version) is not int or version not in (1, 2):
+        raise RuntimeError("Unsupported subscription presentation version")
     return [local.published_link(node["link"], index, node.get("exit_country"),
-                                 node.get("exit_city"), node.get("exit_ip"))
+                                 node.get("exit_city"), node.get("exit_ip"), presentation_version=version)
             for index, node in enumerate(all_nodes(status), 1)]
 
 

@@ -8,6 +8,7 @@ strict local functional validation before it can appear in BestLocal.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import fcntl
 import hashlib
 import json
@@ -17,6 +18,7 @@ import re
 import subprocess
 import sys
 import time
+from urllib.parse import unquote, urlsplit
 
 from source_discovery import SourcePool, canonical_url, decode_subscription, extract_links, RateLimited, SourcePolicyUnavailable
 from owned_temporary import temporary_directory
@@ -32,8 +34,10 @@ REFRESH_SECONDS = 24 * 3600
 
 class ResearchSourcesUnavailable(RuntimeError):
     """A retry may succeed; preserve the model's pending proposal."""
-    def __init__(self, message: str, retry_at: float = 0):
+    def __init__(self, message: str, retry_at: float = 0, *, summary: dict | None = None, reason: str = "publication"):
         self.retry_at = retry_at
+        self.summary = summary or {}
+        self.reason = reason if reason in {"publication", "network"} else "publication"
         super().__init__(message)
 
 
@@ -228,6 +232,7 @@ def publish_catalog(repo: Path, state_dir: Path, updates: list[dict], now: float
 
 def process_research_result(result_text: str, repo: Path, state_dir: Path, now: float) -> dict:
     proposals, rejected = parse_proposal(result_text)
+    reasons = Counter({"invalid-proposal": rejected} if rejected else {})
     try:
         current = parse_catalog(_git_blob(repo, CATALOG_REF), now)
     except (OSError, ValueError, UnicodeError, subprocess.SubprocessError):
@@ -244,32 +249,109 @@ def process_research_result(result_text: str, repo: Path, state_dir: Path, now: 
             try:
                 if not pool.allowed(item["url"]):
                     rejected += 1
+                    reasons["source-policy"] += 1
                     continue
                 raw, _ = pool.get(item["url"])
                 if not _has_compatible_configuration(decode_subscription(raw)):
                     rejected += 1
+                    reasons["no-compatible-configuration"] += 1
                     continue
                 updates.append({**item, "enabled": True, "first_seen": previous["first_seen"] if previous else now,
                                 "last_verified_at": now})
                 accepted += 1
             except (RateLimited, SourcePolicyUnavailable) as exc:
                 transient += 1
+                reasons["rate-limit" if isinstance(exc, RateLimited) else "source-policy-unavailable"] += 1
                 retry_at = max(retry_at, min(now + 86400, max(now + 60, exc.retry_at)))
             except (TimeoutError, OSError):
                 transient += 1
+                reasons["network"] += 1
             except RuntimeError as error:
                 if str(error).startswith("source HTTP 4"):
                     rejected += 1
+                    reasons["source-http-client-error"] += 1
                 else:
                     transient += 1
+                    reasons["source-unavailable"] += 1
             except (ValueError, TypeError, OverflowError):
                 rejected += 1
-    published = publish_catalog(repo, state_dir, updates, now) if updates else False
+                reasons["invalid-source"] += 1
+    summary = {"accepted": accepted, "added": sum(entry["url"] not in known for entry in updates),
+               "refreshed": sum(entry["url"] in known for entry in updates), "rejected": rejected,
+               "rejection_reasons": dict(reasons)}
+    try:
+        published = publish_catalog(repo, state_dir, updates, now) if updates else False
+    except ResearchSourcesUnavailable as exc:
+        # Preserve validation observations even when the Git transaction fails.
+        exc.summary = {**summary, "published": False}
+        raise
+    summary.update(published=published, already_current=not published)
     if transient:
-        raise ResearchSourcesUnavailable("source validation is temporarily unavailable; pending suggestions retained", retry_at=retry_at)
-    return {"accepted": accepted, "added": sum(entry["url"] not in known for entry in updates),
-            "refreshed": sum(entry["url"] in known for entry in updates), "rejected": rejected,
-            "published": published, "already_current": not published}
+        raise ResearchSourcesUnavailable("source validation is temporarily unavailable; pending suggestions retained", retry_at=retry_at, summary=summary, reason="network")
+    return summary
+
+
+def independent_proposal(state_dir: Path, now: float, repo: Path | None = None) -> str:
+    """Propose recent productive feeds; all are independently fetched again.
+
+    The regional registry is read only. A separate discovery registry is used
+    when no productive regional registry exists, so this job never races the
+    local candidate collector's state writer.
+    """
+    from regional_pool import PrivateSourcePool
+    from regional_scheduler import atomic_json
+    regional = state_dir / "regional-discovery-state.json"
+    try:
+        pool = PrivateSourcePool([], regional, now=int(now))
+        productive = [item for item in pool.sources.values()
+                      if item.get("candidate_count", 0) > 0 and item.get("failures", 0) == 0
+                      and 0 <= now - item.get("last_success", 0) <= 2 * REFRESH_SECONDS]
+    except (OSError, ValueError, RuntimeError):
+        productive = []
+    if not productive:
+        fallback = state_dir / "source-fallback-discovery-state.json"
+        pool = PrivateSourcePool([], fallback, now=int(now))
+        pool.collect()
+        productive = [item for item in pool.sources.values()
+                      if item.get("candidate_count", 0) > 0 and item.get("failures", 0) == 0
+                      and 0 <= now - item.get("last_success", 0) <= 2 * REFRESH_SECONDS]
+        # PrivateSourcePool already persists collection; keep an atomic durable
+        # snapshot with fsync for the standalone fallback registry as well.
+        atomic_json(fallback, pool.state)
+    try:
+        known = {item["url"]: item for item in parse_catalog(_git_blob(repo, CATALOG_REF), now)["sources"]} if repo else {}
+    except (OSError, ValueError, UnicodeError, subprocess.SubprocessError):
+        known = {}
+    # Unknown feeds lead; stable useful ones still retain priority within each
+    # group. Rotate equal-quality unknown feeds by day so a bounded proposal
+    # does not permanently repeat the same lexicographic prefix.
+    productive.sort(key=lambda item: (item["url"] in known,
+                                     -item.get("functional_ema", 0),
+                                     -item.get("last_functional_count", 0),
+                                     known.get(item["url"], {}).get("last_verified_at", 0),
+                                     hashlib.sha256(f"{int(now // REFRESH_SECONDS)}:{item['url']}".encode()).hexdigest()))
+    sources, providers = [], Counter()
+    for item in productive:
+        url = canonical_url(item["url"])
+        parsed = urlsplit(url)
+        path = unquote(parsed.path)
+        # Do not promote opaque credentials encountered inside public text.
+        # Discovery may consume public format parameters; registry publication
+        # deliberately requires a clearly credential-free URL.
+        if (parsed.query or re.search(r"(?i)(?:^|/)(?:token|secret|private|password|auth|api[_-]?key)(?:[./_-]|$)", path)
+                or re.search(r"(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", path)
+                or any(len(part) >= 24 and re.fullmatch(r"[A-Za-z0-9_-]+", part) and any(char.isdigit() for char in part)
+                       for part in path.split("/"))):
+            continue
+        provider = (parsed.hostname, tuple(parsed.path.split("/")[1:3])
+                    if parsed.hostname == "raw.githubusercontent.com" else ())
+        if providers[provider] >= 2:
+            continue
+        providers[provider] += 1
+        sources.append({"url": url, "evidence_url": url})
+        if len(sources) == 16:
+            break
+    return json.dumps({"schema": 1, "sources": sources}, sort_keys=True)
 
 
 def main() -> int:

@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import plistlib
 import stat
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -67,6 +68,11 @@ class SourceResearchTests(unittest.TestCase):
         self.catalog_patcher = mock.patch("source_catalog.load_regional_sources", return_value=([], {}))
         self.catalog_context = self.catalog_patcher.start()
         self.addCleanup(self.catalog_patcher.stop)
+        # Existing tests isolate the Grok lifecycle. Independent discovery has
+        # its own real-Git controlled tests below and must not access the web.
+        self.fallback_patcher = mock.patch.object(research, "run_independent_catalog", return_value={})
+        self.fallback_patcher.start()
+        self.addCleanup(self.fallback_patcher.stop)
     def tearDown(self): self.temporary.cleanup()
     def status(self): return json.loads((self.state / research.STATE_NAME).read_text())
     def run_research(self, now=NOW, outcome=None):
@@ -112,7 +118,9 @@ class SourceResearchTests(unittest.TestCase):
 
     def test_strict_strongest_model_selection_refuses_weaker_or_fast_fallback(self):
         self.assertEqual(research.select_model(MODELS), ("grok-4.7-xhigh", "4.7"))
-        for invalid in ("auto - Auto", MODELS + "grok-4.8-fast - Grok 4.8 Fast\n", MODELS + "grok-newest - Grok Newest\n", "grok-4.7-xhigh - Grok 4.7 Extra High Fast"):
+        self.assertEqual(research.select_model(MODELS + "grok-4.8-fast - Grok 4.8 Fast\n"), ("grok-4.7-xhigh", "4.7"))
+        self.assertEqual(research.select_model(MODELS + "grok-4.8-xhigh - Grok 4.8 Extra High\n"), ("grok-4.7-xhigh", "4.7"))
+        for invalid in ("auto - Auto", "cursor-grok-4.6-xhigh - Grok 4.6 Extra High\n", MODELS + "grok-newest - Grok Newest\n", "grok-4.7-xhigh - Grok 4.7 Extra High Fast"):
             with self.subTest(invalid=invalid), self.assertRaises(research.ResearchFailure):
                 research.select_model(invalid)
 
@@ -371,6 +379,150 @@ class SourceResearchTests(unittest.TestCase):
                 installer.install(home, runtime, Path(sys.executable), load=True)
         self.assertEqual(launchctl.call_count, 1)
         self.assertIn(installer.LABEL, launchctl.call_args.args[0][-1])
+
+
+class IndependentSourceResearchTests(unittest.TestCase):
+    FEED = "https://raw.githubusercontent.com/unknown/public/main/servers.txt"
+    BAD = "https://raw.githubusercontent.com/other/public/main/invalid.txt"
+    LINK = "vless://11111111-1111-4111-8111-111111111111@1.1.1.1:443?security=tls&sni=example.com"
+
+    def setUp(self):
+        import source_catalog
+        self.catalog = source_catalog
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.directory = Path(self.temporary.name)
+        self.repo, self.state = self.directory / "repo", self.directory / "state"
+        self.repo.mkdir();self.state.mkdir(mode=0o700)
+        self.now = __import__("time").time()
+        self.git("init", "--bare", str(self.directory / "remote.git"))
+        self.git("init", "-b", "main")
+        self.git("config", "user.name", "Source Test")
+        self.git("config", "user.email", "source@example.invalid")
+        (self.repo / "output").mkdir()
+        (self.repo / "output/best-local.txt").write_text("untouched subscription\n")
+        self.git("add", ".");self.git("commit", "-m", "initial")
+        self.git("remote", "add", "origin", str(self.directory / "remote.git"))
+        self.git("push", "origin", "HEAD:refs/heads/regional")
+
+    def git(self, *args):
+        return subprocess.check_output(["git", *args], cwd=self.repo, stderr=subprocess.DEVNULL, text=True).strip()
+
+    def registry(self, feeds):
+        from source_discovery import SourcePool
+        path = self.state / "regional-discovery-state.json"
+        pool = SourcePool([], path, now=int(self.now))
+        for url in feeds:
+            pool.add(url, "github-search")
+        for item in pool.sources.values():
+            item.update(last_success=int(self.now), candidate_count=3)
+        pool.save();path.chmod(0o600)
+
+    def fallback_state(self):
+        return json.loads((self.state / research.FALLBACK_NAME).read_text())
+
+    def test_quota_does_not_block_unknown_feed_permanent_admission(self):
+        self.registry([self.FEED, self.BAD])
+        self.assertEqual(self.git("log", "--format=%s", "origin/regional"), "initial")
+        with mock.patch.object(research, "research", side_effect=research.ResearchFailure("quota")), \
+             mock.patch.object(self.catalog.SourcePool, "allowed", return_value=True), \
+             mock.patch.object(self.catalog.SourcePool, "get", side_effect=lambda url: ((self.LINK if url == self.FEED else "not a proxy").encode(), {})):
+            self.assertEqual(research.run_once(self.repo, self.state, now=self.now, agent="/fake/agent"), 1)
+        saved = json.loads(self.git("show", "origin/regional:" + self.catalog.CATALOG_PATH))
+        self.assertEqual([item["url"] for item in saved["sources"]], [self.FEED])
+        state = self.fallback_state()
+        self.assertEqual((state["status"], state["added"], state["rejected"]), ("success", 1, 1))
+        self.assertEqual(state["rejection_reasons"], {"no-compatible-configuration": 1})
+        self.assertEqual(json.loads((self.state / research.STATE_NAME).read_text())["last_error"], "quota")
+        history = json.loads((self.state / research.RESEARCH_HISTORY).read_text())
+        self.assertEqual([item["worker"] for item in history], ["independent", "grok"])
+        self.assertEqual(history[1]["error"], "quota")
+        self.assertEqual(self.git("show", "origin/regional:output/best-local.txt"), "untouched subscription")
+        # A new invocation/restart reads durable success and neither re-fetches
+        # nor publishes another transaction within the daily interval.
+        tip = self.git("rev-parse", "origin/regional")
+        with mock.patch.object(self.catalog, "independent_proposal", side_effect=AssertionError("daily result remains current")):
+            result = research.run_independent_catalog(self.repo, self.state, self.now + 3601)
+        self.assertEqual(result["last_success_at"], self.now)
+        self.assertEqual(self.git("rev-parse", "origin/regional"), tip)
+
+    def test_failed_github_publication_retries_automatically_without_model(self):
+        self.registry([self.FEED])
+        with mock.patch.object(self.catalog.SourcePool, "allowed", return_value=True), \
+             mock.patch.object(self.catalog.SourcePool, "get", return_value=(self.LINK.encode(), {})), \
+             mock.patch.object(self.catalog, "publish_catalog", side_effect=self.catalog.ResearchSourcesUnavailable("Git unavailable")):
+            result = research.run_independent_catalog(self.repo, self.state, self.now)
+        self.assertEqual(result["status"], "failed")
+        self.assertEqual(result["added"], 0)
+        self.assertEqual(result["next_retry_at"], self.now + 3600)
+        with mock.patch.object(self.catalog, "independent_proposal", side_effect=AssertionError("respect backoff")):
+            research.run_independent_catalog(self.repo, self.state, self.now + 1800)
+        with mock.patch.object(self.catalog.SourcePool, "allowed", return_value=True), \
+             mock.patch.object(self.catalog.SourcePool, "get", return_value=(self.LINK.encode(), {})):
+            result = research.run_independent_catalog(self.repo, self.state, self.now + 3601)
+        self.assertEqual((result["status"], result["added"], result["consecutive_failures"]), ("success", 1, 0))
+        self.assertEqual(result["last_success_at"], self.now + 3601)
+        self.assertIn(self.FEED, self.git("show", "origin/regional:" + self.catalog.CATALOG_PATH))
+
+    def test_missing_registry_runs_dynamic_discovery_and_persists_compatible_sources(self):
+        def discover(pool):
+            pool.add(self.FEED, "github-search")
+            pool.state["discovery_round"] = 1
+        with mock.patch.object(self.catalog.SourcePool, "discover", discover), \
+             mock.patch.object(self.catalog.SourcePool, "allowed", return_value=True), \
+             mock.patch.object(self.catalog.SourcePool, "get", return_value=(self.LINK.encode(), {})):
+            result = research.run_independent_catalog(self.repo, self.state, self.now)
+        self.assertEqual((result["status"], result["added"]), ("success", 1))
+        snapshot = self.state / "source-fallback-discovery-state.json"
+        self.assertEqual(stat.S_IMODE(snapshot.stat().st_mode), 0o600)
+        self.assertEqual(json.loads(snapshot.read_text())["discovery_round"], 1)
+        self.assertIn(self.FEED, self.git("show", "origin/regional:" + self.catalog.CATALOG_PATH))
+
+    def test_two_daily_runs_admit_unknowns_beyond_first_bounded_batch(self):
+        feeds = [f"https://raw.githubusercontent.com/provider{i}/public/main/servers.txt" for i in range(20)]
+        self.registry(feeds)
+        with mock.patch.object(self.catalog.SourcePool, "allowed", return_value=True), \
+             mock.patch.object(self.catalog.SourcePool, "get", return_value=(self.LINK.encode(), {})):
+            first = research.run_independent_catalog(self.repo, self.state, self.now)
+            first_catalog = json.loads(self.git("show", "origin/regional:" + self.catalog.CATALOG_PATH))
+            second = research.run_independent_catalog(self.repo, self.state, self.now + research.DAY + 1)
+        self.assertEqual(first["added"], 16)
+        self.assertEqual(len(first_catalog["sources"]), 16)
+        self.assertEqual((second["added"], second["refreshed"]), (4, 12))
+        saved = json.loads(self.git("show", "origin/regional:" + self.catalog.CATALOG_PATH))
+        self.assertEqual({item["url"] for item in saved["sources"]}, set(feeds))
+
+    def test_network_validation_is_distinct_from_github_failure(self):
+        self.registry([self.FEED])
+        with mock.patch.object(self.catalog.SourcePool, "allowed", return_value=True), \
+             mock.patch.object(self.catalog.SourcePool, "get", side_effect=TimeoutError):
+            result = research.run_independent_catalog(self.repo, self.state, self.now)
+        self.assertEqual(result["last_error"], "network")
+        self.assertEqual(result["rejection_reasons"], {"network": 1})
+        # State normalization on the next deferred poll preserves the reason.
+        result = research.run_independent_catalog(self.repo, self.state, self.now + 1800)
+        self.assertEqual(result["rejection_reasons"], {"network": 1})
+
+    def test_promotion_skips_credential_like_paths_even_in_public_text(self):
+        private = "https://raw.githubusercontent.com/provider/public/main/11111111-1111-4111-8111-111111111111.txt"
+        self.registry([self.FEED, private])
+        proposal = json.loads(self.catalog.independent_proposal(self.state, self.now, self.repo))
+        self.assertEqual([item["url"] for item in proposal["sources"]], [self.FEED])
+
+    def test_corrupt_interrupted_state_recovers_and_history_is_bounded(self):
+        path = self.state / research.FALLBACK_NAME
+        path.write_text(json.dumps({"schema": 1, "running": True, "next_retry_at": float("inf")}))
+        proposal = json.dumps({"schema": 1, "sources": []})
+        with mock.patch.object(self.catalog, "independent_proposal", return_value=proposal):
+            self.assertEqual(research.run_independent_catalog(self.repo, self.state, self.now)["status"], "success")
+        history = self.state / research.RESEARCH_HISTORY
+        history.write_text(json.dumps([{"at": self.now, "worker": ["invalid"]}]
+                                     + [{"at": self.now, "worker": "independent", "error": {"secret": "discard"}}] * 90))
+        research.append_source_history(self.state, "grok", {"rejected": 2, "rejection_reasons": {"invalid-source": 2, "secret": 10}}, self.now)
+        events = json.loads(history.read_text())
+        self.assertEqual(len(events), 64)
+        self.assertNotIn("secret", history.read_text())
+        self.assertEqual(events[-1]["rejection_reasons"], {"invalid-source": 2})
 
 
 if __name__ == "__main__":

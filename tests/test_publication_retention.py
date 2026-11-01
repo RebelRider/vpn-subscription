@@ -22,7 +22,7 @@ NEW = f"vless://{UUID}@8.8.4.4:443?security=tls&sni=example.com"
 
 
 def node(link, stamp, rank=1):
-    return {"id": build.normalized_fingerprint(build.parse_vless(link)), "link": link,
+    value = {"id": build.normalized_fingerprint(build.parse_vless(link)), "link": link,
             "rank": rank, "validated_at": stamp, "exit_country": "NL", "exit_city": "Test",
             "median_latency": 123.0, "latency_samples_ms": [123.0] * 5,
             "services": {name: {"passed": 5, "attempts": 5, "reasons": ["ok"] * 5,
@@ -30,6 +30,15 @@ def node(link, stamp, rank=1):
                                               "http_status": 200, "curl_exit": None,
                                               "cf_challenge": False, "geo_restricted": False} for _ in range(5)]}
                          for name in ("chatgpt", "youtube", "instagram")}}
+    chat = value["services"]["chatgpt"]
+    chat["reasons"] = ["browser-functional-access"] * 5
+    for evidence in chat["evidence"]:
+        evidence.update(reason="browser-functional-access", http_reason="cloudflare-challenge-inconclusive",
+                        http_outcome="inconclusive", http_status=403, cf_challenge=True,
+                        browser={"passed": True, "checked_at": stamp, "http_status": 200,
+                                 "actionable": True, "restriction_free": True, "composer": True,
+                                 "application_json": True, "hydrated": True, "cold_session": True})
+    return value
 
 
 def status(links, stamp=None):
@@ -104,7 +113,8 @@ class PublicationRetentionTests(unittest.TestCase):
         self.write(value)
         local.validate_generated_result(self.output, self.status_path)
         text = self.output.read_text()
-        self.assertIn("STALE - 1 verified + 2 retained", text)
+        self.assertIn("#profile-title: BL VPN [STALE - ", text)
+        self.assertIn("# local_retained: 2", text)
         self.assertEqual(len(subscription_state.connection_lines(text)), 3)
         self.assertTrue(subscription_state.has_fresh_validation(value))
         self.assertFalse(subscription_state.is_fresh_strict_status(value))
@@ -132,6 +142,25 @@ class PublicationRetentionTests(unittest.TestCase):
         self.assertTrue(all(item["commit"] == self.base for item in provenance.values()))
         retention.validate(local._retention_context(), build, retried, base_ref=later)
 
+    def test_unversioned_legacy_source_provenance_survives_new_presentation(self):
+        legacy = deepcopy(self.original)
+        legacy.pop("presentation_version", None)
+        text = self.output.read_text().splitlines()
+        comments = [line for line in text if line.startswith("#")]
+        links = retention.rendered_links(local._retention_context(), legacy)
+        self.output.write_text("\n".join(comments + links) + "\n")
+        local.write_status(self.status_path, legacy)
+        self.git("add", "output")
+        self.git("commit", "-m", "controlled immutable legacy presentation")
+        self.base = self.git("rev-parse", "HEAD")
+        self.git("update-ref", "refs/remotes/origin/regional", self.base)
+        value = self.mixed()
+        self.assertEqual(value["retained_nodes"], legacy["nodes"])
+        self.write(value)
+        self.assertEqual(value["presentation_version"], 2)
+        local.validate_generated_result(self.output, self.status_path)
+        self.assertTrue(all(item["commit"] == self.base for item in value["retained_provenance"].values()))
+
     def test_changed_payload_identity_or_blob_cannot_forge_retained_proof(self):
         value = self.mixed()
         mutations = [lambda item: item["retained_nodes"][0].update(median_latency=1),
@@ -158,6 +187,10 @@ class PublicationRetentionTests(unittest.TestCase):
                        lambda value: value["nodes"][0]["services"]["youtube"].update(passed=4)):
             invalid = deepcopy(self.original)
             mutate(invalid)
+            if datetime.fromisoformat(invalid["generated_at"]) > datetime.now(timezone.utc):
+                with self.assertRaisesRegex(RuntimeError, "timestamp"):
+                    self.write(invalid)
+                continue
             self.write(invalid)
             self.git("add", "output")
             self.git("commit", "-m", "controlled invalid source")
@@ -236,7 +269,7 @@ class PublicationRetentionTests(unittest.TestCase):
                              datetime.fromisoformat(fresh["generated_at"]).timestamp())
             self.assertFalse(subscription_state.mark_regional(self.repo))
             self.assertEqual(self.git("rev-parse", "origin/regional"), first)
-            self.assertIn("STALE - 1 verified + 2 retained", self.git("show", "origin/regional:output/best-local.txt"))
+            self.assertIn("#profile-title: BL VPN [STALE - ", self.git("show", "origin/regional:output/best-local.txt"))
             local._publish_regional_once(self.output, self.status_path, tested)
             self.assertEqual(self.git("rev-parse", "origin/regional"), first)
             self.assertEqual(self.git("rev-parse", "origin/regional:output/best-local.txt"),

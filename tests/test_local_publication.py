@@ -17,16 +17,41 @@ spec.loader.exec_module(m)
 
 
 def evidence(latency=100):
-    return {'id': hashlib.sha256(b'vless://test').hexdigest(), 'validated_at':datetime.now(timezone.utc).isoformat(), 'link': 'vless://test', 'rank': 1, 'country': 'DE', 'exit_country': 'DE',
+    node = {'id': hashlib.sha256(b'vless://test').hexdigest(), 'validated_at':datetime.now(timezone.utc).isoformat(), 'link': 'vless://test', 'rank': 1, 'country': 'DE', 'exit_country': 'DE',
             'median_latency': latency, 'latency_samples_ms': [latency] * 5,
             'services': {name: {'passed': 5, 'attempts': 5, 'reasons': ['ok'] * 5,
                                'evidence': [{'outcome': 'pass', 'reason': 'ok', 'http_reason': 'ok',
                                              'http_status': 200, 'curl_exit': None,
                                              'cf_challenge': False, 'geo_restricted': False} for _ in range(5)]}
                          for name in ('chatgpt', 'youtube', 'instagram')}}
+    service = node['services']['chatgpt']
+    service['reasons'] = ['browser-functional-access'] * 5
+    for item in service['evidence']:
+        item.update(reason='browser-functional-access', http_outcome='inconclusive',
+                    http_reason='chatgpt-ui-proof-required-inconclusive',
+                    browser={'passed': True, 'checked_at': node['validated_at'], 'http_status': 200,
+                             'composer': True, 'application_json': True, 'actionable': True,
+                             'restriction_free': True, 'hydrated': True, 'cold_session': True})
+    return node
 
 
 class EvidenceTests(unittest.TestCase):
+    def test_current_publication_requires_full_frontend_and_cold_session_proof(self):
+        self.assertTrue(m.valid_node_evidence(evidence(), 5, require_current_browser=True))
+        for field in ('composer', 'application_json', 'hydrated', 'cold_session', 'http_status'):
+            node = evidence()
+            del node['services']['chatgpt']['evidence'][0]['browser'][field]
+            with self.subTest(field=field):
+                self.assertFalse(m.valid_node_evidence(node, 5, require_current_browser=True))
+        node = evidence()
+        node['services']['chatgpt']['reasons'] = ['ok'] * 5
+        for item in node['services']['chatgpt']['evidence']:
+            item.update(reason='ok', http_reason='ok')
+        self.assertFalse(m.valid_node_evidence(node, 5, require_current_browser=True))
+        # Old immutable evidence can be checked at its historical policy;
+        # it never authorizes publication as a newly verified candidate.
+        self.assertTrue(m.valid_node_evidence(node, 5))
+
     def test_required_services_and_strict_boundary(self):
         node = evidence()
         self.assertTrue(m.valid_node_evidence(node, 5))
@@ -125,7 +150,7 @@ class GitPublicationTests(unittest.TestCase):
             (root / 'output').mkdir()
             (root / 'scripts').mkdir()
             (root / 'scripts/protocols.py').write_bytes((ROOT / 'scripts/protocols.py').read_bytes())
-            stamp = datetime.now(timezone.utc).isoformat()
+            stamp = (datetime.now(timezone.utc) - timedelta(minutes=2)).isoformat()
             (root / 'output/best50.txt').write_text(f'# generated: {stamp}\nvless://test\n')
             git('add', '.')
             git('commit', '-m', 'private fixture input')
@@ -144,7 +169,8 @@ class GitPublicationTests(unittest.TestCase):
                 old_snapshot = git('rev-parse', 'origin/regional')
                 # A second completed local validation is publishable, but a
                 # still newer publisher wins during its freshness check.
-                m.write_status(status_path, {**status, 'generated_at': (datetime.now(timezone.utc) + timedelta(seconds=1)).isoformat()})
+                base_stamp = datetime.fromisoformat(stamp)
+                m.write_status(status_path, {**status, 'generated_at': (base_stamp + timedelta(seconds=1)).isoformat()})
                 original_git_output = m.git_output
                 winner = {}
                 def publish_between_freshness_check_and_checkout(*args, **kwargs):
@@ -152,9 +178,9 @@ class GitPublicationTests(unittest.TestCase):
                     if args[0] == 'show' and args[1].endswith(':output/local-status.json') and not winner:
                         checkout = Path(td) / 'concurrent-publisher'
                         git('worktree', 'add', '--detach', str(checkout), old_snapshot)
-                        newer = {**status, 'generated_at': (datetime.now(timezone.utc) + timedelta(seconds=30)).isoformat()}
+                        newer = {**status, 'generated_at': (base_stamp + timedelta(seconds=30)).isoformat()}
                         (checkout / 'output/local-status.json').write_text(json.dumps(newer))
-                        retained = output.read_text().replace('#profile-title: Best Local VPN', '#profile-title: Concurrent fresh winner')
+                        retained = '\n'.join('#profile-title: Concurrent fresh winner' if line.startswith('#profile-title:') else line for line in output.read_text().splitlines()) + '\n'
                         (checkout / 'output/best-local.txt').write_text(retained)
                         git('add', 'output/local-status.json', 'output/best-local.txt', cwd=checkout)
                         git('commit', '-m', 'newer successful private fixture validation', cwd=checkout)
@@ -205,7 +231,8 @@ class GitPublicationTests(unittest.TestCase):
                 self.assertEqual(git('show', 'origin/regional:output/best-local.txt'), output.read_text().strip())
                 m._publish_regional_once(output, status_path, tested)
                 self.assertEqual(first, git('ls-remote', 'origin', 'refs/heads/regional'))
-                # A failed attempt exposes staleness while retaining every URI and its original generated time.
+                # A failed attempt preserves the verified date and all URIs;
+                # title staleness follows age, not this failed attempt.
                 health_status = {**status, 'stability': {**status['stability'], 'qualified': 0}, 'nodes': []}
                 m.publish_regional_health(health_status)
                 git('fetch', 'origin', 'regional')
@@ -215,7 +242,8 @@ class GitPublicationTests(unittest.TestCase):
                                  [line for line in original_lines if line and not line.startswith('#')])
                 self.assertEqual([line for line in retained.splitlines() if line.startswith('# generated:')],
                                  [line for line in original_lines if line.startswith('# generated:')])
-                self.assertIn('#profile-title: Best Local VPN [STALE - no verified servers]', retained)
+                self.assertIn('#profile-title: BL VPN [', retained)
+                self.assertNotIn('STALE', retained)
                 git('fetch', 'origin', 'regional')
                 health = json.loads(git('show', 'origin/regional:output/local-health.json'))
                 self.assertFalse(health['current_policy_validated'])

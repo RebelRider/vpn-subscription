@@ -14,6 +14,7 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from owned_temporary import temporary_directory
+from subscription_presentation import title as presentation_title
 
 MAX_BYTES = 1024 * 1024
 MAX_AGE_SECONDS = 6 * 3600
@@ -43,6 +44,41 @@ def mark_stale_text(text: str) -> str:
     retained = "".join(line for line in text.splitlines(keepends=True)
                        if not line.lstrip().lower().startswith(owned))
     return "\n".join(STALE_HEADERS) + "\n" + retained
+
+
+def apply_presentation(text: str, status: dict, now: float | None = None) -> str:
+    """Annotate the existing publication's age, never the failed attempt's time.
+
+    This is deliberately separate from the six-hour newer-writer guard. Missing
+    or corrupt metadata fails closed to an undated STALE title, preserving the
+    original generated comment and every connection byte.
+    """
+    if not connection_lines(text):
+        raise ValueError("Cannot annotate an empty subscription")
+    try:
+        if not isinstance(status, dict) or status.get("algorithm") != "bestlocal-strict-services-v6":
+            raise RuntimeError("Invalid publication policy")
+        nodes, stability = status.get("nodes"), status.get("stability")
+        if (not isinstance(nodes, list) or not nodes or not all(isinstance(node, dict) for node in nodes)
+                or not isinstance(stability, dict) or type(stability.get("qualified")) is not int
+                or stability["qualified"] != len(nodes)):
+            raise RuntimeError("Invalid publication inventory")
+        title = presentation_title(status, now=now)
+    except (RuntimeError, ValueError, TypeError, OverflowError):
+        return mark_stale_text(text)
+    if status.get("retained_nodes"):
+        headers = (title, "#bestlocal-status: mixed; retained entries are not currently verified", STALE_HEADERS[2])
+    elif "[STALE - " in title:
+        headers = (title, STALE_HEADERS[1], STALE_HEADERS[2])
+    else:
+        headers = (title,)
+    owned = ("#profile-title:", "#bestlocal-status:", "#bestlocal-health-url:")
+    existing = [line for line in text.splitlines() if line.lstrip().lower().startswith(owned)]
+    if existing == list(headers):
+        return text
+    retained = "".join(line for line in text.splitlines(keepends=True)
+                       if not line.lstrip().lower().startswith(owned))
+    return "\n".join(headers) + "\n" + retained
 
 
 def has_fresh_validation(status, now: float | None = None) -> bool:
@@ -98,21 +134,14 @@ def mark_regional(repo: Path, runner=None) -> bool:
                     try:
                         runner.git("worktree", "add", "--detach", str(worktree), "origin/regional")
                         published_status = read_status(worktree / "output/local-status.json")
-                        if is_fresh_strict_status(published_status):
+                        if has_fresh_validation(published_status) and "presentation_version" not in published_status:
                             print("Regional strict validation is fresh; retained subscription unchanged")
                             return False
                         target = worktree / "output/best-local.txt"
                         original = read_text(target)
-                        retained = published_status.get("retained_nodes", [])
-                        if has_fresh_validation(published_status) and isinstance(retained, list) and 1 <= len(retained) <= 2:
-                            fresh = published_status["stability"]["qualified"]
-                            title = f"#profile-title: Best Local VPN [STALE - {fresh} verified + {len(retained)} retained]"
-                            if title in original.splitlines():
-                                print("Regional mixed inventory already discloses historical retention; title unchanged")
-                                return False
-                        marked = mark_stale_text(original)
+                        marked = apply_presentation(original, published_status)
                         if marked == original:
-                            print("Regional retained subscription is already marked stale")
+                            print("Regional subscription validation age is already displayed")
                             return False
                         target.write_text(marked, encoding="utf-8")
                         runner.git("-C", str(worktree), "add", "-f", "output/best-local.txt")
@@ -120,7 +149,7 @@ def mark_regional(repo: Path, runner=None) -> bool:
                                    "user.email=41898282+github-actions[bot]@users.noreply.github.com",
                                    "commit", "-m", "chore: expose retained BestLocal staleness")
                         runner.git("-C", str(worktree), "push", "origin", "HEAD:refs/heads/regional")
-                        print("Regional stale status published; connection configurations and generated time retained")
+                        print("Regional validation age published; connection configurations and generated time retained")
                         return True
                     finally:
                         if worktree.exists():

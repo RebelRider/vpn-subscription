@@ -38,7 +38,7 @@ class ExitGeoTests(unittest.TestCase):
                 "GB",
                 "London",
             ),
-            "🇬🇧 GB | London | 1",
+            "🇬🇧 GB, London  |1|",
         )
 
     def test_country_only(self):
@@ -48,7 +48,7 @@ class ExitGeoTests(unittest.TestCase):
                 "DE",
                 None,
             ),
-            "🇩🇪 DE | 5",
+            "🇩🇪 DE  |5|",
         )
 
     def test_neutral(self):
@@ -58,7 +58,7 @@ class ExitGeoTests(unittest.TestCase):
                 None,
                 None,
             ),
-            "🌐 | 8",
+            "🌐  |8|",
         )
 
     def test_city_normalization(self):

@@ -392,37 +392,11 @@ def presentation_label(
     exit_country: str | None = None,
     exit_city: str | None = None,
     exit_ip: str | None = None,
+    *, presentation_version: int = 2,
 ) -> str:
-    if rank < 1:
-        raise ValueError(
-            f"Invalid rank: {rank}"
-        )
+    from subscription_presentation import server_label
+    return server_label(rank, exit_country, exit_city, exit_ip, version=presentation_version)
 
-    country = (
-        exit_country or ""
-    ).strip().upper()
-
-    city = normalize_city(
-        exit_city
-    )
-
-    if country in {"XX", "ZZ"} or not re.fullmatch(
-        r"[A-Z]{2}",
-        country,
-    ):
-        label = f"🌐 | {rank}"
-    else:
-        prefix = f"{country_flag(country)} {country}"
-        label = f"{prefix} | {city} | {rank}" if city else f"{prefix} | {rank}"
-    if not isinstance(exit_ip, str):
-        return label
-    try:
-        address = ipaddress.ip_address(exit_ip)
-    except (ValueError, TypeError):
-        return label
-    if address.is_global and not address.is_multicast:
-        label += f" | [{address}]"
-    return label
 
 
 def published_link(
@@ -431,6 +405,7 @@ def published_link(
     exit_country: str | None = None,
     exit_city: str | None = None,
     exit_ip: str | None = None,
+    *, presentation_version: int = 2,
 ) -> str:
     """
     Build presentation-only URI fragment.
@@ -447,9 +422,11 @@ def published_link(
         exit_country,
         exit_city,
         exit_ip,
+        presentation_version=presentation_version,
     )
 
     return load_protocols().relabel(link, label)
+
 
 
 def exit_metadata_from_reports(links: list[str], reports: dict) -> dict[str, dict]:
@@ -1027,7 +1004,8 @@ def apply_exit_geography(
 
 
 def valid_node_evidence(node: dict, rounds: int, *, require_round_evidence: bool = False,
-                        reference_time: datetime | None = None) -> bool:
+                        reference_time: datetime | None = None,
+                        require_current_browser: bool = False) -> bool:
     if not isinstance(node, dict) or type(rounds) is not int or rounds not in (3, 4, 5):
         return False
     services = node.get("services", {})
@@ -1052,6 +1030,8 @@ def valid_node_evidence(node: dict, rounds: int, *, require_round_evidence: bool
             if not isinstance(proof, dict) or proof.get("outcome") != "pass":
                 return False
             reason = proof.get("reason")
+            if require_current_browser and name == "chatgpt" and reason != "browser-functional-access":
+                return False
             if reasons is not None and reasons[index] != reason:
                 return False
             code = proof.get("http_status")
@@ -1062,6 +1042,11 @@ def valid_node_evidence(node: dict, rounds: int, *, require_round_evidence: bool
                 browser = proof.get("browser")
                 if (not isinstance(browser, dict) or browser.get("passed") is not True
                         or browser.get("actionable") is not True or browser.get("restriction_free") is not True):
+                    return False
+                if require_current_browser and (
+                        any(browser.get(field) is not True for field in
+                            ("composer", "application_json", "hydrated", "cold_session"))
+                        or type(browser.get("http_status")) is not int or browser["http_status"] != 200):
                     return False
                 try:
                     require_fresh_timestamp(browser.get("checked_at"), 6, "browser service evidence", reference_time=reference_time)
@@ -1090,6 +1075,7 @@ def valid_node_evidence(node: dict, rounds: int, *, require_round_evidence: bool
             and measured_median < MAX_LOCAL_MEDIAN_LATENCY_MS
             and 0 <= median < MAX_LOCAL_MEDIAN_LATENCY_MS
             and math.isclose(median, measured_median, abs_tol=0.001))
+
 
 
 def connection_identity(build, link: str) -> str:
@@ -1598,15 +1584,13 @@ def write_subscription(
     links: list[str],
     status: dict,
 ) -> None:
-    try:
-        generated = datetime.fromisoformat(status["generated_at"].replace("Z", "+00:00")).astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    except (KeyError, ValueError, TypeError, AttributeError):
-        generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    from subscription_presentation import VERSION, title as presentation_title, validation_time
+    generated = validation_time(status.get("generated_at")).strftime("%Y-%m-%d %H:%M:%S UTC")
+    title = presentation_title(status)
+    status["presentation_version"] = VERSION
 
     from publication_retention import rendered_links
     retained = len(status.get("retained_nodes", []))
-    title = (f"#profile-title: Best Local VPN [STALE - {len(links)} verified + {retained} retained]"
-             if retained else "#profile-title: Best Local VPN")
     lines = [
         "# v6.0 — LOCAL NETWORK VERIFIED PROXIES",
         title,
@@ -1686,6 +1670,7 @@ def write_subscription(
     )
 
     temp.replace(output_path)
+
 
 
 def write_status(
@@ -1827,12 +1812,15 @@ def validate_generated_result(
         )
     if retained:
         validate_retention(_retention_context(), load_build_module(), status, base_ref=retention_base_ref)
-        title = f"#profile-title: Best Local VPN [STALE - {qualified} verified + {retained} retained]"
-        if title not in subscription_path.read_text().splitlines():
-            raise RuntimeError("Mixed subscription must disclose retained entries")
     else:
         # The fresh-only path still rejects malformed retention metadata.
         validate_retention(_retention_context(), None, status)
+    from subscription_presentation import title as presentation_title
+    titles = [line for line in subscription_path.read_text().splitlines()
+              if line.lstrip().lower().startswith("#profile-title:")]
+    if titles != [presentation_title(status)]:
+        raise RuntimeError("Subscription title does not match verified presentation metadata")
+
 
 
 def qualified_pool_blob(
@@ -2355,7 +2343,7 @@ def publish_regional_health(status: dict) -> str:
                         if subscription.is_file():
                             try:
                                 original = subscription_state.read_text(subscription)
-                                marked = subscription_state.mark_stale_text(original)
+                                marked = subscription_state.apply_presentation(original, published_status)
                             except (OSError, ValueError, UnicodeError):
                                 print("Retained subscription could not be annotated; publishing failed-validation diagnostics only", flush=True)
                             else:
@@ -2379,6 +2367,7 @@ def publish_regional_health(status: dict) -> str:
             if attempt == 2:
                 raise
             time.sleep(2 ** (attempt + 1))
+
 
 
 def publish_validation_results(subscription_path: Path, status_path: Path,

@@ -613,7 +613,7 @@ def input_metadata(runner: Runner) -> tuple[str, float]:
     # Relevant code changes also require validation even if Best50 stays the same.
     digest = hashlib.sha256(blob.encode())
     scripts = runner.repo / "scripts"
-    for path in sorted([*scripts.glob("*.py"), *scripts.glob("*.js")]):
+    for path in sorted([*scripts.glob("*.py"), *scripts.glob("*.js"), *scripts.glob("*.swift")]):
         digest.update(path.name.encode())
         digest.update(path.read_bytes())
     digest.update((runner.repo / "config.json").read_bytes())

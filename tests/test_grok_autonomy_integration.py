@@ -136,7 +136,15 @@ class GrokAutonomyIntegrationTests(unittest.TestCase):
                 self.assertNotIn("last_success_at", status())
                 self.assertFalse((state / research.PENDING_NAME).exists())
                 self.assertNotIn("must-not-persist", (state / research.STATE_NAME).read_text())
-                self.assertEqual(http_calls, [])
+                # Grok's quota no longer suppresses independent discovery.
+                # This controlled search returns no repositories, so it cannot
+                # consume the catalog hook's later publication attempts.
+                self.assertEqual(len(http_calls), 1)
+                self.assertEqual(urlsplit(http_calls[0]).hostname, "api.github.com")
+                self.assertEqual(urlsplit(http_calls[0]).path, "/search/repositories")
+                fallback = json.loads((state / research.FALLBACK_NAME).read_text())
+                self.assertEqual(fallback["status"], "success")
+                self.assertEqual(fallback["last_success_at"], now)
                 self.assertEqual(git("ls-remote", "origin", "refs/heads/regional"), initial_remote)
 
                 # The next hourly poll before quota retry does no model work.

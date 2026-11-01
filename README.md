@@ -48,7 +48,7 @@ ephemeral and supervised; system networking and existing browser data are untouc
 The pinned browser runtime is installed/repaired only in BestLocal-owned caches.
 
 Subscription names include the observed public exit IP when available, for
-example `🇳🇱 NL | Haarlem | 2 | [193.29.139.198]`. Exit country/city are optional
+example `🇳🇱 NL, Haarlem  |2|   [193.29.139.198]`. Exit country/city are optional
 metadata: Cloudflare trace is preferred; a bounded independent ipify IP echo can
 fall back to the local DB-IP database. Both observations use the candidate proxy.
 Source labels or the server's CDN endpoint are never substituted for its actual
@@ -59,6 +59,14 @@ The leading country flag is emitted as a literal UTF-8 emoji in URI labels
 remaining label stays URL-encoded. VMess retains the flag in its JSON name.
 Happ manages its own active-server display cache; publication never resets that
 cache or restarts a connection merely to refresh an icon.
+
+Fresh profile titles use `BL VPN [30 Oct 2026]`: the successful local validation
+timestamp committed with the subscription, expressed in UTC with fixed English
+month names. Client downloads and failed attempts cannot advance that date.
+At 72 hours, including the age of any retained connection's own proof, the title
+explicitly includes `STALE`. Internal six-hour validation freshness and historical
+retention diagnostics remain separate from this presentation threshold. Names
+are numbered in stable ranking order; IPv6 exit addresses use compressed brackets.
 
 These are public unauthenticated application reachability checks. They do not
 prove account login, video playback or unrestricted authenticated features.
@@ -85,7 +93,7 @@ created or modified. EMB Tools and all other VPN applications are untouched.**
 ## Protocols and formats
 
 The same extraction, ranking and validation pipeline supports the formats
-currently documented by Happ: VLESS, VMess, Trojan, Shadowsocks, Hysteria2
+[currently documented by Happ](https://github.com/HappDev/happ_su/blob/main/faq/adding-configuration-subscription.md): VLESS, VMess, Trojan, Shadowsocks, Hysteria2
 (`hysteria2://` and `hy2://`) and SOCKS5 (`socks://`). Plain and base64 subscriptions
 are detected automatically; share URIs embedded in source text are extracted.
 VMess JSON presentation is rewritten inside its `ps` field; other URI fragments
@@ -126,8 +134,8 @@ keep discovering alternatives. Configured seeds, the strongest 80% of discovered
 sources and trials younger than a day remain protected.
 
 A separate local `com.rebelrider.best50-source-research` launch agent checks hourly
-whether daily public-source research is due. It uses the installed Cursor agent's
-strongest available Grok Extra High model, verifies the effective model, and runs
+whether daily public-source research is due. It selects the installed Cursor agent's
+Grok 4.7 Extra High non-fast model, verifies the effective model, and runs
 in read-only ask mode with a sandbox and disposable empty workspace. It receives
 public source URLs, never candidate credentials or repository files. Only bounded
 JSON proposals are accepted. Public HTTPS feeds are independently checked for
@@ -135,6 +143,8 @@ access policy, safe destinations and compatible configuration syntax, then merge
 into regional `sources/primary-sources.json` with an atomic Git push. The existing
 builder reads that catalog alongside automatic GitHub discovery; suggestions
 never bypass either functional validation stage.
+If that version is removed, a newer non-fast Extra High version may be selected;
+quota failures never cause a downgrade or switch to Auto/Fast.
 
 Quota, region, authentication, model or network failures retry after one, two,
 four, then at most six hours. A source's longer `Retry-After` is respected up to
@@ -142,6 +152,17 @@ the bounded twenty-four-hour source policy limit. A pending successful proposal 
 another model call when feed validation or GitHub publication fails. Catalog
 entries expire after thirty days without independent verification. This is a
 supplement to discovery, so unavailable Grok never stops the normal pipeline.
+
+Before any Grok quota/daily eligibility check, the same hourly job also performs
+independent daily catalog promotion. Up to sixteen recently productive public
+feeds are revalidated and atomically admitted to the shared catalog. Unknown
+sources take priority, with provider diversity and daily rotation; subsequent
+runs continue beyond the first batch. Without a regional registry it invokes
+the existing dynamic discovery into its own durable registry. Its independent
+retry schedule is one/two/four/six hours, respecting source Retry-After. Status
+and bounded reason history live in `source-fallback-status.json` and
+`source-research-history.json` beside the existing research state. Neither a
+source admission nor a model suggestion qualifies any server for BestLocal.
 
 Primary validation retains the existing sing-box/SOCKS engine, repeated rounds,
 GeoIP country policy, performance history and infrastructure/country diversity.
@@ -216,11 +237,11 @@ Its exact digest and current managed policy are checked before publication; the 
 manifest is never published because it may contain private managed credentials. It stages subscription and status in a
 separate temporary Git worktree and atomically pushes the regional branch.
 Normal non-forced updates protect concurrent writers; bounded retries refetch
-before trying again. Empty attempts update health and mark the retained profile
-title `STALE - no verified servers`, preserving every connection URI, its order,
-parameters and original generation time. The cloud workflow also applies this
-marker when local evidence expires, including while the Mac cannot run. Fresh
-successful publication restores the normal title. A newer successful result is
+before trying again. Empty attempts update health while preserving every
+connection URI, its order, parameters and original validation date. The profile
+title exposes `STALE` at the shared 72-hour age threshold; the cloud workflow
+also applies this policy while the Mac cannot run. New successful publication
+restores the dated title when all retained proof is recent enough. A newer successful result is
 protected from an older failed attempt. Happ retains its hourly update setting.
 
 Installation is automated by `scripts/install_local_automation.py --load` after

@@ -20,7 +20,7 @@ EXPLORATION = "trojan://public-candidate@8.8.8.8:443?sni=example.com"
 
 
 def verified_node(link, latency=123.0, rank=1):
-    return {"id": build.normalized_fingerprint(build.parse_vless(link)),
+    node = {"id": build.normalized_fingerprint(build.parse_vless(link)),
             "link": link, "rank": rank, "country": "XX", "exit_country": None,
             "validated_at": datetime.now(timezone.utc).isoformat(),
             "median_latency": latency, "p95_latency": latency,
@@ -30,6 +30,15 @@ def verified_node(link, latency=123.0, rank=1):
                                               "http_status": 200, "curl_exit": None,
                                               "cf_challenge": False, "geo_restricted": False} for _ in range(5)]}
                          for name in ("chatgpt", "youtube", "instagram")}}
+    service = node["services"]["chatgpt"]
+    service["reasons"] = ["browser-functional-access"] * 5
+    for item in service["evidence"]:
+        item.update(reason="browser-functional-access", http_outcome="inconclusive",
+                    http_reason="chatgpt-ui-proof-required-inconclusive",
+                    browser={"passed": True, "checked_at": node["validated_at"], "http_status": 200,
+                             "composer": True, "application_json": True, "actionable": True,
+                             "restriction_free": True, "hydrated": True, "cold_session": True})
+    return node
 
 
 def verified_status(nodes):

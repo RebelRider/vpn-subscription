@@ -135,7 +135,7 @@ class RegionalAnnotationTests(unittest.TestCase):
             # replace the successful freshness-skip return with a timeout.
             self.assertEqual(len(git("worktree", "list", "--porcelain").split("worktree ")) - 1, 1)
             self.assertEqual(git("ls-remote", "origin", "refs/heads/regional"), before)
-            local_status.write_text(json.dumps(status(time.time() - 7 * 3600)))
+            local_status.write_text(json.dumps(status(time.time() - 73 * 3600)))
             git("add", "output/local-status.json")
             git("commit", "-m", "fixture becomes stale")
             git("push", "origin", "HEAD:regional")
@@ -153,7 +153,7 @@ class RegionalAnnotationTests(unittest.TestCase):
             self.assertEqual(len(failed_push), 1)
             git("fetch", "origin", "regional")
             retained = git("show", "origin/regional:output/best-local.txt")
-            self.assertIn(state.STALE_TITLE, retained)
+            self.assertIn("#profile-title: BL VPN [STALE - ", retained)
             self.assertEqual(state.connection_lines(retained), state.connection_lines(TEXT))
             self.assertIn("# generated: 2026-10-20 12:34:56 UTC", retained)
             self.assertEqual(git("show", "origin/regional:output/local-status.json"), original_status.strip())

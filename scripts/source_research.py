@@ -27,6 +27,11 @@ OUTPUT_LIMIT = 4 * 1024 * 1024
 PROPOSAL_LIMIT = 256 * 1024
 STATE_NAME = "source-research-status.json"
 PENDING_NAME = "source-research-pending.json"
+FALLBACK_NAME = "source-fallback-status.json"
+RESEARCH_HISTORY = "source-research-history.json"
+SOURCE_REASON_CODES = {"invalid-proposal", "source-policy", "no-compatible-configuration", "rate-limit",
+                       "source-policy-unavailable", "network", "source-http-client-error",
+                       "source-unavailable", "invalid-source"}
 ERRORS = {"quota", "region", "authentication", "network", "timeout", "output-limit", "model-unavailable", "unverified-model", "invalid-output", "publication", "interrupted", "runner-failure"}
 TIMESTAMPS = {"last_poll_at", "last_attempt_at", "last_success_at", "last_research_generated_at", "next_retry_at", "pending_generated_at", "state_recovered_at", "source_retry_after_at"}
 
@@ -66,12 +71,16 @@ def normalize_state(value, now: float) -> dict:
     model = value.get("model_id")
     if isinstance(model, str) and re.fullmatch(r"(?:cursor-)?grok-\d+(?:\.\d+)*-xhigh", model):
         state["model_id"] = model
-    for key in ("accepted", "added", "refreshed"):
+    for key in ("accepted", "added", "refreshed", "rejected"):
         count = value.get(key)
         if isinstance(count, int) and not isinstance(count, bool) and 0 <= count <= 32:
             state[key] = count
     if isinstance(value.get("published"), bool):
         state["published"] = value["published"]
+    reasons = value.get("rejection_reasons")
+    if isinstance(reasons, dict):
+        state["rejection_reasons"] = {key: count for key, count in reasons.items()
+                                     if key in SOURCE_REASON_CODES and type(count) is int and 0 < count <= 32}
     state["running"] = value.get("running") is True
     return state
 
@@ -113,11 +122,13 @@ def select_model(text: str) -> tuple[str, str]:
                 raise ResearchFailure("model-unavailable")
             listed.append((tuple(map(int, version[1].split("."))), match[1], match[2]))
     qualifying = [entry for entry in listed if re.fullmatch(r"(?:cursor-)?grok-\d+(?:\.\d+)*-xhigh", entry[1]) and "extra high" in entry[2].lower() and "fast" not in entry[2].lower()]
+    qualifying = [entry for entry in qualifying if entry[0] >= (4, 7)]
     if not qualifying:
         raise ResearchFailure("model-unavailable")
-    best = max(qualifying)
-    if max(entry[0] for entry in listed) > best[0]:
-        raise ResearchFailure("model-unavailable")
+    # An unrelated newer Fast model must not disable the requested, available
+    # non-fast 4.7 worker. Never downgrade on quota/model failure.
+    preferred = [entry for entry in qualifying if entry[0] == (4, 7)]
+    best = max(preferred or qualifying)
     return best[1], ".".join(map(str, best[0]))
 
 
@@ -311,6 +322,94 @@ def process_catalog(result_text: str, repo: Path, state_dir: Path, now: float) -
     return process_research_result(result_text, repo, state_dir, now)
 
 
+def source_outcome(value) -> dict:
+    """Only bounded aggregate observations enter unattended diagnostics."""
+    value = value if isinstance(value, dict) else {}
+    result = {key: value.get(key, 0) if type(value.get(key, 0)) is int
+              and 0 <= value.get(key, 0) <= 32 else 0
+              for key in ("accepted", "added", "refreshed", "rejected")}
+    result["published"] = value.get("published") is True
+    reasons = value.get("rejection_reasons", {})
+    result["rejection_reasons"] = {key: count for key, count in reasons.items()
+                                  if key in SOURCE_REASON_CODES and type(count) is int and 0 < count <= 32} if isinstance(reasons, dict) else {}
+    return result
+
+
+def append_source_history(state_dir: Path, worker: str, outcome: dict, now: float, *, error: str | None = None) -> None:
+    """Compact, credential-free history survives failed model/Git attempts."""
+    path = state_dir / RESEARCH_HISTORY
+    try:
+        value = json.loads(path.read_text()) if path.stat().st_size <= PROPOSAL_LIMIT else []
+    except (OSError, ValueError, RecursionError):
+        value = []
+    history = []
+    for item in value[-63:] if isinstance(value, list) else []:
+        if (isinstance(item, dict) and finite_number(item.get("at")) and 0 <= now - item["at"] <= 30 * DAY
+                and isinstance(item.get("worker"), str) and item["worker"] in {"independent", "grok"}):
+            entry = {"at": item["at"], "worker": item["worker"], **source_outcome(item)}
+            if isinstance(item.get("error"), str) and item["error"] in ERRORS:
+                entry["error"] = item["error"]
+            history.append(entry)
+    entry = {"at": now, "worker": worker, **source_outcome(outcome)}
+    if error in ERRORS:
+        entry["error"] = error
+    history.append(entry)
+    atomic_json(path, history)
+
+
+def run_independent_catalog(repo: Path, state_dir: Path, now: float) -> dict:
+    """Daily source promotion is independent of Grok eligibility and quota.
+
+    The hourly launchd poll provides bounded retries. No model invocation or
+    candidate publication occurs here; sources still pass ordinary validation.
+    """
+    from source_catalog import independent_proposal, process_research_result
+    path = state_dir / FALLBACK_NAME
+    with (state_dir / "source-fallback.lock").open("a+") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return {"status": "overlap-deferred"}
+        state = load_state(path, now)
+        state["last_poll_at"] = now
+        if now < state.get("next_retry_at", 0) or (not state.get("running") and state.get("last_success_at", 0)
+                                                  and 0 <= now - state["last_success_at"] < DAY):
+            atomic_json(path, state)
+            return state
+        state.update(status="researching", running=True, last_attempt_at=now)
+        atomic_json(path, state)
+        try:
+            proposal = independent_proposal(state_dir, now, repo)
+            outcome = source_outcome(process_research_result(proposal, repo, state_dir, now))
+            state.update(outcome)
+            state.update(status="success", last_success_at=now, consecutive_failures=0, next_retry_at=0)
+            state.pop("last_error", None)
+            append_source_history(state_dir, "independent", outcome, now)
+            log(f"Independent source research complete; added={outcome['added']} refreshed={outcome['refreshed']} rejected={outcome['rejected']}")
+        except Exception as exc:
+            # A bad source or failed Git transaction never suppresses Grok's
+            # own eligible attempt later in this same scheduled invocation.
+            outcome = source_outcome(getattr(exc, "summary", {}))
+            if not outcome["published"]:
+                outcome["added"] = outcome["refreshed"] = 0
+            failures = min(state.get("consecutive_failures", 0) + 1, 1000)
+            retry = now + min(6 * 3600, 3600 * 2 ** min(failures - 1, 3))
+            policy_retry = getattr(exc, "retry_at", None)
+            if finite_number(policy_retry) and now < policy_retry <= now + DAY:
+                retry = max(retry, policy_retry)
+            reason = getattr(exc, "reason", None)
+            if not isinstance(reason, str) or reason not in ERRORS:
+                reason = "network" if isinstance(exc, TimeoutError) else "invalid-output" if isinstance(exc, ValueError) else "runner-failure"
+            state.update(outcome)
+            state.update(status="failed", last_error=reason, consecutive_failures=failures, next_retry_at=retry)
+            append_source_history(state_dir, "independent", outcome, now, error=reason)
+            log(f"Independent source research deferred: {reason}; bounded retry scheduled")
+        finally:
+            state["running"] = False
+            atomic_json(path, state)
+        return state
+
+
 def load_pending(path: Path, now: float) -> dict | None:
     try:
         if path.stat().st_size > PROPOSAL_LIMIT:
@@ -354,6 +453,12 @@ def run_once(repo: Path, state_dir: Path, *, now: float | None = None, agent: st
             state["state_recovered_at"] = clock()
             log("Recovering an interrupted source-research attempt")
         state.update({"last_poll_at": clock(), "running": False})
+        # Source discovery and durable catalog admission must continue even
+        # while the model is over quota, unauthenticated or waiting for retry.
+        try:
+            run_independent_catalog(repo, state_dir, clock())
+        except (OSError, ValueError, RuntimeError):
+            log("Independent source research infrastructure unavailable; next hourly poll will recover")
         pending = load_pending(pending_path, clock())
         if pending_path.exists() and pending is None:
             pending_path.unlink()
@@ -391,14 +496,17 @@ def run_once(repo: Path, state_dir: Path, *, now: float | None = None, agent: st
                 retry_at = getattr(exc, "retry_at", None)
                 if not finite_number(retry_at) or not clock() < retry_at <= clock() + DAY:
                     retry_at = None
-                raise ResearchFailure("publication", retry_at=retry_at) from None
+                failure = ResearchFailure("publication", retry_at=retry_at)
+                failure.summary = source_outcome(getattr(exc, "summary", {}))
+                raise failure from None
             state.update({"status": "success", "last_success_at": clock(), "last_research_generated_at": pending["generated_at"], "consecutive_failures": 0, "next_retry_at": 0})
             if isinstance(outcome, dict):
-                for key in ("accepted", "added", "refreshed"):
+                for key in ("accepted", "added", "refreshed", "rejected"):
                     count = outcome.get(key)
                     if isinstance(count, int) and not isinstance(count, bool) and 0 <= count <= 32:
                         state[key] = count
                 state["published"] = outcome.get("published") is True
+            append_source_history(state_dir, "grok", outcome, clock())
             state.pop("last_error", None)
             state.pop("source_retry_after_at", None)
             state.pop("pending_generated_at", None)
@@ -420,6 +528,7 @@ def run_once(repo: Path, state_dir: Path, *, now: float | None = None, agent: st
             else:
                 state.pop("source_retry_after_at", None)
             state.update({"status": "failed", "last_error": reason, "consecutive_failures": failures, "next_retry_at": next_retry})
+            append_source_history(state_dir, "grok", getattr(exc, "summary", {}), clock(), error=reason)
             hours = math.ceil((next_retry - clock()) / 3600)
             policy = "; respecting source Retry-After" if "source_retry_after_at" in state else ""
             log(f"Source research pending: {reason}; retry in {hours}h{policy}; existing validated catalog retained")

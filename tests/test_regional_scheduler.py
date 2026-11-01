@@ -85,6 +85,21 @@ class SchedulerTests(unittest.TestCase):
             self.assertNotEqual(first, second)
             self.assertTrue(scheduler.validation_due({"last_validated_signature": first, "last_validated_at": time.time()}, second, time.time()))
 
+    def test_validator_swift_update_revalidates_unchanged_best50(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            repo = Path(temporary);(repo / "scripts").mkdir()
+            (repo / "config.json").write_text("{}")
+            path = repo / "scripts/native_webkit_probe.swift";path.write_text("version1")
+            runner = mock.Mock(repo=repo)
+            generated = time.time() - 10
+            runner.git.side_effect = lambda *args: json.dumps({"generated_at": generated}) if args[0] == "show" else "same-pool"
+            first, _ = scheduler.input_metadata(runner)
+            path.write_text("version2")
+            second, _ = scheduler.input_metadata(runner)
+            self.assertNotEqual(first, second)
+            now = time.time()
+            self.assertTrue(scheduler.validation_due({"last_validated_signature": first, "last_validated_at": now}, second, now))
+
     def test_six_hour_revalidation_and_changed_input(self):
         state = {"last_validated_signature": "same", "last_validated_at": 100, "last_attempt_signature": "same"}
         self.assertFalse(scheduler.validation_due(state, "same", 101))

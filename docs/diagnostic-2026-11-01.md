@@ -143,3 +143,43 @@ create a desktop window.
 
 References: [Apple background scheduling](https://developer.apple.com/documentation/webkit/wkpreferences/inactiveschedulingpolicy-swift.property),
 [Happ protocol formats](https://github.com/HappDev/happ_su/blob/main/faq/adding-configuration-subscription.md).
+
+## Final full-cycle result
+
+The installed launchd path completed the corrected policy at **1 November
+08:40:54 MSK**: **100 candidates → 5 PASS, 86 FAIL, 9 INCONCLUSIVE**. Publication
+was confirmed at **08:43:40 MSK**. Each of the five fresh entries independently
+passed ChatGPT, YouTube and Instagram **5/5**, including five cold browser
+sessions with full document/application evidence. Recomputed median HTTPS
+latencies were **151.369, 166.265, 249.901, 340.712 and 290.603 ms**. Ranking also
+uses reliability/history; it is not a simple latency sort.
+
+The automatic Best50 input was generated at **06:33:27 MSK**. Its published
+diagnostics confirm all **18 permanent sources were consumed**, with 687 first-
+pass functional and 491 final-stable candidates before ranking/diversity selection.
+Thus permanent admission was exercised through the cloud stage as well as saved.
+
+The public artifact contains **six connections: five current plus one protected
+historical SS**. Failure observations were dominated by SOCKS connection failure
+and request timeout, followed by destination TLS errors; Cloudflare/rate limits
+remain inconclusive. These observations overlap services/rounds and must not be
+reported as distinct-server counts.
+
+Both the regional Git artifact and the canonical raw URL were verified with
+title **`BL VPN [01Nov2026 08:40]`**, new server names, and preserved proof times.
+The clean runtime was updated under its existing scheduler lock to `0598dba`;
+no job or VPN was interrupted. The regular 300-second launchd schedule remains
+loaded, alongside the hourly daily-research poll. GitHub Actions `d70c992` and
+`1943de1` were successful; the latest title-only cloud build was still active
+when checked. The canonical raw subscription bytes exactly matched the regional
+Git artifact, rather than merely matching its title.
+
+Read-only VPN-service, routing, DNS and system-proxy snapshots were identical
+before and after the work. Owned test files, scratch worktrees, unused compiled
+experiments and the unused 295 MB browser cache were cleaned. Operational
+history and the two production native binaries needed for reuse/rollback remain.
+
+Remaining limits: public source availability cannot guarantee a minimum pool
+size; quota recovery has only been simulated while real Grok remains over quota;
+Mac-offline/sleep periods cannot produce new local validation. These checks do
+not establish logged-in Safari behavior, account permissions or message generation.

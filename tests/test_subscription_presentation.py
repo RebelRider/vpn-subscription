@@ -39,18 +39,18 @@ class SubscriptionPresentationTests(unittest.TestCase):
             with self.subTest(now=now), self.assertRaises(RuntimeError):
                 presentation.title({"generated_at": "2026-10-30T00:00:00Z"}, now=now)
 
-    def test_exact_72_hour_boundary_and_retained_age_are_independent_of_fresh_subset(self):
+    def test_stale_requires_more_than_72_hours_since_published_validation(self):
         stamp = "2026-10-30T00:00:00Z"
         generated = epoch(stamp)
         status = {"generated_at": stamp}
         self.assertNotIn("STALE", presentation.title(status, now=generated + 72 * 3600 - .001))
-        self.assertIn("STALE", presentation.title(status, now=generated + 72 * 3600))
+        self.assertNotIn("STALE", presentation.title(status, now=generated + 72 * 3600))
+        self.assertIn("STALE", presentation.title(status, now=generated + 72 * 3600 + .001))
         recent = {"generated_at": "2026-11-01T23:00:00Z", "retained_nodes": [{"validated_at": stamp}]}
         self.assertNotIn("STALE", presentation.title(recent, now=generated + 72 * 3600 - .001))
-        self.assertIn("STALE", presentation.title(recent, now=generated + 72 * 3600))
+        self.assertNotIn("STALE", presentation.title(recent, now=generated + 72 * 3600))
         recent["retained_nodes"][0]["validated_at"] = "invalid"
-        with self.assertRaises(RuntimeError):
-            presentation.title(recent, now=generated + 72 * 3600)
+        self.assertNotIn("STALE", presentation.title(recent, now=generated + 72 * 3600))
 
     def test_annotation_keeps_original_date_connections_and_six_hour_writer_guard(self):
         stamp = "2026-10-30T12:34:56Z"
@@ -64,9 +64,9 @@ class SubscriptionPresentationTests(unittest.TestCase):
         self.assertEqual(state.connection_lines(marked), state.connection_lines(original))
         self.assertIn("# generated: 2026-10-30 12:34:56 UTC", marked)
         self.assertEqual(marked, state.apply_presentation(marked, status, now))
-        stale = state.apply_presentation(marked, status, epoch(stamp) + 72 * 3600)
+        stale = state.apply_presentation(marked, status, epoch(stamp) + 72 * 3600 + .001)
         self.assertIn("#profile-title: BL VPN [STALE - 30 Oct 2026]", stale)
-        self.assertEqual(stale, state.apply_presentation(stale, status, epoch(stamp) + 72 * 3600))
+        self.assertEqual(stale, state.apply_presentation(stale, status, epoch(stamp) + 72 * 3600 + .001))
         malformed = state.apply_presentation(original, {**status, "generated_at": "bad"}, now)
         self.assertIn(state.STALE_TITLE, malformed)
         self.assertIn("# generated: 2026-10-30 12:34:56 UTC", malformed)

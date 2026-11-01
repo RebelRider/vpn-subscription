@@ -71,8 +71,9 @@ cache or restarts a connection merely to refresh an icon.
 Fresh profile titles use `BL VPN [30 Oct 2026]`: the successful local validation
 timestamp committed with the subscription, expressed in UTC with fixed English
 month names. Client downloads and failed attempts cannot advance that date.
-At 72 hours, including the age of any retained connection's own proof, the title
-explicitly includes `STALE`. Internal six-hour validation freshness and historical
+Only more than 72 hours after that published validation does the title
+include `STALE`. Retained entries do not independently trigger this title marker.
+Internal six-hour validation freshness and historical
 retention diagnostics remain separate from this presentation threshold. Names
 are numbered in stable ranking order; IPv6 exit addresses use compressed brackets.
 
@@ -249,7 +250,7 @@ before trying again. Empty attempts update health while preserving every
 connection URI, its order, parameters and original validation date. The profile
 title exposes `STALE` at the shared 72-hour age threshold; the cloud workflow
 also applies this policy while the Mac cannot run. New successful publication
-restores the dated title when all retained proof is recent enough. A newer successful result is
+restores the dated title using its completed validation time. A newer successful result is
 protected from an older failed attempt. Happ retains its hourly update setting.
 
 Installation is automated by `scripts/install_local_automation.py --load` after

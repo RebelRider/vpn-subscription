@@ -1,8 +1,8 @@
 """Deterministic Happ presentation, using verified timestamps in UTC.
 
-The client refresh time never supplies a validation date. A connection retained
-from an older publication keeps its own validation age for the 72-hour title
-policy; stricter publication and service-evidence checks live in local_probe.
+The client refresh time never supplies a validation date. The title ages from
+the last successful published validation. Historical per-node evidence remains
+separate in diagnostics; stricter publication checks live in local_probe.
 """
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ def validation_time(value: object, *, now: float | None = None) -> datetime:
 
 
 def title(status: dict, *, now: float | None = None) -> str:
-    """Render the published validation date; any old retained proof is visible."""
+    """Render the last published validation date; STALE requires more than 72h."""
     reference = time.time() if now is None else now
     if not isinstance(status, dict):
         raise RuntimeError("Invalid subscription presentation metadata")
@@ -45,9 +45,7 @@ def title(status: dict, *, now: float | None = None) -> str:
     retained = status.get("retained_nodes", [])
     if not isinstance(retained, list) or not all(isinstance(node, dict) for node in retained):
         raise RuntimeError("Invalid retained subscription presentation metadata")
-    epochs = [generated.timestamp()]
-    epochs.extend(validation_time(node.get("validated_at"), now=reference).timestamp() for node in retained)
-    stale = any(reference - epoch >= STALE_AFTER_SECONDS for epoch in epochs)
+    stale = reference - generated.timestamp() > STALE_AFTER_SECONDS
     date = f"{generated.day:02d} {MONTHS[generated.month - 1]} {generated.year}"
     return f"#profile-title: BL VPN [{'STALE - ' if stale else ''}{date}]"
 

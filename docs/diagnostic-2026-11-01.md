@@ -54,7 +54,8 @@ n/a alone is not a rejection reason.
   rejection reasons, and uses the existing atomic Git publication/retry path.
 * Any historical retention automatically put STALE in the title, irrespective
   of its age; failed attempts also marked a recent good artifact stale. Title
-  freshness now has one 72-hour policy, including each retained proof's age.
+  freshness now follows only the last successful published validation, with
+  STALE strictly after 72 hours. Per-node retained age stays in diagnostics.
   Internal current-policy and six-hour freshness diagnostics remain separate.
 * Rendering errors previously fell back to the current clock for a missing date.
   Malformed, naive and future validation timestamps now fail closed.
@@ -70,8 +71,8 @@ Versioned rendering preserves byte comparisons against old immutable publication
 
 The protected original connections are never silently removed. A historical
 entry is not counted as a current qualifier. The retained Shadowsocks proof at
-the start of this audit dates to 25 October, so keeping it honestly keeps STALE
-visible until a new full validation succeeds for it.
+the start of this audit dates to 25 October; its historical status remains in
+diagnostics and does not make a recent subscription title STALE.
 
 ## Scheduling and recovery
 
@@ -121,7 +122,9 @@ The already-published eight-connection artifact was also reformatted atomically,
 preserving its exact `2026-11-01T03:42:23.530010+00:00` validation timestamp,
 all node evidence, all connection identities, and the protected historical entry.
 Remote content was verified after push; its title is
-`BL VPN [STALE - 01 Nov 2026]`. STALE remains because the protected SS proof is old.
+`BL VPN [01 Nov 2026]`. The user's clarified title policy was applied: retained
+proof age does not trigger STALE; only more than 72 hours since the last successful
+published validation does. The exact 72-hour boundary remains fresh.
 
 The final correction additionally closes the auxiliary-API-only admission path,
 uses independent sessions, and validates the full browser evidence again at

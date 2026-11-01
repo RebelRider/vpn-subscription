@@ -92,7 +92,7 @@ class SubscriptionPresentationTests(unittest.TestCase):
                             http_outcome="inconclusive", http_status=403, cf_challenge=True,
                             browser={"passed": True, "checked_at": status["generated_at"], "http_status": 200,
                                      "actionable": True, "restriction_free": True, "composer": True,
-                                     "application_json": True, "hydrated": True, "cold_session": True})
+                                     "application_json": True, "cold_session": True})
         status["exit_geography"] = {"affects_qualification": False}
         with tempfile.TemporaryDirectory() as directory:
             output, metadata = Path(directory) / "subscription", Path(directory) / "status"

@@ -17,7 +17,7 @@ class NativeProofTests(unittest.TestCase):
     def proof(self):
         return {"available": True, "engine": "native-webkit", "qualified": True,
                 "rounds": [{"passed": True, "reason": "ok", "checked_at": datetime.now(timezone.utc).isoformat(),
-                            "composer": True, "actionable": True, "restriction_free": True,
+                            "composer": True, "actionable": True, "restriction_free": True, "cold_session": True,
                             "application_json": True, "api_kind": "chatgpt-model-catalog", "http_status": 200}]}
 
     def test_complete_current_proof_is_bound_to_requested_proxy(self):
@@ -27,7 +27,7 @@ class NativeProofTests(unittest.TestCase):
         self.assertIs(result["control"], False)
 
     def test_each_application_condition_is_mandatory(self):
-        for key in ("composer", "actionable", "restriction_free", "application_json"):
+        for key in ("composer", "actionable", "restriction_free", "application_json", "cold_session"):
             value = self.proof()
             value["rounds"][0][key] = False
             with self.subTest(key=key):
@@ -76,6 +76,8 @@ class NativeProofTests(unittest.TestCase):
         source = native.SOURCE.read_text()
         self.assertIn("setActivationPolicy(.prohibited)", source)
         self.assertIn("WKWebsiteDataStore.nonPersistent()", source)
+        self.assertIn("c.preferences.inactiveSchedulingPolicy = .none", source)
+        self.assertIn("web?.navigationDelegate = nil", source)
         self.assertIn("proxy.allowFailover = false", source)
         self.assertIn("proxy.excludedDomains = []", source)
         self.assertNotIn("NSWindow(", source)

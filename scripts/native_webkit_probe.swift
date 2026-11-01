@@ -73,6 +73,7 @@ private let proofScript = #"""
 @available(macOS 14.0, *)
 private final class Probe: NSObject, WKNavigationDelegate, WKUIDelegate {
     private var web: WKWebView!
+    private let configuration: [String: Any]
     private var mainStatus = 0
     private var mainURL: URL?
     private var remaining: Int
@@ -80,6 +81,8 @@ private final class Probe: NSObject, WKNavigationDelegate, WKUIDelegate {
     private var done = false
     private var inspecting = false
     private var navigationEpoch = 0
+    private var readinessDeadline: Date?
+    private var sessionIndex = 0
     private var guardTimer: Timer?
     private var networkErrorCode: Int?
     private var proxyChallenges = 0
@@ -89,9 +92,32 @@ private final class Probe: NSObject, WKNavigationDelegate, WKUIDelegate {
     private var proxyUsername: String?
     private var proxyPassword: String?
     init(configuration: [String: Any]) {
+        self.configuration = configuration
         remaining = configuration["rounds"] as! Int
         super.init()
+        guardTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] _ in
+            if !interfaceIsSafe() { self?.finish("browser-runtime-failed") }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 110) { [weak self] in self?.finish("browser-deadline") }
+        navigate()
+    }
+    private func navigate() {
+        // A reload can reuse cookies and a fortunate pooled connection. Every
+        // round instead owns a fresh ephemeral store and networking session.
+        web?.stopLoading()
+        web?.navigationDelegate = nil
+        web?.uiDelegate = nil
+        web = nil
+        sessionIndex += 1
+        navigationEpoch += 1
+        readinessDeadline = nil
+        inspecting = false
+        mainStatus = 0
+        mainURL = nil
         let c = WKWebViewConfiguration()
+        // Windowless views otherwise suspend application JavaScript/layout
+        // after navigation. This affects only this bounded, owned probe view.
+        c.preferences.inactiveSchedulingPolicy = .none
         let store = WKWebsiteDataStore.nonPersistent()
         if configuration["control"] as? Bool != true {
             let port = configuration["port"] as! Int
@@ -109,19 +135,10 @@ private final class Probe: NSObject, WKNavigationDelegate, WKUIDelegate {
         web = WKWebView(frame: NSRect(x: 0, y: 0, width: 1200, height: 900), configuration: c)
         web.navigationDelegate = self
         web.uiDelegate = self
-        guardTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] _ in
-            if !interfaceIsSafe() { self?.finish("browser-runtime-failed") }
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 110) { [weak self] in self?.finish("browser-deadline") }
-        navigate()
-    }
-    private func navigate() {
-        inspecting = false
-        mainStatus = 0
-        mainURL = nil
         web.load(URLRequest(url: URL(string: "https://chatgpt.com/")!, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 25))
     }
     func webView(_ webView: WKWebView, decidePolicyFor response: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        guard webView === web, !done else { decisionHandler(.cancel); return }
         if response.isForMainFrame {
             guard response.canShowMIMEType, ["text/html", "application/xhtml+xml"].contains(response.response.mimeType?.lowercased() ?? "") else {
                 decisionHandler(.cancel)
@@ -134,6 +151,7 @@ private final class Probe: NSObject, WKNavigationDelegate, WKUIDelegate {
         decisionHandler(.allow)
     }
     func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        guard webView === web, !done else { decisionHandler(.cancel); return }
         if action.shouldPerformDownload || action.targetFrame == nil {
             decisionHandler(.cancel)
             return
@@ -152,20 +170,30 @@ private final class Probe: NSObject, WKNavigationDelegate, WKUIDelegate {
         decisionHandler(.allow)
     }
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        guard webView === web, !done else { return }
         navigationEpoch += 1
+        inspecting = false
+        readinessDeadline = nil
     }
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        guard !inspecting, !done else { return }
+        guard webView === web, !inspecting, !done else { return }
         inspecting = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in self?.inspect() }
+        readinessDeadline = Date().addingTimeInterval(10)
+        let epoch = navigationEpoch
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            guard let self, self.navigationEpoch == epoch, self.web === webView else { return }
+            self.inspect()
+        }
     }
     private func inspect() {
         guard !done else { return }
         let epoch = navigationEpoch
+        let inspectedWeb = web!
         let inspectedURL = mainURL
         let inspectedStatus = mainStatus
-        web.callAsyncJavaScript("return await " + proofScript, arguments: [:], in: nil, in: .page) { [weak self] result in
-            guard let self, !self.done else { return }
+        let budget = max(100, min(8500, Int((readinessDeadline?.timeIntervalSinceNow ?? 0) * 1000)))
+        web.callAsyncJavaScript("return await " + proofScript, arguments: ["budgetMilliseconds": budget], in: nil, in: .page) { [weak self] result in
+            guard let self, !self.done, self.web === inspectedWeb, self.navigationEpoch == epoch else { return }
             var proof: [String: Any] = [:]
             var evaluationCategory: String?
             var evaluationCode: Int?
@@ -198,14 +226,25 @@ private final class Probe: NSObject, WKNavigationDelegate, WKUIDelegate {
             if !passed && reason == "ok" { reason = "browser-application-proof-missing" }
             if self.mainStatus == 401 || self.mainStatus == 403 { reason = "access-denied-inconclusive" }
             if self.mainStatus == 429 { reason = "rate-limited-inconclusive" }
+            let readinessReasons = ["browser-application-proof-missing"]
+            if !passed && evaluationCategory == nil && sameDocument && safe && self.mainStatus == 200
+                && readinessReasons.contains(reason) && (self.readinessDeadline?.timeIntervalSinceNow ?? 0) > 0.4 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+                    guard let self, self.web === inspectedWeb, self.navigationEpoch == epoch else { return }
+                    self.inspect()
+                }
+                return
+            }
             var diagnostics: [String: Any] = ["rejected_optional_cookies": proof["rejected_optional_cookies"] as? Bool ?? false,
                 "anon_models_status": proof["anon_models_status"] as? Int ?? 0,
+                "cold_session_index": self.sessionIndex,
                 "page_errors": evaluationCategory == nil ? 0 : 1]
             if let evaluationCategory { diagnostics["category"] = evaluationCategory }
             if let evaluationCode { diagnostics["webkit_error_code"] = evaluationCode }
             self.rounds.append(["passed": passed, "reason": passed ? "ok" : reason,
                 "checked_at": ISO8601DateFormatter().string(from: Date()), "http_status": self.mainStatus,
                 "composer": proof["composer"] as? Bool ?? false, "actionable": proof["actionable"] as? Bool ?? false,
+                "cold_session": true,
                 "restriction_free": proof["restriction_free"] as? Bool ?? false,
                 "application_json": proof["application_json"] as? Bool ?? false,
                 "api_kind": proof["application_json"] as? Bool == true ? "chatgpt-model-catalog" : NSNull(),
@@ -230,9 +269,10 @@ private final class Probe: NSObject, WKNavigationDelegate, WKUIDelegate {
         let tlsFailed = value.domain == NSURLErrorDomain && (-1206 ... -1200).contains(value.code)
         finish(timedOut ? "browser-timeout-inconclusive" : (tlsFailed ? "browser-tls-failed" : "browser-navigation-failed"))
     }
-    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { failedNavigation(error) }
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { failedNavigation(error) }
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { if webView === web && !done { failedNavigation(error) } }
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { if webView === web && !done { failedNavigation(error) } }
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        guard webView === web, !done else { completionHandler(.cancelAuthenticationChallenge, nil); return }
         // Normal certificate trust; no origin credentials, trust exceptions or prompts.
         let space = challenge.protectionSpace
         if space.isProxy() {

@@ -17,7 +17,7 @@ TROJAN = "trojan://public-test@8.8.8.8:443?type=ws&path=%2Fws&host=example.com&s
 
 
 def node(link, latency=300, rank=1):
-    return {"id": build.normalized_fingerprint(build.parse_vless(link)), "link": link, "rank": rank,
+    result = {"id": build.normalized_fingerprint(build.parse_vless(link)), "link": link, "rank": rank,
             "exit_country": "DE", "validated_at": datetime.now(timezone.utc).isoformat(),
             "median_latency": latency, "latency_samples_ms": [latency] * 5,
             "services": {name: {"passed": 5, "attempts": 5, "reasons": ["ok"] * 5,
@@ -25,6 +25,15 @@ def node(link, latency=300, rank=1):
                                               "http_reason": "ok", "curl_exit": 0, "cf_challenge": False,
                                               "geo_restricted": False} for _ in range(5)]}
                          for name in ("chatgpt", "youtube", "instagram")}}
+    service = result["services"]["chatgpt"]
+    service["reasons"] = ["browser-functional-access"] * 5
+    for item in service["evidence"]:
+        item.update(reason="browser-functional-access", http_outcome="inconclusive",
+                    http_reason="chatgpt-ui-proof-required-inconclusive",
+                    browser={"passed": True, "checked_at": result["validated_at"], "http_status": 200,
+                             "composer": True, "application_json": True, "actionable": True,
+                             "restriction_free": True, "cold_session": True})
+    return result
 
 
 class ConnectionIdentityTests(unittest.TestCase):

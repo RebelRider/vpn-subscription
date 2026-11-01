@@ -1045,7 +1045,7 @@ def valid_node_evidence(node: dict, rounds: int, *, require_round_evidence: bool
                     return False
                 if require_current_browser and (
                         any(browser.get(field) is not True for field in
-                            ("composer", "application_json", "hydrated", "cold_session"))
+                            ("composer", "application_json", "cold_session"))
                         or type(browser.get("http_status")) is not int or browser["http_status"] != 200):
                     return False
                 try:
@@ -1217,7 +1217,8 @@ def finalize_local_selection(
         link
         for link in country_qualified
         if link in latency_qualified_links
-        and valid_node_evidence(next(node for node in allowed_nodes if node["link"] == link), status.get("stability", {}).get("rounds", 0))
+        and valid_node_evidence(next(node for node in allowed_nodes if node["link"] == link),
+                                status.get("stability", {}).get("rounds", 0), require_current_browser=True)
     ]
 
     if latency_qualified and build is None:
@@ -1526,6 +1527,7 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
         passed = passed and valid_node_evidence(
             {"services": services, "latency_samples_ms": measurements, "median_latency": latency},
             final_rounds, require_round_evidence=True,
+            require_current_browser=True,
         )
         sample["passes"] = min(sample.get("passes", 0), sample["runs"] - 1) + int(passed)
         sample["last_seen"] = now
@@ -1794,7 +1796,7 @@ def validate_generated_result(
         raise RuntimeError("Incomplete validation rounds")
     for node in status["nodes"]:
         require_fresh_timestamp(node.get("validated_at"), 6, "candidate validation")
-        if not valid_node_evidence(node, rounds, require_round_evidence=True):
+        if not valid_node_evidence(node, rounds, require_round_evidence=True, require_current_browser=True):
             raise RuntimeError("A node lacks required service or latency evidence")
         if status.get("exit_geography", {}).get("affects_qualification", True) and node.get("exit_country") not in ALLOWED_ACTUAL_EXIT_COUNTRIES:
             raise RuntimeError("A node lacks an allowed actual exit country")

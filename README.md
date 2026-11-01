@@ -14,19 +14,27 @@ Missing, blocked, challenged, rate-limited or malformed responses never qualify.
 No padding, fallback candidates or waiver of a service is allowed. Up to twelve
 entries are published, preserving the previous small-list policy.
 
-* ChatGPT: the lightweight HTTPS providers request is a fast path, never the
-  sole authority. Cloudflare, changed/empty provider JSON and unavailable auth
-  routes remain inconclusive. When other services and a valid latency sample
-  work, a stock headless Chromium instance uses that candidate's authenticated
-  HTTP CONNECT proxy. Each of five reloads must expose a visible, editable
+* ChatGPT: the lightweight HTTPS providers request is preliminary evidence;
+  even valid JSON must pass the separate application check. Cloudflare,
+  changed/empty provider JSON and unavailable auth routes remain inconclusive.
+  When other services and a valid latency sample work, stock windowless macOS
+  WebKit uses that candidate's authenticated HTTP CONNECT proxy. Each of five
+  independent ephemeral sessions must expose a visible, editable
   ChatGPT composer and a fresh, validated application JSON response (anonymous
-  model catalogue or genuine auth-provider metadata). No prompt, login, CAPTCHA
+  model catalogue). No prompt, login, CAPTCHA
   solving, stealth or copied browser state is used. A challenge never passes.
   The composer uses semantic selectors because current ChatGPT no longer uses
   the old fixed ID. Browser API fetches bypass their own HTTP cache.
-  This fallback has no desktop window and never activates an application.
+  Only an unavailable native engine permits a stock headless Chromium fallback,
+  with independent contexts and the same application-content requirements.
+  Neither adapter has a desktop window or activates an application.
   Both the Python adapter and JavaScript launcher enforce headless-only operation;
   a headless failure never retries with a visible browser.
+  DOM focus and public application content establish reachability; these checks
+  do not attest message generation, login or full Safari frontend behavior.
+  An experimental Send-button test was rejected because windowless WebKit
+  suspends animation frames even on the control connection. It is not an
+  admission condition and cannot falsely reject otherwise reachable resources.
 * YouTube: the public oEmbed response for the official iframe API example video
   `M7lc1UVf-VE`, validating provider, video type, title and matching embed URL.
 * Instagram: the public login application HTML, requiring its actual login

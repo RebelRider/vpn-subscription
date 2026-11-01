@@ -22,7 +22,7 @@ def native_evidence(rounds=5, **changes):
         "proxy_port": PORT,
         "rounds": [
             {"passed": True, "reason": "ok", "checked_at": datetime.now(timezone.utc).isoformat(),
-             "http_status": 200, "composer": True, "actionable": True,
+             "http_status": 200, "composer": True, "actionable": True, "cold_session": True,
              "restriction_free": True, "application_json": True,
              "api_kind": "chatgpt-model-catalog"}
             for _ in range(rounds)

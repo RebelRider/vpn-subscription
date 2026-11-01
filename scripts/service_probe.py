@@ -684,7 +684,7 @@ def fresh_browser_rounds(result: dict, rounds: int, port: int | None = None) -> 
     for item in values:
         if (not isinstance(item, dict) or item.get("passed") is not True or item.get("reason") != "ok"
                 or type(item.get("http_status")) is not int or item["http_status"] != 200
-                or any(item.get(field) is not True for field in ("composer", "application_json", "actionable", "restriction_free"))):
+                or any(item.get(field) is not True for field in ("composer", "application_json", "actionable", "restriction_free", "cold_session"))):
             return None
         try:
             value = item["checked_at"]
@@ -696,7 +696,8 @@ def fresh_browser_rounds(result: dict, rounds: int, port: int | None = None) -> 
         except (KeyError, TypeError, ValueError, OverflowError):
             return None
         clean.append({"passed": True, "checked_at": checked.isoformat(), "actionable": True,
-                      "restriction_free": True, "composer": True, "application_json": True, "http_status": 200})
+                      "restriction_free": True, "composer": True, "application_json": True,
+                      "cold_session": True, "http_status": 200})
     return clean
 
 
@@ -726,7 +727,7 @@ def browser_diagnostic(result: dict, proof: list[dict] | None) -> dict:
     if failed:
         status = failed.get("http_status")
         diagnostic["first_failed_http_status"] = status if type(status) is int and 100 <= status <= 599 else None
-        for field in ("composer", "application_json"):
+        for field in ("composer", "application_json", "cold_session"):
             value = failed.get(field)
             diagnostic["first_failed_" + field] = value if type(value) is bool else None
         metadata = failed.get("diagnostics")
@@ -735,7 +736,8 @@ def browser_diagnostic(result: dict, proof: list[dict] | None) -> dict:
             if category in {"browser-javascript-script-exception", "browser-javascript-unsupported-result",
                             "browser-javascript-invalid-frame", "browser-javascript-evaluation-failed"}:
                 diagnostic["first_failed_category"] = category
-            for field, maximum in (("page_errors", 10000000), ("webkit_error_code", 100), ("anon_models_status", 599)):
+            for field, maximum in (("page_errors", 10000000), ("webkit_error_code", 100), ("anon_models_status", 599),
+                                   ("cold_session_index", 5)):
                 value = metadata.get(field)
                 if type(value) is int and 0 <= value <= maximum:
                     diagnostic["first_failed_" + field] = value
@@ -801,6 +803,12 @@ async def _validate_address(build, link: str, rounds: int, interface: str, serve
                     ), _request(build, "latency", LATENCY_URL, port, username, password), return_exceptions=True)
                     results = [result if isinstance(result, dict) else {"error": "proxy-request-failed"} for result in results]
                     evidence = {name: service_evidence(name, response) for name, response in zip(SERVICE_URLS, results[:3])}
+                    # Auth-provider JSON proves only that this auxiliary endpoint
+                    # works. It cannot establish that the ChatGPT application
+                    # loads, even when its HTTPS response is genuine.
+                    if evidence["chatgpt"]["outcome"] == "pass":
+                        evidence["chatgpt"].update(
+                            outcome="inconclusive", reason="chatgpt-ui-proof-required-inconclusive")
                     latency_ok, reason = validate_response("latency", results[3])
                     sample = results[3].get("latency_ms")
                     valid_sample = latency_ok and type(sample) in (float, int) and math.isfinite(sample) and sample >= 0

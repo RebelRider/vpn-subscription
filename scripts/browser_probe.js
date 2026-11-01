@@ -196,11 +196,11 @@ async function main() {
     acceptDownloads: false, serviceWorkers: 'block', timeout: 20000};
   if (!config.control) options.proxy = {server: 'http://127.0.0.1:' + config.port,
     username: config.username, password: config.password, bypass: '<-loopback>'};
-  browser = await playwright.chromium.launchPersistentContext(config.profile, options);
-  const page = browser.pages()[0] || await browser.newPage();
-  page.setDefaultTimeout(12000);
   const rounds = [];
   for (let index = 0; index < config.rounds; index++) {
+    browser = await playwright.chromium.launchPersistentContext(config.profile + '/round-' + (index + 1), options);
+    const page = browser.pages()[0] || await browser.newPage();
+    page.setDefaultTimeout(12000);
     let status = 0, apiProof = false, apiKind = null;
     let document = null, documentSequence = 0;
     const counters = {page_errors: 0, failed_requests: 0, service_json_responses: 0, script_failures: 0, api_observations: [],
@@ -239,14 +239,13 @@ async function main() {
     page.on('response', observe);
     let result;
     try {
-      const response = index === 0 ? await page.goto('https://chatgpt.com/', {waitUntil: 'domcontentloaded', timeout: 22000}) :
-        await page.reload({waitUntil: 'domcontentloaded', timeout: 22000});
+      const response = await page.goto('https://chatgpt.com/', {waitUntil: 'domcontentloaded', timeout: 22000});
       if (!document) {
         const navigation = mainDocumentResponse(response, page);
         if (navigation) document = {...navigation, sequence: ++documentSequence};
       }
       status = document ? document.status : 0;
-      if (index === 0) Object.assign(counters, await ordinaryGuestNavigation(page));
+      Object.assign(counters, await ordinaryGuestNavigation(page));
       const knownComposer = page.locator('#prompt-textarea:visible, [data-testid="prompt-textarea"]:visible, textarea[name="prompt-textarea"]:visible, [contenteditable="true"][role="textbox"]:visible, [contenteditable="plaintext-only"][role="textbox"]:visible');
       const semanticComposer = page.getByPlaceholder(COMPOSER_HINT).and(page.locator('textarea:visible'));
       const labeledComposer = page.getByRole('textbox', {name: COMPOSER_HINT}).and(page.locator('textarea:visible'));
@@ -288,7 +287,7 @@ async function main() {
         if (rendered && !apiProof && reason === 'browser-application-proof-missing') reason = 'browser-api-proof-missing';
       }
       result = {passed, reason, checked_at: new Date().toISOString(), http_status: status,
-        composer: rendered, actionable, restriction_free: restrictionFree, application_json: apiProof, api_kind: apiKind,
+        composer: rendered, actionable, cold_session: true, restriction_free: restrictionFree, application_json: apiProof, api_kind: apiKind,
         diagnostics: await diagnostics(page, status, counters)};
     } catch (error) {
       const message = String(error && error.message || '');
@@ -296,7 +295,7 @@ async function main() {
         /ERR_PROXY|ERR_TUNNEL/.test(message) ? 'browser-proxy-failed' :
         /Timeout|timeout/.test(message) ? 'browser-timeout-inconclusive' : 'browser-navigation-failed',
         checked_at: new Date().toISOString(), http_status: status};
-    } finally { page.off('response', observe); page.off('pageerror', pageError); page.off('requestfailed', requestFailed); }
+    } finally { page.off('response', observe); page.off('pageerror', pageError); page.off('requestfailed', requestFailed); await browser.close().catch(() => {}); browser = null; }
     rounds.push(result);
     if (!result.passed) break;
   }

@@ -37,7 +37,7 @@ def node(link, stamp, rank=1):
                         http_outcome="inconclusive", http_status=403, cf_challenge=True,
                         browser={"passed": True, "checked_at": stamp, "http_status": 200,
                                  "actionable": True, "restriction_free": True, "composer": True,
-                                 "application_json": True, "hydrated": True, "cold_session": True})
+                                 "application_json": True, "cold_session": True})
     return value
 
 

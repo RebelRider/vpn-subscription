@@ -16,12 +16,12 @@ class BrowserEvidenceTests(unittest.TestCase):
     def proof(self, now=None):
         return {"passed": True, "reason": "ok", "checked_at": (now or datetime.now(timezone.utc)).isoformat(),
                 "http_status": 200, "composer": True, "actionable": True, "restriction_free": True,
-                "application_json": True, "api_kind": "openai-auth-providers"}
+                "application_json": True, "api_kind": "openai-auth-providers", "cold_session": True}
 
     def test_all_requested_rounds_need_complete_application_evidence(self):
         value = {"qualified": True, "rounds": [self.proof() for _ in range(5)]}
         self.assertTrue(probe.validate_evidence(value, 5)["qualified"])
-        for field in ("composer", "actionable", "restriction_free", "application_json", "api_kind", "http_status", "checked_at"):
+        for field in ("composer", "actionable", "restriction_free", "application_json", "cold_session", "api_kind", "http_status", "checked_at"):
             value = {"qualified": True, "rounds": [self.proof()]}
             del value["rounds"][0][field]
             self.assertFalse(probe.validate_evidence(value, 1)["qualified"])
@@ -65,7 +65,7 @@ const page={setDefaultTimeout(){},mainFrame:()=>frame,on(name,fn){if(!listeners.
  }};
 const moduleObject={exports:{}};
 function fakeRequire(name){
- if(name==='fs')return {readFileSync:()=>JSON.stringify({profile:'owned-test',control:true,rounds:1,
+ if(name==='fs')return {readFileSync:()=>JSON.stringify({profile:'owned-test',control:true,rounds:fixture.rounds??1,
   ...(Object.hasOwn(fixture,'headless')?{headless:fixture.headless}:{})})};
  if(name==='crypto')return require('crypto');
  if(name==='fake-playwright')return {chromium:{launchPersistentContext:async(_profile,options)=>{
@@ -95,6 +95,13 @@ vm.runInNewContext(source,{require:fakeRequire,module:moduleObject,process:{env:
         self.assertIs(result["launchOptions"]["headless"], True)
         self.assertEqual(result["launchCount"], 1)
         self.assertEqual(result["inputActions"], 0)
+
+    def test_every_round_uses_a_new_headless_context(self):
+        result = self.browser_fixture(rounds=3)
+        self.assertTrue(result["qualified"])
+        self.assertEqual(result["launchCount"], 3)
+        self.assertEqual(len(result["rounds"]), 3)
+        self.assertTrue(all(item["cold_session"] for item in result["rounds"]))
 
     def test_visible_challenge_or_restriction_blocks_even_working_api_and_composer(self):
         cases = {"Verify you are human": "cloudflare-challenge-inconclusive",

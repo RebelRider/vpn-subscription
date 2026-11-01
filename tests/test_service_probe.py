@@ -57,7 +57,7 @@ def report(samples):
 def browser_round(checked_at):
     return {"passed": True, "reason": "ok", "checked_at": checked_at,
             "http_status": 200, "composer": True, "application_json": True,
-            "actionable": True, "restriction_free": True}
+            "actionable": True, "restriction_free": True, "cold_session": True}
 
 
 def build_stub():
@@ -321,10 +321,14 @@ class ExitMetadataTests(unittest.IsolatedAsyncioTestCase):
         build, child = build_stub(), SimpleNamespace(returncode=None)
         async def request(_build, service, *args):
             return response(service) if service in probe.SERVICE_URLS or service == "latency" else {"error": "private-user-password"}
+        async def browser(_build, port, username, password, rounds):
+            return {"qualified": True, "control": False, "proxy_port": port,
+                    "rounds": [browser_round(datetime.now(timezone.utc).isoformat()) for _ in range(rounds)]}
         with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8"])), \
                 patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(return_value=child)), \
                 patch.object(probe, "_wait_authenticated", AsyncMock()), \
-                patch.object(probe, "_request", AsyncMock(side_effect=request)):
+                patch.object(probe, "_request", AsyncMock(side_effect=request)), \
+                patch.object(probe, "check_chatgpt", AsyncMock(side_effect=browser)):
             result = await probe._validate_one(build, LINK, 3, "en0")
         self.assertTrue(result["qualified"])
         self.assertEqual(result["rejection_reasons"], [])
@@ -395,6 +399,30 @@ class IsolationTests(unittest.TestCase):
 
 
 class AsyncProbeTests(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.real_check_chatgpt = probe.check_chatgpt
+        async def browser(_build, port, username, password, rounds):
+            return {"qualified": True, "control": False, "proxy_port": port,
+                    "rounds": [browser_round(datetime.now(timezone.utc).isoformat()) for _ in range(rounds)]}
+        self.browser = AsyncMock(side_effect=browser)
+        patcher = patch.object(probe, "check_chatgpt", self.browser)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    async def test_auth_provider_json_never_substitutes_for_application(self):
+        build, child = build_stub(), SimpleNamespace(returncode=None)
+        with patch.object(probe, "_resolve_public_servers", AsyncMock(return_value=["8.8.8.8"])), \
+                patch.object(probe.asyncio, "create_subprocess_exec", AsyncMock(return_value=child)), \
+                patch.object(probe, "_wait_authenticated", AsyncMock()), \
+                patch.object(probe, "_request", AsyncMock(side_effect=lambda _build, service, *args: response(service))), \
+                patch.object(probe, "check_chatgpt", AsyncMock(return_value={"qualified": False, "reason": "browser-application-proof-missing"})) as browser:
+            result = await probe._validate_one(build, LINK, 3, "en0")
+        browser.assert_awaited_once()
+        self.assertFalse(result["qualified"])
+        self.assertEqual(result["services"]["chatgpt"]["passed"], 0)
+        self.assertEqual(result["services"]["chatgpt"]["evidence"][0]["outcome"], "inconclusive")
+        self.assertEqual(result["services"]["chatgpt"]["reasons"], ["chatgpt-ui-proof-required-inconclusive"])
+
     async def test_second_public_address_recovers_transport_after_first_process_cleanup(self):
         build = build_stub()
         children = [SimpleNamespace(returncode=None), SimpleNamespace(returncode=None)]
@@ -618,7 +646,7 @@ class AsyncProbeTests(unittest.IsolatedAsyncioTestCase):
     async def test_browser_adapter_errors_are_inconclusive(self):
         # Missing/browser dependency errors never become a successful proof.
         with patch.dict("sys.modules", {"browser_probe": SimpleNamespace(check_chatgpt=AsyncMock(side_effect=RuntimeError("secret")))}):
-            result = await probe.check_chatgpt(build_stub(), 12345, "user", "secret", 3)
+            result = await self.real_check_chatgpt(build_stub(), 12345, "user", "secret", 3)
         self.assertFalse(result["qualified"])
         self.assertNotIn("secret", json.dumps(result))
 

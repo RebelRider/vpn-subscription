@@ -121,7 +121,7 @@ def validate_evidence(value: object, rounds: int, now: datetime | None = None) -
         code = item.get("http_status")
         if isinstance(code, int) and not isinstance(code, bool) and 0 <= code <= 599:
             clean_item["http_status"] = code
-        for key in ("composer", "actionable", "restriction_free", "application_json"):
+        for key in ("composer", "actionable", "restriction_free", "application_json", "cold_session"):
             if isinstance(item.get(key), bool):
                 clean_item[key] = item[key]
         kind = item.get("api_kind")
@@ -167,6 +167,7 @@ def validate_evidence(value: object, rounds: int, now: datetime | None = None) -
     passed = (len(clean) == rounds and all(item["passed"] is True and item.get("reason") == "ok"
               and item.get("composer") is True and item.get("application_json") is True
               and item.get("actionable") is True and item.get("restriction_free") is True
+              and item.get("cold_session") is True
               and item.get("api_kind") in {"openai-auth-providers", "chatgpt-model-catalog"}
               and item.get("http_status") == 200 for item in clean))
     if value["qualified"] and not passed:

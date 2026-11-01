@@ -37,7 +37,7 @@ def verified_node(link, latency=123.0, rank=1):
                     http_reason="chatgpt-ui-proof-required-inconclusive",
                     browser={"passed": True, "checked_at": node["validated_at"], "http_status": 200,
                              "composer": True, "application_json": True, "actionable": True,
-                             "restriction_free": True, "hydrated": True, "cold_session": True})
+                             "restriction_free": True, "cold_session": True})
     return node
 
 

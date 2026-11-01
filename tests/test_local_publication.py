@@ -31,14 +31,14 @@ def evidence(latency=100):
                     http_reason='chatgpt-ui-proof-required-inconclusive',
                     browser={'passed': True, 'checked_at': node['validated_at'], 'http_status': 200,
                              'composer': True, 'application_json': True, 'actionable': True,
-                             'restriction_free': True, 'hydrated': True, 'cold_session': True})
+                             'restriction_free': True, 'cold_session': True})
     return node
 
 
 class EvidenceTests(unittest.TestCase):
     def test_current_publication_requires_full_frontend_and_cold_session_proof(self):
         self.assertTrue(m.valid_node_evidence(evidence(), 5, require_current_browser=True))
-        for field in ('composer', 'application_json', 'hydrated', 'cold_session', 'http_status'):
+        for field in ('composer', 'application_json', 'cold_session', 'http_status'):
             node = evidence()
             del node['services']['chatgpt']['evidence'][0]['browser'][field]
             with self.subTest(field=field):

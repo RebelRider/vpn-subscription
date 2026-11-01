@@ -199,6 +199,13 @@ class ReliabilityRecoveryTests(unittest.TestCase):
                                         "http_status": 200, "curl_exit": 0,
                                         "cf_challenge": False, "geo_restricted": False}] * 3}
                     for name in ("chatgpt", "youtube", "instagram")}
+        services["chatgpt"]["reasons"] = ["browser-functional-access"] * 3
+        for item in services["chatgpt"]["evidence"]:
+            item.update(reason="browser-functional-access", http_outcome="inconclusive",
+                        http_reason="chatgpt-ui-proof-required-inconclusive",
+                        browser={"passed": True, "checked_at": stamp(now), "http_status": 200,
+                                 "composer": True, "application_json": True, "actionable": True,
+                                 "restriction_free": True, "cold_session": True})
         report = {"qualified": True, "services": services, "median_ms": 100,
                   "p95_ms": 100, "latency_samples_ms": [100, 100, 100],
                   "validated_at": stamp(now), "rejection_reasons": []}

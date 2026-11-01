@@ -68,9 +68,10 @@ remaining label stays URL-encoded. VMess retains the flag in its JSON name.
 Happ manages its own active-server display cache; publication never resets that
 cache or restarts a connection merely to refresh an icon.
 
-Fresh profile titles use `BL VPN [30 Oct 2026]`: the successful local validation
-timestamp committed with the subscription, expressed in UTC with fixed English
-month names. Client downloads and failed attempts cannot advance that date.
+Fresh profile titles use `BL VPN [01Nov2026 23:41]`: the successful local validation
+timestamp committed with the subscription, displayed in `Europe/Moscow` with fixed
+English month names. Evidence timestamps stay in UTC. Client downloads, title
+formatting and failed attempts cannot advance the displayed validation time.
 Only more than 72 hours after that published validation does the title
 include `STALE`. Retained entries do not independently trigger this title marker.
 Internal six-hour validation freshness and historical

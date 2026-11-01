@@ -18,10 +18,12 @@ def epoch(stamp):
 
 
 class SubscriptionPresentationTests(unittest.TestCase):
-    def test_date_is_utc_with_fixed_english_months_across_midnight_and_leap_day(self):
-        cases = (("2026-10-31T01:15:00+03:00", "30 Oct 2026"),
-                 ("2028-02-29T23:59:59Z", "29 Feb 2028"),
-                 ("2026-11-01T00:01:00-03:00", "01 Nov 2026"))
+    def test_moscow_minutes_with_fixed_english_months_across_midnight_and_leap_day(self):
+        cases = (("2026-10-31T01:15:00+03:00", "31Oct2026 01:15"),
+                 ("2028-02-29T20:59:59Z", "29Feb2028 23:59"),
+                 ("2028-02-29T23:59:59Z", "01Mar2028 02:59"),
+                 ("2026-11-01T00:01:00-03:00", "01Nov2026 06:01"),
+                 ("2026-10-31T21:00:00Z", "01Nov2026 00:00"))
         for stamp, date in cases:
             now = epoch(stamp) + 1
             with self.subTest(stamp=stamp), patch.object(presentation.time, "strftime", create=True,
@@ -60,12 +62,12 @@ class SubscriptionPresentationTests(unittest.TestCase):
         now = epoch(stamp) + 7 * 3600
         self.assertFalse(state.has_fresh_validation(status, now))
         marked = state.apply_presentation(original, status, now)
-        self.assertIn("#profile-title: BL VPN [30 Oct 2026]", marked)
+        self.assertIn("#profile-title: BL VPN [30Oct2026 15:34]", marked)
         self.assertEqual(state.connection_lines(marked), state.connection_lines(original))
         self.assertIn("# generated: 2026-10-30 12:34:56 UTC", marked)
         self.assertEqual(marked, state.apply_presentation(marked, status, now))
         stale = state.apply_presentation(marked, status, epoch(stamp) + 72 * 3600 + .001)
-        self.assertIn("#profile-title: BL VPN [STALE - 30 Oct 2026]", stale)
+        self.assertIn("#profile-title: BL VPN [STALE - 30Oct2026 15:34]", stale)
         self.assertEqual(stale, state.apply_presentation(stale, status, epoch(stamp) + 72 * 3600 + .001))
         malformed = state.apply_presentation(original, {**status, "generated_at": "bad"}, now)
         self.assertIn(state.STALE_TITLE, malformed)

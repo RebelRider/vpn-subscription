@@ -1,7 +1,7 @@
 # BestLocal audit — 1 November 2026
 
-Operational times below use Moscow time (UTC+3). Subscription title dates use
-UTC, consistently with the immutable validation timestamps. No VPN application
+Operational times and subscription titles use Moscow time (`Europe/Moscow`).
+Immutable validation timestamps remain in UTC. No VPN application
 or system routing, DNS or proxy configuration was modified.
 
 ## Live evidence before deploying this audit's corrections
@@ -62,7 +62,7 @@ n/a alone is not a rejection reason.
 
 ## Presentation and preservation
 
-Fresh titles use `BL VPN [30 Oct 2026]`; outdated proof remains visibly STALE.
+Fresh titles use `BL VPN [01Nov2026 23:41]`; outdated publications remain visibly STALE.
 The date belongs to the completed validation atomically published with the
 artifact, not Happ's download time. Names use, for example,
 `🇩🇪 DE, Frankfurt am Main  |1|   [47.245.182.206]`. Unknown geography remains
@@ -122,7 +122,7 @@ The already-published eight-connection artifact was also reformatted atomically,
 preserving its exact `2026-11-01T03:42:23.530010+00:00` validation timestamp,
 all node evidence, all connection identities, and the protected historical entry.
 Remote content was verified after push; its title is
-`BL VPN [01 Nov 2026]`. The user's clarified title policy was applied: retained
+`BL VPN [01Nov2026 06:42]` for that preserved timestamp. The user's clarified title policy was applied: retained
 proof age does not trigger STALE; only more than 72 hours since the last successful
 published validation does. The exact 72-hour boundary remains fresh.
 
@@ -132,7 +132,7 @@ selection/publication. **451 regression tests passed** before committing this
 correction. Controlled tests cover quota/recovery, real bare-Git failed-push
 retry, unknown source admission, a second daily batch, invalid feeds, corrupted
 state, interrupted jobs, unchanged-input revalidation, duplicate identities,
-future timestamps, UTC midnight and the exact 72-hour title boundary.
+future timestamps, Moscow midnight, leap day and the exact 72-hour title boundary.
 
 The optional pinned Playwright WebKit experiment was rejected: its local fixture
 triggered the UI guard before any ChatGPT request. Official code creates an

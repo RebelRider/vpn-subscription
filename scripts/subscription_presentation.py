@@ -1,4 +1,4 @@
-"""Deterministic Happ presentation, using verified timestamps in UTC.
+"""Deterministic Happ presentation, displaying verified timestamps in Moscow.
 
 The client refresh time never supplies a validation date. The title ages from
 the last successful published validation. Historical per-node evidence remains
@@ -7,6 +7,7 @@ separate in diagnostics; stricter publication checks live in local_probe.
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 import ipaddress
 import math
 import re
@@ -15,6 +16,7 @@ import time
 VERSION = 2
 STALE_AFTER_SECONDS = 72 * 3600
 MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+TITLE_TIMEZONE = ZoneInfo("Europe/Moscow")
 
 
 def validation_time(value: object, *, now: float | None = None) -> datetime:
@@ -46,7 +48,9 @@ def title(status: dict, *, now: float | None = None) -> str:
     if not isinstance(retained, list) or not all(isinstance(node, dict) for node in retained):
         raise RuntimeError("Invalid retained subscription presentation metadata")
     stale = reference - generated.timestamp() > STALE_AFTER_SECONDS
-    date = f"{generated.day:02d} {MONTHS[generated.month - 1]} {generated.year}"
+    displayed = generated.astimezone(TITLE_TIMEZONE)
+    date = (f"{displayed.day:02d}{MONTHS[displayed.month - 1]}{displayed.year} "
+            f"{displayed.hour:02d}:{displayed.minute:02d}")
     return f"#profile-title: BL VPN [{'STALE - ' if stale else ''}{date}]"
 
 

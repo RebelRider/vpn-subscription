@@ -5,15 +5,15 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-11-02 22:29:50 UTC
+# generated: 2026-11-02 23:32:21 UTC
 #
 # candidates: 8000
-# parse_valid: 4619
+# parse_valid: 4291
 # exact_duplicates_removed: 0
-# structural_duplicates_removed: 1779
-# first_pass_working: 725
+# structural_duplicates_removed: 1783
+# first_pass_working: 697
 # final_tested: 500
-# final_stable: 477
+# final_stable: 490
 # published: 20
 # functional_preliminary: gstatic
 # primary_functional: verified HTTPS Cloudflare trace, YouTube204, 1MB payload; service acceptance is authoritative on Mac
@@ -21,23 +21,23 @@
 #
 # Quality-filtered public proxy configurations.
 #
-vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.90:443?flow=xtls-rprx-vision&fp=qq&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&security=reality&sid=c39cc7310a&sni=yahoo.com&type=tcp#DE
-hysteria2://861726bb-c61a-b0e0-99fa-5ddfdcf21902@64.32.13.230:443?sni=4c37a418-tmm5c0-ttxkqc-e06r.los.hyhuawei.com#US
+hysteria2://63e1b9462d708b56d5d5a0267cffecdc@promo3.goonars.com:443?security=tls&alpn=h3&insecure=0&sni=promo3.goonars.com#US
+vless://4a140c2f-5b0c-4524-950c-026de74fcf69@5.149.249.94:443?fp=firefox&pbk=pR39Vv5qhk8r6akOicoy6mMs4-ppSWUez8MyAXG7wwQ&security=reality&serviceName=neurex&sid=27350908de933e09&sni=nlb.kosmosapp.net&type=grpc#NL
+ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.192:8080#GB
+vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.35:443/?type=tcp&encryption=none&flow=xtls-rprx-vision&sni=yahoo.com&fp=firefox&security=reality&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&sid=c39cc7310a#DE
+trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@216.152.155.59:443?sni=api.nextjobopportunityandclaimyouridealrole.com&type=tcp&security=tls#US
+trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@66.163.114.106:443?sni=www.findconnectwithemployersandbuildprofessionalnetwork.com&type=tcp&security=tls#US
+ss://YWVzLTEyOC1nY206c2hhZG93c29ja3M=@37.19.198.236:443#US
+vmess://eyJhZGQiOiIzOC45MS4xMDcuNDkiLCJhaWQiOjAsImhvc3QiOiIzOC45MS4xMDcuNDkiLCJpZCI6ImY4YzhkYzNkLTBkMzctNDZiMC04YjM0LWE3MjMyODgyZmNmZSIsIm5ldCI6InRjcCIsInBhdGgiOiIiLCJwb3J0IjoiMTgwMDAiLCJwcyI6IlVTIiwic25pIjoiMzguOTEuMTA3LjQ5IiwidGxzIjoiIiwidHlwZSI6Im5vbmUiLCJ2IjoiMiJ9
+trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@216.152.156.42:443?security=tls&sni=blog.healthcarejobshubenhancemedicalprofessionalskillstoday.com#US
+trojan://5t6i121em5lkmsmk@us007.zestapp778.com:42314?sni=us007.zestapp778.com&type=tcp&fp=chrome&security=tls#US
+trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@169.197.140.169:443?fp=chrome&sni=api.discoverfreshgraduatejobsstartyourprofessionaljourney.com&security=tls#US
+vless://40992c2a-513e-4837-9594-23411fd42afd@165.22.198.128:443?security=none&type=tcp&headerType=http&path=%2F&host=cloudfront.net&encryption=none#NL
+vless://35c9f200-7520-4005-b78e-f8a2fb9f68f7@145.63.143.205:8444?security=tls&sni=pl1.meshbeat.online&alpn=http%2F1.1&fp=firefox&type=ws&path=%2Fapi%2Fv1%2Fdevices%2F10be32b380%2Ftelemetry&host=pl1.meshbeat.online#PL
+vless://a8321cfe-39a2-48a0-a918-f01f7d9006ed@188.137.237.14:8444?security=tls&sni=nl16.meshbeat.online&alpn=http%2F1.1&fp=firefox&type=ws&path=%2Fapi%2Fv1%2Fdevices%2F317eb6a07b%2Ftelemetry&host=nl16.meshbeat.online#NL
+ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTo0YTJyZml4b3BoZGpmZmE4S1ZBNEFh@193.29.139.234:8080#NL
 vless://861d8ee0-6ed9-465a-8dbf-69f7674725dd@79.141.164.125:443?encryption=none&fp=firefox&pbk=pR39Vv5qhk8r6akOicoy6mMs4-ppSWUez8MyAXG7wwQ&security=reality&serviceName=neurex&sid=27350908de933e09&sni=nla.kosmosapp.net&type=grpc#NL
-vless://40992c2a-513e-4837-9594-23411fd42afd@165.227.236.51:443?encryption=none&headerType=http&host=cloudfront.net&path=%2F&security=none&type=tcp#GB
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@216.152.155.131:443?sni=www.nextjobopportunityandclaimyouridealrole.com&type=tcp&fp=chrome&security=tls#US
-vless://40992c2a-513e-4837-9594-23411fd42afd@3.12.54.217:443?encryption=none&headerType=http&host=fast.com&path=%2F&security=none&type=tcp#US
-vmess://eyJ2IjoiMiIsInBzIjoiVVMiLCJhZGQiOiIyMy4xNDcuNTYuMTgxIiwicG9ydCI6IjUyODQzIiwiaWQiOiI4OGJlNzkzYy1jMzY4LTRlYjEtODgwOS0wNTdlNWRmOTY2MDYiLCJhaWQiOiIwIiwic2N5IjoiYXV0byIsIm5ldCI6InRjcCIsInR5cGUiOiJub25lIiwiaG9zdCI6IiIsInBhdGgiOiIiLCJ0bHMiOiIiLCJzbmkiOiIiLCJhbHBuIjoiIiwiZnAiOiIifQ==
-ss://YWVzLTI1Ni1nY206WlJwZ2FCZUd4dEVOSVhndmhwa1pCS3o5R25XUlMyZFljeDlPK2EyaXdOND0@185.215.132.9:19999#US
-vless://40992c2a-513e-4837-9594-23411fd42afd@164.92.213.174:443?encryption=none&headerType=http&host=store.steampowered.com&path=%2F&security=none&type=tcp#NL
-vless://48ff2b70-e180-582f-8866-d9a2edeed5f5@15.204.97.198:23576?type=tcp&encryption=none&flow=xtls-rprx-vision&sni=fuck.rkn&fp=chrome&security=reality&pbk=1y5h2FGWKXTJ9xLPCqPo6Mw7RxoZzh6fGkEQKNxpZ3s&sid=01#US
-trojan://242a3d8eee5e4ed1a6bfa4141d549a25@www.findlocaljobnetworkandbuildcommunityconnections.com:443?sni=www.findlocaljobnetworkandbuildcommunityconnections.com&type=tcp&security=tls#US
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@66.163.112.171:443?sni=learn.unlockyourfuturefindyourperfectcareer.com&type=tcp&fp=chrome&security=tls#US
-ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.205:8080#GB
-ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTpvWklvQTY5UTh5aGNRVjhrYTNQYTNB@193.29.139.204:8080#NL
-hysteria2://a35c508f-4d5d-4531-842e-6e9d43c762c0@13.143.189.149:4444?sni=pl2.nexfile.net#PL
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@66.163.127.215:443?sni=courses.indyourperfectremotetechjobfromthecomfortofhome.com&type=tcp&fp=chrome&security=tls#NL
-vless://501a2da5-cb22-4a3f-915e-e3b821d1d62d@87.199.205.28:443?flow=xtls-rprx-vision&fp=firefox&pbk=W-9zyiOq287RtXVTZlTFbSDJ0Mx8joyBLJoA7ZE7eBw&security=reality&sid=a9c11b06829163c9&sni=vkvd754.okcdn.ru&type=tcp#NL
-ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTp2MWMtaTVTU0ZYUDhuNGcxV2JjMEw5Z1g4Mng1TzJRYQ==@dns27.m3hrzd.ir:1355#NL
-vless://2446e2e2-1ce3-4502-9050-1dd32bacc68c@tr2.h1cloud.net:25021?encryption=none&flow=xtls-rprx-vision&fp=firefox&headerType=none&pbk=od79bUkYtqQtsGrrTdhmkDflx5c9al4vqxwWApvc-Dg&security=reality&sid=17fa3af0924c88b3&sni=www.samsung.com&type=tcp#NL
-vless://88742d38-3f5c-4b9c-b256-7df5db8257ec@107.181.151.128:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=zfsjt2A8ur0qHWIuCG7F9W4wZN3VTuL6fkTljC-9R0s&security=reality&sid=8f79726c5002&sni=www.mozilla.org&type=tcp#GB
+vless://05488656-d4bf-4634-8b2e-e4ff5a56c7e2@82.118.22.161:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&headerType=&pbk=xY1KpNxaIGmi6jfeudYQ_aaLGQqWK_uHStnwUFd2_2E&security=reality&sid=fa3ea655619a3e78&sni=www.cloudflare.com&type=tcp#PL
+vless://bb5c63ae-b5f1-414b-802c-625e8b761bf6@86.53.110.15:443?path=%2Fjx-aarup88tmqca66&security=tls&host=jyfrj1cims.dev.onappjet.com&type=ws#DE
+vless://40992c2a-513e-4837-9594-23411fd42afd@164.92.213.126:443?encryption=none&headerType=http&host=fast.com&path=%2F&security=none&type=tcp#NL
+vless://2446e2e2-1ce3-4502-9050-1dd32bacc68c@tr2.h1cloud.net:25021?security=reality&encryption=none&pbk=od79bUkYtqQtsGrrTdhmkDflx5c9al4vqxwWApvc-Dg&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=www.samsung.com&sid=17fa3af0924c88b3#NL

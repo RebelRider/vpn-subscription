@@ -1,25 +1,26 @@
 # v6.0 — LOCAL NETWORK VERIFIED PROXIES
-#profile-title: BL VPN [07Nov2026 12:04]
+#profile-title: BL VPN [07Nov2026 14:11]
 #profile-update-interval: 1
 #subscription-ping-onopen-enabled: 1
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-11-07 09:04:07 UTC
+# generated: 2026-11-07 11:11:24 UTC
 #
 # Local filtering: ChatGPT providers JSON + YouTube video metadata + Instagram application HTML; median proxy HTTPS latency <500 ms
 # Local final stability: 5/5 complete rounds required
 # upstream_nodes: 100
-# local_qualified: 3
+# local_qualified: 4
 # local_ranking: stability, median latency, p95 latency
 #
 # Fresh entries were re-tested through the current local network; retained entries preserve historical evidence and are not currently verified.
 #
 # local_retained: 1
-# published_total: 4
+# published_total: 5
 #bestlocal-status: mixed; retained entries are not currently verified
 #bestlocal-health-url: https://raw.githubusercontent.com/RebelRider/vpn-subscription/regional/output/local-health.json
-vless://8bac7917-b4d2-4338-bbfc-5d47bda8c5ab@213.182.201.18:3090?type=grpc&serviceName=vless#🇩🇪%20DE%20%20%7C1%7C%20%20%20%5B213.182.201.18%5D
-hysteria2://4fa0ca1b-0742-419d-8fd2-3f698e06b206@84.32.102.158:20443?sni=hy62c5d8.w-mebel.pro#🇳🇱%20NL%2C%20Amsterdam%20%20%7C2%7C%20%20%20%5B195.189.96.134%5D
-hysteria2://4fa0ca1b-0742-419d-8fd2-3f698e06b206@84.32.102.153:20443?sni=hy62c5d8.w-mebel.pro#🇳🇱%20NL%2C%20Amsterdam%20%20%7C3%7C%20%20%20%5B195.189.96.134%5D
-ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.192:8080#🇳🇱%20NL%2C%20Amsterdam%20%20%7C4%7C%20%20%20%5B193.29.139.198%5D
+hysteria2://4fa0ca1b-0742-419d-8fd2-3f698e06b206@84.32.102.153:20443?sni=hy62c5d8.w-mebel.pro#🇳🇱%20NL%2C%20Amsterdam%20%20%7C1%7C%20%20%20%5B195.189.96.134%5D
+hysteria2://4fa0ca1b-0742-419d-8fd2-3f698e06b206@88.216.57.197:20443?sni=hy51290d.w-mebel.pro#🇺🇸%20US%2C%20Chicago%20%20%7C2%7C%20%20%20%5B88.216.183.164%5D
+hysteria2://4fa0ca1b-0742-419d-8fd2-3f698e06b206@84.32.102.145:20443?sni=hy62c5d8.w-mebel.pro#🇳🇱%20NL%2C%20Amsterdam%20%20%7C3%7C%20%20%20%5B195.189.96.134%5D
+hysteria2://4fa0ca1b-0742-419d-8fd2-3f698e06b206@84.32.102.144:20443?sni=hy62c5d8.w-mebel.pro#🇳🇱%20NL%2C%20Amsterdam%20%20%7C4%7C%20%20%20%5B195.189.96.134%5D
+ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.192:8080#🇳🇱%20NL%2C%20Amsterdam%20%20%7C5%7C%20%20%20%5B193.29.139.198%5D

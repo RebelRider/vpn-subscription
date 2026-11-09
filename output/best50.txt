@@ -5,15 +5,15 @@
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-11-09 11:58:00 UTC
+# generated: 2026-11-09 13:02:55 UTC
 #
 # candidates: 8000
-# parse_valid: 4845
+# parse_valid: 4648
 # exact_duplicates_removed: 0
-# structural_duplicates_removed: 2383
-# first_pass_working: 565
+# structural_duplicates_removed: 2006
+# first_pass_working: 596
 # final_tested: 500
-# final_stable: 485
+# final_stable: 490
 # published: 50
 # functional_preliminary: gstatic
 # primary_functional: verified HTTPS Cloudflare trace, YouTube204, 1MB payload; service acceptance is authoritative on Mac
@@ -21,53 +21,53 @@
 #
 # Quality-filtered public proxy configurations.
 #
-ss://YWVzLTEyOC1nY206c2hhZG93c29ja3M=@156.146.38.168:443#US
-vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.74:443?flow=xtls-rprx-vision&fp=chrome&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&security=reality&sid=c39cc7310a&sni=yahoo.com&type=tcp#DE
-ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.203:8080#GB
+ss://YWVzLTI1Ni1nY206WlJwZ2FCZUd4dEVOSVhndmhwa1pCS3o5R25XUlMyZFljeDlPK2EyaXdOND0=@167.88.62.203:19999#US
+ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.202:8080#GB
 ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTpINEpIa0hVMnBJUloxc2JydVEtcDM5R3JoMXo2bnhZOA@dns27.m3hrzd.ir:8044#NL
-ss://YWVzLTI1Ni1nY206WlJwZ2FCZUd4dEVOSVhndmhwa1pCS3o5R25XUlMyZFljeDlPK2EyaXdOND0@38.91.107.57:19999#US
-vmess://eyJ2IjoiMiIsInBzIjoiVVMiLCJhZGQiOiIxMjkuMTQ2Ljc3LjI0OCIsInBvcnQiOiIzOTQ5NSIsImlkIjoiZjgzNmM3MzYtODdmYy00ZmRlLWFhYmMtMDA4NTdlY2RmZjNlIiwiYWlkIjoiMCIsInNjeSI6ImF1dG8iLCJuZXQiOiJ3cyIsInR5cGUiOiIiLCJ0bHMiOiIiLCJhbHBuIjoiIiwicGF0aCI6Ii9jY3R2MTMubTN1OCJ9
-vless://a3940ddb-ba50-5109-a0fd-4a06990f1ded@179.253.248.21:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=learn.microsoft.com&fp=chrome&pbk=ABZFDD3Ne57Q0i7skCnEpyUVTKTdMhm3aqJ9mwLZ7lw&sid=62169cb853fb7503&type=tcp&headerType=none#US
-vless://1d39f715-2740-4d99-bc3b-197cc48dcee7@107.173.237.146:8443?encryption=none&fp=firefox&pbk=D3ojIs3AUKP_tV0E4TEjh90HBVJp24Nq3qMfdxD30kc&security=reality&sid=df8611c07d&sni=updates.cdn-apple.com&type=tcp#US
-vless://1b4b11d5-4c2d-4533-9a55-636757cdee94@195.211.98.43:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=www.cloudflare.com&fp=chrome&pbk=xPnpkXu5qfwIArlHKvJsqKJnGdGbJK1tT2GzWMyLohA&sid=9c56fddf237e8eaf&type=tcp&headerType=none#US
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@66.163.112.142:443?sni=cdn.unlockyourfuturefindyourperfectcareer.com&type=tcp&fp=chrome&security=tls#US
-vless://90157e25-cee1-4217-921e-91f300bc1a24@50.7.227.77:443?security=reality&flow=xtls-rprx-vision&fp=firefox&pbk=1vSZjvhZO01oAEH3b7eebR1qF5dLU1Dq2E7xu8pwGSs&sid=428ef87fd47a3a32&sni=50.7.227.77#US
-vless://48ff2b70-e180-582f-8866-d9a2edeed5f5@15.204.97.206:23576?type=tcp&encryption=none&flow=xtls-rprx-vision&sni=fuck.rkn&fp=chrome&security=reality&pbk=1y5h2FGWKXTJ9xLPCqPo6Mw7RxoZzh6fGkEQKNxpZ3s&sid=01#US
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@193.108.119.193:443?security=tls&sni=resources.iloverussia2026.com#DE
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@216.106.186.155:443?security=tls&fp=chrome&sni=api.findlocaljobnetworkandbuildcommunityconnections.com#US
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@169.197.140.169:443?sni=api.discoverfreshgraduatejobsstartyourprofessionaljourney.com&type=tcp&fp=chrome&security=tls#US
-vmess://eyJhZGQiOiI4NC4xNy40MS4yIiwiYWlkIjowLCJob3N0IjoiIiwiaWQiOiJmOGM4ZGMzZC0wZDM3LTQ2YjAtOGIzNC1hNzIzMjg4MmZjZmUiLCJuZXQiOiJ0Y3AiLCJwYXRoIjoiIiwicG9ydCI6IjE4MDAwIiwicHMiOiJVUyIsInNuaSI6ImJqMWFhMnp5anh5YW15dWsudi4zZG5zLnZpcCIsInRscyI6IiIsInR5cGUiOiJub25lIiwidiI6IjIifQ==
-vless://ae908ff5-f749-402c-af25-e6e9aef4d6bb@45.138.100.248:14430?path=%2Fvless&security=none&sni=45.138.100.248&type=ws#US
-vmess://eyJhZGQiOiIyMy4xNTAuMTUyLjY1IiwiYWlkIjoiMCIsImFscG4iOiIiLCJob3N0IjoiIiwiaWQiOiI1YzA0MGYxZC00NWRiLTQzYmQtOGQ0Ni1lNDk1MGU0MzM3MzUiLCJuZXQiOiJ0Y3AiLCJwYXRoIjoiIiwicG9ydCI6IjEyNzAiLCJwcyI6IlVTIiwic2N5IjoiYXV0byIsInNuaSI6InhtZmhscHkuY29tIiwidGxzIjoidGxzIiwidHlwZSI6Im5vbmUiLCJ2IjoiMiJ9
-trojan://5t6i121em5lkmsmk@45.77.54.204:51520?fp=firefox&sni=de001.zestapp778.com&type=tcp&security=tls#DE
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@167.88.61.175:443?security=tls&sni=blog.browseseniorrolesandenhanceyourcareertoday.com#US
-vless://5de0c218-0138-45d8-94d2-c2c3f37a1a6d@83.147.18.75:443?flow=xtls-rprx-vision&fp=random&pbk=tfFzmbVByvoZxxIEUiHMv22_k0-nQz00L0XjU0bd_Fc&security=reality&sid=7f1e29593aa94ad1&sni=www.bing.com&type=tcp#GB
+vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.229:443?flow=xtls-rprx-vision&fp=firefox&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&security=reality&sid=c39cc7310a&sni=yahoo.com&type=tcp#DE
+trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@169.197.140.245:443?sni=www.discoverfreshgraduatejobsstartyourprofessionaljourney.com&type=tcp&fp=chrome&security=tls#US
+vless://490be4f8-f599-4ed8-86fe-ea54c74b6a88@xray1-direct-mci1-fs-ce.freesocks.work:443?security=reality&encryption=none&pbk=7j3hmlHrEDk3Kjx-dFG3E3jf0c6PZF45trIPFsuKWmI&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=dl.google.com#US
+vless://48ff2b70-e180-582f-8866-d9a2edeed5f5@15.204.97.197:23576?type=tcp&encryption=none&flow=xtls-rprx-vision&sni=fuck.rkn&fp=chrome&security=reality&pbk=1y5h2FGWKXTJ9xLPCqPo6Mw7RxoZzh6fGkEQKNxpZ3s&sid=01#US
+trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@66.163.122.26:443?sni=blog.searchnationwidecareerchangehelperandguidancetoday.com&type=tcp&fp=chrome&security=tls#US
+trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@216.106.186.82:443?fp=chrome&sni=courses.findlocaljobnetworkandbuildcommunityconnections.com&security=tls#US
+trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@66.163.112.171:443?allowInsecure=0&sni=learn.unlockyourfuturefindyourperfectcareer.com&security=tls#US
+ss://YWVzLTEyOC1nY206c2hhZG93c29ja3M@37.19.198.243:443#US
+vless://1d39f715-2740-4d99-bc3b-197cc48dcee7@107.173.237.146:8443?encryption=none&security=reality&sni=updates.cdn-apple.com&fp=chrome&pbk=D3ojIs3AUKP_tV0E4TEjh90HBVJp24Nq3qMfdxD30kc&sid=df8611c07d&type=tcp&headerType=none#US
+vless://1653818d-532e-46be-b825-384107fb7c3a@live.mediacorphub.org:443?type=grpc&security=tls&fp=firefox&sni=live.mediacorphub.org&serviceName=home.v1.ObjectService#NL
+vless://95f85937-7b95-45c4-8d69-95da6a978569@80.47.13.182:443?encryption=none&security=tls&serviceName=stats.v2.StreamService&sni=dl.megadrishto.com&type=grpc&fp=edge#PL
+vless://90157e25-cee1-4217-921e-91f300bc1a24@fduknew.titun.su:443?flow=xtls-rprx-vision&pbk=1vSZjvhZO01oAEH3b7eebR1qF5dLU1Dq2E7xu8pwGSs&security=reality&sid=428ef87fd47a3a32&sni=bizorg.su&type=tcp&fp=chrome#US
+vless://4201786b-d99b-4147-a5f0-20d47acddb81@150.251.143.253:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=MzgB17ZFbKqs8pbC3EscTzHid_ENc-k_Cp6nXl-2knw&security=reality&sid=6976d670818644cc&sni=4935e4t.de25.h1clayd.click&type=tcp#NL
+vless://03548fbd-70f9-43a8-827f-3a94424e26a2@wryly-messiest.video-streams.org:443?encryption=none&type=ws&path=%2Fws&host=wryly-messiest.video-streams.org&security=tls&sni=wryly-messiest.video-streams.org&fp=chrome#US
+vless://301d514e-4aa0-47b0-ba44-a0cb891cd52f@2.59.183.167:443?fp=chrome&pbk=OZVjfQBboTDTBw0baMFqzVPsVUI4FNQmspTEb0b0zW4&security=reality&sni=www.samsung.com&type=tcp#NL
+trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@193.108.119.29:443?sni=blog.iloverussia2026.com&type=tcp&fp=chrome&security=tls#DE
+hysteria2://40fb1315-191a-11ed-b0ca-f23c91cfbbc9@64.32.13.230:443?sni=ddcdcde6-tm96o0-0-1imi4.los.hyhuawei.com#US
+vless://f8d52ece-fad4-478d-875d-df6eed3befa7@fr.golangwikito.cfd:443/?type=tcp&encryption=none&flow=xtls-rprx-vision&sni=fr.golangwikito.cfd&fp=firefox&security=reality&pbk=isYQuhKDrgc7IQ7G0LHywFnt57wffrkZ-er18DkVsBA&sid=e6d589857d1cec5e#NL
+vmess://eyJ2IjoiMiIsInBzIjoiTkwiLCJhZGQiOiIxODguMTY2LjgxLjEzNSIsInBvcnQiOiIxMjcwIiwiaWQiOiI1YzA0MGYxZC00NWRiLTQzYmQtOGQ0Ni1lNDk1MGU0MzM3MzUiLCJhaWQiOiIwIiwic2N5IjoiYXV0byIsIm5ldCI6InRjcCIsInR5cGUiOiIiLCJ0bHMiOiJ0bHMiLCJzbmkiOiJ4bWZobHB5LmNvbSJ9
+vmess://eyJhZGQiOiIxMjkuMTQ2LjE0My44MCIsImFpZCI6MCwiaG9zdCI6IiIsImlkIjoiZDQ2MDNjYzItZTBlZS00NjUxLTgzZjUtMWRiNWI3MTY4MTc3IiwibmV0IjoidGNwIiwicGF0aCI6IiIsInBvcnQiOiI0ODExMSIsInBzIjoiVVMiLCJzbmkiOiIxMjkuMTQ2LjE0My44MCIsInRscyI6IiIsInR5cGUiOiJub25lIiwidiI6IjIifQ==
+vless://67cd3349-f789-4cbb-8b91-4b6b1654ce7c@3.169.9.125:443?security=tls&sni=d1afk2ndm8pox3.cloudfront.net&alpn=http%2F1.1&fp=chrome&type=ws&host=d1afk2ndm8pox3.cloudfront.net&path=%2F&encryption=none#US
+ss://YWVzLTI1Ni1nY206ZmFCQW9ENTRrODdVSkc3@15.204.247.124:2375#US
+vless://dfcb92d2-7f77-4008-95cb-a691aa88d4b5@static.29.103.98.91.clients.your-server.de:443?encryption=none&flow=xtls-rprx-vision&security=tls&sni=static.200.164.31.2.clients.your-server.de&fp=chrome&alpn=h2%2Chttp%2F1.1&type=tcp&headerType=none#DE
+vless://dfcb92d2-7f77-464d-95cb-a691aa88d4b5@rdeead72bbbe22dc0fc.welzora.ir:8080?encryption=none&security=reality&sni=firmwaresign.partners.nvidia.com&fp=chrome&pbk=9us40tQNpGsUHNgFPH400iHplUGFtoGD-gq6SyUGZiU&sid=ff883a3799f80dd0&type=tcp&headerType=none&host=firmwaresign.partners.nvidia.com#DE
+vmess://eyJhZGQiOiJkMi5hbm9uaXguY2xvdWQiLCJhaWQiOjAsImlkIjoiYjgzMTM4MWQtNjMyNC00ZDUzLWFkNGYtOGNkYTQ4YjMwODExIiwibmV0Ijoid3MiLCJwYXRoIjoiL3dlYnNvY2tldC90cmFuc2Zlci9nYXlwb3JuIiwicG9ydCI6ODAxOCwicHMiOiJERSIsInNjeSI6ImF1dG8iLCJ0eXBlIjoibm9uZSIsInYiOiIyIn0=
+vless://dfcb92d2-7f77-4003-95cb-a691aa88d4b5@2cd5.denzaro.ir:36729?encryption=none&security=reality&sni=www3.denzaro.ir&fp=chrome&pbk=cneNVFZv_7xGiWGKgb5CRsiNsLum13ZlZUDr-DyJd0w&sid=97b66cc9&type=tcp&headerType=none&host=www3.denzaro.ir#DE
+hysteria2://a35c508f-4d5d-4531-842e-6e9d43c762c0@13.143.189.149:4444?sni=pl2.nexfile.net#PL
+vless://44ae52b9-76fc-444d-8e43-186b4384b80a@free-amsterdam-node-1.cloudwidecdn.com:443?flow=xtls-rprx-vision&fp=chrome&pbk=PryGoq51ilG0eLUPl9i0xCvmk1xpwkyFSr_tG4GNLlU&security=reality&sid=1d86d17709852910&sni=www.apple.com&type=tcp#NL
+vless://f8d52ece-fad4-478d-875d-df6eed3befa7@31.77.129.151:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=5fkwwCKZzMsE6Eb_b3iqluu-1AWIfnYl-p0N3EL9Al8&security=reality&sid=2c9a2790ad5900b2&sni=ge-s-1.pythonmakemigreat.wiki&type=tcp#DE
 vless://e07a6d05-f665-4811-91f0-9b3dc1094e4d@2.26.230.148:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=yr_opKG6DGTppNDXkk-DhGSYJZXbb9o-caexk2FZO38&security=reality&sid=8f3c6e2a1b5d4f09&sni=tradingview.com&type=tcp#DE
-vless://12776e55-6230-48b9-b069-1bb8a04b4237@music.3apes.online:443?encryption=none&flow=xtls-rprx-vision&pbk=q4_o7NvD6vQg4hYsyO29Q6PVufjTJHDUbQTqstre9EQ&security=reality&sni=music.3apes.online&type=tcp&fp=chrome#DE
-hysteria2://a35c508f-4d5d-4531-842e-6e9d43c762c0@13.143.189.143:4444?sni=pl3.nexfile.net#PL
-vless://adcaa148-7c66-4282-a81a-99ec8afa029d@82.118.19.153:443?flow=xtls-rprx-vision&fp=firefox&pbk=Tiuy8om5Lk0pWL95-8LaFFTwH0vbURVMoOkaW9xGaiE&security=reality&sid=670ed9f350bd8ee0&sni=www.cloudflare.com&type=tcp#DE
-vless://408c814e-f70a-4d16-b3b3-8182bb70211d@34.39.80.57:50818?&security=tls&fp=chrome&sni=yingguo.rymaker.cn&type=ws&headerType=none&path=%2FGunService#GB
-vless://95c2ba1e-a330-4e6b-bd81-bf9c0f647b2f@195.206.235.45:443?encryption=none&fp=firefox&pbk=hFee7zTreqlv_wccK_8zxN5v23hj9u-DshByvGf-KAA&security=reality&sid=23732d14a527990d&sni=345739t.de15.h1clayd.click&type=tcp#NL
-vless://44ae52b9-76fc-444d-8e43-186b4384b80a@free-amsterdam-node-1.cloudwidecdn.com:443?flow=xtls-rprx-vision&fp=random&host=www.apple.com&pbk=PryGoq51ilG0eLUPl9i0xCvmk1xpwkyFSr_tG4GNLlU&security=reality&sid=1d86d17709852910&sni=www.apple.com&type=tcp#NL
-vless://95f85937-7b95-45c4-8d69-95da6a978569@80.47.13.182:443?encryption=none&fp=firefox&security=tls&serviceName=stats.v2.StreamService&sni=dl.megadrishto.com&type=grpc#PL
-vless://05488656-d4bf-4634-8b2e-e4ff5a56c7e2@82.118.22.161:443?security=reality&encryption=none&pbk=xY1KpNxaIGmi6jfeudYQ_aaLGQqWK_uHStnwUFd2_2E&headerType=&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=www.cloudflare.com&sid=fa3ea655619a3e78#PL
-vless://e57ce64d-5a1a-4a90-96df-9e1bd3ad26e4@138.124.125.193:10444?flow=xtls-rprx-vision&fp=chrome&path=%2F&pbk=0oTkcqwLTUNLnSOP-VUWErmy6usAIg-biBE6ioZO-Vo&security=reality&sid=8debcf36f1cc69ff&sni=ads.x5.ru&type=tcp#GB
+vless://0386df1b-7abd-4676-f3c6-d65d691023b9@sino.bestsellers1.site:2083?security=tls&type=ws&sni=sino.bestsellers1.site&path=%2F&host=sino.bestsellers1.site&fp=chrome#DE
+vless://e57ce64d-5a1a-4a90-96df-9e1bd3ad26e4@138.124.125.193:10444?type=tcp&security=reality&sni=ads.x5.ru&flow=xtls-rprx-vision&pbk=0oTkcqwLTUNLnSOP-VUWErmy6usAIg-biBE6ioZO-Vo&sid=8debcf36f1cc69ff&fp=safari#GB
+vless://14f3543e-6136-47a2-9bc0-eea1dac73d07@79.141.164.124:443?security=reality&encryption=none&pbk=pR39Vv5qhk8r6akOicoy6mMs4-ppSWUez8MyAXG7wwQ&fp=chrome&type=grpc&serviceName=neurex&sni=nla.kosmosapp.net&sid=27350908de933e09#NL
+vless://501a2da5-cb22-4a3f-915e-e3b821d1d62d@87.199.205.28:443?security=reality&encryption=none&pbk=W-9zyiOq287RtXVTZlTFbSDJ0Mx8joyBLJoA7ZE7eBw&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=vkvd754.okcdn.ru&sid=ef1d3554c652a436#NL
 vless://6db6b948-655f-4f68-a9e7-865050e05b31@93.152.215.254:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=is-86tEDOjNbNAnVwc-YHHYSn1MF9SF68P6VjESfDHQ&security=reality&sid=a2fcac&sni=93.152.215.254&type=tcp#NL
-vless://ead0dd61-d398-40ad-80d6-a0e1e516d7d3@212.227.235.66:2053?fp=firefox&pbk=7Y6Xb5Ql_03K25x8yKUSOKI2JTOMyv2nyCcFza90uxk&security=reality&sid=29e8dcd2b37aaa7f&sni=www.apple.com&type=tcp#DE
-ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTpvWklvQTY5UTh5aGNRVjhrYTNQYTNB@193.29.139.235:443#NL
-vless://501a2da5-cb22-4a3f-915e-e3b821d1d62d@87.199.205.28:443?flow=xtls-rprx-vision&fp=qq&pbk=W-9zyiOq287RtXVTZlTFbSDJ0Mx8joyBLJoA7ZE7eBw&security=reality&sid=ef1d3554c652a436&sni=vkvd754.okcdn.ru&type=tcp#NL
-vless://dbf3f074-3b18-43f3-b82a-debd8c879c69@136.176.68.34:443?security=reality&type=tcp&sni=www.apple.com&flow=xtls-rprx-vision&fp=chrome&pbk=Jcm0TjP_kw-KmJoiG5EGyY5sQ9RGeqlX9Ajd3ZCnSAo&sid=a6040129ad7f4b74#GB
-vless://4201786b-d99b-4147-a5f0-20d47acddb81@4935e4t.de25.h1clayd.click:443?type=tcp&security=reality&flow=xtls-rprx-vision&fp=firefox&pbk=MzgB17ZFbKqs8pbC3EscTzHid_ENc-k_Cp6nXl-2knw&sid=6976d670818644cc&sni=4935e4t.de25.h1clayd.click#NL
-ss://YWVzLTI1Ni1nY206WlJwZ2FCZUd4dEVOSVhndmhwa1pCS3o5R25XUlMyZFljeDlPK2EyaXdOND0=@193.108.119.83:19999#DE
-ss://YWVzLTI1Ni1nY206WlJwZ2FCZUd4dEVOSVhndmhwa1pCS3o5R25XUlMyZFljeDlPK2EyaXdOND0@193.108.117.111:19999#DE
-vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.35:443?flow=xtls-rprx-vision&fp=chrome&path=%2F%2B&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&security=reality&sid=c39cc7310a&sni=yahoo.com&type=tcp#DE
-vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.90:443?flow=xtls-rprx-vision&fp=random&host=yahoo.com&path=%2F&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&security=reality&sid=c39cc7310a&sni=yahoo.com&type=tcp#DE
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@193.108.119.29:443?sni=blog.iloverussia2026.com&type=tcp&security=tls#DE
-hysteria2://a35c508f-4d5d-4531-842e-6e9d43c762c0@13.143.189.144:4444?sni=pl2.nexfile.net#PL
-vless://44ae52b9-76fc-444d-8e43-186b4384b80a@86.54.28.75:443?flow=xtls-rprx-vision&fp=random&pbk=PryGoq51ilG0eLUPl9i0xCvmk1xpwkyFSr_tG4GNLlU&security=reality&sid=1d86d17709852910&sni=www.apple.com&type=tcp#NL
-ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.193:8080#GB
-ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTpvWklvQTY5UTh5aGNRVjhrYTNQYTNB@82.38.31.162:443#GB
-ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@193.29.139.132:8080#NL
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@193.108.119.96:443?sni=learn.iloverussia2026.com&type=tcp&fp=chrome&security=tls#DE
-hysteria2://a35c508f-4d5d-4531-842e-6e9d43c762c0@13.143.189.101:4444?sni=pl1.nexfile.net#PL
-vmess://eyJ2IjoiMiIsInBzIjoiTkwiLCJhZGQiOiIyMDkuMzguNDIuMjM4IiwicG9ydCI6IjEyNzAiLCJpZCI6IjVjMDQwZjFkLTQ1ZGItNDNiZC04ZDQ2LWU0OTUwZTQzMzczNSIsImFpZCI6IjAiLCJzY3kiOiJhdXRvIiwibmV0IjoidGNwIiwidHlwZSI6IiIsInRscyI6InRscyIsInNuaSI6InhtZmhscHkuY29tIn0=
+trojan://5t6i121em5lkmsmk@de001.zestapp778.com:51520?sni=de001.zestapp778.com&type=tcp&fp=chrome&security=tls#DE
+vmess://eyJ2IjoiMiIsInBzIjoiREUiLCJhZGQiOiIyLjI2Ljk5LjE1MCIsInBvcnQiOiI4MDE4IiwiaWQiOiJiODMxMzgxZC02MzI0LTRkNTMtYWQ0Zi04Y2RhNDhiMzA4MTEiLCJhaWQiOiIwIiwic2N5IjoiYXV0byIsIm5ldCI6IndzIiwidHlwZSI6IiIsInRscyI6IiIsInBhdGgiOiIvd2Vic29ja2V0L3RyYW5zZmVyL2dheXBvcm4iLCJob3N0Ijoic2hpdC42NzEzMzc2Ny54eXoifQ==
+vless://ce698f0c-a8ec-474a-b5d8-3be8032deeb8@146.103.118.189:443?encryption=none&type=ws&security=tls&path=/574ck-finland&host=nl2.574ck.xyz&sni=nl2.574ck.xyz&fp=chrome#NL
+vless://d14392a5-8fd5-4c19-be8e-3503e3cee9cf@78.47.113.225:2789?security=reality&sni=tgju.org&type=tcp&fp=edge&pbk=o6UTWdONnTOvDOWmhfxXUoeOEtlw7VUkoAWkmOk_FWI&sid=4e4aaad65cc07da8#DE
+ss://YWVzLTEyOC1nY206c2hhZG93c29ja3M=@158.173.24.73:443#GB
+ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@193.29.139.223:8080#NL
+vless://d806a58b-33aa-42e0-b170-395e49c16b37@sql.popmintxo.cc:443?security=reality&encryption=none&pbk=Y0noOXC8qHmbM0GmDpj-9BBwKSOtHs-uMbNfKU050GQ&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=www.microsoft.com&sid=b558b9305a0b#GB
+vless://501a2da5-cb22-4a3f-915e-e3b821d1d62d@87.199.205.28:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=W-9zyiOq287RtXVTZlTFbSDJ0Mx8joyBLJoA7ZE7eBw&security=reality&sid=6b196d2f190f32b3&sni=vkvd754.okcdn.ru&type=tcp#NL
+ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTpLS21pNHhCTjVzMC05T3o0OWc3emtINGwwTFdxNlVhcQ%3D%3D@dns27.m3hrzd.ir:1355#NL
+ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTpvWklvQTY5UTh5aGNRVjhrYTNQYTNB@82.38.31.165:443#GB
+vless://1653818d-532e-46be-b825-384107fb7c3a@api.mediacorphub.org:443?type=grpc&security=tls&fp=firefox&sni=api.mediacorphub.org&serviceName=gw.v2.PushService#NL
+vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.89:443?flow=xtls-rprx-vision&fp=ios&host=yahoo.com&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&security=reality&sid=c39cc7310a&sni=yahoo.com&type=tcp#DE

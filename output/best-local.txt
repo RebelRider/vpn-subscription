@@ -1,23 +1,24 @@
 # v6.0 — LOCAL NETWORK VERIFIED PROXIES
-#profile-title: BL VPN [09Nov2026 12:50]
+#profile-title: BL VPN [09Nov2026 13:21]
 #profile-update-interval: 1
 #subscription-ping-onopen-enabled: 1
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-11-09 09:50:00 UTC
+# generated: 2026-11-09 10:21:50 UTC
 #
 # Local filtering: ChatGPT providers JSON + YouTube video metadata + Instagram application HTML; median proxy HTTPS latency <500 ms
 # Local final stability: 5/5 complete rounds required
 # upstream_nodes: 100
-# local_qualified: 1
+# local_qualified: 2
 # local_ranking: stability, median latency, p95 latency
 #
 # Fresh entries were re-tested through the current local network; retained entries preserve historical evidence and are not currently verified.
 #
 # local_retained: 1
-# published_total: 2
+# published_total: 3
 #bestlocal-status: mixed; retained entries are not currently verified
 #bestlocal-health-url: https://raw.githubusercontent.com/RebelRider/vpn-subscription/regional/output/local-health.json
-vless://95f85937-7b95-45c4-8d69-95da6a978569@dl.megadrishto.com:443?encryption=none&type=grpc&security=tls&sni=dl.megadrishto.com&fp=firefox&alpn=h2&serviceName=stats.v2.StreamService#🇵🇱%20PL%2C%20Warsaw%20%20%7C1%7C%20%20%20%5B80.47.13.189%5D
-ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.192:8080#🇳🇱%20NL%2C%20Amsterdam%20%20%7C2%7C%20%20%20%5B193.29.139.198%5D
+vless://95f85937-7b95-45c4-8d69-95da6a978569@dl.megadrishto.com:443?encryption=none&type=grpc&security=tls&sni=dl.megadrishto.com&fp=firefox&alpn=h2&serviceName=stats.v2.StreamService#🇵🇱%20PL%2C%20Warsaw%20%20%7C1%7C%20%20%20%5B80.47.13.233%5D
+vless://95f85937-7b95-45c4-8d69-95da6a978569@80.47.13.182:443?encryption=none&fp=firefox&security=tls&serviceName=stats.v2.StreamService&sni=dl.megadrishto.com&type=grpc#🇵🇱%20PL%2C%20Warsaw%20%20%7C2%7C%20%20%20%5B80.47.13.222%5D
+ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.192:8080#🇳🇱%20NL%2C%20Amsterdam%20%20%7C3%7C%20%20%20%5B193.29.139.198%5D

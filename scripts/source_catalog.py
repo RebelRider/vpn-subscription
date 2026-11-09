@@ -73,6 +73,12 @@ def parse_catalog(raw: bytes, now: float | None = None) -> dict:
                 first = verified
             clean = {"url": url, "evidence_url": evidence, "first_seen": first,
                      "last_verified_at": verified, "enabled": record.get("enabled", True)}
+            discoverer = record.get("discovered_by")
+            if discoverer in ("independent", "grok"):
+                clean["discovered_by"] = discoverer
+                model = record.get("discovery_model")
+                if discoverer == "grok" and isinstance(model, str) and re.fullmatch(r"(?:cursor-)?grok-\d+(?:\.\d+)*-xhigh", model):
+                    clean["discovery_model"] = model
             if url not in records or records[url]["last_verified_at"] < verified:
                 records[url] = clean
         except (KeyError, ValueError, TypeError, OverflowError):
@@ -155,6 +161,11 @@ def _merge_catalog(current: dict, updates: list[dict], now: float) -> dict:
         record = dict(update)
         if previous:
             record["first_seen"] = previous["first_seen"]
+            # Refreshing a legacy entry cannot establish its original finder.
+            for key in ("discovered_by", "discovery_model"):
+                record.pop(key, None)
+                if key in previous:
+                    record[key] = previous[key]
         records[record["url"]] = record
     ranked = sorted(records.values(), key=lambda item: (-item["last_verified_at"], item["url"]))[:MAX_SOURCES]
     sources = sorted(ranked, key=lambda item: item["url"])
@@ -230,7 +241,13 @@ def publish_catalog(repo: Path, state_dir: Path, updates: list[dict], now: float
     return False
 
 
-def process_research_result(result_text: str, repo: Path, state_dir: Path, now: float) -> dict:
+def process_research_result(result_text: str, repo: Path, state_dir: Path, now: float, *,
+                            discovered_by: str | None = None, model_id: str | None = None) -> dict:
+    if discovered_by not in (None, "independent", "grok"):
+        raise ValueError("invalid source discoverer")
+    if model_id is not None and (discovered_by != "grok" or not isinstance(model_id, str)
+                                 or not re.fullmatch(r"(?:cursor-)?grok-\d+(?:\.\d+)*-xhigh", model_id)):
+        raise ValueError("invalid source discovery model")
     proposals, rejected = parse_proposal(result_text)
     reasons = Counter({"invalid-proposal": rejected} if rejected else {})
     try:
@@ -256,8 +273,15 @@ def process_research_result(result_text: str, repo: Path, state_dir: Path, now: 
                     rejected += 1
                     reasons["no-compatible-configuration"] += 1
                     continue
-                updates.append({**item, "enabled": True, "first_seen": previous["first_seen"] if previous else now,
-                                "last_verified_at": now})
+                update = {**item, "enabled": True, "first_seen": previous["first_seen"] if previous else now,
+                          "last_verified_at": now}
+                if previous:
+                    update.update({key: previous[key] for key in ("discovered_by", "discovery_model") if key in previous})
+                elif discovered_by is not None:
+                    update["discovered_by"] = discovered_by
+                    if model_id is not None:
+                        update["discovery_model"] = model_id
+                updates.append(update)
                 accepted += 1
             except (RateLimited, SourcePolicyUnavailable) as exc:
                 transient += 1
@@ -300,14 +324,23 @@ def independent_proposal(state_dir: Path, now: float, repo: Path | None = None) 
     """
     from regional_pool import PrivateSourcePool
     from regional_scheduler import atomic_json
-    regional = state_dir / "regional-discovery-state.json"
-    try:
-        pool = PrivateSourcePool([], regional, now=int(now))
-        productive = [item for item in pool.sources.values()
-                      if item.get("candidate_count", 0) > 0 and item.get("failures", 0) == 0
-                      and 0 <= now - item.get("last_success", 0) <= 2 * REFRESH_SECONDS]
-    except (OSError, ValueError, RuntimeError):
-        productive = []
+    productive_by_url = {}
+    for regional in (state_dir / "regional-discovery-state.json", state_dir / "serbia/regional-discovery-state.json"):
+        try:
+            pool = PrivateSourcePool([], regional, now=int(now))
+            for item in pool.sources.values():
+                if (item.get("candidate_count", 0) <= 0 or item.get("failures", 0) != 0
+                        or not 0 <= now - item.get("last_success", 0) <= 2 * REFRESH_SECONDS):
+                    continue
+                url = canonical_url(item["url"])
+                previous = productive_by_url.get(url)
+                priority = lambda value: (value.get("last_success", 0), value.get("functional_ema", 0),
+                                          value.get("last_functional_count", 0), value.get("candidate_count", 0))
+                if previous is None or priority(item) > priority(previous):
+                    productive_by_url[url] = item
+        except (OSError, ValueError, RuntimeError):
+            continue
+    productive = list(productive_by_url.values())
     if not productive:
         fallback = state_dir / "source-fallback-discovery-state.json"
         pool = PrivateSourcePool([], fallback, now=int(now))

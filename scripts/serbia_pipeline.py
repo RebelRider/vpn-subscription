@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 from collections import Counter
+from datetime import datetime, timezone
 import fcntl
 import hashlib
 import ipaddress
@@ -40,6 +41,20 @@ MAX_NODES = 12
 STATE_NAME = "serbia-scheduler-status.json"
 
 
+class PriorValidationUnconfirmed(RuntimeError):
+    """A completed empty attempt cannot revoke inconclusive previous RS nodes."""
+
+
+def client_compatibility(entry_count: int) -> dict:
+    """Describe content availability without claiming an actual Happ import."""
+    if type(entry_count) is not int or not 0 <= entry_count <= MAX_NODES:
+        raise ValueError("Invalid Serbia client entry count")
+    return {"client": "Happ", "format": "proxy-share-uris", "entries": entry_count,
+            "availability": "verified-rs" if entry_count else "awaiting-verified-rs",
+            "empty_subscription_import_supported": None, "import_verified": False,
+            "empty_import_evidence": "user-reported-parse-error"}
+
+
 def _state(path: Path) -> dict:
     try:
         if path.stat().st_size > 1024 * 1024:
@@ -64,31 +79,73 @@ def due(state: dict, signature: str, now: float) -> bool:
 
 
 def confirmed_empty_diagnostics(diagnostics: list) -> bool:
-    """Unknown/infrastructure-only runs cannot invalidate the last RS pool."""
-    for item in diagnostics:
-        if not isinstance(item, dict):
-            continue
-        geo = item.get("exit_country_evidence")
-        if isinstance(geo, dict) and geo.get("reason") == "observed-exit-country-mismatch":
-            try:
-                observed_at = parse_timestamp(geo.get("checked_at"), "Serbia exit observation")
-                observations = geo.get("observations", [])
-                if 0 <= time.time() - observed_at <= MAX_RESULT_AGE:
-                    for observation in observations:
-                        address = ipaddress.ip_address(observation["ip"])
-                        country = observation.get("country", "")
-                        if (address.is_global and not address.is_multicast
-                                and observation.get("source") in {"cloudflare-trace", "country-is"}
-                                and isinstance(country, str) and len(country) == 2 and country.isascii()
-                                and country.isalpha() and country.isupper() and country not in {COUNTRY, "ZZ", "XX"}):
-                            return True
-            except (ValueError, TypeError, KeyError, RuntimeError):
-                pass
-        if item.get("outcome") == "fail":
-            # The common classifier separates uncertainty from destination/
-            # proxy failures; browser/engine infrastructure is handled above.
-            return True
+    """Initial empty selection needs some definitive evidence, not only outages."""
+    return (isinstance(diagnostics, list) and len(diagnostics) <= 150
+            and any(_definitive_rejection(item) for item in diagnostics))
+
+
+def _definitive_rejection(diagnostic: dict) -> bool:
+    if not isinstance(diagnostic, dict) or diagnostic.get("qualified") is True:
+        return False
+    if any(reason in diagnostic.get("rejection_reasons", []) for reason in
+           ("proxy-start-or-network-failure", "loopback-proxy-unavailable", "request-process-failed")):
+        # These failures do not establish that the owned validator ever became
+        # usable; absence of a working test engine must not clear the old pool.
+        return False
+    # Recompute FAIL from bounded evidence; a bare or contradictory outcome
+    # label alone must never erase a previously verified connection.
+    from local_feedback import classify_diagnostic
+    geo = diagnostic.get("exit_country_evidence")
+    mismatch = ("observed-exit-country-mismatch" in diagnostic.get("rejection_reasons", [])
+                or isinstance(geo, dict) and geo.get("reason") == "observed-exit-country-mismatch")
+    if not mismatch:
+        return diagnostic.get("outcome") == "fail" and classify_diagnostic(diagnostic) == "fail"
+    if not isinstance(geo, dict) or geo.get("reason") != "observed-exit-country-mismatch":
+        return False
+    try:
+        stamp = parse_timestamp(geo.get("checked_at"), "Serbia exit observation")
+        if not 0 <= time.time() - stamp <= MAX_RESULT_AGE:
+            return False
+        observations = geo.get("observations")
+        if not isinstance(observations, list) or not 1 <= len(observations) <= 3:
+            return False
+        for item in observations:
+            address = ipaddress.ip_address(item["ip"])
+            country = item.get("country", "")
+            if (address.is_global and not address.is_multicast and "%" not in item["ip"]
+                    and item.get("source") in {"cloudflare-trace", "country-is"}
+                    and isinstance(country, str) and re.fullmatch(r"[A-Z]{2}", country)
+                    and country not in {COUNTRY, "XX", "ZZ"}):
+                return True
+    except (ValueError, TypeError, KeyError, RuntimeError):
+        pass
     return False
+
+
+def protect_previous_nonempty(build, previous: dict | None, status: dict) -> None:
+    """An unrelated rejection is not evidence that the old RS pool failed."""
+    if status.get("nodes") or not isinstance(previous, dict) or not previous.get("nodes"):
+        return
+    try:
+        # Historical proof is checked at its original completed validation time;
+        # its age never grants a new pass or prevents a definitive current FAIL.
+        stamp = parse_timestamp(previous.get("generated_at"), "previous Serbia validation")
+        if stamp > time.time():
+            return
+        _validate_result(build, previous, now=stamp)
+    except (ValueError, TypeError, RuntimeError, KeyError):
+        # Corrupt metadata must remain repairable by a complete current result.
+        return
+    diagnostics = status.get("diagnostics", [])
+    diagnostics = diagnostics if isinstance(diagnostics, list) else []
+    by_id = {}
+    for diagnostic in diagnostics[:150]:
+        if isinstance(diagnostic, dict) and isinstance(diagnostic.get("id"), str):
+            by_id.setdefault(diagnostic["id"], []).append(diagnostic)
+    for node in previous["nodes"]:
+        rechecks = by_id.get(node["id"], [])
+        if len(rechecks) != 1 or not _definitive_rejection(rechecks[0]):
+            raise PriorValidationUnconfirmed("Previous RS candidate has no definitive current rejection")
 
 
 def _validate_result(build, status: dict, *, now: float | None = None) -> None:
@@ -120,8 +177,10 @@ def _validate_result(build, status: dict, *, now: float | None = None) -> None:
             raise ValueError("Invalid or duplicate Serbia node")
         seen.add(connection)
         if (not local_probe.valid_node_evidence(node, rounds, require_round_evidence=True,
-                                               require_current_browser=True, required_services=SERVICES)
-                or not service_probe.valid_exit_country_evidence(node.get("exit_country_evidence"), COUNTRY)
+                                               require_current_browser=True, required_services=SERVICES,
+                                               reference_time=datetime.fromtimestamp(now, timezone.utc))
+                or not service_probe.valid_exit_country_evidence(node.get("exit_country_evidence"), COUNTRY,
+                                                                reference_time=now)
                 or node.get("exit_country") != COUNTRY):
             raise ValueError("Serbia requires current four-service and actual RS egress proof")
         stamp = parse_timestamp(node.get("validated_at"), "Serbia node")
@@ -129,19 +188,31 @@ def _validate_result(build, status: dict, *, now: float | None = None) -> None:
             raise ValueError("Serbia node proof timestamp is inconsistent")
     if status.get("result") != ("qualified" if nodes else "empty"):
         raise ValueError("Invalid Serbia empty-result classification")
+    compatibility = status.get("client_compatibility")
+    if "client_compatibility" in status and (
+            not isinstance(compatibility, dict) or type(compatibility.get("entries")) is not int
+            or compatibility.get("empty_subscription_import_supported") is not None
+            or compatibility.get("import_verified") is not False
+            or compatibility != client_compatibility(len(nodes))):
+        raise ValueError("Inconsistent Serbia client availability metadata")
 
 
 def render(build, status: dict) -> str:
     _validate_result(build, status)
-    header = subscription_title(status).replace("BL VPN [", "BL VPN Serbia [", 1)
+    header = subscription_title(status).replace("BL VPN [", "BL RS [", 1)
+    if len(header.removeprefix("#profile-title: ")) > 25:
+        raise ValueError("Serbia profile title exceeds Happ's 25-character limit")
     lines = ["# BestLocal Serbia: independently validated actual RS egress", header,
              "#profile-update-interval: 1", "#subscription-ping-onopen-enabled: 1",
              "#ping-type: proxy", "#check-url-via-proxy: https://www.gstatic.com/generate_204",
              "#subscriptions-sort-type: ping", f"# generated: {status['generated_at']}",
              "# Required: ChatGPT AND YouTube AND Instagram AND Spotify; median proxy HTTPS <500 ms",
              f"# local_qualified: {len(status['nodes'])}", f"#bestlocal-result: {status['result']}"]
+    compatibility = client_compatibility(len(status["nodes"]))
+    lines.append(f"#bestlocal-availability: {compatibility['availability']}; entries={compatibility['entries']}")
     if not status["nodes"]:
         lines.append("# No currently verified servers with actual Serbia egress; no substitute countries or historical entries.")
+        lines.append("#bestlocal-happ-import: unverified-empty; client reported a parse error on the previous empty response")
     lines.extend(local_probe.published_link(
                      local_probe.tested_connection_link(build, node), node["rank"], COUNTRY,
                                            node.get("exit_city"), node.get("exit_ip"))
@@ -170,6 +241,7 @@ def _validate_inputs(runner: Runner, build, status: dict, manifest_path: Path, *
 
 def publish(repo: Path, state_dir: Path, build, status: dict, manifest_path: Path) -> str:
     """One immutable branch transaction; retry against a fresh base, no force push."""
+    status.setdefault("client_compatibility", client_compatibility(len(status.get("nodes", []))))
     runner = Runner(repo, time.monotonic() + 300)
     serialized = (json.dumps(status, sort_keys=True, indent=2, allow_nan=False) + "\n").encode()
     try:
@@ -198,6 +270,9 @@ def publish(repo: Path, state_dir: Path, build, status: dict, manifest_path: Pat
                         return "superseded"
                     if previous_time == current_time and previous != status:
                         raise ValueError("Conflicting Serbia snapshots have equal validation times")
+                    # This guard uses the same immutable base as the subsequent
+                    # commit. A racing writer forces a fresh fetch and recheck.
+                    protect_previous_nonempty(build, previous, status)
                 with temporary_directory(prefix="best50-regional-publish-", parent=state_dir / "temporary", repo=repo) as directory:
                     worktree = Path(directory) / "checkout"
                     try:
@@ -237,6 +312,8 @@ def publish(repo: Path, state_dir: Path, build, status: dict, manifest_path: Pat
                     if actual != expected:
                         raise RuntimeError("Serbia publication verification failed")
                 return "published"
+            except PriorValidationUnconfirmed:
+                raise
             except (RuntimeError, OSError, subprocess.SubprocessError):
                 if attempt == 2:
                     raise RuntimeError("Serbia publication failed after bounded retries") from None
@@ -320,6 +397,7 @@ async def _validate(repo: Path, state_dir: Path, runner: Runner, upstream_sha: s
     status["countries"] = {COUNTRY: len(selected)} if selected else {}
     status["regional_source_feedback"] = regional_pool.apply_local_feedback(state_dir, status["diagnostics"])
     status["publication"] = {"subscription_path": SUBSCRIPTION, "status_path": STATUS, "branch": "regional"}
+    status["client_compatibility"] = client_compatibility(len(selected))
     _validate_result(build, status)
     return status, Path(manifest["manifest_path"])
 
@@ -379,6 +457,16 @@ def run_once(repo: Path, state_dir: Path) -> int:
             state.pop("last_error", None)
             log(f"Serbia complete: tested={state['last_tested']} qualified={state['last_qualified']} publication={publication}")
             return 0
+        except PriorValidationUnconfirmed:
+            failures = state.get("consecutive_failures", 0)
+            failures = failures + 1 if type(failures) is int and 0 <= failures < 1000 else 1
+            state.update(health="retained_inconclusive", running=False, consecutive_failures=failures,
+                         next_retry_at=time.time() + retry_delay(failures), last_failure_at=time.time(),
+                         last_publication_status="retained", last_error="prior-rs-recheck-inconclusive")
+            status.setdefault("publication", {}).update(status="retained-inconclusive", last_known_good_preserved=True)
+            atomic_json(state_dir / "last-result.json", status)
+            log("Serbia empty result deferred: prior RS candidates remain unconfirmed; published snapshot preserved")
+            return 1
         except (Exception, KeyboardInterrupt) as exc:
             failures = state.get("consecutive_failures", 0)
             failures = failures + 1 if type(failures) is int and 0 <= failures < 1000 else 1

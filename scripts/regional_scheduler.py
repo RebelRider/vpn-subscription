@@ -153,10 +153,13 @@ def validation_summary(status: dict) -> dict:
     regional = regional if isinstance(regional, dict) else {}
     discovery = regional.get("discovery", {})
     discovery = discovery if isinstance(discovery, dict) else {}
+    source_counts = regional.get("source_counts", {})
+    source_counts = source_counts if isinstance(source_counts, dict) else {}
     return {"tested_candidates": len(diagnostics), "input_candidates": count(status.get("input", {}).get("nodes"), 150) if isinstance(status.get("input"), dict) else 0,
             "protocols": dict(protocols), "validation_outcomes": dict(outcomes),
             "rejection_categories": dict(reasons), "browser_reasons": dict(browsers),
-            "sources": {"known": count(regional.get("source_count")),
+            "sources": {"known": count(source_counts.get("registered", regional.get("source_count"))),
+                        **{name: count(source_counts[name]) for name in ("attempted", "deferred") if name in source_counts},
                         **{name: count(discovery.get(name)) for name in ("discovered_sources", "fetched_sources", "source_failures")}}}
 
 
@@ -172,7 +175,7 @@ def safe_summary(value) -> dict:
         "validation_outcomes": {"pass", "fail", "inconclusive", "unknown"},
         "rejection_categories": {"latency", "timeout", "dns", "routing", "tls", "configuration", "protocol", "proxy", "services", "browser", "other"},
         "browser_reasons": BROWSER_REASON_CODES | {"passed", "not_attempted", "other"},
-        "sources": {"known", "discovered_sources", "fetched_sources", "source_failures"},
+        "sources": {"known", "attempted", "deferred", "discovered_sources", "fetched_sources", "source_failures"},
     }.items():
         result[name] = counts(value.get(name), allowed)
     return result
@@ -528,8 +531,12 @@ class Runner:
         self.deadline = deadline
         self.active: subprocess.Popen | None = None
         self.environment: dict[str, str] = {}
+        self.last_stderr = ""
+        self.last_output_metadata: dict = {}
 
-    def run(self, command: list[str], label: str, timeout: float = 90, *, check: bool = True) -> tuple[int, str]:
+    def run(self, command: list[str], label: str, timeout: float = 90, *, check: bool = True,
+            separate_stderr: bool = False) -> tuple[int, str]:
+        self.last_stderr, self.last_output_metadata = "", {}
         remaining = min(timeout, self.deadline - time.monotonic())
         if remaining <= 0:
             raise CommandFailure("job deadline", 124)
@@ -546,17 +553,17 @@ class Runner:
             Path(command[0]).name in {"git", "gh"} or validator
         ):
             command = [sys.executable, str(helper), "--", *command]
-        with tempfile.TemporaryFile() as output:
+        with tempfile.TemporaryFile() as output, tempfile.TemporaryFile() as error:
             process = subprocess.Popen(
                 [sys.executable, str(Path(__file__).resolve()), "--supervise", str(os.getpid()), str(remaining), "--", *command],
                 cwd=self.repo, env=environment, stdin=subprocess.DEVNULL,
-                stdout=output, stderr=subprocess.STDOUT, start_new_session=True,
+                stdout=output, stderr=error if separate_stderr else subprocess.STDOUT, start_new_session=True,
             )
             self.active = process
             exceeded = False
             try:
                 while process.poll() is None:
-                    if time.monotonic() >= self.deadline or output.tell() > MAX_OUTPUT_BYTES:
+                    if time.monotonic() >= self.deadline or output.tell() + error.tell() > MAX_OUTPUT_BYTES:
                         exceeded = True
                         self.stop()
                         break
@@ -564,8 +571,21 @@ class Runner:
                 process.wait(timeout=5)
             finally:
                 self.stop()
+            stdout_size, stderr_size = output.tell(), error.tell()
+            exceeded = exceeded or stdout_size + stderr_size > MAX_OUTPUT_BYTES
             output.seek(0)
-            detail = output.read(MAX_OUTPUT_BYTES).decode(errors="replace")
+            captured_stdout = output.read(MAX_OUTPUT_BYTES)
+            error.seek(0)
+            captured_stderr = error.read(max(0, MAX_OUTPUT_BYTES - len(captured_stdout)))
+            self.last_stderr = captured_stderr.decode(errors="replace")
+            self.last_output_metadata = {
+                "stdout_bytes": stdout_size, "stderr_bytes": stderr_size,
+                "stdout_sha256": hashlib.sha256(captured_stdout).hexdigest(),
+                "stderr_sha256": hashlib.sha256(captured_stderr).hexdigest(),
+                "stdout_truncated": stdout_size > len(captured_stdout),
+                "stderr_truncated": stderr_size > len(captured_stderr),
+            }
+            detail = captured_stdout.decode(errors="replace")
             code = 124 if exceeded else process.returncode
             if check and code:
                 raise CommandFailure(label, code, detail)

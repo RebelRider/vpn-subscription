@@ -72,9 +72,30 @@ class SerbiaPolicyTests(unittest.TestCase):
 
     def test_empty_subscription_is_valid_and_contains_no_dummy_nodes(self):
         text = serbia.render(build, result([]))
-        self.assertIn('BL VPN Serbia [', text)
+        self.assertIn('BL RS [', text)
+        title = next(line.removeprefix('#profile-title: ') for line in text.splitlines() if line.startswith('#profile-title: '))
+        self.assertLessEqual(len(title), 25)
         self.assertIn('#bestlocal-result: empty', text)
+        self.assertIn('#bestlocal-availability: awaiting-verified-rs; entries=0', text)
+        self.assertIn('#bestlocal-happ-import: unverified-empty', text)
         self.assertFalse(any(line and not line.startswith('#') for line in text.splitlines()))
+
+    def test_client_metadata_is_bounded_consistent_and_not_an_import_claim(self):
+        for nodes in ([], [node()]):
+            status = result(nodes)
+            serbia._validate_result(build, status)  # Older snapshots stay readable.
+            status['client_compatibility'] = serbia.client_compatibility(len(nodes))
+            serbia._validate_result(build, status)
+            self.assertIs(status['client_compatibility']['import_verified'], False)
+            self.assertIsNone(status['client_compatibility']['empty_subscription_import_supported'])
+            for broken in (None, {}, {**status['client_compatibility'], 'entries': 99},
+                           {**status['client_compatibility'], 'entries': bool(nodes)},
+                           {**status['client_compatibility'], 'import_verified': True},
+                           {**status['client_compatibility'], 'empty_subscription_import_supported': True}):
+                invalid = copy.deepcopy(status)
+                invalid['client_compatibility'] = broken
+                with self.subTest(empty=not nodes, invalid=broken), self.assertRaises(ValueError):
+                    serbia._validate_result(build, invalid)
 
     def test_ipv6_and_protocol_agnostic_rendering(self):
         # Properly bracketed public IPv6 transport remains supported.
@@ -94,6 +115,14 @@ class SerbiaPolicyTests(unittest.TestCase):
             'observations': [{'source': 'cloudflare-trace', 'ip': '8.8.8.8', 'country': 'US'}]}}
         self.assertTrue(serbia.confirmed_empty_diagnostics([observed]))
         observed['exit_country_evidence']['observations'][0]['country'] = 'RS'
+        self.assertFalse(serbia.confirmed_empty_diagnostics([observed]))
+        missing = {'outcome': 'fail', 'rejection_reasons': ['observed-exit-country-mismatch']}
+        self.assertFalse(serbia.confirmed_empty_diagnostics([missing]))
+        self.assertFalse(serbia.confirmed_empty_diagnostics([
+            {'outcome': 'fail', 'rejection_reasons': ['proxy-start-or-network-failure']}]))
+        observed['outcome'] = 'fail'
+        observed['exit_country_evidence']['observations'][0]['country'] = 'DE'
+        observed['exit_country_evidence']['checked_at'] = '2020-01-01T00:00:00+00:00'
         self.assertFalse(serbia.confirmed_empty_diagnostics([observed]))
         self.assertLessEqual(serbia.REVALIDATE_SECONDS + 90*60 + 35*60 + 5*60, 6*3600)
 
@@ -167,6 +196,33 @@ class SerbiaRecoveryTests(unittest.TestCase):
                 self.assertEqual(serbia.run_once(root, root/'serbia'), 1)
                 publisher.assert_not_called()
             self.assertEqual((root/'best-local.txt').read_text(), 'existing main subscription')
+
+    def test_inconclusive_prior_rs_retains_published_time_and_schedules_retry(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            state = root/'serbia'
+            state.mkdir(mode=0o700)
+            original_time = time.time() - 3600
+            original = {'last_completed_at': original_time, 'last_signature': 'older',
+                        'last_published_validation_at': original_time, 'last_publication_at': original_time + 10}
+            serbia.atomic_json(state/serbia.STATE_NAME, original)
+            completed = result([])
+            completed['diagnostics'] = [{'outcome': 'inconclusive'}]
+            with patch.object(serbia, 'Runner', self.Runner), \
+                    patch.object(serbia, 'input_metadata', return_value=('new-input', time.time())), \
+                    patch.object(serbia, '_validate', AsyncMock(return_value=(completed, state/'manifest'))), \
+                    patch.object(serbia.local_probe, 'load_build_module', return_value=build), \
+                    patch.object(serbia, 'publish', side_effect=serbia.PriorValidationUnconfirmed('previous RS unresolved')):
+                self.assertEqual(serbia.run_once(root, state), 1)
+            deferred = json.loads((state/serbia.STATE_NAME).read_text())
+            self.assertEqual(deferred['health'], 'retained_inconclusive')
+            self.assertEqual(deferred['last_publication_status'], 'retained')
+            self.assertGreater(deferred['next_retry_at'], time.time())
+            self.assertFalse(deferred['running'])
+            for key in original:
+                self.assertEqual(deferred[key], original[key])
+            attempt = json.loads((state/'last-result.json').read_text())
+            self.assertTrue(attempt['publication']['last_known_good_preserved'])
 
 
 class SerbiaDiscoveryTests(unittest.TestCase):
@@ -248,12 +304,88 @@ class SerbiaPublicationTests(unittest.TestCase):
         self.assertEqual(serbia.publish(self.repo, self.state, build, status, self.manifest_path), 'published')
         self.assertEqual(head, self.git(self.repo, 'rev-parse', 'origin/regional'))
         empty = self.status([])
+        empty['diagnostics'] = [{'id': status['nodes'][0]['id'], 'qualified': False, 'outcome': 'fail',
+                                 'rejection_reasons': ['socks-connection-failed']}]
         self.assertEqual(serbia.publish(self.repo, self.state, build, empty, self.manifest_path), 'published')
         raw = self.git(self.repo, 'show', 'origin/regional:'+serbia.SUBSCRIPTION)
         self.assertIn('#bestlocal-result: empty', raw)
         self.assertEqual(self.main_blob, self.git(self.repo, 'rev-parse', 'origin/regional:output/best-local.txt'))
         published = json.loads(self.git(self.repo, 'show', 'origin/regional:'+serbia.STATUS))
         self.assertEqual(published['nodes'], [])
+        self.assertEqual(published['client_compatibility'], serbia.client_compatibility(0))
+
+    def test_unrelated_nonrs_cannot_erase_missing_or_inconclusive_previous_rs(self):
+        good = self.status()
+        serbia.publish(self.repo, self.state, build, good, self.manifest_path)
+        previous_head = self.git(self.repo, 'rev-parse', 'origin/regional')
+        previous_files = {path: self.git(self.repo, 'show', 'origin/regional:'+path)
+                          for path in (serbia.SUBSCRIPTION, serbia.STATUS)}
+        unrelated = {'id': 'f'*64, 'qualified': False, 'outcome': 'fail',
+                     'rejection_reasons': ['observed-exit-country-mismatch'],
+                     'exit_country_evidence': {'reason': 'observed-exit-country-mismatch',
+                         'checked_at': datetime.now(timezone.utc).isoformat(),
+                         'observations': [{'source': 'cloudflare-trace', 'ip': '8.8.8.8', 'country': 'DE'}]}}
+        for previous_recheck in ([], [{'id': good['nodes'][0]['id'], 'qualified': False, 'outcome': 'inconclusive',
+                                      'rejection_reasons': ['required-exit-country-unconfirmed-inconclusive']}]):
+            empty = self.status([])
+            empty['diagnostics'] = [unrelated] + previous_recheck
+            with self.subTest(previous_recheck=bool(previous_recheck)), self.assertRaises(serbia.PriorValidationUnconfirmed):
+                serbia.publish(self.repo, self.state, build, empty, self.manifest_path)
+            self.assertEqual(previous_head, self.git(self.repo, 'rev-parse', 'origin/regional'))
+            for path, expected in previous_files.items():
+                self.assertEqual(expected, self.git(self.repo, 'show', 'origin/regional:'+path))
+        empty = self.status([])
+        empty['diagnostics'] = [unrelated, {'id': good['nodes'][0]['id'], 'qualified': False,
+                                'outcome': 'fail', 'rejection_reasons': ['socks-connection-failed']}]
+        self.assertEqual(serbia.publish(self.repo, self.state, build, empty, self.manifest_path), 'published')
+        self.assertEqual([], json.loads(self.git(self.repo, 'show', 'origin/regional:'+serbia.STATUS))['nodes'])
+        self.assertEqual(self.main_blob, self.git(self.repo, 'rev-parse', 'origin/regional:output/best-local.txt'))
+
+    def test_each_previous_rs_node_needs_its_own_definitive_current_rejection(self):
+        first, second = node(), node(URI.replace('1.1.1.1', '8.8.4.4'))
+        second['rank'] = 2
+        previous = result([first, second])
+        current = result([])
+        current['diagnostics'] = [{'id': first['id'], 'qualified': False, 'outcome': 'fail',
+                                   'rejection_reasons': ['latency-not-below-500ms']}]
+        with self.assertRaises(serbia.PriorValidationUnconfirmed):
+            serbia.protect_previous_nonempty(build, previous, current)
+        current['diagnostics'].append({'id': second['id'], 'qualified': False, 'outcome': 'inconclusive',
+            'exit_country_evidence': {'reason': 'observed-exit-country-mismatch',
+                'checked_at': datetime.now(timezone.utc).isoformat(),
+                'observations': [{'source': 'country-is', 'ip': '8.8.4.4', 'country': 'NL'}]}})
+        serbia.protect_previous_nonempty(build, previous, current)
+
+    def test_racing_good_rs_publication_is_rechecked_before_empty_retry(self):
+        initial = self.status([])
+        serbia.publish(self.repo, self.state, build, initial, self.manifest_path)
+        concurrent = self.root/'rs-winner'
+        self.git(self.root, 'clone', '--branch', 'regional', str(self.remote), str(concurrent))
+        self.git(concurrent, 'config', 'user.name', 'other')
+        self.git(concurrent, 'config', 'user.email', 'other@example.invalid')
+        winner = self.status()
+        empty = self.status([])  # Newer validation time does not prove the old RS failed.
+        empty['diagnostics'] = [{'id': 'e'*64, 'qualified': False, 'outcome': 'fail',
+                                 'rejection_reasons': ['socks-connection-failed']}]
+        original, raced = serbia.Runner, []
+        test = self
+        class Racing(original):
+            def git(this, *args, **kwargs):
+                if args and args[0] == 'push' and not raced:
+                    (concurrent/serbia.SUBSCRIPTION).write_text(serbia.render(build, winner))
+                    (concurrent/serbia.STATUS).write_text(json.dumps(winner))
+                    test.git(concurrent, 'add', '.')
+                    test.git(concurrent, 'commit', '-m', 'concurrent verified RS fixture')
+                    test.git(concurrent, 'push', 'origin', 'HEAD:regional')
+                    raced.append(test.git(concurrent, 'rev-parse', 'HEAD'))
+                return super().git(*args, **kwargs)
+        with patch.object(serbia, 'Runner', Racing), patch.object(serbia.time, 'sleep'), \
+                self.assertRaises(serbia.PriorValidationUnconfirmed):
+            serbia.publish(self.repo, self.state, build, empty, self.manifest_path)
+        self.assertEqual(len(raced), 1)
+        self.assertEqual(raced[0], self.git(self.repo, 'rev-parse', 'origin/regional'))
+        self.assertEqual(winner, json.loads(self.git(self.repo, 'show', 'origin/regional:'+serbia.STATUS)))
+        self.assertEqual(self.main_blob, self.git(self.repo, 'rev-parse', 'origin/regional:output/best-local.txt'))
 
     def test_manifest_tampering_and_wrong_country_preserve_remote(self):
         head = self.git(self.repo, 'rev-parse', 'origin/regional')

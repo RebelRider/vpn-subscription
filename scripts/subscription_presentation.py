@@ -51,7 +51,10 @@ def title(status: dict, *, now: float | None = None) -> str:
     displayed = generated.astimezone(TITLE_TIMEZONE)
     date = (f"{displayed.day:02d}{MONTHS[displayed.month - 1]}{displayed.year} "
             f"{displayed.hour:02d}:{displayed.minute:02d}")
-    return f"#profile-title: BL VPN [{'STALE - ' if stale else ''}{date}]"
+    # Happ documents a 25-character profile-title limit. Keep the full saved
+    # timestamp for fresh profiles and in metadata; never truncate into a
+    # misleading date when adding the stale marker.
+    return "#profile-title: BL VPN [STALE]" if stale else f"#profile-title: BL VPN [{date}]"
 
 
 def server_label(rank: int, country: str | None, city: str | None,

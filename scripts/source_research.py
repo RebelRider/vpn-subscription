@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 from contextlib import contextmanager
 import fcntl
+import hashlib
 import json
 import math
 import os
@@ -29,17 +30,24 @@ STATE_NAME = "source-research-status.json"
 PENDING_NAME = "source-research-pending.json"
 FALLBACK_NAME = "source-fallback-status.json"
 RESEARCH_HISTORY = "source-research-history.json"
+ATTEMPT_HISTORY = "source-research-attempt-history.json"
 SOURCE_REASON_CODES = {"invalid-proposal", "source-policy", "no-compatible-configuration", "rate-limit",
                        "source-policy-unavailable", "network", "source-http-client-error",
                        "source-unavailable", "invalid-source"}
 ERRORS = {"quota", "region", "authentication", "network", "timeout", "output-limit", "model-unavailable", "unverified-model", "invalid-output", "publication", "interrupted", "runner-failure"}
-TIMESTAMPS = {"last_poll_at", "last_attempt_at", "last_success_at", "last_research_generated_at", "next_retry_at", "pending_generated_at", "state_recovered_at", "source_retry_after_at"}
+TIMESTAMPS = {"last_poll_at", "last_attempt_at", "last_success_at", "last_research_generated_at", "next_retry_at", "pending_generated_at", "state_recovered_at", "source_retry_after_at", "last_model_attempt_at", "last_model_success_at", "last_catalog_publication_at"}
+ATTEMPT_STAGES = {"models", "model-run", "stream", "proposal", "model-complete"}
+EVENT_TYPES = {"system", "user", "assistant", "tool_call", "tool_result", "result", "interaction_query", "other"}
+FAILURE_CODES = ERRORS | {"stream-not-json", "stream-event-shape", "stream-after-result", "stream-before-init",
+                         "stream-model-mismatch", "stream-no-init", "stream-no-result", "stream-result-shape",
+                         "proposal-size", "proposal-not-json", "proposal-schema", "proposal-sources", "proposal-source-shape"}
 
 
 class ResearchFailure(RuntimeError):
-    def __init__(self, reason: str, retry_at=None):
+    def __init__(self, reason: str, retry_at=None, *, failure_code=None):
         super().__init__(reason)
         self.retry_at = retry_at
+        self.failure_code = failure_code if failure_code in FAILURE_CODES else reason
 
 
 def log(message: str) -> None:
@@ -50,6 +58,63 @@ def log(message: str) -> None:
 def finite_number(value) -> bool:
     return ((type(value) is int and -(10 ** 15) <= value <= 10 ** 15)
             or (type(value) is float and math.isfinite(value)))
+
+
+def safe_attempt(value) -> dict:
+    """Closed schema: never persist output text, prompts, URLs or exception text."""
+    if not isinstance(value, dict):
+        return {}
+    safe = {}
+    for field in ("at",):
+        number = value.get(field)
+        if finite_number(number) and 0 < number <= 10**12:
+            safe[field] = number
+    for field in ("stdout_bytes", "stderr_bytes", "final_result_bytes"):
+        number = value.get(field)
+        if type(number) is int and 0 <= number <= 10**12:
+            safe[field] = number
+    code = value.get("exit_code")
+    if type(code) is int and -255 <= code <= 255:
+        safe["exit_code"] = code
+    for field in ("stdout_sha256", "stderr_sha256", "final_result_sha256"):
+        digest = value.get(field)
+        if isinstance(digest, str) and re.fullmatch(r"[a-f0-9]{64}", digest):
+            safe[field] = digest
+    for field in ("requested_model", "verified_model"):
+        model = value.get(field)
+        if isinstance(model, str) and re.fullmatch(r"(?:cursor-)?grok-\d+(?:\.\d+)*-xhigh", model):
+            safe[field] = model
+    version = value.get("cli_version")
+    if isinstance(version, str) and (version == "unknown" or re.fullmatch(r"\d{4}\.\d{2}\.\d{2}-[a-f0-9]{6,40}", version)):
+        safe["cli_version"] = version
+    for field in ("stdout_truncated", "stderr_truncated", "model_request_attempted", "model_success"):
+        if type(value.get(field)) is bool:
+            safe[field] = value[field]
+    for field, choices in (("stage", ATTEMPT_STAGES), ("failure_code", FAILURE_CODES),
+                           ("result_subtype", {"success", "error", "unknown"}),
+                           ("catalog_status", {"published", "current", "failed", "not-attempted"})):
+        if isinstance(value.get(field), str) and value[field] in choices:
+            safe[field] = value[field]
+    counts = value.get("event_counts")
+    if isinstance(counts, dict):
+        safe["event_counts"] = {key: number for key, number in counts.items()
+                                if key in EVENT_TYPES and type(number) is int and 0 <= number <= 100000}
+    return safe
+
+
+def append_attempt_history(state_dir: Path, diagnostic: dict, now: float) -> None:
+    path = state_dir / ATTEMPT_HISTORY
+    try:
+        previous = json.loads(path.read_text()) if path.stat().st_size <= PROPOSAL_LIMIT else []
+    except (OSError, ValueError, RecursionError):
+        previous = []
+    history = []
+    for record in previous[-63:] if isinstance(previous, list) else []:
+        clean = safe_attempt(record)
+        if 0 <= now - clean.get("at", 0) <= 30 * DAY:
+            history.append(clean)
+    history.append(safe_attempt(diagnostic))
+    atomic_json(path, history)
 
 
 def normalize_state(value, now: float) -> dict:
@@ -77,6 +142,9 @@ def normalize_state(value, now: float) -> dict:
             state[key] = count
     if isinstance(value.get("published"), bool):
         state["published"] = value["published"]
+    diagnostic = safe_attempt(value.get("last_model_diagnostic"))
+    if diagnostic:
+        state["last_model_diagnostic"] = diagnostic
     reasons = value.get("rejection_reasons")
     if isinstance(reasons, dict):
         state["rejection_reasons"] = {key: count for key, count in reasons.items()
@@ -143,60 +211,74 @@ def unique_object(pairs):
 
 def parse_proposal(text: str) -> dict:
     if not isinstance(text, str) or len(text.encode()) > PROPOSAL_LIMIT:
-        raise ResearchFailure("invalid-output")
+        raise ResearchFailure("invalid-output", failure_code="proposal-size")
     try:
         value = json.loads(text, object_pairs_hook=unique_object)
     except (ValueError, TypeError, RecursionError, OverflowError):
-        raise ResearchFailure("invalid-output") from None
+        raise ResearchFailure("invalid-output", failure_code="proposal-not-json") from None
     if not isinstance(value, dict) or set(value) != {"schema", "sources"} or type(value["schema"]) is not int or value["schema"] != 1:
-        raise ResearchFailure("invalid-output")
+        raise ResearchFailure("invalid-output", failure_code="proposal-schema")
     if not isinstance(value["sources"], list) or len(value["sources"]) > 32:
-        raise ResearchFailure("invalid-output")
+        raise ResearchFailure("invalid-output", failure_code="proposal-sources")
     for source in value["sources"]:
         if not isinstance(source, dict) or not {"url", "evidence_url", "name"} <= set(source) <= {"url", "evidence_url", "name", "protocols"}:
-            raise ResearchFailure("invalid-output")
+            raise ResearchFailure("invalid-output", failure_code="proposal-source-shape")
         if any(not isinstance(source[k], str) or not 0 < len(source[k]) <= limit for k, limit in (("url", 2048), ("evidence_url", 2048), ("name", 160))):
-            raise ResearchFailure("invalid-output")
+            raise ResearchFailure("invalid-output", failure_code="proposal-source-shape")
         protocols = source.get("protocols", [])
         if not isinstance(protocols, list) or len(protocols) > 16 or any(not isinstance(item, str) or not 0 < len(item) <= 32 for item in protocols):
-            raise ResearchFailure("invalid-output")
+            raise ResearchFailure("invalid-output", failure_code="proposal-source-shape")
     return value
 
 
-def verified_result(stream: str, version: str) -> str:
+def verified_result(stream: str, version: str, diagnostic: dict | None = None) -> str:
     if len(stream.encode()) > OUTPUT_LIMIT:
         raise ResearchFailure("output-limit")
     verified, final = False, None
     expected = re.compile(r"\bGrok " + re.escape(version) + r"(?![\d.])")
+    counts = {}
+    if diagnostic is not None:
+        diagnostic["stage"] = "stream"
+        diagnostic["event_counts"] = counts
     for raw in stream.splitlines():
         if not raw.strip():
             continue
         try:
             event = json.loads(raw, object_pairs_hook=unique_object)
         except (ValueError, RecursionError, OverflowError):
-            raise ResearchFailure("invalid-output") from None
+            raise ResearchFailure("invalid-output", failure_code="stream-not-json") from None
         if not isinstance(event, dict):
-            raise ResearchFailure("invalid-output")
+            raise ResearchFailure("invalid-output", failure_code="stream-event-shape")
         kind = event.get("type")
         if not isinstance(kind, str):
-            raise ResearchFailure("invalid-output")
+            raise ResearchFailure("invalid-output", failure_code="stream-event-shape")
+        safe_kind = kind if kind in EVENT_TYPES else "other"
+        counts[safe_kind] = min(counts.get(safe_kind, 0) + 1, 100000)
         if final is not None and (kind in {"assistant", "tool_call", "tool_result", "result"} or kind == "system" and event.get("subtype") == "init"):
-            raise ResearchFailure("invalid-output")
+            raise ResearchFailure("invalid-output", failure_code="stream-after-result")
         if kind == "system" and event.get("subtype") == "init":
             model = event.get("model")
             if not isinstance(model, str) or not expected.search(model) or "extra high" not in model.lower() or "fast" in model.lower():
-                raise ResearchFailure("unverified-model")
+                raise ResearchFailure("unverified-model", failure_code="stream-model-mismatch")
             verified = True
+            if diagnostic is not None:
+                diagnostic["verified_model"] = diagnostic.get("requested_model", "grok-" + version + "-xhigh")
         elif kind in {"assistant", "tool_call", "tool_result", "result"} and not verified:
-            raise ResearchFailure("unverified-model")
+            raise ResearchFailure("unverified-model", failure_code="stream-before-init")
         if kind == "result":
+            if diagnostic is not None:
+                subtype = event.get("subtype")
+                diagnostic["result_subtype"] = subtype if isinstance(subtype, str) and subtype in {"success", "error"} else "unknown"
             if final is not None or event.get("subtype") != "success" or event.get("is_error") or not isinstance(event.get("result"), str):
-                raise ResearchFailure("invalid-output")
+                raise ResearchFailure("invalid-output", failure_code="stream-result-shape")
             final = event["result"]
     if not verified:
-        raise ResearchFailure("unverified-model")
+        raise ResearchFailure("unverified-model", failure_code="stream-no-init")
     if final is None:
-        raise ResearchFailure("invalid-output")
+        raise ResearchFailure("invalid-output", failure_code="stream-no-result")
+    if diagnostic is not None:
+        diagnostic.update(stage="proposal", final_result_bytes=len(final.encode()),
+                          final_result_sha256=hashlib.sha256(final.encode()).hexdigest())
     parse_proposal(final)
     return final
 
@@ -298,28 +380,74 @@ def existing_source_context(repo: Path) -> str:
             + json.dumps(urls, ensure_ascii=True))
 
 
-def research(agent: str, state_dir: Path, prompt_context: str = "") -> tuple[str, str]:
+def agent_version(agent: str) -> str:
+    """Installed CLI version is public filesystem metadata, without a model call."""
+    try:
+        version = Path(agent).resolve().parent.name
+    except (OSError, RuntimeError):
+        return "unknown"
+    return version if re.fullmatch(r"\d{4}\.\d{2}\.\d{2}-[a-f0-9]{6,40}", version) else "unknown"
+
+
+def capture_attempt_output(diagnostic: dict, runner, code: int, stdout: str) -> str:
+    """Keep only sizes and captured-byte hashes; error text stays in memory."""
+    stderr = getattr(runner, "last_stderr", "")
+    stderr = stderr if isinstance(stderr, str) else ""
+    metadata = getattr(runner, "last_output_metadata", {})
+    observed = {"stdout_bytes": len(stdout.encode()), "stderr_bytes": len(stderr.encode()),
+                "stdout_sha256": hashlib.sha256(stdout.encode()).hexdigest(),
+                "stderr_sha256": hashlib.sha256(stderr.encode()).hexdigest(),
+                "stdout_truncated": False, "stderr_truncated": False}
+    if isinstance(metadata, dict):
+        observed.update(safe_attempt(metadata))
+    diagnostic.update(observed)
+    diagnostic["exit_code"] = code
+    return stderr
+
+
+def research(agent: str, state_dir: Path, prompt_context: str = "", *, diagnostic: dict | None = None) -> tuple[str, str]:
+    diagnostic = {} if diagnostic is None else diagnostic
+    diagnostic.update(stage="models", cli_version=agent_version(agent), model_success=False,
+                      model_request_attempted=False, catalog_status="not-attempted")
     with temporary_directory(prefix="source-research-workspace-", parent=state_dir / "temporary") as temporary:
         workspace = Path(temporary) / "workspace"
         workspace.mkdir(mode=0o700)
         runner = Runner(workspace, time.monotonic() + MODELS_TIMEOUT + RESEARCH_TIMEOUT + 15)
         try:
             with cursor_environment():
-                code, models = runner.run([agent, "models"], "source research model inventory", MODELS_TIMEOUT, check=False)
+                code, models = runner.run([agent, "models"], "source research model inventory", MODELS_TIMEOUT, check=False, separate_stderr=True)
+                errors = capture_attempt_output(diagnostic, runner, code, models)
+                if diagnostic["stdout_truncated"] or diagnostic["stderr_truncated"]:
+                    raise ResearchFailure("output-limit")
                 if code:
-                    raise ResearchFailure(classify_failure(models, code))
+                    raise ResearchFailure(classify_failure(models + "\n" + errors, code))
                 model, version = select_model(models)
-                code, stream = runner.run([agent, "-p", PROMPT + prompt_context, "--trust", "--mode=ask", "--sandbox", "enabled", "--model", model, "--output-format", "stream-json"], "read-only public source research", RESEARCH_TIMEOUT, check=False)
+                diagnostic.update(stage="model-run", requested_model=model, model_request_attempted=True)
+                code, stream = runner.run([agent, "-p", PROMPT + prompt_context, "--trust", "--mode=ask", "--sandbox", "enabled", "--model", model, "--output-format", "stream-json"], "read-only public source research", RESEARCH_TIMEOUT, check=False, separate_stderr=True)
+                errors = capture_attempt_output(diagnostic, runner, code, stream)
+                if diagnostic["stdout_truncated"] or diagnostic["stderr_truncated"]:
+                    raise ResearchFailure("output-limit")
             if code:
-                raise ResearchFailure(classify_failure(stream, code))
-            return verified_result(stream, version), model
+                try:
+                    verified_result(stream, version, diagnostic)
+                except ResearchFailure:
+                    pass
+                diagnostic["stage"] = "model-run"
+                raise ResearchFailure(classify_failure(stream + "\n" + errors, code))
+            result = verified_result(stream, version, diagnostic)
+            diagnostic.update(stage="model-complete", model_success=True)
+            return result, model
+        except (Exception, KeyboardInterrupt) as exc:
+            diagnostic["failure_code"] = (exc.failure_code if isinstance(exc, ResearchFailure)
+                                           else "interrupted" if isinstance(exc, KeyboardInterrupt) else "runner-failure")
+            raise
         finally:
             runner.stop()
 
 
-def process_catalog(result_text: str, repo: Path, state_dir: Path, now: float) -> dict:
+def process_catalog(result_text: str, repo: Path, state_dir: Path, now: float, *, model_id=None) -> dict:
     from source_catalog import process_research_result
-    return process_research_result(result_text, repo, state_dir, now)
+    return process_research_result(result_text, repo, state_dir, now, discovered_by="grok", model_id=model_id)
 
 
 def source_outcome(value) -> dict:
@@ -380,7 +508,7 @@ def run_independent_catalog(repo: Path, state_dir: Path, now: float) -> dict:
         atomic_json(path, state)
         try:
             proposal = independent_proposal(state_dir, now, repo)
-            outcome = source_outcome(process_research_result(proposal, repo, state_dir, now))
+            outcome = source_outcome(process_research_result(proposal, repo, state_dir, now, discovered_by="independent"))
             state.update(outcome)
             state.update(status="success", last_success_at=now, consecutive_failures=0, next_retry_at=0)
             state.pop("last_error", None)
@@ -426,6 +554,20 @@ def load_pending(path: Path, now: float) -> dict | None:
         return None
 
 
+def log_poll_summary(state: dict, state_dir: Path, now: float) -> None:
+    """An exit-zero eligibility poll must never look like successful Grok work."""
+    fallback = load_state(state_dir / FALLBACK_NAME, now)
+    def stamp(value):
+        return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(value)) if finite_number(value) and 0 < value <= now + DAY else "never"
+    clean = normalize_state(state, now)
+    log(f"Poll: Grok={clean.get('status', 'pending')}/{clean.get('last_error', 'none')}; "
+        f"model_success={stamp(clean.get('last_model_success_at'))}; "
+        f"catalog_publication={stamp(clean.get('last_catalog_publication_at'))}; "
+        f"next_retry={stamp(clean.get('next_retry_at'))}; "
+        f"independent_success={stamp(fallback.get('last_success_at'))} "
+        f"added={fallback.get('added', 0)} refreshed={fallback.get('refreshed', 0)}")
+
+
 def run_once(repo: Path, state_dir: Path, *, now: float | None = None, agent: str | None = None, defer_hours: float = 0) -> int:
     clock = time.time if now is None else lambda: now
     state_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -469,29 +611,40 @@ def run_once(repo: Path, state_dir: Path, *, now: float | None = None, agent: st
         if clock() < state.get("next_retry_at", 0):
             atomic_json(state_path, state)
             log("Source research pending bounded retry; no agent call attempted")
+            log_poll_summary(state, state_dir, clock())
             return 0
-        if pending is None and "last_research_generated_at" in state and clock() - state["last_research_generated_at"] < DAY:
+        last_model_success = max(state.get("last_research_generated_at", 0), state.get("last_model_success_at", 0))
+        if pending is None and last_model_success and clock() - last_model_success < DAY:
             state["status"] = "idle"
             atomic_json(state_path, state)
             log("Successful daily research remains current")
+            log_poll_summary(state, state_dir, clock())
             return 0
         state.update({"running": True, "last_attempt_at": clock(), "status": "publishing" if pending else "researching"})
         atomic_json(state_path, state)
         def interrupted(_signum, _frame):
             raise KeyboardInterrupt
         handlers = {sig: signal.signal(sig, interrupted) for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP)}
+        diagnostic = None
         try:
             if pending is None:
                 selected_agent = agent or shutil.which("agent")
                 if not selected_agent:
                     raise ResearchFailure("model-unavailable")
-                result_text, model_id = research(selected_agent, state_dir, existing_source_context(repo))
+                diagnostic = {"at": clock(), "stage": "models", "model_success": False}
+                state["last_model_attempt_at"] = clock()
+                result_text, model_id = research(selected_agent, state_dir, existing_source_context(repo), diagnostic=diagnostic)
                 pending = {"schema": 1, "generated_at": clock(), "model_id": model_id, "result": result_text}
                 atomic_json(pending_path, pending)
+                state["last_model_success_at"] = pending["generated_at"]
+            elif "last_model_success_at" not in state:
+                # A valid persisted pending proposal was already verified before
+                # its atomic write. Replaying it never consumes another model run.
+                state["last_model_success_at"] = pending["generated_at"]
             state.update({"status": "publishing", "pending_generated_at": pending["generated_at"], "model_id": pending["model_id"]})
             atomic_json(state_path, state)
             try:
-                outcome = process_catalog(pending["result"], repo, state_dir, clock())
+                outcome = process_catalog(pending["result"], repo, state_dir, clock(), model_id=pending["model_id"])
             except Exception as exc:
                 retry_at = getattr(exc, "retry_at", None)
                 if not finite_number(retry_at) or not clock() < retry_at <= clock() + DAY:
@@ -500,6 +653,10 @@ def run_once(repo: Path, state_dir: Path, *, now: float | None = None, agent: st
                 failure.summary = source_outcome(getattr(exc, "summary", {}))
                 raise failure from None
             state.update({"status": "success", "last_success_at": clock(), "last_research_generated_at": pending["generated_at"], "consecutive_failures": 0, "next_retry_at": 0})
+            if isinstance(outcome, dict) and outcome.get("published") is True:
+                state["last_catalog_publication_at"] = clock()
+            if diagnostic is not None:
+                diagnostic["catalog_status"] = "published" if isinstance(outcome, dict) and outcome.get("published") is True else "current"
             if isinstance(outcome, dict):
                 for key in ("accepted", "added", "refreshed", "rejected"):
                     count = outcome.get(key)
@@ -518,6 +675,10 @@ def run_once(repo: Path, state_dir: Path, *, now: float | None = None, agent: st
             return 0
         except (Exception, KeyboardInterrupt) as exc:
             reason = str(exc) if isinstance(exc, ResearchFailure) and str(exc) in ERRORS else "interrupted" if isinstance(exc, KeyboardInterrupt) else "runner-failure"
+            if diagnostic is not None:
+                diagnostic.setdefault("failure_code", exc.failure_code if isinstance(exc, ResearchFailure) else reason)
+                if diagnostic.get("model_success"):
+                    diagnostic["catalog_status"] = "failed"
             failures = min(state.get("consecutive_failures", 0) + 1, 1000)
             delay = min(6 * 3600, 3600 * 2 ** min(failures - 1, 3))
             retry_at = getattr(exc, "retry_at", None)
@@ -535,7 +696,14 @@ def run_once(repo: Path, state_dir: Path, *, now: float | None = None, agent: st
             return 1
         finally:
             state["running"] = False
+            if diagnostic is not None:
+                state["last_model_diagnostic"] = safe_attempt(diagnostic)
+                try:
+                    append_attempt_history(state_dir, diagnostic, clock())
+                except (OSError, ValueError, RuntimeError):
+                    log("Bounded model-attempt audit write deferred")
             atomic_json(state_path, state)
+            log_poll_summary(state, state_dir, clock())
             for sig, handler in handlers.items():
                 signal.signal(sig, handler)
 

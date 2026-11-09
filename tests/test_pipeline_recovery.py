@@ -352,7 +352,7 @@ class FinalistRecoveryTests(unittest.TestCase):
             self.assertTrue(all(link.split("#")[0] in tested for link in published))
             status = json.loads((Path(directory) / "status.json").read_text())
             self.assertEqual(status["finalist_local_feedback"]["rejected"], 500)
-            self.assertEqual(catalog_additions, [(SEED, "grok-research")])
+            self.assertEqual(catalog_additions, [(SEED, "source-catalog")])
             self.assertEqual(status["source_catalog"], {"status": "fresh", "sources": 1})
 
 

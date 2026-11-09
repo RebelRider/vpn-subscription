@@ -3716,7 +3716,7 @@ async def main_async() -> int:
     pool = SourcePool(CFG["sources"], OUT / "discovery-state.json", now=now)
     catalog_urls, catalog_status = load_regional_sources(ROOT, now=now)
     for url in catalog_urls:
-        pool.add(url, origin="grok-research")
+        pool.add(url, origin="source-catalog")
     stats["source_catalog"] = catalog_status
     all_links, source_stats = await asyncio.to_thread(pool.collect)
     stats["discovery"] = pool.stats

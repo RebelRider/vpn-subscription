@@ -28,6 +28,15 @@ installer = load("install_local_automation", ROOT / "scripts/install_local_autom
 
 
 class SchedulerTests(unittest.TestCase):
+    def test_registered_sources_are_not_confused_with_attempts_during_outage(self):
+        status = {"diagnostics": [], "input": {"nodes": 0, "regional_summary": {
+            "source_count": 28, "source_counts": {"registered": 101, "attempted": 27, "deferred": 74},
+            "discovery": {"fetched_sources": 0, "source_failures": 27}}}}
+        summary = scheduler.safe_summary(scheduler.validation_summary(status))
+        self.assertEqual(summary["sources"]["known"], 101)
+        self.assertEqual(summary["sources"]["attempted"], 27)
+        self.assertEqual(summary["sources"]["deferred"], 74)
+
     def test_secondary_runtime_is_reserved_before_main_freshness_deadline(self):
         # Worst case: Serbia starts just before main becomes due. Both owned
         # jobs may consume their full budgets; the next poll still fits six h.

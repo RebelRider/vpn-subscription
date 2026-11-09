@@ -41,6 +41,26 @@ retry concurrent branch updates and verify the remote bytes. Existing CI also
 annotates both profiles after more than72h without successful local validation,
 without advancing their saved dates. Happ's handling of an empty subscription
 is client-specific; an empty file must never be padded with unverified entries.
+The current Happ client reported `Failed to parse configuration` on an empty
+response. That response also had a31-character title; the documented limit is25.
+Serbia now uses `BL RS [09Nov2026 22:06]` (the saved validation time, not the
+download time). Stale profile titles remain short, with the full validation date
+preserved in metadata. Empty-profile import remains **unverified**, and explicit
+`client_compatibility` metadata distinguishes awaiting-RS content from tested URI
+availability. No invented, direct or neighboring-country entry is supplied to
+make an empty list appear importable.
+
+An empty result cannot revoke a previous nonempty Serbia snapshot unless every
+previous RS node has its own current definitive rejection. Missing, inconclusive
+or engine-infrastructure rechecks retain the prior bytes/date and schedule retry,
+even when other candidates have definite failures.
+
+Recent public **unverified inputs**, never PASS results, are cached privately for
+up to24h (2000 entries /2MB, mode600). Source outages can therefore continue fresh
+functional tests instead of reducing exploration to Best50 alone. A new Serbia
+cache can use a fresh public main input manifest after authorization checks;
+source ages survive replay. Managed private aliases remain excluded. Diagnostics
+separate registered, attempted, fetched, failed and deferred source counts.
 
 ## Validation contract
 
@@ -203,6 +223,25 @@ the bounded twenty-four-hour source policy limit. A pending successful proposal 
 another model call when feed validation or GitHub publication fails. Catalog
 entries expire after thirty days without independent verification. This is a
 supplement to discovery, so unavailable Grok never stops the normal pipeline.
+
+`config.json` is the seed list, not the changing effective master. Daily additions
+are committed to the shared regional
+[primary source registry](https://github.com/RebelRider/vpn-subscription/blob/regional/sources/primary-sources.json),
+which both cloud and local collection consume. New entries record the actual
+finder (`independent` or `grok`, and the verified model when applicable); legacy
+unknown provenance is not retroactively attributed to a model. Discovery caches
+use the generic `source-catalog` origin. The reserve mechanism promotes productive
+main **and Serbia** source registries, so regional discoveries do not remain isolated.
+
+Research runs through Cursor CLI without opening a GUI. An hourly exit0 may
+mean a backoff skip; it is not proof of model research. State/log summaries keep
+model attempt, model success and catalog publication distinct. Model stdout JSON
+is separate from stderr warnings. A bounded64-attempt audit records only CLI
+version, stage, exit status, byte counts/hashes, safe event counts and parser reason
+codes; raw model text, prompts, credentials and URLs are never written there.
+The safe audit is `source-research-attempt-history.json` in the existing state
+directory. Actual recovery after quota restoration is only verified by a real
+subsequent successful model attempt, not a simulation or loaded launchd job.
 
 Before any Grok quota/daily eligibility check, the same hourly job also performs
 independent daily catalog promotion. Up to sixteen recently productive public

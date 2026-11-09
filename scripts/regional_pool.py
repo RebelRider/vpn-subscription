@@ -6,7 +6,7 @@ Managed credentials never enter source discovery state or public diagnostics.
 """
 from __future__ import annotations
 
-from collections import Counter
+from collections import Counter, defaultdict, deque
 from urllib.parse import unquote
 import hashlib
 import ipaddress
@@ -50,6 +50,10 @@ SOURCE_ID = re.compile(r"[0-9a-f]{24}")
 MANIFEST_NAME = "regional-input-manifest.json"
 HISTORY_NAME = "regional-pool-state.json"
 DISCOVERY_NAME = "regional-discovery-state.json"
+CANDIDATE_CACHE_NAME = "regional-candidate-cache.json"
+MAX_CACHED_CANDIDATES = 2000
+MAX_CANDIDATE_CACHE_BYTES = 2 * 1024 * 1024
+MAX_CANDIDATE_CACHE_AGE = 24 * 3600
 
 
 def _number(value, maximum=10 ** 12):
@@ -112,7 +116,7 @@ def _state_directory(path):
     return path
 
 
-def _private_bytes(path: Path, *, required=False) -> bytes | None:
+def _private_bytes(path: Path, *, required=False, maximum=MAX_BYTES) -> bytes | None:
     """Open without following symlinks; verify the actual open file's ownership."""
     try:
         descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0))
@@ -125,10 +129,10 @@ def _private_bytes(path: Path, *, required=False) -> bytes | None:
     with os.fdopen(descriptor, "rb") as stream:
         info = os.fstat(stream.fileno())
         if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
-                or stat.S_IMODE(info.st_mode) != 0o600 or info.st_size > MAX_BYTES):
+                or stat.S_IMODE(info.st_mode) != 0o600 or info.st_size > maximum):
             raise ValueError("Private input must be a bounded user-owned mode-600 file")
-        raw = stream.read(MAX_BYTES + 1)
-    if len(raw) > MAX_BYTES:
+        raw = stream.read(maximum + 1)
+    if len(raw) > maximum:
         raise ValueError("Private input exceeds size limit")
     return raw
 
@@ -231,6 +235,129 @@ def _candidate(build, link, source_ids=(), origin="regional-exploration", public
                 "origin": origin, "public_publish_allowed": bool(public), "_node": node}
     except (ValueError, KeyError, TypeError, OverflowError, UnicodeError, RecursionError):
         return None
+
+
+def _serbia_hint(candidate, history):
+    """A bounded exploration preference, never country or functional proof."""
+    if history["candidates"].get(candidate["id"], {}).get("last_exit_country") == "RS":
+        return True
+    remark = unquote(candidate["link"].rsplit("#", 1)[-1]) if "#" in candidate["link"] else ""
+    return "🇷🇸" in remark or bool(re.search(
+        r"(?i)(?<![A-Za-z])(?:RS|Serbia|Srbija|Belgrade|Beograd|Сербия|Србија)(?![A-Za-z])", remark))
+
+
+def _load_candidate_cache(build, state_dir, now, private_connections):
+    """Recover only discovery inputs; no cached service result is accepted."""
+    try:
+        raw = _private_bytes(state_dir / CANDIDATE_CACHE_NAME, maximum=MAX_CANDIDATE_CACHE_BYTES)
+        if raw is None:
+            return {}, "missing"
+        data = json.loads(raw)
+        if (not isinstance(data, dict) or set(data) != {"schema", "unverified_inputs", "entries"}
+                or type(data["schema"]) is not int or data["schema"] != 1
+                or data["unverified_inputs"] is not True or not isinstance(data["entries"], list)
+                or len(data["entries"]) > MAX_CACHED_CANDIDATES):
+            raise ValueError
+        result = {}
+        for entry in data["entries"]:
+            if (not isinstance(entry, dict) or set(entry) != {
+                    "id", "link", "protocol", "source_ids", "observed_at", "public_publish_allowed"}
+                    or entry["public_publish_allowed"] is not True or not _number(entry["observed_at"])
+                    or not now - MAX_CANDIDATE_CACHE_AGE <= entry["observed_at"] <= now + 60
+                    or not isinstance(entry["source_ids"], list)
+                    or _source_ids(entry["source_ids"]) != entry["source_ids"]):
+                continue
+            candidate = _candidate(build, entry["link"], entry["source_ids"])
+            if (candidate is None or candidate["id"] != entry["id"] or candidate["protocol"] != entry["protocol"]
+                    or connection_identity(build, candidate["link"]) in private_connections):
+                continue
+            candidate["_observed_at"] = entry["observed_at"]
+            old = result.get(candidate["id"])
+            if old is None or old["_observed_at"] < candidate["_observed_at"]:
+                result[candidate["id"]] = candidate
+        return result, "available" if result else "empty-or-expired"
+    except (OSError, ValueError, TypeError, KeyError, UnicodeError, RecursionError):
+        return {}, "invalid-or-unavailable"
+
+
+def _main_manifest_candidates(build, state_dir, now, private_connections):
+    """Seed a new RS pool from fresh PUBLIC main inputs, never its PASS results."""
+    path = state_dir.parent / MANIFEST_NAME
+    try:
+        raw = _private_bytes(path)
+        if raw is None:
+            return {}
+        manifest = json.loads(raw)
+        stamp = manifest.get("generated_at") if isinstance(manifest, dict) else None
+        entries = manifest.get("nodes") if isinstance(manifest, dict) else None
+        if (not _number(stamp) or not now - MAX_AGE <= stamp <= now + 60
+                or not isinstance(entries, list) or not 1 <= len(entries) <= MAX_MANIFEST_NODES):
+            return {}
+        eligible = [entry for entry in entries if isinstance(entry, dict)
+                    and entry.get("public_publish_allowed") is True and entry.get("origin") != "managed"]
+        # This verifies the original frozen manifest and its live managed-policy
+        # digest, including equivalent private aliases, before copying inputs.
+        validate_manifest_membership(build, eligible, path, expected_digest=hashlib.sha256(raw).hexdigest(), now=now)
+        result = {}
+        for entry in eligible:
+            candidate = _candidate(build, entry.get("link"), entry.get("source_ids", []))
+            if candidate is None or connection_identity(build, candidate["link"]) in private_connections:
+                continue
+            observed = entry.get("input_observed_at", stamp)
+            if not _number(observed) or not now - MAX_CANDIDATE_CACHE_AGE <= observed <= stamp + 60:
+                continue
+            # A new manifest around replayed inputs must not renew discovery age.
+            candidate["_observed_at"] = observed
+            result[candidate["id"]] = candidate
+        return result
+    except (OSError, ValueError, TypeError, KeyError, UnicodeError, RecursionError):
+        return {}
+
+
+def _cache_order(candidates, history):
+    """Reserve RS hints, then rotate protocols and endpoint networks in O(n log n)."""
+    def diverse(values):
+        buckets = defaultdict(lambda: defaultdict(list))
+        for candidate in sorted(values, key=lambda value: (
+                -value["_observed_at"],
+                -max((history["sources"].get(key, {}).get("local_ema", 0)
+                      for key in value["source_ids"]), default=0), value["id"])):
+            buckets[candidate["protocol"]][_endpoint(candidate["_node"])].append(candidate)
+        protocols = deque(deque(deque(group) for group in endpoints.values())
+                          for _, endpoints in sorted(buckets.items()))
+        while protocols:
+            endpoints = protocols.popleft()
+            group = endpoints.popleft()
+            yield group.popleft()
+            if group:
+                endpoints.append(group)
+            if endpoints:
+                protocols.append(endpoints)
+    preferred = list(diverse([value for value in candidates.values() if _serbia_hint(value, history)]))[:MAX_CACHED_CANDIDATES // 4]
+    ids = {value["id"] for value in preferred}
+    yield from preferred
+    yield from diverse([value for key, value in candidates.items() if key not in ids])
+
+
+def _save_candidate_cache(state_dir, candidates, history):
+    records, size = [], 128
+    for candidate in _cache_order(candidates, history):
+        record = {key: candidate[key] for key in ("id", "link", "protocol", "source_ids")}
+        record.update(observed_at=candidate["_observed_at"], public_publish_allowed=True)
+        record_size = len(json.dumps(record, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()) + 1
+        if size + record_size > MAX_CANDIDATE_CACHE_BYTES:
+            continue
+        records.append(record)
+        size += record_size
+        if len(records) >= MAX_CACHED_CANDIDATES:
+            break
+    # The existing atomic writer creates a private mode-600 file and never
+    # follows a destination symlink. The serialized cache has its tighter cap.
+    raw = _write_private(state_dir / CANDIDATE_CACHE_NAME,
+                         {"schema": 1, "unverified_inputs": True, "entries": records})
+    if len(raw) > MAX_CANDIDATE_CACHE_BYTES:
+        raise ValueError("Regional candidate cache exceeds its size limit")
+    return len(records)
 
 
 def _managed(build, state_dir):
@@ -407,7 +534,7 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
                                       "RS sing-box", "Serbia v2ray", "proxy subscription"]
         catalog_urls, catalog_status = load_regional_sources(build.ROOT, now=now)
         for url in catalog_urls:
-            pool.add(url, origin="grok-research")
+            pool.add(url, origin="source-catalog")
         for key, record in history["sources"].items():
             if key in pool.sources:
                 pool.sources[key]["functional_ema"] = record.get("local_ema", 0)
@@ -420,6 +547,7 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
         discovery_stats = {**(pool.stats if pool is not None else {}),
                            "collection_error": "regional-discovery-unavailable"}
     candidates = {}
+    fresh_cache = {}
     invalid = 0
     for link in links:
         candidate = _candidate(build, link, pool.link_sources.get(link, ()))
@@ -427,18 +555,57 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
             invalid += 1
             continue
         identifier = candidate["id"]
+        candidate["_observed_at"] = now
+        if connection_identity(build, candidate["link"]) not in private_connections:
+            cached = {**candidate, "_observed_at": now}
+            if identifier in fresh_cache:
+                cached["source_ids"] = _source_ids(set(cached["source_ids"]) | set(fresh_cache[identifier]["source_ids"]))
+            fresh_cache[identifier] = cached
         previous = history["candidates"].get(identifier, {})
         source_ids = _source_ids(set(candidate["source_ids"]) | set(previous.get("source_ids", [])))
         history["candidates"][identifier] = {**previous, "last_seen": now, "source_ids": source_ids,
                                                "last_tested": previous.get("last_tested", 0)}
         if identifier in by_id:
             by_id[identifier]["source_ids"] = _source_ids(set(by_id[identifier]["source_ids"]) | set(source_ids))
+            by_id[identifier]["_observed_at"] = now
             continue
         if identifier in candidates:
             candidates[identifier]["source_ids"] = _source_ids(set(candidates[identifier]["source_ids"]) | set(source_ids))
         else:
             candidate["source_ids"] = source_ids
             candidates[identifier] = candidate
+    cached, cache_status = _load_candidate_cache(build, state_dir, now, private_connections)
+    partial_discovery = (not fresh_cache or bool(discovery_stats.get("collection_error"))
+                         or bool(discovery_stats.get("budget_exhausted"))
+                         or bool(discovery_stats.get("source_failures"))
+                         or bool(discovery_stats.get("deferred_sources")))
+    fallback_count = 0
+    if preferred_country == "RS" and not cached and partial_discovery:
+        cached = _main_manifest_candidates(build, state_dir, now, private_connections)
+        fallback_count = len(cached)
+    replayed = {}
+    if partial_discovery:
+        for identifier, candidate in cached.items():
+            if identifier in candidates or identifier in by_id:
+                continue
+            candidates[identifier] = candidate
+            replayed[identifier] = candidate["_observed_at"]
+            previous = history["candidates"].get(identifier, {})
+            source_ids = _source_ids(set(candidate["source_ids"]) | set(previous.get("source_ids", [])))
+            candidate["source_ids"] = source_ids
+            history["candidates"][identifier] = {**previous, "last_seen": max(previous.get("last_seen", 0), candidate["_observed_at"]),
+                                                   "source_ids": source_ids, "last_tested": previous.get("last_tested", 0)}
+    merged_cache = dict(cached)
+    for identifier, candidate in fresh_cache.items():
+        previous = merged_cache.get(identifier)
+        if previous is not None:
+            candidate["source_ids"] = _source_ids(set(candidate["source_ids"]) | set(previous["source_ids"]))
+        merged_cache[identifier] = candidate
+    try:
+        stored_cache_count = _save_candidate_cache(state_dir, merged_cache, history)
+        cache_persistence = "saved"
+    except (OSError, ValueError):
+        stored_cache_count, cache_persistence = 0, "unavailable"
     # Queue contention is validator uncertainty, not evidence of a dead server.
     # Give due promising candidates a small tranche without displacing normal
     # exploration. A retry hint never supplies cached functional proof.
@@ -457,9 +624,7 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
         # Source labels are search hints only. Reserve at least one quarter for
         # broad rotating exploration to find unlabeled/mislabelled Serbian exits.
         def hinted(value):
-            remark = unquote(value["link"].rsplit("#", 1)[-1]) if "#" in value["link"] else ""
-            return (history["candidates"].get(value["id"], {}).get("last_exit_country") == "RS"
-                    or "🇷🇸" in remark or bool(re.search(r"(?i)(?<![A-Za-z])(?:RS|Serbia|Srbija|Belgrade|Beograd|Сербия|Србија)(?![A-Za-z])", remark)))
+            return _serbia_hint(value, history)
         preferred = _select([value for value in normal if hinted(value)], history, remaining - max(1, remaining // 4))
         selected.extend(preferred)
         broad = _select([value for value in normal if not hinted(value)], history, remaining - len(preferred))
@@ -487,7 +652,16 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
         # inputs even if their cache cannot be written; the frozen manifest
         # below remains mandatory for publication authorization.
         provenance_persistence = "unavailable"
-    nodes = [{key: value for key, value in candidate.items() if key != "_node"} for candidate in selected]
+    nodes = [{**{key: value for key, value in candidate.items() if not key.startswith("_")},
+              **({"input_observed_at": candidate["_observed_at"]} if "_observed_at" in candidate else {})}
+             for candidate in selected]
+    used_cache_ages = [max(0, now - replayed[node["id"]]) for node in nodes if node["id"] in replayed]
+    fetched_sources = discovery_stats.get("fetched_sources", 0)
+    failed_sources = discovery_stats.get("source_failures", 0)
+    fetched_sources = fetched_sources if type(fetched_sources) is int and 0 <= fetched_sources <= 160 else 0
+    failed_sources = failed_sources if type(failed_sources) is int and 0 <= failed_sources <= 160 else 0
+    registered_sources = min(160, max(len(pool.sources) if pool is not None else 0, len(source_stats), fetched_sources + failed_sources))
+    attempted_sources = min(registered_sources, fetched_sources + failed_sources)
     manifest = {"schema": 1, "generated_at": now, "unverified_inputs": True,
                 "best50_digest": hashlib.sha256("\n".join(best50_links).encode()).hexdigest(),
                 "managed_pool_digest": managed_digest,
@@ -500,6 +674,16 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
                             "collected": len(links), "invalid": invalid,
                             "discovery": discovery_stats, "source_catalog": catalog_status,
                             "provenance_persistence": provenance_persistence,
+                            "candidate_cache": {"status": cache_status, "fresh": len(fresh_cache),
+                                                "available": len(cached), "offered": len(replayed),
+                                                "used": len(used_cache_ages), "stored": stored_cache_count,
+                                                "oldest_used_age_seconds": max(used_cache_ages, default=None),
+                                                "youngest_used_age_seconds": min(used_cache_ages, default=None),
+                                                "fallback_main_manifest": fallback_count,
+                                                "persistence": cache_persistence},
+                            "source_counts": {"registered": registered_sources, "attempted": attempted_sources,
+                                              "fetched": fetched_sources, "failed": failed_sources,
+                                              "deferred": max(0, registered_sources - attempted_sources)},
                             "source_count": len(source_stats)}}
     if best50_sha is not None:
         if not isinstance(best50_sha, str) or not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", best50_sha):

@@ -19,7 +19,7 @@ from subscription_presentation import title as presentation_title
 MAX_BYTES = 1024 * 1024
 MAX_AGE_SECONDS = 6 * 3600
 HEALTH_URL = "https://raw.githubusercontent.com/RebelRider/vpn-subscription/regional/output/local-health.json"
-STALE_TITLE = "#profile-title: Best Local VPN [STALE - no verified servers]"
+STALE_TITLE = "#profile-title: BL VPN [STALE]"
 STALE_HEADERS = (STALE_TITLE, "#bestlocal-status: stale; retained configurations are not currently verified",
                  "#bestlocal-health-url: " + HEALTH_URL)
 
@@ -68,7 +68,7 @@ def apply_presentation(text: str, status: dict, now: float | None = None) -> str
         return mark_stale_text(text)
     if status.get("retained_nodes"):
         headers = (title, "#bestlocal-status: mixed; retained entries are not currently verified", STALE_HEADERS[2])
-    elif "[STALE - " in title:
+    elif "[STALE" in title:
         headers = (title, STALE_HEADERS[1], STALE_HEADERS[2])
     else:
         headers = (title,)
@@ -93,9 +93,9 @@ def apply_serbia_presentation(text: str, status: dict, now: float | None = None)
                 or status.get("result") != ("qualified" if nodes else "empty")
                 or len(connection_lines(text)) != len(nodes)):
             raise RuntimeError("Invalid Serbia publication metadata")
-        title = presentation_title(status, now=now).replace("BL VPN [", "BL VPN Serbia [", 1)
+        title = presentation_title(status, now=now).replace("BL VPN [", "BL RS [", 1)
     except (RuntimeError, ValueError, TypeError, AttributeError):
-        title = "#profile-title: BL VPN Serbia [STALE - unverified date]"
+        title = "#profile-title: BL RS [STALE]"
     headers = [title]
     if "STALE" in title:
         headers.append("#bestlocal-status: stale; last Serbia selection is older than 72h or unverified")

@@ -17,6 +17,19 @@ LINK = f"vless://{UUID}@1.1.1.1:443?security=tls&sni=example.com#public"
 class DormantSourceRecoveryTests(unittest.TestCase):
     NOW = 2_000_000_000
 
+    def test_catalog_origin_is_truthful_and_legacy_sources_are_not_lost(self):
+        url = "https://raw.githubusercontent.com/public/catalog/main/config.txt"
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            pool = discovery.SourcePool([], path, now=self.NOW)
+            self.assertTrue(pool.add(url, origin="grok-research"))
+            pool.save()
+            loaded = discovery.SourcePool([], path, now=self.NOW + 1)
+            self.assertEqual(len(loaded.sources), 1)
+            self.assertEqual(next(iter(loaded.sources.values()))["origin"], "source-catalog")
+            loaded.save()
+            self.assertEqual(next(iter(discovery.SourcePool([], path, now=self.NOW + 2).sources.values()))["origin"], "source-catalog")
+
     @staticmethod
     def dormant(url, retry_at):
         key = hashlib.sha256(url.encode()).hexdigest()[:24]

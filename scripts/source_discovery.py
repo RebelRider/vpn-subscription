@@ -368,8 +368,12 @@ class SourcePool:
                 if key in restored:
                     continue
                 origin = item.get("origin")
-                if not isinstance(origin, str) or origin not in {"seed", "github-search", "public-feed-link", "grok-research"}:
+                if not isinstance(origin, str) or origin not in {"seed", "github-search", "public-feed-link", "grok-research", "source-catalog"}:
                     origin = "public-feed-link"
+                if origin == "grok-research":
+                    # Older catalog admissions included independent discovery.
+                    # Preserve the source, but do not invent model provenance.
+                    origin = "source-catalog"
                 clean = {"url": url, "origin": origin}
                 clean["first_seen"] = self._integer(item.get("first_seen"), self.now, self.now)
                 for name in ("last_fetch", "last_changed", "last_success", "last_tested"):
@@ -421,7 +425,7 @@ class SourcePool:
                     expected = hashlib.sha256(url.encode()).hexdigest()[:24]
                     retired_at, retry_at = record["retired_at"], record["retry_at"]
                     if (key != expected or key in restored
-                            or record["origin"] not in {"github-search", "public-feed-link", "grok-research"}
+                            or record["origin"] not in {"github-search", "public-feed-link", "grok-research", "source-catalog"}
                             or type(retired_at) not in (int, float) or type(retry_at) not in (int, float)
                             or not math.isfinite(retired_at) or not math.isfinite(retry_at)
                             or not 0 < retired_at <= self.now
@@ -430,7 +434,7 @@ class SourcePool:
                     # A newer surviving hash ledger always keeps its cooldown,
                     # including caches written by an earlier implementation.
                     retry_at = max(retry_at, self.state["retired_sources"].get(key, 0))
-                    restored_dormant[key] = {"url": url, "origin": record["origin"],
+                    restored_dormant[key] = {"url": url, "origin": "source-catalog" if record["origin"] == "grok-research" else record["origin"],
                                             "retired_at": retry_at - RETIREMENT_COOLDOWN,
                                             "retry_at": retry_at}
                 except (ValueError, KeyError, TypeError, OverflowError):
@@ -447,7 +451,7 @@ class SourcePool:
             return
         key = hashlib.sha256(url.encode()).hexdigest()[:24]
         origin = item.get("origin")
-        if not isinstance(origin, str) or origin not in {"github-search", "public-feed-link", "grok-research"}:
+        if not isinstance(origin, str) or origin not in {"github-search", "public-feed-link", "grok-research", "source-catalog"}:
             origin = "public-feed-link"
         self.state["dormant_sources"][key] = {"url": url, "origin": origin,
                                                "retired_at": self.now,

@@ -1,0 +1,5891 @@
+{
+  "algorithm": "serbia-strict-services-v1",
+  "countries": {},
+  "diagnostics": [
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "54af60b31e19f666",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "98b7951f9f6ed9e6123fdd088c32a4b64a9b49cafca0f694f3ce25929a223a13",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "167.88.62.203",
+      "upstream_rank": 1
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "b0408081536f51a0",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "a2f7069a97594053d6f5a240430c074f5571dcd5fbda66d2dbf26a0fd1cfbc6b",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "82.38.31.202",
+      "upstream_rank": 2
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "ff65554955bb90ad",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "observed-exit-country-mismatch"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": {
+        "checked_at": "2026-11-09T14:18:58.143656+00:00",
+        "country": "NL",
+        "observations": [
+          {
+            "country": "NL",
+            "ip": "2a02:20b3:103:3d::1",
+            "source": "cloudflare-trace"
+          }
+        ],
+        "reason": "observed-exit-country-mismatch"
+      },
+      "id": "829494153aca2ec0aaf5a7d41f4a21198bf32244ffd4a1d84c2fda725e4f5506",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "fail",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "observed-exit-country-mismatch"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "185.4.115.146",
+      "upstream_rank": 3
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "835fc799ba908a32",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "32a194a8f5cc599bc8a20da31c307da0f4d927487e823b033fa14a0ca6297d7a",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "169.40.42.229",
+      "upstream_rank": 4
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "96911d29708b381d",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "ec2608999dbab0a1b8382545a3eb4eb9860a5765e9c7969bc0d70d855100e07e",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "169.197.140.245",
+      "upstream_rank": 5
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "1d603f8c3998ee4b",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "39bf99c1b2c87abfc665148f32da0206e146b8b9575228aa1cf824e19ab0cb84",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "23.191.200.206",
+      "upstream_rank": 6
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "18e9107c3fd46aeb",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "d7298ed701f45d38b1aae33b4a5f8589f801a9fb4e75e62e92c17a162577ea11",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "15.204.97.197",
+      "upstream_rank": 7
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "4c9737ac14d705e5",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "63690cd4016fd3912854361c0ba6202953ac82363005266563b149def45d3c83",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "66.163.122.26",
+      "upstream_rank": 8
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "bb95ead420ff8113",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "81708eb62ce80db9d92942a3d886397060f9d5b9f52109f1018b5fa14afb7ce9",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "216.106.186.82",
+      "upstream_rank": 9
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "65b719391f91d11f",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "930a5a41eacc2daed6ee022ad485faa455c2168aa7cd2b52d11627122a9bef97",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "66.163.112.171",
+      "upstream_rank": 10
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "16cfe56f115c832e",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "db730445523a547729b117951402f3bce3dc95d640e44afa42b79ee7f87cdda0",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "37.19.198.243",
+      "upstream_rank": 11
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "08500f5ca30ddcb1",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "d2c68ae9c5939c744efbea7f1dde7af56209e86f72aa87758994e3764d967b33",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "107.173.237.146",
+      "upstream_rank": 12
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "f6dfcaa01a1c2aac",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "observed-exit-country-mismatch"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": {
+        "checked_at": "2026-11-09T14:19:07.317890+00:00",
+        "country": "NL",
+        "observations": [
+          {
+            "country": "NL",
+            "ip": "89.105.195.153",
+            "source": "cloudflare-trace"
+          }
+        ],
+        "reason": "observed-exit-country-mismatch"
+      },
+      "id": "d5178e0e298bbc385bf396964d361e5a85ed82b7ec153c1c2cc2e9796b885785",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "fail",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "observed-exit-country-mismatch"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "89.105.195.147",
+      "upstream_rank": 13
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "448a24498b38ea1d",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "observed-exit-country-mismatch"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": {
+        "checked_at": "2026-11-09T14:19:10.410275+00:00",
+        "country": "PL",
+        "observations": [
+          {
+            "country": "PL",
+            "ip": "80.47.13.207",
+            "source": "cloudflare-trace"
+          }
+        ],
+        "reason": "observed-exit-country-mismatch"
+      },
+      "id": "6cd46871b09a1abef46875debb6638101937ca92d524c586204eb41bf82698a1",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "fail",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "observed-exit-country-mismatch"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "80.47.13.182",
+      "upstream_rank": 14
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "1299c6b6a0197a5c",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "59950edf8bfc939adb09a365f92a0f135d41a3f56821bc9dc1515b21acb1318b",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "50.7.227.77",
+      "upstream_rank": 15
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "c7bcf48121412d97",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "d78785d9fd046b4f5573e4dd1f9b72c6c1e8e87afcf52298fd35f94f3a42204f",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "150.251.143.253",
+      "upstream_rank": 16
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "15d557aeb4eab186",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "29c8328def5ac30acb19702137f61d00b3f7e8b4c8df577de929dfbef23fbee4",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "146.75.117.242",
+      "upstream_rank": 17
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "731134402be72a19",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "348ada7b5385497c701ddf8721a068c92b37cd2321a035f2098cc6b53f05ed91",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "2.59.183.167",
+      "upstream_rank": 18
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "ed49da185a62c538",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "fab0852e5f869a0a39261eb539ee8d475e3a02cd7e503667311e93ab689c4be8",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "193.108.119.29",
+      "upstream_rank": 19
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "3f5ade805c60fa5f",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "9760758fe85c26a2c02358baa7f9ec450c104db78023a5deef6cb2a9391169e3",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "hysteria2",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "64.32.13.230",
+      "upstream_rank": 20
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "8f4262f76b8022f9",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "066f73ac7563317a7370a8eb5178109db9b436e8176df872f71d063536fef79a",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "31.56.186.24",
+      "upstream_rank": 21
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "fbf64087e33bf7e9",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "701ca0cbf4d4bc4306938a9c544dd84129d1a10f5ded92bab999f968d1b863b7",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "188.166.81.135",
+      "upstream_rank": 22
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "097f86779005afbc",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "abfc188062c6cf449ff4ae593ceb8dc471d20e75849172be7a53472bfc11761f",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "129.146.143.80",
+      "upstream_rank": 23
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "09317a54f1a13b24",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "173b016a38edd8bf9aa97ca14d82fde77a7c3bc3bddff2e78298f41703b4b202",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "3.169.9.125",
+      "upstream_rank": 24
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "6d2ee4408bfc50b7",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "d53cf0316a026b7dc893f9355c7b7c8eb225c36dc862252b52dbafe45d01558a",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "15.204.247.124",
+      "upstream_rank": 25
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "26faa4f6ce722458",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "observed-exit-country-mismatch"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": {
+        "checked_at": "2026-11-09T14:19:19.122027+00:00",
+        "country": "GB",
+        "observations": [
+          {
+            "country": "GB",
+            "ip": "45.43.75.222",
+            "source": "cloudflare-trace"
+          }
+        ],
+        "reason": "observed-exit-country-mismatch"
+      },
+      "id": "ab6f778b107f7ae9fda03e67d7b6e04d6bbf1c76d7e24d9fce73a6c2ece99c01",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "fail",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "observed-exit-country-mismatch"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "91.98.103.29",
+      "upstream_rank": 26
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "2e758804d88a0791",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "d920b293405489c208f281c06d7d177b9f250633d041e4ed14582088a756e8bc",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "109.70.74.95",
+      "upstream_rank": 27
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "3c4ffd99a968d7e3",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "dcc8f3d3a5e1ccd7be892dcec653cd09a66435be7ece66d3847bf1b130491329",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "2.26.54.200",
+      "upstream_rank": 28
+    },
+    {
+      "attempted_address_count": 2,
+      "endpoint_attempts": [
+        {
+          "address_id": "652a086be6924321",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        },
+        {
+          "address_id": "1f7a1832ca542cec",
+          "attempt": 2,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "952d8dfb686dca31810b64136452bd35b61c89b493a4dd1bb63d4c0a63b4ec1a",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "5.75.200.186",
+      "upstream_rank": 29
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "a62936802e069046",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "cbe96a8a016be9e108cca72aaa38cea554afcb1f6fa20adf22cf600e59242d1f",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "hysteria2",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "13.143.189.149",
+      "upstream_rank": 30
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "61b0eb9982d09edf",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "1a9a10d17d733cc1b41b0f6390086896f0a24ff893f0f9db41a0eb1f781fcbc0",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "86.54.28.75",
+      "upstream_rank": 31
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "77985482f400e1f8",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "10d31e5b00bdd7cfc41bc313da5b822fb85b5df7838ee06392f46e262fead712",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "31.77.129.151",
+      "upstream_rank": 32
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "96c6cc0768363ef4",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "observed-exit-country-mismatch"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": {
+        "checked_at": "2026-11-09T14:19:26.828220+00:00",
+        "country": "DE",
+        "observations": [
+          {
+            "country": "DE",
+            "ip": "2.26.230.148",
+            "source": "cloudflare-trace"
+          }
+        ],
+        "reason": "observed-exit-country-mismatch"
+      },
+      "id": "256957d3e9d4952d5eaa8d7ce05292c73530fde7081883bd3908ea239ca697ab",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "fail",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "observed-exit-country-mismatch"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "2.26.230.148",
+      "upstream_rank": 33
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "c6de61a4b4e38ba8",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "ee1f463ac2a2e40951eecf0b198fda626eaf291d205a0a6e27adfd4eac580f29",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "91.107.247.173",
+      "upstream_rank": 34
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "71e682c97f2c377c",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "18dec9b6b648c91e56b4da2c77fa465855fb20748babb8977ddc46d7c8111bd2",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "138.124.125.193",
+      "upstream_rank": 35
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "4720b3f9a8553dc2",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "e40b6116919e5feb87a9ee260bd33b67888ddd0e68560721bb2a0031b9909e6e",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "79.141.164.124",
+      "upstream_rank": 36
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "b860510192b25dd2",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "b1f82a71d43cd258f084aceb16a49b009c026f40dd739d9de653897c709087f8",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "87.199.205.28",
+      "upstream_rank": 37
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "fff6967b6d80cfc5",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "b2b107c59ebff4617ca7eaea6a15406982925db3a442143b0a40caa8165a2f8c",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "93.152.215.254",
+      "upstream_rank": 38
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "66be0975cb62666c",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "e4d626f8665419a121464aa12be5b4c60421cf052f14f5e67cdb5a3c55a15957",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "45.77.54.204",
+      "upstream_rank": 39
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "39a39c95dc18c0a8",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "b5fded732c8c869f0eb940fd3d2892d1a9234074b94866239f031d85ed68a890",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "2.26.99.150",
+      "upstream_rank": 40
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "a385264af8a2aeb6",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "def640115f7e8c28c42c0b6d70d9a788b9dbba926607129ecc0c42bee00dc488",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "146.103.118.189",
+      "upstream_rank": 41
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "3e59e366362caf8c",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "2546cbad0a82bb07d318ff6192ab5a266a87ef097eda3d10f1590f18fd7c9e63",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "78.47.113.225",
+      "upstream_rank": 42
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "31882f5e7b538ad6",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "f640c9a7569410646ff96ab515ee7698f850b9a2e2d10340e4dd6246ab790aef",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "158.173.24.73",
+      "upstream_rank": 43
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "daa30cca8aadb078",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "cf3bdb8412a0f3c9a1381e3306205b646a3db9d444e469dd074ad27714ece844",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "193.29.139.223",
+      "upstream_rank": 44
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "980876ec4899bb3f",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "52fde0214e8a87de6da862b6ee189b2df57cc5363c932122ff86f006e39ce012",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "104.239.12.81",
+      "upstream_rank": 45
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "b860510192b25dd2",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "baaeb7a1783fd97f491e41306fa6240ebda1658adfcc300cd3726830ed422bfa",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "87.199.205.28",
+      "upstream_rank": 46
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "ff65554955bb90ad",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "observed-exit-country-mismatch"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": {
+        "checked_at": "2026-11-09T14:19:40.131067+00:00",
+        "country": "EE",
+        "observations": [
+          {
+            "country": "EE",
+            "ip": "192.159.101.184",
+            "source": "cloudflare-trace"
+          }
+        ],
+        "reason": "observed-exit-country-mismatch"
+      },
+      "id": "73fcc1173c0425d1105e1a3243ff51adc67532f6dcd22de7ef9ac9e9760fabd9",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "fail",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "observed-exit-country-mismatch"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "185.4.115.146",
+      "upstream_rank": 47
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "46d251e4920c95d2",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "68786c0c6428048f5deee2d37ac63053336eb96bd45c98ee99ae1061de51136b",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "82.38.31.165",
+      "upstream_rank": 48
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "13679143f482de2c",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "observed-exit-country-mismatch"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": {
+        "checked_at": "2026-11-09T14:19:40.311248+00:00",
+        "country": "NL",
+        "observations": [
+          {
+            "country": "NL",
+            "ip": "89.105.195.154",
+            "source": "cloudflare-trace"
+          }
+        ],
+        "reason": "observed-exit-country-mismatch"
+      },
+      "id": "e4c96988655f3b5e252d9e4fdea22a64229baf8a7a35ce394d5dbea5db2d4010",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "fail",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "observed-exit-country-mismatch"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "89.105.195.148",
+      "upstream_rank": 49
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "882fa09c2627eb76",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "642d68f8941c2efd0dade952815acfcbb6e5d3e8002a82526e552fc0113b3875",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "169.40.42.89",
+      "upstream_rank": 50
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "4054a976a242dc30",
+          "attempt": 1,
+          "engine_errors": {
+            "tls-handshake-failed": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "tls-handshake-failed": 1
+      },
+      "exit_country_evidence": null,
+      "id": "000de08cacd3d9062a8a9322253ed10104594822e3e7efd1b5c9350e7ab0f81d",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "190.93.244.198",
+      "upstream_rank": 51
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "ff315ce8a3fe72fb",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "observed-exit-country-mismatch"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": {
+        "checked_at": "2026-11-09T14:19:41.145674+00:00",
+        "country": "NL",
+        "observations": [
+          {
+            "country": "NL",
+            "ip": "89.105.195.158",
+            "source": "cloudflare-trace"
+          }
+        ],
+        "reason": "observed-exit-country-mismatch"
+      },
+      "id": "00183036c5033a1d760c7136389b4e8255936696aa8358489f9b260444b6fdd2",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "fail",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "observed-exit-country-mismatch"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "89.105.195.152",
+      "upstream_rank": 52
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "5886f485fbc4b71d",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "00557bf1fb58608c848be55b6fc6abf3a9e5545c75ca1998816dd390449dfbcd",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "141.95.0.23",
+      "upstream_rank": 53
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "19db9d89042232e2",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "021e205b8cd902b9bfe6ce9755103d0956da8b3fd1e2edeeef670e56ea6f2b86",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "hysteria2",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "201.8.71.59",
+      "upstream_rank": 54
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "03fa16bbdacb5fd4",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "0230083ca6ce6161a2abe3a03f2e0c8c7eb17c6057078dccbe1af44828f701d6",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "116.203.249.12",
+      "upstream_rank": 55
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "30274ad94f4f0aa9",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "0010d4fd4061249d47fce914c879111dbe234a212c8380301f0afaf086ba6a8b",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "66.163.118.62",
+      "upstream_rank": 56
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "6db91688fb67eb92",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "006496ab95ed672fd5141ed45e96f3d29e124d358ec7cb5a3ad55c2ce7e7bce8",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "151.115.72.50",
+      "upstream_rank": 57
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "356e925f3bbf31be",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "00669769a3ef3833b3b6644fef562da6005e8e2470b02669019662e263999c54",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "141.164.45.187",
+      "upstream_rank": 58
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "722946d78236071f",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "034b607a4d24e2bdaae19db258b6826c78b06663a0a3877fcbce48c0b895e5d2",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "162.251.61.46",
+      "upstream_rank": 59
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "422acf3003c9c457",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "05f4db2bce4a2b2d37b385cdc16c7c56e575d5b4a67185c3735f8df85d8d5f57",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "hysteria2",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "162.249.125.133",
+      "upstream_rank": 60
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "997dd9870739e91b",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "009220bb3409f01ca19eaf58b731f7c2c2997ab7f4714fa1c2043bd84210b341",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "116.204.164.27",
+      "upstream_rank": 61
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "fa3b71f390068f81",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "010cb8ba28aa9cd373ac9c28c24edb8cb3206cdbdf2993a27e2f63d9abec99e5",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "77.221.132.206",
+      "upstream_rank": 62
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "d1a00cfddf9f91e0",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "0126199708fa20eb890f83b19b1d87737e9443e8b213a995287476bb2fe62c3e",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "216.152.155.54",
+      "upstream_rank": 63
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "1a315658b5fafdd4",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "06d91bcec0e8b32f0a163751844c02a40132c81f28617dfdb2f5007b6c24cee0",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "hysteria2",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "179.61.138.145",
+      "upstream_rank": 64
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "844a181d0d1ca603",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "0d0477ecd8ec97f01dbba6374ecb2fd66219c892c706dabe5356d33a3ae71720",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "47.243.153.153",
+      "upstream_rank": 65
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "3eb77f2055f18359",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "00b281f94f5e5dd5ebe816362213e00f6821c9ea5df71dec94601e800cc47c60",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "169.40.42.35",
+      "upstream_rank": 66
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "4ac6e7f6cc7b72d8",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "011aafe0ee608c4ecfa7960d7599bc8f4ba7b8634a088619c21d3a67033ee0e8",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "82.38.31.170",
+      "upstream_rank": 67
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "7fb874ea9a5f7ba0",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "022bc7f5bc0b75ba2d179cbf16955561b61d295a701cdc6e48292fea7a0f7c8b",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "104.20.55.137",
+      "upstream_rank": 68
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "145d5f6eac72dbd9",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "10446b3c16547e333304ee4c4b0574c2b81eb7350670431e6267742ffd48ab00",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "129.146.77.248",
+      "upstream_rank": 69
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "179b53631aaf34ae",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "2606b4cac34093d5ae4d7c1f7fb45ba495145d82d0cccff8539c7cf52e8daf92",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "hysteria2",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "185.139.215.41",
+      "upstream_rank": 70
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "7f7d273266037c00",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "016e5f370a677990ab8485cc0fbc663f83c546b44aef996b24c9cb28c2ab865a",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "153.52.255.118",
+      "upstream_rank": 71
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "c6ab9aacf2d1f994",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "02072f8e66f1e6f872461b07ebcb4945180b4ae9eb744c6adfc094dbfc51e21e",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "130.49.189.158",
+      "upstream_rank": 72
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "ce5b23da97daedfb",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "02669691f9c21186728bdaa9bfa982e94af606aca1ebf6add3443f92e1e6eb89",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "172.67.118.45",
+      "upstream_rank": 73
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "eeec5aaea70fb627",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "117b01da71ca9e0fd212f77d5de0d3379ec8c66fd8b4a5e8fe4414d108955c20",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "156.225.67.109",
+      "upstream_rank": 74
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "3697addaee669e28",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "63748c2c83b4bcb06bedea44738be8fb556f1235d1aeae6b0cfacb60709308c9",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "hysteria2",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "95.143.196.97",
+      "upstream_rank": 75
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "29e0c7f32c074d43",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "0198d731453ac155c368c4658b35ef1e8c4d8e09727cf6d002511410a79ab161",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "94.156.181.35",
+      "upstream_rank": 76
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "53ff586741eb1637",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "05cd32f30adc07f3b959c3bc680091eafbec715b98d0a4a937beb871259d68c3",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "81.12.35.246",
+      "upstream_rank": 77
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "d965595a89ff94a7",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "126cb8d24c72a20618eec39479f268fa4e5e8d213a6d57b1288c23778b2de2f9",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "45.77.141.230",
+      "upstream_rank": 78
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "de17ab19e12e766b",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "1e4de23d5e9b39fe81f0008293aea2bc3f46f5a42c8a3ec2b56241b39fdd701a",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "104.17.10.171",
+      "upstream_rank": 79
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "1a9674666297d55c",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "a8c9888898bd918ae692d189395e2189cc474a4d5c5c130567e25db08d141627",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "hysteria2",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "109.70.74.213",
+      "upstream_rank": 80
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "a7a34133e8182bb3",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "01b53853d97c652dc16ba172ec9b873c081e643e2f19334d428e44e77ef9b1f5",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "23.191.200.207",
+      "upstream_rank": 81
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "441e754540f460ff",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "061a9c7eadbdab43c70409b845f6334220ecf5b070cb8211ecf38b96f7393bb8",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "169.197.142.68",
+      "upstream_rank": 82
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "d735037637fc0416",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "4629787d02eceae2dc3310b7903b7f01a8db48a148f2e0a3f7dc1867f5ae0628",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "45.63.30.142",
+      "upstream_rank": 83
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "76796168df807df9",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "06c7f4d56bb3a6559466e5b7147fd727847d033fc005fadfc06bb33c9ae709f3",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "hysteria2",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "31.76.62.148",
+      "upstream_rank": 84
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "bb4c13f680493072",
+          "attempt": 1,
+          "engine_errors": {
+            "tls-handshake-failed": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "tls-handshake-failed": 1
+      },
+      "exit_country_evidence": null,
+      "id": "07dedc7daf4101b327b2c27d23a75ebfde6a87f26b9b00d0aef44173069d1588",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "198.41.208.172",
+      "upstream_rank": 85
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "f567166422d5294a",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "020191deb64269e006997df87e396997774e50a8422d123b2aef1ec735cb9e38",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "85.198.80.164",
+      "upstream_rank": 86
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "dc5696da9d04037a",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "06a7807267e0c794707e772e3db5ca2824e8485ca53b18efdd44c37d7ea23f32",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "149.22.87.204",
+      "upstream_rank": 87
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "90af7bd64ec74b97",
+          "attempt": 1,
+          "engine_errors": {
+            "tls-handshake-failed": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "tls-handshake-failed": 1
+      },
+      "exit_country_evidence": null,
+      "id": "01992138bbbd8babb84c5c6ccef55d120f0edde0c108d7d6d1ac9d0e9e75dd58",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "162.159.44.161",
+      "upstream_rank": 88
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "451b1cd58725d614",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "0db63087c3137f8382121c7c0b3b601f2fcf174b430c297f256217dbdf7581dd",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "79.137.99.183",
+      "upstream_rank": 89
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "12f6b9899eb2c01c",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "4e486e3520691182700c1d6d4200f7cdb6d946cab48bd3b82afc1ca49dcc18d8",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "hysteria2",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "152.32.254.68",
+      "upstream_rank": 90
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "3d48f9822ff6619a",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "0205b76ac9b694dbfa5e71987c1c00bd5a5f83dfe1be434deeda502664f4fad6",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "103.102.229.75",
+      "upstream_rank": 91
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "64d972d77ef94a1e",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "02fcd1b6b3a74998b3b2e6b8baaa363dc7cf37a773463fffda50bd96b8f5518f",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "208.69.78.158",
+      "upstream_rank": 92
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "b9b0973b4faf15c8",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "08b01d640513cf4a81182e7e6ce2ce07c0687903bff2c17be8c94206b4248cf8",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "13.140.83.153",
+      "upstream_rank": 93
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "0bbd2aca4d23becb",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "18b039499ffd91366204e869b96fb4c3ae87c37286374cbae55507eeb902dd1c",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "159.89.13.84",
+      "upstream_rank": 94
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "545b471281fbd50d",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "27a765c3ff286b8f3e854f2ce6b63d2be32a6e01f60827e30649b88df57a6460",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "hysteria2",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "156.224.78.11",
+      "upstream_rank": 95
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "43e38921537fbb9a",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "0344133358a6f8a74455ffa66b5cafc3d043309e18171286908abffaf60019c0",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "195.123.240.65",
+      "upstream_rank": 96
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "bedba2f5995fba4e",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "0797de693d68a7d466cecdcbeff7153015548362078b89ea2e9b3ee70a583b58",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "46.242.239.59",
+      "upstream_rank": 97
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "af2c2e900f12f837",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "08b9ba3294855c8ab660249b76f53193d80469794292a6e7bb48a455adc2e264",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "142.202.51.22",
+      "upstream_rank": 98
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "1deee7c52e7ca25f",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": null,
+      "id": "2e31af5761b24802065f629ddd5e9dc7e92490a93c9a94414669e66337e25cf0",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "154.84.1.140",
+      "upstream_rank": 99
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "a2f4e266964f4dbd",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": null,
+      "id": "32a365dbf7d311b353e2a78ece8941226a0ae905cce642a7bc791ad5897eb520",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "hysteria2",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "155.248.209.237",
+      "upstream_rank": 100
+    }
+  ],
+  "gates": {
+    "mandatory": {
+      "chatgpt": 0,
+      "instagram": 0,
+      "spotify": 0,
+      "youtube": 0
+    },
+    "preliminary": {}
+  },
+  "generated_at": "2026-11-09T14:20:29.813537+00:00",
+  "input": {
+    "best50_digest": "962348236df944879b3ec327bccb4ae11d7bab27506ccf08b72f8b2b47c68d1d",
+    "nodes": 100,
+    "path": "origin/main Best50 + independent Serbia exploration",
+    "regional_manifest": {
+      "digest": "3454afd386f6f3d816f56f8253ba3de4d98e47726e7e087f06468764771d7a3f"
+    },
+    "regional_summary": {
+      "best50": 50,
+      "browser_retry": 0,
+      "collected": 8000,
+      "discovery": {
+        "discovered_sources": 9,
+        "fetched_sources": 68,
+        "rate_limited": false,
+        "source_failures": 4
+      },
+      "exploration": 50,
+      "invalid": 3568,
+      "local_recheck": 0,
+      "managed": 0,
+      "provenance_persistence": "saved",
+      "source_catalog": {
+        "active": 64,
+        "status": "available"
+      },
+      "source_count": 72
+    }
+  },
+  "latency_method": "median of 3..5 fresh HTTPS gstatic generate_204 completion times in milliseconds via the candidate authenticated proxy path; includes SOCKS, transport and TLS; strictly below 500ms",
+  "network": {
+    "probe_default_interface": "en0",
+    "system_network_modified": false,
+    "system_route_interface": "utun6"
+  },
+  "nodes": [],
+  "publication": {
+    "branch": "regional",
+    "status_path": "output/local-status-Serbia.json",
+    "subscription_path": "output/best-local-Serbia.txt"
+  },
+  "regional_source_feedback": {
+    "definitive_failure": 8,
+    "inconclusive": 92,
+    "persisted": true,
+    "qualified": 0,
+    "sources_updated": 59
+  },
+  "required_services": [
+    "chatgpt",
+    "youtube",
+    "instagram",
+    "spotify"
+  ],
+  "result": "empty",
+  "retained_nodes": [],
+  "stability": {
+    "first_pass_survivors": 0,
+    "minimum_successes": 5,
+    "qualified": 0,
+    "round_survivors": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "rounds": 5
+  },
+  "upstream_sha": "efae0c7f94ddbbdd7c6732301d95c642030b828f"
+}

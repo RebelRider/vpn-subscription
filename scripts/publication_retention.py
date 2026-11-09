@@ -45,7 +45,10 @@ def rendered_links(local, status: dict) -> list[str]:
     version = status.get("presentation_version", 1)
     if type(version) is not int or version not in (1, 2):
         raise RuntimeError("Unsupported subscription presentation version")
-    return [local.published_link(node["link"], index, node.get("exit_country"),
+    from protocols import pin_transport_address
+    build = local.load_build_module() if any(node.get("tested_server_ip") for node in all_nodes(status)) else None
+    return [local.published_link(pin_transport_address(build, node["link"], node["tested_server_ip"])
+                    if node.get("tested_server_ip") else node["link"], index, node.get("exit_country"),
                                  node.get("exit_city"), node.get("exit_ip"), presentation_version=version)
             for index, node in enumerate(all_nodes(status), 1)]
 
@@ -207,7 +210,7 @@ def prepare(local, build, status: dict, base_ref: str) -> None:
     if not set(allowed) & published_ids:
         return
     current = snapshot(local.ROOT, base_ref)
-    fresh_connections = {local.connection_identity(build, node["link"]) for node in status["nodes"]}
+    fresh_connections = {local.connection_identity(build, local.tested_connection_link(build, node)) for node in status["nodes"]}
     fresh_ids = {node["id"] for node in status["nodes"]}
     retained, provenance = [], {}
     for identifier in allowed:
@@ -216,7 +219,7 @@ def prepare(local, build, status: dict, base_ref: str) -> None:
         node = _entry(local, current, identifier)
         if node is None:
             continue
-        connection = local.connection_identity(build, node["link"])
+        connection = local.connection_identity(build, local.tested_connection_link(build, node))
         if connection in fresh_connections:
             continue
         if any(value.get("id") == identifier for value in current["status"]["nodes"]):

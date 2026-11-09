@@ -81,6 +81,32 @@ def apply_presentation(text: str, status: dict, now: float | None = None) -> str
     return "\n".join(headers) + "\n" + retained
 
 
+def apply_serbia_presentation(text: str, status: dict, now: float | None = None) -> str:
+    """Age Serbia independently, including a deliberately empty completed result."""
+    try:
+        nodes = status.get("nodes")
+        if (status.get("algorithm") != "serbia-strict-services-v1"
+                or status.get("required_services") != ["chatgpt", "youtube", "instagram", "spotify"]
+                or not isinstance(nodes, list) or len(nodes) > 12
+                or not all(isinstance(node, dict) for node in nodes)
+                or status.get("stability", {}).get("qualified") != len(nodes)
+                or status.get("result") != ("qualified" if nodes else "empty")
+                or len(connection_lines(text)) != len(nodes)):
+            raise RuntimeError("Invalid Serbia publication metadata")
+        title = presentation_title(status, now=now).replace("BL VPN [", "BL VPN Serbia [", 1)
+    except (RuntimeError, ValueError, TypeError, AttributeError):
+        title = "#profile-title: BL VPN Serbia [STALE - unverified date]"
+    headers = [title]
+    if "STALE" in title:
+        headers.append("#bestlocal-status: stale; last Serbia selection is older than 72h or unverified")
+    owned = ("#profile-title:", "#bestlocal-status:")
+    existing = [line for line in text.splitlines() if line.lstrip().lower().startswith(owned)]
+    if existing == headers:
+        return text
+    return "\n".join(headers) + "\n" + "".join(
+        line for line in text.splitlines(keepends=True) if not line.lstrip().lower().startswith(owned))
+
+
 def has_fresh_validation(status, now: float | None = None) -> bool:
     """Fresh subset timestamp, also used to protect newer mixed writers."""
     now = time.time() if now is None else now
@@ -133,18 +159,27 @@ def mark_regional(repo: Path, runner=None) -> bool:
                     worktree = Path(directory) / "checkout"
                     try:
                         runner.git("worktree", "add", "--detach", str(worktree), "origin/regional")
-                        published_status = read_status(worktree / "output/local-status.json")
-                        if has_fresh_validation(published_status) and "presentation_version" not in published_status:
-                            print("Regional strict validation is fresh; retained subscription unchanged")
+                        changed = []
+                        for sub, meta, serbia in (("output/best-local.txt", "output/local-status.json", False),
+                                                  ("output/best-local-Serbia.txt", "output/local-status-Serbia.json", True)):
+                            target = worktree / sub
+                            if not target.is_file():
+                                continue
+                            try:
+                                published_status = read_status(worktree / meta)
+                                if not serbia and has_fresh_validation(published_status) and "presentation_version" not in published_status:
+                                    continue
+                                original = read_text(target)
+                                marked = (apply_serbia_presentation if serbia else apply_presentation)(original, published_status)
+                                if marked != original:
+                                    target.write_text(marked, encoding="utf-8")
+                                    changed.append(sub)
+                            except (RuntimeError, ValueError, OSError, TypeError):
+                                print("Regional age annotation deferred for one profile; other profile remains independent")
+                        if not changed:
+                            print("Regional subscription validation ages are already displayed")
                             return False
-                        target = worktree / "output/best-local.txt"
-                        original = read_text(target)
-                        marked = apply_presentation(original, published_status)
-                        if marked == original:
-                            print("Regional subscription validation age is already displayed")
-                            return False
-                        target.write_text(marked, encoding="utf-8")
-                        runner.git("-C", str(worktree), "add", "-f", "output/best-local.txt")
+                        runner.git("-C", str(worktree), "add", "-f", *changed)
                         runner.git("-C", str(worktree), "-c", "user.name=best50-bot", "-c",
                                    "user.email=41898282+github-actions[bot]@users.noreply.github.com",
                                    "commit", "-m", "chore: expose retained BestLocal staleness")

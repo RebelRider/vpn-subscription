@@ -65,21 +65,28 @@ jobs:
           set -euo pipefail
           python scripts/update_geoip.py
 
+      - name: Restore pinned engine archive
+        id: engine-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/best50-engine/sing-box.tgz
+          key: sing-box-linux-amd64-1.13.19-ef88a9e577d474210867bd708933d042e9b70106529df2656182c9db90106aa1
+
       - name: Install pinned, verified sing-box
         shell: bash
         run: |
           set -euo pipefail
-          VERSION="1.13.19"
-          # SHA256 from the official GitHub release asset digest.
-          SHA256="ef88a9e577d474210867bd708933d042e9b70106529df2656182c9db90106aa1"
-          curl --proto '=https' --tlsv1.2 -fsSL --retry 3 --retry-max-time 90 \
-            --connect-timeout 15 --max-time 60 \
-            "https://github.com/SagerNet/sing-box/releases/download/v${VERSION}/sing-box-${VERSION}-linux-amd64.tar.gz" \
-            -o /tmp/sing-box.tgz
-          echo "${SHA256}  /tmp/sing-box.tgz" | sha256sum --check --strict
-          tar -xzf /tmp/sing-box.tgz -C /tmp
-          sudo install "/tmp/sing-box-${VERSION}-linux-amd64/sing-box" /usr/local/bin/sing-box
-          sing-box version
+          python scripts/install_ci_engine.py \
+            --cache "$RUNNER_TEMP/best50-engine/sing-box.tgz" \
+            --bin-directory "$RUNNER_TEMP/best50-engine/bin"
+          echo "$RUNNER_TEMP/best50-engine/bin" >> "$GITHUB_PATH"
+
+      - name: Save verified engine archive
+        if: steps.engine-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/best50-engine/sing-box.tgz
+          key: sing-box-linux-amd64-1.13.19-ef88a9e577d474210867bd708933d042e9b70106529df2656182c9db90106aa1
 
       - name: Run regression tests with the real proxy engine
         run: python -m unittest discover -s tests -v

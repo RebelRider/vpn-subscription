@@ -10,7 +10,7 @@ import ipaddress
 import json
 import re
 import uuid
-from urllib.parse import parse_qs, unquote, urlsplit
+from urllib.parse import parse_qs, parse_qsl, unquote, urlencode, urlsplit, urlunsplit
 
 SUPPORTED_SCHEMES = frozenset({'vless', 'vmess', 'trojan', 'ss', 'hysteria2', 'hy2', 'socks'})
 SS_METHODS = frozenset({'aes-128-gcm', 'aes-256-gcm', 'chacha20-ietf-poly1305', '2022-blake3-aes-128-gcm', '2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'})
@@ -216,6 +216,70 @@ def relabel(link: str, label: str) -> str:
         # continue escaping every other presentation character as before.
         encoded_label = label[:2] + quote(label[2:], safe='')
     return link.split('#', 1)[0] + '#' + encoded_label
+
+
+def pin_transport_address(build, link: str, server_ip: str) -> str:
+    """Publish the tested public transport address without changing its semantics.
+
+    The validator resolves a source hostname and pins one address in sing-box.
+    Keeping that hostname in the subscription could send Happ to an untested
+    address or IP family. Preserve the source URI separately for provenance;
+    this helper creates the equivalent import URI for the tested connection.
+    """
+    if not isinstance(server_ip, str) or '%' in server_ip:
+        raise ValueError('invalid tested transport address')
+    try:
+        address = ipaddress.ip_address(server_ip)
+    except ValueError:
+        raise ValueError('invalid tested transport address') from None
+    if not address.is_global or address.is_multicast:
+        raise ValueError('non-public tested transport address')
+    node = build.parse_vless(link)
+    expected = json.loads(json.dumps(build.vless_to_singbox(node), allow_nan=False))
+    expected['server'] = str(address)
+    tls = expected.get('tls', {})
+    if tls.get('enabled'):
+        # Match service_probe.make_config, including an implicit hostname SNI.
+        tls['server_name'] = node.get('sni') or node['server']
+
+    scheme = link.split(':', 1)[0].lower()
+    if scheme == 'vmess':
+        body, separator, fragment = link.split('://', 1)[1].partition('#')
+        data = json.loads(b64(body))
+        data['add'] = str(address)
+        if tls.get('enabled'):
+            data['sni'] = tls['server_name']
+        pinned = 'vmess://' + base64.b64encode(
+            json.dumps(data, separators=(',', ':'), ensure_ascii=False).encode()).decode()
+        if separator:
+            pinned += '#' + fragment
+    else:
+        parse_link = link
+        if scheme == 'ss':
+            rest = link.split('://', 1)[1]
+            if '@' not in rest.split('#', 1)[0].split('?', 1)[0]:
+                encoded, separator, fragment = rest.partition('#')
+                parse_link = 'ss://' + b64(encoded) + ('#' + fragment if separator else '')
+        parsed = urlsplit(parse_link)
+        userinfo, separator, _ = parsed.netloc.rpartition('@')
+        authority = ('[' + str(address) + ']') if address.version == 6 else str(address)
+        authority += ':' + str(node['port'])
+        if separator:
+            authority = userinfo + '@' + authority
+        query = parsed.query
+        if tls.get('enabled'):
+            options = parse_qsl(query, keep_blank_values=True, max_num_fields=24)
+            options = [(key, value) for key, value in options if key != 'sni']
+            options.append(('sni', tls['server_name']))
+            query = urlencode(options)
+        pinned = urlunsplit((parsed.scheme, authority, parsed.path, query, parsed.fragment))
+
+    # A format-specific normalization must never silently lose credentials,
+    # transport headers, SNI, Reality keys, obfuscation, ALPN or other options.
+    actual = build.vless_to_singbox(build.parse_vless(pinned))
+    if actual != expected:
+        raise ValueError('unrepresentable tested transport configuration')
+    return pinned
 
 
 def connection_identity(build, link: str) -> str:

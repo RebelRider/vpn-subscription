@@ -1005,11 +1005,14 @@ def apply_exit_geography(
 
 def valid_node_evidence(node: dict, rounds: int, *, require_round_evidence: bool = False,
                         reference_time: datetime | None = None,
-                        require_current_browser: bool = False) -> bool:
+                        require_current_browser: bool = False,
+                        required_services=("chatgpt", "youtube", "instagram")) -> bool:
     if not isinstance(node, dict) or type(rounds) is not int or rounds not in (3, 4, 5):
         return False
     services = node.get("services", {})
-    names = ("chatgpt", "youtube", "instagram")
+    names = required_services
+    if tuple(names) not in (("chatgpt", "youtube", "instagram"), ("chatgpt", "youtube", "instagram", "spotify")):
+        return False
     if not isinstance(services, dict):
         return False
     for name in names:
@@ -1080,6 +1083,13 @@ def valid_node_evidence(node: dict, rounds: int, *, require_round_evidence: bool
 
 def connection_identity(build, link: str) -> str:
     return load_protocols().connection_identity(build, link)
+
+
+def tested_connection_link(build, node: dict) -> str:
+    """The source URI remains provenance; the exported transport is the tested one."""
+    if node.get("tested_server_ip"):
+        return load_protocols().pin_transport_address(build, node["link"], node["tested_server_ip"])
+    return node["link"]
 
 
 def _previous_published_order(repo: Path | None = None) -> list[str]:
@@ -1163,7 +1173,7 @@ def validate_publication_nodes(build, nodes: list[dict], *, maximum: int = MAX_L
             raise RuntimeError("Malformed publication candidate")
         try:
             identifier = build.normalized_fingerprint(build.parse_vless(node["link"]))
-            connection = connection_identity(build, node["link"])
+            connection = connection_identity(build, tested_connection_link(build, node))
         except (ValueError, KeyError, TypeError, OverflowError, RecursionError):
             raise RuntimeError("Invalid publication configuration") from None
         if (not isinstance(identifier, str) or not re.fullmatch(r"[0-9a-f]{64}", identifier)
@@ -1226,7 +1236,8 @@ def finalize_local_selection(
     unique_connections, unique_links = set(), []
     for link in latency_qualified:
         try:
-            connection = connection_identity(build, link)
+            node = next(node for node in allowed_nodes if node["link"] == link)
+            connection = connection_identity(build, tested_connection_link(build, node))
         except (ValueError, KeyError, TypeError, OverflowError, RecursionError):
             continue
         if connection not in unique_connections:
@@ -1477,7 +1488,9 @@ def require_fresh_timestamp(value: str | None, max_hours: float, description: st
         raise RuntimeError(f"Stale or future {description}; maximum age {max_hours:g}h")
 
 
-async def run_local_probe(build, links, final_rounds, minimum_successes, input_description):
+async def run_local_probe(build, links, final_rounds, minimum_successes, input_description, *,
+                          required_services=("chatgpt", "youtube", "instagram"), required_exit_country=None,
+                          state_dir=None, previous_order=None):
     if not 3 <= final_rounds <= 5 or minimum_successes != final_rounds:
         raise RuntimeError("Local validation requires 3..5 rounds and every round must succeed")
     service_probe = load_service_probe()
@@ -1498,15 +1511,19 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
             unique_links.append(link)
     print(f"Local equivalent configurations removed: {len(links) - len(unique_links)}", flush=True)
     links = unique_links
+    policy = {} if tuple(required_services) == ("chatgpt", "youtube", "instagram") and required_exit_country is None else {
+        "required_services": required_services, "required_exit_country": required_exit_country}
     reports = await service_probe.validate_candidates(
         build, links, rounds=final_rounds,
         interface=build.CFG.get("_probe_default_interface", "en0"),
+        **policy,
     )
     build._local_reports = reports
-    history_path = STATE_DIR / "local-reliability.json"
+    history_dir = STATE_DIR if state_dir is None else Path(state_dir)
+    history_path = history_dir / "local-reliability.json"
     now = int(time.time())
     history = load_local_reliability(history_path, now)
-    gate_counts = {name: 0 for name in ("chatgpt", "youtube", "instagram")}
+    gate_counts = {name: 0 for name in required_services}
     qualified = []
     diagnostics = []
     from local_feedback import classify_diagnostic
@@ -1528,7 +1545,16 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
             {"services": services, "latency_samples_ms": measurements, "median_latency": latency},
             final_rounds, require_round_evidence=True,
             require_current_browser=True,
+            required_services=required_services,
         )
+        if required_exit_country is not None:
+            passed = passed and service_probe.valid_exit_country_evidence(result.get("exit_country_evidence"), required_exit_country)
+        if passed and result.get("tested_server_ip"):
+            try:
+                load_protocols().pin_transport_address(build, link, result["tested_server_ip"])
+            except (ValueError, KeyError, TypeError):
+                passed = False
+                result.setdefault("rejection_reasons", []).append("happ-tested-address-unrepresentable")
         sample["passes"] = min(sample.get("passes", 0), sample["runs"] - 1) + int(passed)
         sample["last_seen"] = now
         sample["qualified"] = passed
@@ -1538,7 +1564,7 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
                       "services": services, "latency_samples_ms": measurements,
                       "median_latency": latency if isinstance(latency, (float, int)) and math.isfinite(latency) else None,
                       "rejection_reasons": result.get("rejection_reasons", ["missing-result"] if not result else [])}
-        for field in ("protocol", "engine_errors", "latency_checks", "attempted_address_count", "endpoint_attempts", "browser_check"):
+        for field in ("protocol", "engine_errors", "latency_checks", "attempted_address_count", "endpoint_attempts", "browser_check", "exit_country_evidence", "tested_server_ip"):
             if field in result:
                 diagnostic[field] = result[field]
         diagnostic["outcome"] = classify_diagnostic(diagnostic)
@@ -1548,10 +1574,10 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
             qualified.append((link, result, rank, reliability))
         diagnostics.append(diagnostic)
         print("Candidate", diagnostic["id"], json.dumps({k: v for k, v in diagnostic.items() if k not in {"id", "upstream_rank"}}, allow_nan=False), flush=True)
-    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    history_dir.mkdir(parents=True, exist_ok=True)
     # Hash-only history is diagnostic; no candidate credentials are stored here.
     save_local_reliability(history_path, history)
-    qualified = rank_local_qualifiers(qualified, identities, _previous_published_order())
+    qualified = rank_local_qualifiers(qualified, identities, _previous_published_order() if previous_order is None else previous_order)
     status = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "algorithm": "bestlocal-strict-services-v6",
@@ -1567,6 +1593,7 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
                    "latency_samples_ms": result["latency_samples_ms"],
                    "median_latency": result["median_ms"], "p95_latency": result["p95_ms"],
                    "services": result["services"], "historical_reliability": reliability,
+                   **{field: result[field] for field in ("tested_server_ip", "exit_country_evidence") if field in result},
                    "validated_at": result["validated_at"], "upstream_rank": upstream_rank}
                   for index, (link, result, upstream_rank, reliability) in enumerate(qualified, 1)],
     }
@@ -1577,6 +1604,7 @@ def _retention_context():
     # Some callers load this module without registering it in sys.modules.
     return SimpleNamespace(ROOT=ROOT, MAX_LOCAL_PUBLISHED_NODES=MAX_LOCAL_PUBLISHED_NODES,
                            published_link=published_link, connection_identity=connection_identity,
+                           tested_connection_link=tested_connection_link, load_build_module=load_build_module,
                            validate_publication_nodes=validate_publication_nodes,
                            require_fresh_timestamp=require_fresh_timestamp, valid_node_evidence=valid_node_evidence)
 
@@ -1608,7 +1636,7 @@ def write_subscription(
         "#",
         (
             "# Local filtering: "
-            "ChatGPT providers JSON + YouTube video metadata + "
+            "ChatGPT cold-session application proof + YouTube video metadata + "
             "Instagram application HTML; median proxy HTTPS latency <500 ms"
         ),
         (

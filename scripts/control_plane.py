@@ -98,7 +98,8 @@ def validate_command(command: list[str]) -> None:
     if command and Path(command[0]).name in {"git", "gh"}:
         return
     if (len(command) >= 2 and Path(command[0]).resolve() == Path(sys.executable).resolve()
-            and Path(command[1]).resolve() == Path("scripts/local_probe.py").resolve()):
+            and Path(command[1]).resolve() in {Path("scripts/local_probe.py").resolve(),
+                                              Path("scripts/serbia_pipeline.py").resolve()}):
         return
     raise RuntimeError("control-plane wrapper accepts only Git, gh, or the local validator")
 

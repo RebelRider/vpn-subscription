@@ -170,7 +170,13 @@ class GitPublicationTests(unittest.TestCase):
                 # A second completed local validation is publishable, but a
                 # still newer publisher wins during its freshness check.
                 base_stamp = datetime.fromisoformat(stamp)
-                m.write_status(status_path, {**status, 'generated_at': (base_stamp + timedelta(seconds=1)).isoformat()})
+                # Deliberately cross a minute boundary: status and presentation
+                # are one transaction. Updating only status used to fail title
+                # validation before the competing writer was even exercised.
+                second_stamp = base_stamp.replace(second=59, microsecond=0) + timedelta(seconds=1)
+                second_status = {**status, 'generated_at': second_stamp.isoformat()}
+                m.write_subscription(output, [node['link'] for node in second_status['nodes']], second_status)
+                m.write_status(status_path, second_status)
                 original_git_output = m.git_output
                 winner = {}
                 def publish_between_freshness_check_and_checkout(*args, **kwargs):
@@ -178,7 +184,7 @@ class GitPublicationTests(unittest.TestCase):
                     if args[0] == 'show' and args[1].endswith(':output/local-status.json') and not winner:
                         checkout = Path(td) / 'concurrent-publisher'
                         git('worktree', 'add', '--detach', str(checkout), old_snapshot)
-                        newer = {**status, 'generated_at': (base_stamp + timedelta(seconds=30)).isoformat()}
+                        newer = {**status, 'generated_at': (second_stamp + timedelta(seconds=30)).isoformat()}
                         (checkout / 'output/local-status.json').write_text(json.dumps(newer))
                         retained = '\n'.join('#profile-title: Concurrent fresh winner' if line.startswith('#profile-title:') else line for line in output.read_text().splitlines()) + '\n'
                         (checkout / 'output/best-local.txt').write_text(retained)
@@ -190,8 +196,9 @@ class GitPublicationTests(unittest.TestCase):
                         git('worktree', 'remove', '--force', str(checkout))
                     return result
                 with patch.object(m, 'git_output', side_effect=publish_between_freshness_check_and_checkout):
-                    with self.assertRaises(RuntimeError):
+                    with self.assertRaisesRegex(RuntimeError, 'git command failed: push'):
                         m._publish_regional_once(output, status_path, tested)
+                self.assertIn('sha', winner, 'The competing publication must actually run')
                 git('fetch', 'origin', 'regional')
                 self.assertEqual(git('rev-parse', 'origin/regional'), winner['sha'])
                 self.assertEqual(json.loads(git('show', 'origin/regional:output/local-status.json')), winner['status'])

@@ -101,6 +101,21 @@ class SubscriptionStateTests(unittest.TestCase):
 
 
 class RegionalAnnotationTests(unittest.TestCase):
+    def test_serbia_age_is_independent_and_empty_is_not_a_fake_server(self):
+        now = int(time.time())
+        meta = {"algorithm": "serbia-strict-services-v1",
+                "required_services": ["chatgpt", "youtube", "instagram", "spotify"],
+                "nodes": [], "stability": {"qualified": 0}, "result": "empty",
+                "generated_at": stamp(now - 72 * 3600)}
+        text = "#profile-title: old\n#bestlocal-result: empty\n# generated: preserved\n"
+        fresh = state.apply_serbia_presentation(text, meta, now)
+        self.assertNotIn("STALE", fresh)
+        stale = state.apply_serbia_presentation(fresh, meta, now + 1)
+        self.assertIn("BL VPN Serbia [STALE -", stale)
+        self.assertFalse(state.connection_lines(stale))
+        self.assertIn("# generated: preserved", stale)
+        self.assertEqual(stale, state.apply_serbia_presentation(stale, meta, now + 1))
+
     def test_real_bare_git_fresh_skip_stale_publication_retry_and_idempotence(self):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)

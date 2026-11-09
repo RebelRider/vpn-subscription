@@ -534,13 +534,14 @@ class Runner:
         environment = os.environ.copy()
         environment.update({"GIT_TERMINAL_PROMPT": "0", "GH_PROMPT_DISABLED": "1", **self.environment})
         # Ignore ambient proxy variables for loopback proxy tests. No system settings change.
-        if "scripts/local_probe.py" in command:
+        validator = any(script in command for script in ("scripts/local_probe.py", "scripts/serbia_pipeline.py"))
+        if validator:
             for key in list(environment):
                 if key.lower() in {"http_proxy", "https_proxy", "all_proxy", "no_proxy"}:
                     environment.pop(key)
         helper = self.repo / "scripts/control_plane.py"
         if sys.platform == "darwin" and helper.is_file() and (
-            Path(command[0]).name in {"git", "gh"} or "scripts/local_probe.py" in command
+            Path(command[0]).name in {"git", "gh"} or validator
         ):
             command = [sys.executable, str(helper), "--", *command]
         with tempfile.TemporaryFile() as output:
@@ -660,6 +661,32 @@ def dispatch_replenishment(runner: Runner, state: dict, state_path: Path, now: f
     atomic_json(state_path, state)
 
 
+def run_secondary_profiles(repo: Path, state_dir: Path) -> dict:
+    """A secondary profile has its own due/retry state and cannot veto main.
+
+    Called under the existing scheduler lock on every poll, including a main
+    skip or failure. The child still shares the validator resource lock.
+    """
+    if not (repo / "scripts/serbia_pipeline.py").is_file():
+        return {}
+    child = Runner(repo, time.monotonic() + 36 * 60)
+    geoip = state_dir / "geoip"
+    child.environment = {"BEST50_CITY_DB_IPV4": str(geoip / "dbip-city-ipv4.csv.gz"),
+                         "BEST50_CITY_DB_IPV6": str(geoip / "dbip-city-ipv6.csv.gz")}
+    try:
+        code, output = child.run([sys.executable, "scripts/serbia_pipeline.py", "--repo", str(repo),
+                                  "--state-dir", str(state_dir / "serbia")],
+                                 "Serbia validation/publication", timeout=35 * 60, check=False)
+        for line in output.splitlines()[-12:]:
+            log("Serbia: " + line)
+        return {"last_poll_at": time.time(), "exit_code": code}
+    except Exception as exc:
+        log("Serbia deferred independently: " + redact(str(exc)))
+        return {"last_poll_at": time.time(), "exit_code": 1}
+    finally:
+        child.stop()
+
+
 def run_scheduler(repo: Path, state_dir: Path) -> int:
     state_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
     state_path = state_dir / "regional-scheduler-status.json"
@@ -697,6 +724,7 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
             raise KeyboardInterrupt
         original_handlers = {s: signal.signal(s, interrupted) for s in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP)}
         stage, failure_outcome, history_needed = "scheduler", "infrastructure_failed", False
+        interrupted_run = False
         try:
             if runner.git("status", "--porcelain"):
                 raise RuntimeError("Production runtime is dirty; refusing self-update")
@@ -801,6 +829,7 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
             log(f"Local validation and publication complete: {qualified} freshly verified; {state.get('last_published_retained_count', 0)} protected historical entries retained")
             return 0
         except (Exception, KeyboardInterrupt) as exc:
+            interrupted_run = isinstance(exc, KeyboardInterrupt)
             previous_failures = state.get("consecutive_failures", 0)
             failures = previous_failures + 1 if isinstance(previous_failures, int) and 0 <= previous_failures <= 1000 else 1
             delay = retry_delay(failures)
@@ -812,6 +841,11 @@ def run_scheduler(repo: Path, state_dir: Path) -> int:
             return 1
         finally:
             runner.stop()
+            if not interrupted_run:
+                try:
+                    state["serbia"] = run_secondary_profiles(repo, state_dir)
+                except KeyboardInterrupt:
+                    state["serbia"] = {"last_poll_at": time.time(), "exit_code": 130}
             state["validation_due_seconds"] = validation_interval(state)
             state.update({"running": False, "last_scheduler_finished_at": time.time()})
             published = state.get("last_published_at")

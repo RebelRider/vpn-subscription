@@ -6,9 +6,43 @@ then publishes to the unchanged Happ subscription:
 
 https://raw.githubusercontent.com/RebelRider/vpn-subscription/regional/output/best-local.txt
 
+The independent Serbia subscription is:
+
+https://raw.githubusercontent.com/RebelRider/vpn-subscription/regional/output/best-local-Serbia.txt
+
+It uses the same discovery, protocol adapters, isolated validator, reliability
+ranking and Git transport. Its separate policy requires **actual RS egress AND
+ChatGPT AND YouTube AND Instagram AND Spotify**, with the same five complete
+rounds and median **strictly <500 ms**. Country names, flags, source metadata and
+entry IP locations are discovery hints only. Two HTTPS observers (Cloudflare
+trace and country.is), plus a repeated trace, must agree on RS through that
+candidate before service checks and again afterwards. Unknown or conflicting
+geography cannot qualify. Spotify's official redirect to `open.spotify.com` is
+supported; actual application metadata/assets are required, never just HTTP200.
+
+Serbia has independent input manifests, discovery rotation, feedback, validation
+history, due/backoff state and publication paths under the existing launchd
+scheduler. A 230-minute due interval reserves time for the primary validation
+and its own bounded run within six hours while the Mac is awake and online.
+The primary subscription keeps its existing selection policy. Both profiles
+share the global candidate resource lock; a failed Serbia run cannot veto or
+modify the primary subscription. Serbia source discovery prioritizes regional
+hints and reserves at least one quarter of exploration for other unlabeled
+candidates. Previously published Serbia nodes are independently rechecked.
+
+A confirmed zero-qualifier Serbia result publishes a comment-only subscription
+and matching `regional/output/local-status-Serbia.json`, without dummy nodes or
+neighboring countries. Infrastructure/uncertainty-only failures preserve the
+previous artifact and retry. Git commits atomically update both Serbia files,
+recheck public-export authorization and Best50 before push, refuse older writers,
+retry concurrent branch updates and verify the remote bytes. Existing CI also
+annotates both profiles after more than72h without successful local validation,
+without advancing their saved dates. Happ's handling of an empty subscription
+is client-specific; an empty file must never be padded with unverified entries.
+
 ## Validation contract
 
-Every published BestLocal entry must pass **ChatGPT AND YouTube AND Instagram**
+Every newly verified BestLocal entry must pass **ChatGPT AND YouTube AND Instagram**
 in every one of five rounds, and its median latency must be **strictly <500 ms**.
 Missing, blocked, challenged, rate-limited or malformed responses never qualify.
 No padding, fallback candidates or waiver of a service is allowed. Up to twelve
@@ -85,7 +119,12 @@ Each candidate has its own sing-box process and authenticated ephemeral loopback
 SOCKS port. Only that candidate is an outbound; there is no direct fallback.
 Both outbound `bind_interface` and route `default_interface` bind to en0.
 Endpoint DNS is checked for public addresses, then pinned; TLS retains original
-SNI. Destination DNS is sent through SOCKS/VLESS or the other candidate protocol.
+SNI. Fresh exported URIs now pin that exact tested transport IP as well, with
+reparsed sing-box outbound equality required for every adapter. Original source
+URIs/identities remain in provenance. This prevents Happ from resolving a source
+hostname to another untested IP/family. Equivalent pinned connections are
+deduplicated. The IP in the display label remains the observed **exit** IP; it
+need not be the transport/entry IP. Destination DNS is sent through SOCKS/VLESS or the other candidate protocol.
 Endpoint lookup uses the existing macOS resolver without changing its settings.
 GitHub fetch/push/API commands use a separate ephemeral authenticated SOCKS
 proxy with a direct outbound bound to en0 and explicit HTTPS DNS. Its environment
@@ -93,7 +132,7 @@ and Git proxy override apply only to the owned command; existing GitHub/keychain
 authentication is preserved. This avoids failures in the active system tunnel
 without changing that tunnel or any system settings. Candidate HTTPS checks
 always override this control proxy with their own candidate connection.
-At most four candidates and sixteen HTTPS requests run concurrently. Kernel
+At most four candidates and sixteen HTTPS requests (twenty for Serbia) run concurrently. Kernel
 locks cover direct validation and scheduled jobs. Watchdogs and cancellation
 cleanup target only children/process groups created by this system.
 

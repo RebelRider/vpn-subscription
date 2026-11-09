@@ -570,6 +570,10 @@ class SourcePool:
         if self.now < int(self.state.get("api_retry_at", 0)) or self.now - int(self.state.get("last_discovery", 0)) < interval:
             return
         queries = ["proxy subscription", "v2ray configs", "sing-box subscription", "hysteria2 proxy", "shadowsocks subscription"]
+        custom = getattr(self, "discovery_queries", None)
+        if (isinstance(custom, (list, tuple)) and 1 <= len(custom) <= 12
+                and all(isinstance(q, str) and 1 <= len(q) <= 100 and not any(ord(c) < 32 for c in q) for q in custom)):
+            queries = list(custom)
         query = queries[int(self.state.get("discovery_round", 0)) % len(queries)]
         since = (datetime.fromtimestamp(self.now, timezone.utc) - timedelta(days=60)).strftime("%Y-%m-%d")
         url = "https://api.github.com/search/repositories?" + urlencode({"q": f"{query} pushed:>{since} archived:false fork:false", "sort": "updated", "order": "desc", "per_page": 20})

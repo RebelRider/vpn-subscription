@@ -68,6 +68,8 @@ SERVICE_URLS = {
     ),
     "instagram": "https://www.instagram.com/accounts/login/",
 }
+SPOTIFY_URL = "https://www.spotify.com/"
+ALL_SERVICE_URLS = {**SERVICE_URLS, "spotify": SPOTIFY_URL}
 ALLOWED_HOSTS = {
     "chatgpt": frozenset({"chatgpt.com", "www.chatgpt.com"}),
     "youtube": frozenset({"youtube.com", "www.youtube.com"}),
@@ -75,10 +77,13 @@ ALLOWED_HOSTS = {
     "latency": frozenset({"www.gstatic.com"}),
     "trace": frozenset({"www.cloudflare.com"}),
     "exit-ip": frozenset({"api64.ipify.org"}),
+    "spotify": frozenset({"www.spotify.com", "spotify.com", "open.spotify.com"}),
+    "exit-country": frozenset({"api.country.is"}),
 }
 LATENCY_URL = "https://www.gstatic.com/generate_204"
 TRACE_URL = "https://www.cloudflare.com/cdn-cgi/trace"
 EXIT_IP_URL = "https://api64.ipify.org?format=json"
+EXIT_COUNTRY_URL = "https://api.country.is/"
 EXIT_METADATA_TIMEOUT = 4
 MAX_EXIT_IP_RESPONSE_BYTES = 1024
 ANTI_AUTOMATION = (
@@ -102,6 +107,7 @@ class _VisibleText(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.stack = []
         self.parts = []
+        self.important = []
         self.size = 0
 
     def handle_starttag(self, tag, attrs):
@@ -113,7 +119,7 @@ class _VisibleText(HTMLParser):
         if tag not in self.VOID:
             if len(self.stack) >= 256:
                 raise ValueError("HTML nesting exceeds probe limit")
-            self.stack.append((tag, bool(hidden)))
+            self.stack.append((tag, bool(hidden), tag in {"h1", "h2", "h3"} or values.get("role") == "alert"))
 
     def handle_endtag(self, tag):
         for index in range(len(self.stack) - 1, -1, -1):
@@ -125,6 +131,8 @@ class _VisibleText(HTMLParser):
         if not (self.stack and self.stack[-1][1]) and self.size < 65536:
             value = data[:65536 - self.size]
             self.parts.append(value)
+            if any(item[2] for item in self.stack):
+                self.important.append(value)
             self.size += len(value)
 
 
@@ -168,8 +176,18 @@ def response_restrictions(response: dict) -> tuple[bool, bool]:
     challenge = response.get("cf_mitigated") == "challenge" or any(marker in lowered for marker in CF_CHALLENGE_MARKERS)
     # A translated/static app bundle may mention unsupported countries without
     # restricting this request. Require an actual error response or JSON error.
+    blocking_heading = False
+    if isinstance(response.get("content_type"), str) and "text/html" in response["content_type"].lower():
+        parser = _VisibleText()
+        try:
+            parser.feed(body.decode("utf-8", errors="replace"))
+            important = " ".join(parser.important).lower().encode()
+            blocking_heading = any(marker in important for marker in GEO_RESTRICTION_MARKERS)
+        except (ValueError, RecursionError):
+            pass
     geographic = any(marker in lowered for marker in GEO_RESTRICTION_MARKERS) and (
         response.get("status") in (400, 401, 403, 451)
+        or blocking_heading
         or (isinstance(response.get("content_type"), str) and "application/json" in response["content_type"].lower()
             and b'"error"' in body.lower())
     )
@@ -238,6 +256,7 @@ def _safe_url(url: str, service: str) -> bool:
             and not parsed.fragment
             and not re.search(r"/(challenge|checkpoint|consent)(?:/|$)", parsed.path)
             and (service != "exit-ip" or (parsed.path in ("", "/") and parsed.query == "format=json"))
+            and (service != "exit-country" or (parsed.path in ("", "/") and not parsed.query))
         )
     except (TypeError, ValueError, KeyError):
         return False
@@ -349,6 +368,19 @@ def validate_response(service: str, response: dict) -> tuple[bool, str]:
         if app and metadata and scripts:
             return True, "ok"
         return False, "unexpected-instagram-application"
+    if service == "spotify":
+        # A Spotify application document, not a redirect, asset, generic 200,
+        # captive portal or geo/error page. Playback/authentication is not tested.
+        if "text/html" not in content_type or len(body) < 1024:
+            return False, "expected-spotify-html"
+        if not re.fullmatch(r"/(?:[a-z]{2}(?:-[a-z]{2})?/)?", urlsplit(response["url"]).path, re.I):
+            return False, "unexpected-spotify-path-inconclusive"
+        canonical = bool(re.search(rb'<(?:link|meta)\b[^>]*(?:href|content)=["\']https://(?:(?:www|open)\.)?spotify\.com(?:/|["\'])', body, re.I))
+        assets = bool(re.search(rb'https://(?:(?:www\.)?spotify\.com|open\.spotifycdn\.com|(?:[a-z0-9-]+\.)?scdn\.co)/[^"\'<> ]+\.(?:js|css)', body, re.I))
+        web_player = all(re.search(rb'<script\b[^>]*id=["\']' + name + rb'["\']', body, re.I)
+                         for name in (b"appServerConfig", b"initialState", b"__CDN_FILE_URLS__"))
+        application = b"__NEXT_DATA__" in body or b"__next_f.push" in body or b"data-event-name" in body or bool(web_player)
+        return (True, "ok") if canonical and assets and application else (False, "unexpected-spotify-application")
     if service == "trace":
         trace = parse_exit_trace(body)
         return (True, "ok") if trace else (False, "unexpected-exit-trace")
@@ -356,6 +388,10 @@ def validate_response(service: str, response: dict) -> tuple[bool, str]:
         if content_type.split(";", 1)[0].strip() != "application/json":
             return False, "expected-exit-ip-json"
         return (True, "ok") if parse_exit_ip(body) else (False, "unexpected-exit-ip")
+    if service == "exit-country":
+        if content_type.split(";", 1)[0].strip() != "application/json":
+            return False, "expected-exit-country-json"
+        return (True, "ok") if parse_exit_country(body) else (False, "unexpected-exit-country")
     return False, "unknown-service"
 
 
@@ -401,6 +437,74 @@ def parse_exit_ip(body: bytes) -> dict | None:
         return {"ip": str(address), "loc": ""}
     except (ValueError, UnicodeError, RecursionError):
         return None
+
+
+def parse_exit_country(body: bytes) -> dict | None:
+    if not isinstance(body, bytes) or len(body) > 4096:
+        return None
+    try:
+        payload = json.loads(body)
+        if not isinstance(payload, dict) or not isinstance(payload.get("ip"), str) or "%" in payload["ip"]:
+            return None
+        address = ipaddress.ip_address(payload["ip"])
+        country = payload["country"]
+        if (not address.is_global or address.is_multicast or not isinstance(country, str)
+                or not re.fullmatch(r"[A-Z]{2}", country) or country in {"XX", "ZZ"}):
+            return None
+        return {"ip": str(address), "loc": country}
+    except (ValueError, UnicodeError, KeyError, TypeError, RecursionError):
+        return None
+
+
+def valid_exit_country_evidence(evidence: dict, country: str = "RS", reference_time=None) -> bool:
+    """Require independent country observations of actual candidate egress.
+
+    Country databases describe IP allocation imperfectly. Agreement by two HTTPS
+    observers, with a repeated trace, is required; unknown/disagreement fails closed.
+    """
+    try:
+        now = datetime.now(timezone.utc) if reference_time is None else reference_time
+        if isinstance(now, (int, float)):
+            now = datetime.fromtimestamp(now, timezone.utc)
+        checked = datetime.fromisoformat(evidence["checked_at"].replace("Z", "+00:00"))
+        observations = evidence["observations"]
+        if (checked.tzinfo is None or not 0 <= (now - checked).total_seconds() <= 6 * 3600
+                or country != "RS" or evidence["country"] != country
+                or not isinstance(observations, list) or len(observations) != 3
+                or [item.get("source") for item in observations] !=
+                ["cloudflare-trace", "country-is", "cloudflare-trace"]):
+            return False
+        for item in observations:
+            if not isinstance(item.get("ip"), str) or "%" in item["ip"]:
+                return False
+            address = ipaddress.ip_address(item["ip"])
+            if not address.is_global or address.is_multicast or item["country"] != country:
+                return False
+        return True
+    except (ValueError, KeyError, TypeError, AttributeError, OverflowError):
+        return False
+
+
+async def observe_required_exit_country(build, port, username, password, country):
+    observations = []
+    for service, url, source in (("trace", TRACE_URL, "cloudflare-trace"),
+                                 ("exit-country", EXIT_COUNTRY_URL, "country-is"),
+                                 ("trace", TRACE_URL, "cloudflare-trace")):
+        try:
+            response = await asyncio.wait_for(_request(build, service, url, port, username, password), EXIT_METADATA_TIMEOUT)
+            if not validate_response(service, response)[0]:
+                return None
+            parsed = parse_exit_trace(response["body"]) if service == "trace" else parse_exit_country(response["body"])
+            if parsed is None:
+                return None
+            observations.append({"source": source, "ip": parsed["ip"], "country": parsed["loc"]})
+            if parsed["loc"] != country:
+                return {"country": parsed["loc"], "checked_at": datetime.now(timezone.utc).isoformat(),
+                        "observations": observations, "reason": "observed-exit-country-mismatch"}
+        except (asyncio.TimeoutError, OSError, ValueError, TypeError, RuntimeError):
+            return None
+    evidence = {"country": country, "checked_at": datetime.now(timezone.utc).isoformat(), "observations": observations}
+    return evidence if valid_exit_country_evidence(evidence, country) else None
 
 
 async def observe_exit_metadata(build, port: int, username: str, password: str) -> dict:
@@ -634,14 +738,14 @@ async def _request(build, service: str, url: str, port: int, username: str, pass
     return {"error": "redirect-limit", "url": url}
 
 
-def summarize_report(report: dict, rounds: int) -> dict:
+def summarize_report(report: dict, rounds: int, required_services=None) -> dict:
     samples = report["latency_samples_ms"]
     valid = len(samples) == rounds and all(type(value) in (int, float) and math.isfinite(value) and value >= 0 for value in samples)
     if valid:
         report["median_ms"] = statistics.median(samples)
         report["p95_ms"] = sorted(samples)[max(0, math.ceil(.95 * len(samples)) - 1)]
     services = report.get("services", {})
-    all_services = (isinstance(services, dict) and set(services) == set(SERVICE_URLS)
+    all_services = (isinstance(services, dict) and set(services) == set(required_services or SERVICE_URLS)
                     and all(isinstance(result, dict) and type(result.get("passed")) is int
                             and type(result.get("attempts")) is int
                             and result["passed"] == rounds and result["attempts"] == rounds
@@ -744,10 +848,10 @@ def browser_diagnostic(result: dict, proof: list[dict] | None) -> dict:
     return diagnostic
 
 
-def empty_report(link: str) -> dict:
+def empty_report(link: str, required_services=None) -> dict:
     return {
         "id": hashlib.sha256(link.encode()).hexdigest()[:16], "qualified": False,
-        "services": {name: {"passed": 0, "attempts": 0, "reasons": [], "evidence": []} for name in SERVICE_URLS},
+        "services": {name: {"passed": 0, "attempts": 0, "reasons": [], "evidence": []} for name in (required_services or SERVICE_URLS)},
         "latency_samples_ms": [], "median_ms": None, "p95_ms": None, "rejection_reasons": [],
         "validated_at": datetime.now(timezone.utc).isoformat(), "exit_trace": None,
         "engine_errors": {}, "latency_checks": [],
@@ -755,10 +859,12 @@ def empty_report(link: str) -> dict:
 
 
 async def _validate_address(build, link: str, rounds: int, interface: str, server_ip: str,
-                            progress: dict | None = None) -> dict:
+                            progress: dict | None = None, *, required_services=None, required_exit_country=None) -> dict:
     """One completely owned proxy process and one pinned, already-validated address."""
     started = time.monotonic()
-    report = empty_report(link)
+    service_urls = {name: ALL_SERVICE_URLS[name] for name in (required_services or SERVICE_URLS)}
+    report = empty_report(link, service_urls)
+    report["tested_server_ip"] = server_ip
     if progress is not None:
         progress["report"] = report
     process = None
@@ -792,6 +898,15 @@ async def _validate_address(build, link: str, rounds: int, interface: str, serve
             engine_error_task = asyncio.create_task(drain_error_classes(getattr(process, "stderr", None), engine_errors))
             try:
                 await _wait_authenticated(port, username, password, process)
+                if required_exit_country is not None:
+                    country_proof = await observe_required_exit_country(build, port, username, password, required_exit_country)
+                    report["exit_country_evidence"] = country_proof
+                    if not valid_exit_country_evidence(country_proof, required_exit_country):
+                        known_other = isinstance(country_proof, dict) and country_proof.get("reason") == "observed-exit-country-mismatch"
+                        report["validation_outcome"] = "fail" if known_other else "inconclusive"
+                        report["rejection_reasons"].append("observed-exit-country-mismatch" if known_other else
+                                                           "required-exit-country-unconfirmed-inconclusive")
+                        return report
                 browser_attempted = False
                 browser_result = None
                 for round_index in range(rounds):
@@ -799,18 +914,18 @@ async def _validate_address(build, link: str, rounds: int, interface: str, serve
                     # diagnostics never imply an unattempted service succeeded.
                     results = await asyncio.gather(*(
                         _request(build, name, url, port, username, password)
-                        for name, url in SERVICE_URLS.items()
+                        for name, url in service_urls.items()
                     ), _request(build, "latency", LATENCY_URL, port, username, password), return_exceptions=True)
                     results = [result if isinstance(result, dict) else {"error": "proxy-request-failed"} for result in results]
-                    evidence = {name: service_evidence(name, response) for name, response in zip(SERVICE_URLS, results[:3])}
+                    evidence = {name: service_evidence(name, response) for name, response in zip(service_urls, results[:-1])}
                     # Auth-provider JSON proves only that this auxiliary endpoint
                     # works. It cannot establish that the ChatGPT application
                     # loads, even when its HTTPS response is genuine.
                     if evidence["chatgpt"]["outcome"] == "pass":
                         evidence["chatgpt"].update(
                             outcome="inconclusive", reason="chatgpt-ui-proof-required-inconclusive")
-                    latency_ok, reason = validate_response("latency", results[3])
-                    sample = results[3].get("latency_ms")
+                    latency_ok, reason = validate_response("latency", results[-1])
+                    sample = results[-1].get("latency_ms")
                     valid_sample = latency_ok and type(sample) in (float, int) and math.isfinite(sample) and sample >= 0
                     # Preserve completed HTTP evidence before waiting for the
                     # serialized browser. A browser queue deadline must never
@@ -821,7 +936,7 @@ async def _validate_address(build, link: str, rounds: int, interface: str, serve
                         current["passed"] += int(item["outcome"] == "pass")
                         current["reasons"].append(item["reason"])
                         current["evidence"].append(item)
-                    report["latency_checks"].append(service_evidence("latency", results[3]))
+                    report["latency_checks"].append(service_evidence("latency", results[-1]))
                     if valid_sample:
                         report["latency_samples_ms"].append(sample)
                     chatgpt = evidence["chatgpt"]
@@ -830,7 +945,7 @@ async def _validate_address(build, link: str, rounds: int, interface: str, serve
                         and chatgpt["http_status"] != 429
                         and chatgpt["reason"] != "rate-limited-inconclusive"
                         and not chatgpt["geo_restricted"]
-                        and all(evidence[name]["outcome"] == "pass" for name in ("youtube", "instagram"))
+                        and all(item["outcome"] == "pass" for name, item in evidence.items() if name != "chatgpt")
                         and valid_sample
                     )
                     if eligible_browser:
@@ -857,9 +972,23 @@ async def _validate_address(build, link: str, rounds: int, interface: str, serve
                         failed = True
                     if failed:
                         break
-                summarize_report(report, rounds)
+                summarize_report(report, rounds, service_urls)
                 if report["qualified"]:
-                    report.update(await observe_exit_metadata(build, port, username, password))
+                    if required_exit_country is not None:
+                        country_proof = await observe_required_exit_country(build, port, username, password, required_exit_country)
+                        report["exit_country_evidence"] = country_proof
+                        if not valid_exit_country_evidence(country_proof, required_exit_country):
+                            report["qualified"] = False
+                            known_other = isinstance(country_proof, dict) and country_proof.get("reason") == "observed-exit-country-mismatch"
+                            report["validation_outcome"] = "fail" if known_other else "inconclusive"
+                            report["rejection_reasons"].append("observed-exit-country-mismatch" if known_other else
+                                                               "required-exit-country-unconfirmed-inconclusive")
+                        else:
+                            first = country_proof["observations"][0]
+                            report["exit_trace"] = {"ip": first["ip"], "loc": first["country"]}
+                            report["exit_trace_source"] = "cloudflare-trace"
+                    else:
+                        report.update(await observe_exit_metadata(build, port, username, password))
             finally:
                 await _stop(build, process)
                 process = None
@@ -906,10 +1035,10 @@ def has_https_response(report: dict) -> bool:
                for item in evidence if isinstance(item, dict))
 
 
-async def _validate_one(build, link: str, rounds: int, interface: str) -> dict:
+async def _validate_one(build, link: str, rounds: int, interface: str, *, required_services=None, required_exit_country=None) -> dict:
     """Try at most two public addresses, only after a complete transport failure."""
     started = time.monotonic()
-    report = empty_report(link)
+    report = empty_report(link, required_services)
     attempts = []
     progress = {}
     try:
@@ -928,7 +1057,9 @@ async def _validate_one(build, link: str, rounds: int, interface: str) -> dict:
                        "https_response": False, "engine_errors": {}, "rejection_reasons": ["attempt-interrupted"]}
             attempts.append(attempt)
             progress.clear()
-            report = await asyncio.wait_for(_validate_address(build, link, rounds, interface, address, progress), remaining)
+            policy = {} if required_services is None and required_exit_country is None else {
+                "required_services": required_services, "required_exit_country": required_exit_country}
+            report = await asyncio.wait_for(_validate_address(build, link, rounds, interface, address, progress, **policy), remaining)
             usable = has_https_response(report)
             attempt.update(https_response=usable, engine_errors=report.get("engine_errors", {}),
                            rejection_reasons=report.get("rejection_reasons", []))
@@ -965,7 +1096,8 @@ async def _validate_one(build, link: str, rounds: int, interface: str) -> dict:
     return report
 
 
-async def validate_candidates(build, links: list[str], rounds: int = 5, interface: str = "en0") -> dict[str, dict]:
+async def validate_candidates(build, links: list[str], rounds: int = 5, interface: str = "en0", *,
+                              required_services=None, required_exit_country=None) -> dict[str, dict]:
     """Validate independently, with at most four candidates / sixteen requests.
 
     The 3..5 round bounds are policy: an accidental flag cannot turn a single
@@ -978,10 +1110,16 @@ async def validate_candidates(build, links: list[str], rounds: int = 5, interfac
         raise ValueError("service validation requires a physical en interface")
     if not isinstance(links, list) or len(links) > 150 or any(not isinstance(link, str) for link in links):
         raise ValueError("service validation accepts at most 150 candidate share URIs")
+    if required_services is not None and tuple(required_services) not in (tuple(SERVICE_URLS), tuple(ALL_SERVICE_URLS)):
+        raise ValueError("unknown or incomplete service policy")
+    if required_exit_country not in (None, "RS"):
+        raise ValueError("unsupported required exit country")
     semaphore = asyncio.Semaphore(MAX_CONCURRENT)
     async def one(link):
         async with semaphore:
-            return link, await _validate_one(build, link, rounds, interface)
+            policy = {} if required_services is None and required_exit_country is None else {
+                "required_services": required_services, "required_exit_country": required_exit_country}
+            return link, await _validate_one(build, link, rounds, interface, **policy)
     tasks = [asyncio.create_task(one(link)) for link in dict.fromkeys(links)]
     try:
         return dict(await asyncio.gather(*tasks))

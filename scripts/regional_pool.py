@@ -7,6 +7,7 @@ Managed credentials never enter source discovery state or public diagnostics.
 from __future__ import annotations
 
 from collections import Counter
+from urllib.parse import unquote
 import hashlib
 import ipaddress
 import json
@@ -200,6 +201,9 @@ def _load_history(state_dir: Path, now):
                 item["last_outcome"] = outcome if isinstance(outcome, str) and outcome in {"qualified", "definitive-failure", "inconclusive"} else "inconclusive"
                 tested = value.get("last_tested", 0)
                 item["last_tested"] = tested if _number(tested) and tested <= now + 300 else 0
+                country = value.get("last_exit_country")
+                if isinstance(country, str) and re.fullmatch(r"[A-Z]{2}", country):
+                    item["last_exit_country"] = country
                 retry = _browser_retry(value.get("browser_retry"), now)
                 if retry is not None:
                     item["browser_retry"] = retry
@@ -262,7 +266,7 @@ def _endpoint(node):
         return ".".join(node["server"].lower().split(".")[-2:])
 
 
-def _published_rechecks(build):
+def _published_rechecks(build, preferred_country=None):
     """Read only public previously published strict inputs, never cached passes."""
     def git(*arguments):
         return subprocess.check_output(["git", *arguments], cwd=build.ROOT,
@@ -282,16 +286,19 @@ def _published_rechecks(build):
         commit = git("rev-parse", "--verify", "refs/remotes/origin/regional").strip().decode("ascii")
         if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit):
             return []
-        status = json.loads(blob(commit, "output/local-status.json"))
+        status_path = "output/local-status-Serbia.json" if preferred_country == "RS" else "output/local-status.json"
+        subscription_path = "output/best-local-Serbia.txt" if preferred_country == "RS" else "output/best-local.txt"
+        algorithm = "serbia-strict-services-v1" if preferred_country == "RS" else "bestlocal-strict-services-v6"
+        status = json.loads(blob(commit, status_path))
         nodes = status.get("nodes") if isinstance(status, dict) else None
         retained = status.get("retained_nodes", []) if isinstance(status, dict) else None
-        if (not isinstance(status, dict) or status.get("algorithm") != "bestlocal-strict-services-v6"
+        if (not isinstance(status, dict) or status.get("algorithm") != algorithm
                 or not isinstance(nodes, list) or not 1 <= len(nodes) <= 12
                 or not isinstance(retained, list) or len(retained) > 2):
             return []
         nodes = nodes + retained
         published = {}
-        for line in blob(commit, "output/best-local.txt").decode().splitlines():
+        for line in blob(commit, subscription_path).decode().splitlines():
             if not line.strip() or line.lstrip().startswith("#"):
                 continue
             candidate = _candidate(build, line.strip(), origin="local-recheck")
@@ -300,7 +307,19 @@ def _published_rechecks(build):
         result = []
         for value in nodes:
             candidate = _candidate(build, value.get("link"), origin="local-recheck") if isinstance(value, dict) else None
-            if candidate is not None and candidate["id"] in published:
+            if candidate is None:
+                continue
+            published_id = candidate["id"]
+            if value.get("tested_server_ip"):
+                try:
+                    from protocols import pin_transport_address
+                    pinned = pin_transport_address(build, value["link"], value["tested_server_ip"])
+                    published_id = build.normalized_fingerprint(build.parse_vless(pinned))
+                except (ValueError, TypeError, KeyError):
+                    continue
+            if published_id in published:
+                # Retest the original source identity, while matching the exact
+                # pinned transport that was rendered in the published artifact.
                 result.append(candidate)
         return result
     except (OSError, ValueError, TypeError, KeyError, UnicodeError, RecursionError, subprocess.SubprocessError):
@@ -335,13 +354,15 @@ def _select(candidates, history, count):
     return selected
 
 
-def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best50_sha=None):
+def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best50_sha=None, preferred_country=None):
     """Return Best50, managed entries and a rotating independent public tranche.
 
     Synchronous bounded collection belongs in asyncio.to_thread at the caller.
     `manifest_digest` must be captured in the completed validation status and
     supplied to validate_manifest_membership before public publication.
     """
+    if preferred_country not in (None, "RS"):
+        raise ValueError("Unsupported regional exploration preference")
     now = time.time() if now is None else now
     if not _number(now) or type(limit) is not int or not 0 <= limit <= MAX_EXPLORATION:
         raise ValueError("Invalid regional collection limits")
@@ -369,7 +390,7 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
             by_id[candidate["id"]]["public_publish_allowed"] = False
     recheck_count = 0
     recheck_order = {}
-    for candidate in _published_rechecks(build):
+    for candidate in (_published_rechecks(build) if preferred_country is None else _published_rechecks(build, preferred_country)):
         recheck_order.setdefault(candidate["id"], len(recheck_order))
         if recheck_count >= min(14, limit):
             break
@@ -381,6 +402,9 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
     catalog_status = {"status": "unavailable"}
     try:
         pool = PrivateSourcePool(build.CFG.get("sources", []), state_dir / DISCOVERY_NAME, now=now)
+        if preferred_country == "RS":
+            pool.discovery_queries = ["Serbia proxy subscription", "Serbia hysteria2", "Serbia shadowsocks",
+                                      "RS sing-box", "Serbia v2ray", "proxy subscription"]
         catalog_urls, catalog_status = load_regional_sources(build.ROOT, now=now)
         for url in catalog_urls:
             pool.add(url, origin="grok-research")
@@ -428,7 +452,23 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
     retry_selected = due[:quota]
     selected.extend(retry_selected)
     normal = [value for key, value in candidates.items() if key not in pending]
-    selected.extend(_select(normal, history, max(0, limit - recheck_count - len(retry_selected))))
+    remaining = max(0, limit - recheck_count - len(retry_selected))
+    if preferred_country == "RS" and remaining:
+        # Source labels are search hints only. Reserve at least one quarter for
+        # broad rotating exploration to find unlabeled/mislabelled Serbian exits.
+        def hinted(value):
+            remark = unquote(value["link"].rsplit("#", 1)[-1]) if "#" in value["link"] else ""
+            return (history["candidates"].get(value["id"], {}).get("last_exit_country") == "RS"
+                    or "🇷🇸" in remark or bool(re.search(r"(?i)(?<![A-Za-z])(?:RS|Serbia|Srbija|Belgrade|Beograd|Сербия|Србија)(?![A-Za-z])", remark)))
+        preferred = _select([value for value in normal if hinted(value)], history, remaining - max(1, remaining // 4))
+        selected.extend(preferred)
+        broad = _select([value for value in normal if not hinted(value)], history, remaining - len(preferred))
+        selected.extend(broad)
+        picked_ids = {value["id"] for value in preferred + broad}
+        selected.extend(_select([value for value in normal if value["id"] not in picked_ids], history,
+                                remaining - len(preferred) - len(broad)))
+    else:
+        selected.extend(_select(normal, history, remaining))
     due_selected = sorted((value for value in selected if value["id"] in pending and pending[value["id"]]["after"] <= now), key=retry_order)
     retry_positions = {value["id"]: index for index, value in enumerate(due_selected)}
     # Admission uses this list's actual order; merely recording a priority in
@@ -561,6 +601,15 @@ def apply_local_feedback(state_dir, diagnostics, now=None):
         if candidate is None:
             continue  # Best50-only and private candidates have no invented source attribution.
         candidate.update(last_tested=now, last_seen=now, last_outcome=outcome)
+        # Store only a validated same-proxy observation as a future search hint.
+        # This field never authorizes selection/publication without a fresh test.
+        country_evidence = result.get("exit_country_evidence")
+        if isinstance(country_evidence, dict):
+            from service_probe import valid_exit_country_evidence
+            country = country_evidence.get("country")
+            if (isinstance(country, str) and re.fullmatch(r"[A-Z]{2}", country)
+                    and valid_exit_country_evidence(country_evidence, country)):
+                candidate["last_exit_country"] = country
         if outcome == "inconclusive" and _deferred_browser_result(result):
             previous = candidate.get("browser_retry", {})
             attempts = min(8, previous.get("attempts", 0) + 1)

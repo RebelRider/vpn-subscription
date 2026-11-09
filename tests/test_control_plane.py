@@ -121,7 +121,7 @@ class ControlPlaneTests(unittest.TestCase):
         scheduler = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(scheduler)
         for platform in ("darwin", "linux"):
-            for command, eligible in ((["git", "status"], True), (["gh", "api", "rate_limit"], True), ([sys.executable, "scripts/local_probe.py", "--publish"], True), ([sys.executable, "scripts/update_exit_geoip.py"], False)):
+            for command, eligible in ((["git", "status"], True), (["gh", "api", "rate_limit"], True), ([sys.executable, "scripts/local_probe.py", "--publish"], True), ([sys.executable, "scripts/serbia_pipeline.py"], True), ([sys.executable, "scripts/update_exit_geoip.py"], False)):
                 with self.subTest(platform=platform, command=command):
                     runner = scheduler.Runner(ROOT, time.monotonic() + 5)
                     process = mock.Mock(returncode=0)

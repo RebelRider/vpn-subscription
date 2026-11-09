@@ -1,26 +1,23 @@
 # v6.0 — LOCAL NETWORK VERIFIED PROXIES
-#profile-title: BL VPN [09Nov2026 10:43]
+#profile-title: BL VPN [09Nov2026 12:50]
 #profile-update-interval: 1
 #subscription-ping-onopen-enabled: 1
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-11-09 07:43:03 UTC
+# generated: 2026-11-09 09:50:00 UTC
 #
 # Local filtering: ChatGPT providers JSON + YouTube video metadata + Instagram application HTML; median proxy HTTPS latency <500 ms
 # Local final stability: 5/5 complete rounds required
-# upstream_nodes: 53
-# local_qualified: 4
+# upstream_nodes: 100
+# local_qualified: 1
 # local_ranking: stability, median latency, p95 latency
 #
 # Fresh entries were re-tested through the current local network; retained entries preserve historical evidence and are not currently verified.
 #
 # local_retained: 1
-# published_total: 5
+# published_total: 2
 #bestlocal-status: mixed; retained entries are not currently verified
 #bestlocal-health-url: https://raw.githubusercontent.com/RebelRider/vpn-subscription/regional/output/local-health.json
-vless://95f85937-7b95-45c4-8d69-95da6a978569@dl.megadrishto.com:443?encryption=none&type=grpc&security=tls&sni=dl.megadrishto.com&fp=firefox&alpn=h2&serviceName=stats.v2.StreamService#🇵🇱%20PL%2C%20Warsaw%20%20%7C1%7C%20%20%20%5B80.47.13.233%5D
-vless://1653818d-532e-46be-b825-384107fb7c3a@fetch.mediacorphub.org:443?encryption=none&type=grpc&security=tls&sni=fetch.mediacorphub.org&fp=firefox&alpn=h2&serviceName=api.v1.FeedService#🇳🇱%20NL%2C%20Enschede%20%20%7C2%7C%20%20%20%5B89.105.195.158%5D
-vless://4201786b-d99b-4147-a5f0-20d47acddb81@8a2e72t.nl11.h1clayd.click:443?type=tcp&security=reality&flow=xtls-rprx-vision&fp=firefox&pbk=VZS639V1i-35g7VXb9EoTYL-Srm7858sxcvFAunncmA&sid=8d0d0679f42ffd98&sni=8a2e72t.nl11.h1clayd.click#🇳🇱%20NL%2C%20Kerkrade%20%20%7C3%7C%20%20%20%5B79.182.70.192%5D
-vless://1d1eda2e-0bd7-4478-877b-1c5425c6c4dd@201.58.185.120:443?encryption=none&flow=xtls-rprx-vision&pbk=yr_opKG6DGTppNDXkk-DhGSYJZXbb9o-caexk2FZO38&security=reality&sid=8f3c6e2a1b5d4f09&sni=tradingview.com&type=tcp&fp=firefox#🇩🇪%20DE%2C%20Frankfurt%20am%20Main%20%20%7C4%7C%20%20%20%5B201.58.185.120%5D
-ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.192:8080#🇳🇱%20NL%2C%20Amsterdam%20%20%7C5%7C%20%20%20%5B193.29.139.198%5D
+vless://95f85937-7b95-45c4-8d69-95da6a978569@dl.megadrishto.com:443?encryption=none&type=grpc&security=tls&sni=dl.megadrishto.com&fp=firefox&alpn=h2&serviceName=stats.v2.StreamService#🇵🇱%20PL%2C%20Warsaw%20%20%7C1%7C%20%20%20%5B80.47.13.189%5D
+ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.192:8080#🇳🇱%20NL%2C%20Amsterdam%20%20%7C2%7C%20%20%20%5B193.29.139.198%5D

@@ -28,6 +28,15 @@ installer = load("install_local_automation", ROOT / "scripts/install_local_autom
 
 
 class SchedulerTests(unittest.TestCase):
+    def test_secondary_runtime_is_reserved_before_main_freshness_deadline(self):
+        # Worst case: Serbia starts just before main becomes due. Both owned
+        # jobs may consume their full budgets; the next poll still fits six h.
+        for count in (0, 2, 9, 10, 12):
+            elapsed = (scheduler.validation_interval({"last_local_qualified": count})
+                       + scheduler.SECONDARY_DEADLINE_SECONDS + scheduler.JOB_DEADLINE_SECONDS
+                       + scheduler.POLL_SECONDS)
+            self.assertLess(elapsed, scheduler.REVALIDATE_SECONDS)
+
     def test_inactivity_disabled_workflow_recovers_with_existing_auth(self):
         runner = mock.Mock()
         runner.run.side_effect = [scheduler.CommandFailure("dispatch", 1, "workflow disabled"),

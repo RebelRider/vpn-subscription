@@ -24,6 +24,8 @@ Serbia has independent input manifests, discovery rotation, feedback, validation
 history, due/backoff state and publication paths under the existing launchd
 scheduler. A 230-minute due interval reserves time for the primary validation
 and its own bounded run within six hours while the Mac is awake and online.
+The primary scheduler also reserves Serbia's full35-minute budget before its
+own six-hour deadline, preventing a secondary run from delaying main validation.
 The primary subscription keeps its existing selection policy. Both profiles
 share the global candidate resource lock; a failed Serbia run cannot veto or
 modify the primary subscription. Serbia source discovery prioritizes regional

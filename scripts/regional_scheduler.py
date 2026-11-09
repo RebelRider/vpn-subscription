@@ -27,8 +27,10 @@ POLL_SECONDS = 300
 REVALIDATE_SECONDS = 6 * 3600
 MAX_INPUT_AGE_SECONDS = 18 * 3600
 JOB_DEADLINE_SECONDS = 90 * 60
+SECONDARY_DEADLINE_SECONDS = 35 * 60
 REPLENISH_SECONDS = 6 * 3600
-VALIDATION_DUE_SECONDS = REVALIDATE_SECONDS - JOB_DEADLINE_SECONDS - POLL_SECONDS - 5 * 60
+VALIDATION_DUE_SECONDS = (REVALIDATE_SECONDS - JOB_DEADLINE_SECONDS
+                          - SECONDARY_DEADLINE_SECONDS - POLL_SECONDS - 5 * 60)
 LOW_POOL_SIZE = 10
 MAX_OUTPUT_BYTES = 4 * 1024 * 1024
 MAX_STATE_BYTES = 1024 * 1024
@@ -669,14 +671,14 @@ def run_secondary_profiles(repo: Path, state_dir: Path) -> dict:
     """
     if not (repo / "scripts/serbia_pipeline.py").is_file():
         return {}
-    child = Runner(repo, time.monotonic() + 36 * 60)
+    child = Runner(repo, time.monotonic() + SECONDARY_DEADLINE_SECONDS + 60)
     geoip = state_dir / "geoip"
     child.environment = {"BEST50_CITY_DB_IPV4": str(geoip / "dbip-city-ipv4.csv.gz"),
                          "BEST50_CITY_DB_IPV6": str(geoip / "dbip-city-ipv6.csv.gz")}
     try:
         code, output = child.run([sys.executable, "scripts/serbia_pipeline.py", "--repo", str(repo),
                                   "--state-dir", str(state_dir / "serbia")],
-                                 "Serbia validation/publication", timeout=35 * 60, check=False)
+                                 "Serbia validation/publication", timeout=SECONDARY_DEADLINE_SECONDS, check=False)
         for line in output.splitlines()[-12:]:
             log("Serbia: " + line)
         return {"last_poll_at": time.time(), "exit_code": code}

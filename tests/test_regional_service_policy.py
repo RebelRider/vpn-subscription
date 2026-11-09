@@ -25,6 +25,13 @@ def geo():
 
 
 class PolicyResponses(unittest.TestCase):
+    def test_observed_wrong_country_is_definitive_but_unknown_country_is_not(self):
+        from local_feedback import classify_diagnostic
+        self.assertEqual(classify_diagnostic({"qualified": False,
+            "rejection_reasons": ["observed-exit-country-mismatch"]}), "fail")
+        self.assertEqual(classify_diagnostic({"qualified": False,
+            "rejection_reasons": ["required-exit-country-unconfirmed-inconclusive"]}), "inconclusive")
+
     def test_spotify_requires_application_not_generic_http_200(self):
         self.assertEqual(probe.validate_response("spotify", spotify()), (True, "ok"))
         player = spotify(url="https://open.spotify.com/", body=(

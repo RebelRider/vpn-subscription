@@ -94,6 +94,7 @@ def classify_diagnostic(diagnostic) -> str:
     if (any(code in {5, 6, 7, 28, 35, 51, 56, 60, 97} for code in curl_codes)
             or any(marker in text for marker in (
                 "invalid-or-unsafe-config", "invalid-config", "configuration-invalid",
+                "observed-exit-country-mismatch",
                 "protocol-authentication-failed", "protocol-handshake-failed", "protocol-error",
                 "dns-failed", "dns-timeout", "name-resolution-failed", "server-dns",
                 "routing-no-route", "connection-refused", "connection-reset", "connection-eof",

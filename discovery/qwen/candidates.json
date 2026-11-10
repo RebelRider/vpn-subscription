@@ -1,0 +1,43 @@
+{
+  "candidates": [
+    {
+      "id": "38d3b098090307684f8e42f07eef4af772b7585100f40195495a7f4ad4ce9409",
+      "observed_at": 1794338299.133304,
+      "protocol": "vless",
+      "serbia_hint_unverified": false,
+      "source_body_sha256": "de02be0562cd889bb57eb345a11e6a31662178bf34bf076a8f27c1853322d398",
+      "source_url": "https://raw.githubusercontent.com/RebelRider/vpn-subscription/main/output/qualified-all.txt"
+    },
+    {
+      "id": "ea152619d1ff98ead2a613cd5525220c197aabeab28f35ea1e1cfc18a31a1fde",
+      "observed_at": 1794338299.133304,
+      "protocol": "vless",
+      "serbia_hint_unverified": false,
+      "source_body_sha256": "de02be0562cd889bb57eb345a11e6a31662178bf34bf076a8f27c1853322d398",
+      "source_url": "https://raw.githubusercontent.com/RebelRider/vpn-subscription/main/output/qualified-all.txt"
+    }
+  ],
+  "generated_at": 1794338508.9245608,
+  "model": "mlx-community/Qwen3.8-27B-4bit",
+  "schema": 1,
+  "sources": [
+    {
+      "body_sha256": "cdd1661f08be320dba956a10b2d61f2f8a1e896f6d05a23f4c4fd5b0d760a184",
+      "candidate_count": 100,
+      "evidence_url": "https://raw.githubusercontent.com/RebelRider/vpn-subscription/main/output/best100.txt",
+      "fetched_at": 1794338045.2143831,
+      "serbia_hint_unverified": false,
+      "url": "https://raw.githubusercontent.com/RebelRider/vpn-subscription/main/output/best100.txt"
+    },
+    {
+      "body_sha256": "de02be0562cd889bb57eb345a11e6a31662178bf34bf076a8f27c1853322d398",
+      "candidate_count": 256,
+      "evidence_url": "https://raw.githubusercontent.com/RebelRider/vpn-subscription/main/output/qualified-all.txt",
+      "fetched_at": 1794338299.133304,
+      "serbia_hint_unverified": false,
+      "url": "https://raw.githubusercontent.com/RebelRider/vpn-subscription/main/output/qualified-all.txt"
+    }
+  ],
+  "unverified_inputs": true,
+  "worker": "qwen"
+}

@@ -124,6 +124,37 @@ class SourceResearchTests(unittest.TestCase):
             with self.subTest(invalid=invalid), self.assertRaises(research.ResearchFailure):
                 research.select_model(invalid)
 
+    def test_inventory_outage_does_not_inherit_weeks_of_quota_backoff(self):
+        research.atomic_json(self.state / research.STATE_NAME, {
+            "schema": 1, "last_error": "quota", "consecutive_failures": 69,
+            "retry_failure_key": "quota:model-run", "retry_failure_count": 69})
+        FakeRunner.responses = [(1, "Failed to load models: unavailable token=never-persist")]
+        self.assertEqual(self.run_research()[0], 1)
+        state = self.status()
+        self.assertEqual(state["last_error"], "inventory-unavailable")
+        self.assertEqual(state["next_retry_at"], NOW + 3600)
+        self.assertEqual(state["consecutive_failures"], 70)
+        self.assertEqual(state["retry_failure_count"], 1)
+        self.assertFalse(state["last_model_diagnostic"]["model_request_attempted"])
+        self.assertNotIn("never-persist", json.dumps(state))
+
+    def test_inventory_retries_back_off_then_new_model_quota_gets_own_interval(self):
+        now = NOW
+        for hours in (1, 2, 4, 6):
+            FakeRunner.responses = [(1, "Failed to load models: unavailable")]
+            self.assertEqual(self.run_research(now)[0], 1)
+            self.assertEqual(self.status()["next_retry_at"], now + hours * 3600)
+            now += hours * 3600
+        FakeRunner.responses = [(0, MODELS), (1, "out of usage")]
+        self.assertEqual(self.run_research(now)[0], 1)
+        self.assertEqual(self.status()["last_error"], "quota")
+        self.assertEqual(self.status()["next_retry_at"], now + 3600)
+        # Recovery consumes one model result, then clears the separate retry run.
+        FakeRunner.responses = [(0, MODELS), (0, stream())]
+        self.assertEqual(self.run_research(now + 3600)[0], 0)
+        self.assertNotIn("retry_failure_key", self.status())
+        self.assertNotIn("retry_failure_count", self.status())
+
     def test_wrong_model_malformed_and_oversized_stream_fail_closed(self):
         for text, error in ((stream(model="Grok 4.6 Extra High"), "unverified-model"), (stream(model="Grok 4.7 Extra High Fast"), "unverified-model"), ("not JSON", "invalid-output"), (json.dumps({"type": "result", "result": EMPTY}), "unverified-model"), (stream(result="```json\n{}\n```"), "invalid-output"), (stream() + "\n" + json.dumps({"type": "tool_call"}), "invalid-output"), ("x" * (research.OUTPUT_LIMIT + 1), "output-limit")):
             with self.subTest(error=error), self.assertRaisesRegex(research.ResearchFailure, error):

@@ -438,6 +438,11 @@ def normalize_scheduler_state(value, now: float | None = None) -> tuple[dict, li
             valid = item in STAGE_CODES if isinstance(item, str) else False
         elif name in {"last_health_publication_status", "last_subscription_publication_status"}:
             valid = item in PUBLICATION_STATUS_CODES if isinstance(item, str) else False
+        elif name == "serbia":
+            valid = (isinstance(item, dict) and set(item) == {"last_poll_at", "exit_code"}
+                     and type(item["last_poll_at"]) in (int, float) and math.isfinite(item["last_poll_at"])
+                     and 0 < item["last_poll_at"] <= now + 300
+                     and type(item["exit_code"]) is int and -255 <= item["exit_code"] <= 255)
         if valid:
             normalized[name] = item
         else:

@@ -133,6 +133,12 @@ include `STALE`. Retained entries do not independently trigger this title marker
 Internal six-hour validation freshness and historical
 retention diagnostics remain separate from this presentation threshold. Names
 are numbered in stable ranking order; IPv6 exit addresses use compressed brackets.
+Protection of explicitly configured historical entries lasts at most 72 hours
+from their own successful validation. A fresh definitive failure revokes that
+protection immediately; an inconclusive infrastructure result does not. A new
+successful publication cannot repeatedly append an expired protected connection.
+If the entire run fails, the separate last-known-good artifact still retains its
+original evidence/date and ages visibly instead of being replaced with an empty file.
 
 These are public unauthenticated application reachability checks. They do not
 prove account login, video playback or unrestricted authenticated features.

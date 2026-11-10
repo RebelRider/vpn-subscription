@@ -184,3 +184,85 @@ Serbia empty-result publication, dynamic source collection and canonical raw
 bytes. A functional RS+four-service connection and actual Happ import of an empty
 profile remain unverified. No such positive result is claimed. Operational
 history is retained; audit scratch files/test logs are removed.
+
+## Follow-up: source research and Serbia import, evening9November
+
+The user reported Happ's exact error `Failed to parse configuration`. The image
+path was unavailable; no screenshot contents were inferred. The canonical Serbia
+response was HTTP200 with zero URI configurations and a31-character profile
+title. Happ's official
+[app-management documentation](https://github.com/HappDev/happ_su/blob/main/dev-docs/app-management.md)
+sets a25-character title limit. The title is now `BL RS [09Nov2026 21:44]`
+(23characters); CI published this presentation-only correction while preserving
+the original validation timestamp. Fresh main titles remain unchanged. Stale
+titles are short `[STALE]`; the full saved time remains in metadata.
+
+The previous rejection cannot distinguish an empty-body limitation from the title
+defect. Empty import support is therefore unknown, with `import_verified:false`;
+no claimed successful import, speculative JSON, dummy/direct entry or substitute
+country was added. Client availability metadata explicitly says awaiting verified
+RS servers when there are zero entries. The active Happ connection was untouched.
+
+The Grok researcher was loaded and polling hourly (251launchd invocations at audit
+entry). Exit0 on a backoff skip is not model success. Its last scheduled attempt
+at16:29MSK failedquota; a separate required read-only worker attempt at21:45 also
+verified Grok4.7 ExtraHigh and failedquota. Retained history contained no successful
+Grok source admission. Earlier invalid-output/runner failures cannot be diagnosed
+exactly because rejected payloads were not retained; no schema incompatibility
+was demonstrated. Installed Cursor CLI emitted the expected outer stream schema.
+
+Independent discovery is actually replenishing the shared permanent catalog:
+`config.json` has34 bootstrap seeds, while regional `sources/primary-sources.json`
+had64 effective dynamic entries. At13:29:31MSK,
+commit`02d131fd9a2e7fdb5b90a042fd64e590a6517a9d` added16 feeds and evicted16oldest
+entries under the bounded64-entry cap. Nine daily independent-success events
+matched catalog commits on1–9November. Cloud output at21:29 and the Mac's21:33
+manifest both confirmed consumption of64 active catalog entries. These were
+fallback discoveries, not successful Grok work.
+
+Catalog origins now use truthful generic `source-catalog`; legacy `grok-research`
+origins migrate without losing sources or quarantine history. New entries carry
+their actual finder/model; unknown historical provenance stays unknown. Daily
+promotion reads productive main **and Serbia** registries instead of leaving
+Serbia discoveries isolated. CLI JSON stdout and warning stderr are separated,
+with a shared output cap. A bounded safe audit records stages, version, exit code,
+byte counts/hashes, event counts and granular failure reasons. It contains no raw
+model text, URLs, prompts, credentials or tokens. Model success, catalog publishing
+and poll/backoff states are distinct.
+
+The earlier Serbia50-input run had lost all supplemental exploration: zero fetched
+feeds,27 source failures, repository-discovery`SSLEOFError`,180s budget exhausted,
+45 deferrals. A failed public feed subsequently worked with both Python and curl;
+no deterministic TLS/IPv6 defect was reproduced and certificate checks were not
+disabled. URLs/reputation persisted, but candidate bodies did not.
+
+The new private cache stores only public **unverified** inputs (2000entries/2MB,
+24h per-input TTL, mode600). Every service/latency/country check must run anew.
+Fresh public main manifests may seed Serbia after managed-policy and integrity
+checks; replay never renews source observation age. Controlled source outages
+using actual public inputs returned100 candidates rather than50, and a subsequent
+cache replay preserved their original age with no PASS fields. The real main
+collector saved2000 inputs in815705bytes, mode600. The next real Serbia manifest
+had100 inputs,65 fetched sources,7 failures and2 reused public inputs. Registered,
+attempted and deferred source counts are now separate.
+
+Mixed uncertainty also previously risked clearing a good RS snapshot whenever any
+unrelated candidate failed. The writer now requires a definitive current rejection
+for **each** previous RS node before replacing a nonempty pool with empty output.
+Missing, inconclusive, duplicate or engine-start-uncertain rechecks preserve the
+old bytes/date and enter bounded retry, including concurrent-writer races.
+
+Local release tests:520passed. Real
+[CI42680635437](https://github.com/RebelRider/vpn-subscription/actions/runs/42680635437)
+also passed520 tests, reused the SHA-verified engine cache, consumed64 active
+catalog sources and fetched64 feeds. Actual cloud validation produced536first-pass
+working /450finalstable /50Best50. Actual publication at22:20:30MSK:
+commit`8b84715f1691eba25c88c372ae5ec2e47cb16a00`.
+
+That update changed Best50 during Serbia's local run. Its completed22:21 result
+(100candidates:6wrong-country/94unconfirmed) was correctly withheld against the
+new input; the prior public artifact remained. The normal scheduler fetched the
+new Best50 and started its own retry at22:26 without manual commands.
+
+Implementation commit: `d209383`. No new service, browser window, VPN change,
+system route/DNS/proxy change, credential rotation or manual source list was used.

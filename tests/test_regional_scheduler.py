@@ -28,6 +28,19 @@ installer = load("install_local_automation", ROOT / "scripts/install_local_autom
 
 
 class SchedulerTests(unittest.TestCase):
+    def test_secondary_status_survives_each_ordinary_scheduler_poll(self):
+        now = time.time()
+        state = {"serbia": {"last_poll_at": now - 30, "exit_code": 0}}
+        normalized, recovered = scheduler.normalize_scheduler_state(state, now)
+        self.assertEqual(normalized["serbia"], state["serbia"])
+        self.assertFalse(recovered)
+        for invalid in ({"last_poll_at": now, "exit_code": True}, {"last_poll_at": float("nan"), "exit_code": 0},
+                        {"last_poll_at": now + 1000, "exit_code": 0}, {"last_poll_at": now, "exit_code": 0, "extra": "untrusted"}):
+            with self.subTest(invalid=invalid):
+                normalized, recovered = scheduler.normalize_scheduler_state({"serbia": invalid}, now)
+                self.assertNotIn("serbia", normalized)
+                self.assertTrue(recovered)
+
     def test_registered_sources_are_not_confused_with_attempts_during_outage(self):
         status = {"diagnostics": [], "input": {"nodes": 0, "regional_summary": {
             "source_count": 28, "source_counts": {"registered": 101, "attempted": 27, "deferred": 74},

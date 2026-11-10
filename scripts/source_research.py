@@ -34,7 +34,7 @@ ATTEMPT_HISTORY = "source-research-attempt-history.json"
 SOURCE_REASON_CODES = {"invalid-proposal", "source-policy", "no-compatible-configuration", "rate-limit",
                        "source-policy-unavailable", "network", "source-http-client-error",
                        "source-unavailable", "invalid-source"}
-ERRORS = {"quota", "region", "authentication", "network", "timeout", "output-limit", "model-unavailable", "unverified-model", "invalid-output", "publication", "interrupted", "runner-failure"}
+ERRORS = {"quota", "region", "authentication", "network", "timeout", "output-limit", "model-unavailable", "inventory-unavailable", "unverified-model", "invalid-output", "publication", "interrupted", "runner-failure"}
 TIMESTAMPS = {"last_poll_at", "last_attempt_at", "last_success_at", "last_research_generated_at", "next_retry_at", "pending_generated_at", "state_recovered_at", "source_retry_after_at", "last_model_attempt_at", "last_model_success_at", "last_catalog_publication_at"}
 ATTEMPT_STAGES = {"models", "model-run", "stream", "proposal", "model-complete"}
 EVENT_TYPES = {"system", "user", "assistant", "tool_call", "tool_result", "result", "interaction_query", "other"}
@@ -133,6 +133,11 @@ def normalize_state(value, now: float) -> dict:
         state["status"] = value["status"]
     if isinstance(value.get("last_error"), str) and value["last_error"] in ERRORS:
         state["last_error"] = value["last_error"]
+    retry_key = value.get("retry_failure_key")
+    retry_count = value.get("retry_failure_count")
+    if (isinstance(retry_key, str) and retry_key in {reason + ":" + stage for reason in ERRORS for stage in ATTEMPT_STAGES | {"catalog", "runner"}}
+            and type(retry_count) is int and 1 <= retry_count <= 1000):
+        state.update(retry_failure_key=retry_key, retry_failure_count=retry_count)
     model = value.get("model_id")
     if isinstance(model, str) and re.fullmatch(r"(?:cursor-)?grok-\d+(?:\.\d+)*-xhigh", model):
         state["model_id"] = model
@@ -420,7 +425,8 @@ def research(agent: str, state_dir: Path, prompt_context: str = "", *, diagnosti
                 if diagnostic["stdout_truncated"] or diagnostic["stderr_truncated"]:
                     raise ResearchFailure("output-limit")
                 if code:
-                    raise ResearchFailure(classify_failure(models + "\n" + errors, code))
+                    reason = classify_failure(models + "\n" + errors, code)
+                    raise ResearchFailure("inventory-unavailable" if reason == "runner-failure" else reason)
                 model, version = select_model(models)
                 diagnostic.update(stage="model-run", requested_model=model, model_request_attempted=True)
                 code, stream = runner.run([agent, "-p", PROMPT + prompt_context, "--trust", "--mode=ask", "--sandbox", "enabled", "--model", model, "--output-format", "stream-json"], "read-only public source research", RESEARCH_TIMEOUT, check=False, separate_stderr=True)
@@ -667,6 +673,8 @@ def run_once(repo: Path, state_dir: Path, *, now: float | None = None, agent: st
             state.pop("last_error", None)
             state.pop("source_retry_after_at", None)
             state.pop("pending_generated_at", None)
+            state.pop("retry_failure_key", None)
+            state.pop("retry_failure_count", None)
             # Persist success before removing the replayable proposal. A crash
             # between these writes may repeat idempotent publication, never Grok.
             atomic_json(state_path, state)
@@ -680,7 +688,10 @@ def run_once(repo: Path, state_dir: Path, *, now: float | None = None, agent: st
                 if diagnostic.get("model_success"):
                     diagnostic["catalog_status"] = "failed"
             failures = min(state.get("consecutive_failures", 0) + 1, 1000)
-            delay = min(6 * 3600, 3600 * 2 ** min(failures - 1, 3))
+            stage = diagnostic.get("stage", "runner") if diagnostic else "catalog" if pending else "runner"
+            retry_key = reason + ":" + stage
+            retry_count = min(state.get("retry_failure_count", 0) + 1, 1000) if state.get("retry_failure_key") == retry_key else 1
+            delay = min(6 * 3600, 3600 * 2 ** min(retry_count - 1, 3))
             retry_at = getattr(exc, "retry_at", None)
             next_retry = clock() + delay
             if finite_number(retry_at) and clock() < retry_at <= clock() + DAY:
@@ -688,7 +699,8 @@ def run_once(repo: Path, state_dir: Path, *, now: float | None = None, agent: st
                 state["source_retry_after_at"] = retry_at
             else:
                 state.pop("source_retry_after_at", None)
-            state.update({"status": "failed", "last_error": reason, "consecutive_failures": failures, "next_retry_at": next_retry})
+            state.update({"status": "failed", "last_error": reason, "consecutive_failures": failures, "next_retry_at": next_retry,
+                          "retry_failure_key": retry_key, "retry_failure_count": retry_count})
             append_source_history(state_dir, "grok", getattr(exc, "summary", {}), clock(), error=reason)
             hours = math.ceil((next_retry - clock()) / 3600)
             policy = "; respecting source Retry-After" if "source_retry_after_at" in state else ""

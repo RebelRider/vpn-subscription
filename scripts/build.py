@@ -204,6 +204,11 @@ def _parse_vless(link: str) -> dict:
         query,
         "fp",
     )
+    if security == "reality" and not fingerprint_value:
+        # REALITY clients require uTLS in sing-box. Use the same explicit,
+        # interoperable default that we export to Happ instead of rejecting a
+        # usable source merely because its optional URI fp was omitted.
+        fingerprint_value = "chrome"
 
     alpn = q1(query, "alpn").split(",") if q1(query, "alpn") else []
     if len(alpn) > 8 or any(not re.fullmatch(r"[A-Za-z0-9./-]{1,32}", item) for item in alpn):

@@ -15,6 +15,7 @@ import subprocess
 import time
 
 MAX_RETAINED = 2
+MAX_RETENTION_SECONDS = 72 * 3600
 MAX_BYTES = 1024 * 1024
 OID = re.compile(r"[0-9a-f]{40}|[0-9a-f]{64}")
 ID = re.compile(r"[0-9a-f]{64}")
@@ -212,12 +213,25 @@ def prepare(local, build, status: dict, base_ref: str) -> None:
     current = snapshot(local.ROOT, base_ref)
     fresh_connections = {local.connection_identity(build, local.tested_connection_link(build, node)) for node in status["nodes"]}
     fresh_ids = {node["id"] for node in status["nodes"]}
+    failed_ids = {item.get("id") for item in status.get("diagnostics", [])
+                  if isinstance(item, dict) and item.get("outcome") == "fail" and isinstance(item.get("id"), str)}
     retained, provenance = [], {}
     for identifier in allowed:
-        if identifier in fresh_ids:
+        if identifier in fresh_ids or identifier in failed_ids:
             continue
         node = _entry(local, current, identifier)
         if node is None:
+            continue
+        # Protection bridges temporary failures, not permanent retirement of
+        # strict validation. Keep the immutable last-good archive, but never
+        # append a weeks-old connection to each newly verified publication.
+        try:
+            checked = datetime.fromisoformat(node["validated_at"].replace("Z", "+00:00"))
+            age = time.time() - checked.timestamp()
+            recent = checked.tzinfo is not None and math.isfinite(age) and 0 <= age <= MAX_RETENTION_SECONDS
+        except (KeyError, ValueError, TypeError, AttributeError, OverflowError):
+            recent = False
+        if not recent:
             continue
         connection = local.connection_identity(build, local.tested_connection_link(build, node))
         if connection in fresh_connections:

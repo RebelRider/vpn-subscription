@@ -85,6 +85,7 @@ TRACE_URL = "https://www.cloudflare.com/cdn-cgi/trace"
 EXIT_IP_URL = "https://api64.ipify.org?format=json"
 EXIT_COUNTRY_URL = "https://api.country.is/"
 EXIT_METADATA_TIMEOUT = 4
+REQUIRED_EXIT_COUNTRY_TIMEOUT = 8
 MAX_EXIT_IP_RESPONSE_BYTES = 1024
 ANTI_AUTOMATION = (
     b"cf-chl-", b"just a moment", b"verify you are human",
@@ -486,25 +487,47 @@ def valid_exit_country_evidence(evidence: dict, country: str = "RS", reference_t
 
 
 async def observe_required_exit_country(build, port, username, password, country):
-    observations = []
+    observations, attempts = [], []
+    def evidence(reason, observed=None):
+        return {"country": observed, "checked_at": datetime.now(timezone.utc).isoformat(),
+                "observations": observations, "attempts": attempts, "reason": reason}
+
     for service, url, source in (("trace", TRACE_URL, "cloudflare-trace"),
                                  ("exit-country", EXIT_COUNTRY_URL, "country-is"),
                                  ("trace", TRACE_URL, "cloudflare-trace")):
+        response, started = {}, time.monotonic()
         try:
-            response = await asyncio.wait_for(_request(build, service, url, port, username, password), EXIT_METADATA_TIMEOUT)
-            if not validate_response(service, response)[0]:
-                return None
-            parsed = parse_exit_trace(response["body"]) if service == "trace" else parse_exit_country(response["body"])
-            if parsed is None:
-                return None
-            observations.append({"source": source, "ip": parsed["ip"], "country": parsed["loc"]})
-            if parsed["loc"] != country:
-                return {"country": parsed["loc"], "checked_at": datetime.now(timezone.utc).isoformat(),
-                        "observations": observations, "reason": "observed-exit-country-mismatch"}
-        except (asyncio.TimeoutError, OSError, ValueError, TypeError, RuntimeError):
-            return None
-    evidence = {"country": country, "checked_at": datetime.now(timezone.utc).isoformat(), "observations": observations}
-    return evidence if valid_exit_country_evidence(evidence, country) else None
+            response = await asyncio.wait_for(_request(build, service, url, port, username, password), REQUIRED_EXIT_COUNTRY_TIMEOUT)
+            passed, reason = validate_response(service, response)
+        except asyncio.CancelledError:
+            raise
+        except asyncio.TimeoutError:
+            passed, reason = False, "proxy-request-timeout"
+        except (OSError, ValueError, TypeError, RuntimeError):
+            passed, reason = False, "exit-country-request-failed"
+        # Never persist response bodies, URLs, arbitrary engine errors or proxy
+        # credentials. Unknown text remains inconclusive, with a closed reason.
+        if reason not in {"ok", "proxy-request-timeout", "socks-connection-failed", "destination-tls-failed",
+                          "destination-certificate-invalid", "proxy-name-resolution-failed", "destination-name-resolution-failed",
+                          "loopback-proxy-unavailable", "proxy-receive-failed", "cloudflare-challenge-inconclusive",
+                          "rate-limited-inconclusive", "unexpected-exit-trace", "unexpected-exit-country"} and not re.fullmatch(r"http-[1-5][0-9]{2}", reason):
+            reason = "exit-country-request-failed"
+        status = response.get("status") if isinstance(response, dict) else None
+        code = response.get("curl_exit") if isinstance(response, dict) else None
+        attempts.append({"endpoint": source, "reason": reason,
+                         "http_status": status if type(status) is int and 100 <= status <= 599 else None,
+                         "curl_exit": code if type(code) is int and 0 <= code <= 255 else None,
+                         "elapsed_ms": round(max(0, time.monotonic() - started) * 1000, 1)})
+        if not passed:
+            return evidence("required-exit-country-unconfirmed-inconclusive")
+        parsed = parse_exit_trace(response["body"]) if service == "trace" else parse_exit_country(response["body"])
+        if parsed is None:
+            return evidence("required-exit-country-unconfirmed-inconclusive")
+        observations.append({"source": source, "ip": parsed["ip"], "country": parsed["loc"]})
+        if parsed["loc"] != country:
+            return evidence("observed-exit-country-mismatch", parsed["loc"])
+    result = evidence("ok", country)
+    return result if valid_exit_country_evidence(result, country) else evidence("required-exit-country-unconfirmed-inconclusive")
 
 
 async def observe_exit_metadata(build, port: int, username: str, password: str) -> dict:

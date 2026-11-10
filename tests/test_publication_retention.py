@@ -62,7 +62,7 @@ class PublicationRetentionTests(unittest.TestCase):
         self.git("init", "-b", "main")
         self.git("config", "user.name", "Retention test")
         self.git("config", "user.email", "retention@example.invalid")
-        self.original = status([OLD_A, OLD_B], (datetime.now(timezone.utc) - timedelta(days=3)).isoformat())
+        self.original = status([OLD_A, OLD_B], (datetime.now(timezone.utc) - timedelta(days=2)).isoformat())
         # Historical browser proof is deliberately too old for today's fresh gate.
         chat = self.original["nodes"][0]["services"]["chatgpt"]
         chat["reasons"] = ["browser-functional-access"] * 5
@@ -103,6 +103,25 @@ class PublicationRetentionTests(unittest.TestCase):
         value = status([NEW] if links is None else links)
         retention.prepare(local._retention_context(), build, value, self.base)
         return value
+
+    def test_expired_protection_cannot_reappear_in_fresh_publication(self):
+        original_time = datetime.fromisoformat(self.original["generated_at"]).timestamp()
+        for offset, retained in ((72 * 3600, True), (72 * 3600 + 1, False)):
+            with self.subTest(offset=offset), patch.object(retention.time, "time", return_value=original_time + offset):
+                value = self.mixed()
+                self.assertEqual(bool(value.get("retained_nodes")), retained)
+                self.assertEqual(value["nodes"][0]["link"], NEW)
+                self.assertEqual(value["stability"]["qualified"], 1)
+        # The last-known-good evidence itself remains immutable and readable.
+        self.assertEqual(retention.snapshot(self.repo, self.base)["status"], self.original)
+
+    def test_current_definitive_failure_revokes_protection_but_infrastructure_error_does_not(self):
+        for outcome, expected in (("fail", 1), ("inconclusive", 2)):
+            value = status([NEW])
+            value["diagnostics"] = [{"id": self.original["nodes"][0]["id"], "outcome": outcome}]
+            retention.prepare(local._retention_context(), build, value, self.base)
+            self.assertEqual(len(value["retained_nodes"]), expected)
+            self.assertEqual(value["stability"]["qualified"], 1)
 
     def test_new_fresh_candidate_preserves_two_original_entries_without_fresh_count_inflation(self):
         value = self.mixed()

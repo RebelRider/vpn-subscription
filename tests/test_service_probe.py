@@ -249,6 +249,56 @@ class ResponseValidationTests(unittest.TestCase):
 
 
 class ExitMetadataTests(unittest.IsolatedAsyncioTestCase):
+    async def test_required_country_retains_failure_details_without_secrets_or_pass(self):
+        for failure, expected in (({"error": "socks-connection-failed", "curl_exit": 97}, "socks-connection-failed"),
+                                  ({"error": "secret-password-token"}, "exit-country-request-failed"),
+                                  (asyncio.TimeoutError(), "proxy-request-timeout")):
+            with self.subTest(expected=expected), patch.object(probe, "_request", AsyncMock(side_effect=[failure])):
+                result = await probe.observe_required_exit_country(None, 12345, "private-user", "private-pass", "RS")
+            self.assertFalse(probe.valid_exit_country_evidence(result))
+            self.assertEqual(result["attempts"][0]["reason"], expected)
+            self.assertIsNone(result["country"])
+            self.assertNotIn("private-", json.dumps(result))
+            self.assertNotIn("secret-password-token", json.dumps(result))
+
+    async def test_required_country_records_partial_consensus_and_rejects_disagreement(self):
+        trace = response("trace", body=b"ip=8.8.8.8\nloc=RS\n")
+        other = response("exit-country", url=probe.EXIT_COUNTRY_URL, body=b'{"ip":"8.8.8.8","country":"DE"}')
+        with patch.object(probe, "_request", AsyncMock(side_effect=[trace, other])) as request:
+            result = await probe.observe_required_exit_country(None, 12345, "u", "p", "RS")
+        self.assertEqual(request.await_count, 2)
+        self.assertEqual(result["country"], "DE")
+        self.assertEqual(result["reason"], "observed-exit-country-mismatch")
+        self.assertEqual(len(result["observations"]), 2)
+        self.assertFalse(probe.valid_exit_country_evidence(result))
+
+    async def test_required_country_has_own_timeout_and_requires_all_three_observers(self):
+        trace = response("trace", body=b"ip=2001:4860:4860::8888\nloc=RS\n")
+        country = response("exit-country", url=probe.EXIT_COUNTRY_URL, body=b'{"ip":"2001:4860:4860::8888","country":"RS"}')
+        self.assertGreater(probe.REQUIRED_EXIT_COUNTRY_TIMEOUT, probe.EXIT_METADATA_TIMEOUT)
+        with patch.object(probe, "EXIT_METADATA_TIMEOUT", .001), \
+                patch.object(probe, "_request", AsyncMock(side_effect=[trace, country, trace])) as request:
+            result = await probe.observe_required_exit_country(None, 12345, "u", "p", "RS")
+        self.assertTrue(probe.valid_exit_country_evidence(result))
+        self.assertEqual(request.await_count, 3)
+        self.assertEqual(len(result["attempts"]), 3)
+        self.assertEqual([call.args[3:] for call in request.await_args_list], [(12345, "u", "p")] * 3)
+
+    async def test_required_country_timeout_reaps_request_and_cancellation_propagates(self):
+        finished = asyncio.Event()
+        async def blocked(*args):
+            try:
+                await asyncio.Event().wait()
+            finally:
+                finished.set()
+        with patch.object(probe, "REQUIRED_EXIT_COUNTRY_TIMEOUT", .01), patch.object(probe, "_request", blocked):
+            result = await asyncio.wait_for(probe.observe_required_exit_country(None, 1, "u", "p", "RS"), .5)
+        self.assertTrue(finished.is_set())
+        self.assertEqual(result["attempts"][0]["reason"], "proxy-request-timeout")
+        with patch.object(probe, "_request", AsyncMock(side_effect=asyncio.CancelledError)):
+            with self.assertRaises(asyncio.CancelledError):
+                await probe.observe_required_exit_country(None, 1, "u", "p", "RS")
+
     async def test_primary_success_uses_exact_same_candidate_proxy_once(self):
         build = build_stub()
         with patch.object(probe, "_request", AsyncMock(return_value=response("trace"))) as request:

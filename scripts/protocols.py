@@ -209,6 +209,14 @@ def relabel(link: str, label: str) -> str:
         base = link.split('#', 1)[0]
         if 'security' not in parse_qs(urlsplit(base).query, keep_blank_values=True):
             link = base + ('&' if '?' in base else '?') + 'security=tls'
+    if link.lower().startswith('vless://'):
+        parsed = urlsplit(link)
+        options = parse_qsl(parsed.query, keep_blank_values=True, max_num_fields=64)
+        values = dict(options)
+        if values.get('security', '').lower() == 'reality' and not values.get('fp'):
+            options = [(key, value) for key, value in options if key != 'fp']
+            options.append(('fp', 'chrome'))
+            link = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(options), parsed.fragment))
     encoded_label = quote(label, safe='')
     if len(label) >= 2 and all(0x1F1E6 <= ord(char) <= 0x1F1FF for char in label[:2]):
         # Happ documents literal leading flags as supported icons. Keep this
@@ -271,6 +279,9 @@ def pin_transport_address(build, link: str, server_ip: str) -> str:
             options = parse_qsl(query, keep_blank_values=True, max_num_fields=24)
             options = [(key, value) for key, value in options if key != 'sni']
             options.append(('sni', tls['server_name']))
+            if tls.get('reality', {}).get('enabled'):
+                options = [(key, value) for key, value in options if key != 'fp']
+                options.append(('fp', tls['utls']['fingerprint']))
             query = urlencode(options)
         pinned = urlunsplit((parsed.scheme, authority, parsed.path, query, parsed.fragment))
 

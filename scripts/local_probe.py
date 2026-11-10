@@ -1564,7 +1564,7 @@ async def run_local_probe(build, links, final_rounds, minimum_successes, input_d
                       "services": services, "latency_samples_ms": measurements,
                       "median_latency": latency if isinstance(latency, (float, int)) and math.isfinite(latency) else None,
                       "rejection_reasons": result.get("rejection_reasons", ["missing-result"] if not result else [])}
-        for field in ("protocol", "engine_errors", "latency_checks", "attempted_address_count", "endpoint_attempts", "browser_check", "exit_country_evidence", "tested_server_ip"):
+        for field in ("protocol", "engine_errors", "latency_checks", "attempted_address_count", "endpoint_attempts", "browser_check", "browser_admission_retry", "exit_country_evidence", "tested_server_ip"):
             if field in result:
                 diagnostic[field] = result[field]
         diagnostic["outcome"] = classify_diagnostic(diagnostic)

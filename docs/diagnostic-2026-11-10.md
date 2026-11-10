@@ -71,6 +71,9 @@ An omitted/empty optional fingerprint now consistently defaults to explicit
 `chrome` in parsing, the test outbound and Happ export. Explicit fingerprints stay
 unchanged. Actual sing-box configuration checks accept both TCP and gRPC; this
 proves configuration compatibility, not those servers' application availability.
+The installed Happ Xray core also accepted reconstructed TCP and gRPC REALITY
+configurations in offline configuration-test mode. No connection or active Happ
+state was changed; this is not a successful end-to-end Happ import/network test.
 
 The scheduler wrote its Serbia child status but rejected that same field on its
 next load, emitting an inaccurate state-recovery warning every poll. The bounded
@@ -100,5 +103,60 @@ quota restoration remains externally unverified.
 
 ## Verification and deployment
 
-Deployment, final regression results and exact published inventory are recorded
-below after completion. Synthetic fault tests are not live server availability.
+Implementation commit: `e40da95c0f4e134a8643b791d454507b54e1d0b7`.
+The existing production runtime automatically fast-forwarded to it and launchd
+started local validation at07:32:23 (10:32:23MSK), without a manual job kick.
+At07:35:30 the hourly source researcher independently requested and verified
+Grok4.7 ExtraHigh non-fast, then received quota failure at07:35:52; the new
+per-stage retry state schedules08:35:52. This proves scheduled retry/model
+selection after the inventory outage, not successful quota restoration.
+
+The full macOS suite passed **533 tests in424.144s**. Focused checks passed:
+REALITY4, service checks61, source research33, scheduler43 and retention16.
+Controlled coverage includes source disappearance/replenishment, previously
+unknown source admission to a real local Git registry, unchanged-input
+revalidation, interrupted jobs, bounded retries, both atomic/idempotent
+publishers, concurrency, RS disagreement/empty results, HTTPS challenges,
+strict latency boundaries, IPv4/IPv6 and secret-safe diagnostics.
+Synthetic fault tests are not live server availability.
+
+The last complete automatic batch preceding this repair tested100 candidates,
+with3PASS/91FAIL/6INCONCLUSIVE, published at06:55:01 (09:55:01MSK).
+Its fresh proof generated_at is06:53:50; three fresh nodes had medians
+276.325/433.830/382.922ms, plus the now-expiring historical Shadowsocks.
+Those counts differ from the deliberately frozen screenshot's repeat test.
+
+[CI42775872716](https://github.com/RebelRider/vpn-subscription/actions/runs/42775872716)
+also passed533 tests (90.165s), collected8000 candidates, parsed4390, found620
+first-pass working and472 final-stable, and published50Best50 entries in
+main commit`8c620fb1386027b412cb0ad7ffdd90288c77736e`. The live local input mix
+was38VLESS/20Shadowsocks/13VMess/13Trojan/14Hysteria2/2SOCKS.
+
+The automatic local run completed at07:41:36:100 tested,4PASS/66FAIL/
+30INCONCLUSIVE. Four nodes had all five service rounds and medians
+276.999/197.258/326.334/394.040ms. Best50 had changed concurrently, so the
+07:42:29 publication guard correctly withheld this result and preserved the
+existing published subscription. A51s bounded retry was recorded; the existing
+serialized Serbia stage completed independently at07:46:33 with100tested,
+zeroqualified and a verified empty-result publication. No stale result was
+published merely to increase list size.
+
+The next scheduled primary run at07:51 completed at07:59:11 with four strict
+qualifiers. Its publication exposed a regression in the new explicit-fingerprint
+export: it also moved an existing fp parameter to the end of the query, changing
+immutable URI bytes without changing semantics. The historical-evidence guard
+correctly blocked publication at08:00:15. Export now preserves every existing
+nonempty fingerprint's query position, while still making missing defaults
+explicit. The exact live immutable artifact was checked against the corrected
+renderer. Regression coverage includes real historical REALITY Git publications.
+
+The first repaired batch also exposed browser admission starvation:18 candidates
+never obtained the serialized WebKit slot within45s. They were correctly marked
+INCONCLUSIVE, but lacked an actual ChatGPT application test. After the parallel
+tranche drains, up to four such nonstarted checks now receive a complete fresh
+sequential attempt. Hourly selection rotation avoids permanently favoring the
+same subset. The same five service rounds, strict latency threshold, isolation
+and (for Serbia) four-service/RS policy still apply; old partial results are
+discarded. Additional worst-case work is bounded to4×180s, with one browser.
+Executed browser failures, HTTP restrictions and challenges are not blindly
+retried. Recovery/cancellation/rotation have controlled regression coverage.

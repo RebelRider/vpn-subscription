@@ -36,6 +36,7 @@ from owned_temporary import temporary_directory
 
 
 MAX_CONCURRENT = 4
+MAX_BROWSER_ADMISSION_RETRIES = 4
 MAX_RESPONSE_BYTES = 1024 * 1024
 MAX_HEADERS_BYTES = 64 * 1024
 REQUEST_TIMEOUT = 16
@@ -1145,7 +1146,23 @@ async def validate_candidates(build, links: list[str], rounds: int = 5, interfac
             return link, await _validate_one(build, link, rounds, interface, **policy)
     tasks = [asyncio.create_task(one(link)) for link in dict.fromkeys(links)]
     try:
-        return dict(await asyncio.gather(*tasks))
+        reports = dict(await asyncio.gather(*tasks))
+        # A serialized browser can take longer than another candidate's bounded
+        # admission wait. Once the parallel tranche has drained, give a small
+        # rotating subset a full, fresh sequential attempt. Never replay old
+        # HTTP, latency or browser proof, or run additional browsers in parallel.
+        deferred = [link for link, report in reports.items()
+                    if report.get("browser_check", {}).get("reason") == "browser-queue-deferred-inconclusive"
+                    and report["browser_check"].get("browser_started") is False]
+        hour = str(int(time.time() // 3600))
+        deferred.sort(key=lambda link: hashlib.sha256((hour + ":" + link).encode()).digest())
+        policy = {} if required_services is None and required_exit_country is None else {
+            "required_services": required_services, "required_exit_country": required_exit_country}
+        for link in deferred[:MAX_BROWSER_ADMISSION_RETRIES]:
+            report = await _validate_one(build, link, rounds, interface, **policy)
+            report["browser_admission_retry"] = {"attempted": True, "previous_reason": "browser-queue-deferred-inconclusive"}
+            reports[link] = report
+        return reports
     finally:
         for task in tasks:
             if not task.done():

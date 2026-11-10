@@ -16,7 +16,8 @@ from scripts import subscription_state
 
 
 UUID = "11111111-1111-4111-8111-111111111111"
-OLD_A = f"vless://{UUID}@1.1.1.1:443?security=tls&sni=example.com"
+OLD_A = (f"vless://{UUID}@1.1.1.1:443?security=reality&sni=example.com"
+         "&pbk=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&fp=chrome&type=tcp")
 OLD_B = "trojan://retention-fixture@8.8.8.8:443?sni=example.com"
 NEW = f"vless://{UUID}@8.8.4.4:443?security=tls&sni=example.com"
 

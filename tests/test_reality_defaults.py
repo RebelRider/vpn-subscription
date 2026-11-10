@@ -48,6 +48,16 @@ class RealityDefaults(unittest.TestCase):
         self.assertEqual(build.parse_vless(tls)['fp'], '')
         self.assertNotIn('fp', parse_qs(urlsplit(protocols.relabel(tls, 'label')).query))
 
+    def test_explicit_fingerprint_preserves_immutable_published_query_order(self):
+        for fingerprint in ('chrome', 'safari', 'firefox'):
+            source = BASE + '&fp=' + fingerprint + '&type=grpc&serviceName=example'
+            pinned = protocols.pin_transport_address(build, source, '8.8.8.8')
+            # The historical renderer only moved sni to the end. Moving fp
+            # changed immutable publication bytes despite equivalent settings.
+            keys = list(parse_qs(urlsplit(pinned).query))
+            self.assertEqual(keys, ['security', 'pbk', 'sid', 'fp', 'type', 'serviceName', 'sni'])
+            self.assertEqual(protocols.pin_transport_address(build, pinned, '8.8.8.8'), pinned)
+
     @unittest.skipUnless(shutil.which('sing-box'), 'sing-box not installed')
     def test_real_engine_accepts_both_transports_without_network(self):
         for transport in ('tcp', 'grpc'):

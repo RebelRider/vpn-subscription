@@ -279,7 +279,7 @@ def pin_transport_address(build, link: str, server_ip: str) -> str:
             options = parse_qsl(query, keep_blank_values=True, max_num_fields=24)
             options = [(key, value) for key, value in options if key != 'sni']
             options.append(('sni', tls['server_name']))
-            if tls.get('reality', {}).get('enabled'):
+            if tls.get('reality', {}).get('enabled') and not dict(options).get('fp'):
                 options = [(key, value) for key, value in options if key != 'fp']
                 options.append(('fp', tls['utls']['fingerprint']))
             query = urlencode(options)

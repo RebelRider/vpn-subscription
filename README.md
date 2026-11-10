@@ -110,6 +110,11 @@ denied. A real local isolation self-test must pass before browser checks run.
 One global kernel lock serializes browsers. All profiles and processes are owned,
 ephemeral and supervised; system networking and existing browser data are untouched.
 The pinned browser runtime is installed/repaired only in BestLocal-owned caches.
+After a parallel candidate batch drains, at most four checks that never obtained
+a browser slot get a fresh sequential validation. Selection rotates hourly;
+each retry repeats all services, latency samples and applicable exit-country
+checks. Execution failures/challenges are not admission retries, and previous
+partial proof cannot qualify a retried connection. Browser concurrency stays one.
 
 Subscription names include the observed public exit IP when available, for
 example `🇳🇱 NL, Haarlem  |2|   [193.29.139.198]`. Exit country/city are optional

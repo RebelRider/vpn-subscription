@@ -818,5 +818,99 @@ class AsyncProbeTests(unittest.IsolatedAsyncioTestCase):
         build._stop_owned_probe_process.assert_awaited_once_with(child)
 
 
+class DeferredBrowserRecoveryTests(unittest.IsolatedAsyncioTestCase):
+    def deferred(self):
+        return {"qualified": False, "old_partial_evidence": True,
+                "browser_check": {"reason": "browser-queue-deferred-inconclusive", "browser_started": False}}
+
+    async def test_bounded_sequential_recovery_runs_only_after_parallel_tranche_and_replaces_evidence(self):
+        counts, active, recovered, peak_recovery = {}, 0, [], 0
+        async def validate(build, link, rounds, interface, **policy):
+            nonlocal active, peak_recovery
+            counts[link] = counts.get(link, 0) + 1
+            if counts[link] == 1:
+                await asyncio.sleep(0)
+                return self.deferred()
+            self.assertEqual(len(counts), 9)
+            active += 1
+            peak_recovery = max(peak_recovery, active)
+            await asyncio.sleep(0)
+            active -= 1
+            recovered.append(link)
+            return {"qualified": True, "fresh_evidence": link}
+        with patch.object(probe, "_validate_one", side_effect=validate):
+            result = await probe.validate_candidates(None, [str(i) for i in range(9)], 5, "en0")
+        self.assertEqual(len(recovered), probe.MAX_BROWSER_ADMISSION_RETRIES)
+        self.assertEqual(peak_recovery, 1)
+        for link in recovered:
+            self.assertTrue(result[link]["qualified"])
+            self.assertEqual(result[link]["fresh_evidence"], link)
+            self.assertNotIn("old_partial_evidence", result[link])
+            self.assertTrue(result[link]["browser_admission_retry"]["attempted"])
+        self.assertEqual(list(result), [str(i) for i in range(9)])
+
+    async def test_failed_fresh_retry_never_reuses_old_partial_success_and_preserves_serbia_policy(self):
+        services = tuple(probe.ALL_SERVICE_URLS)
+        fresh = {"qualified": False, "services": {}, "rejection_reasons": ["socks-connection-failed"]}
+        with patch.object(probe, "_validate_one", AsyncMock(side_effect=[self.deferred(), fresh])) as validate:
+            result = await probe.validate_candidates(None, ["one", "one"], 5, "en0",
+                                                     required_services=services, required_exit_country="RS")
+        self.assertFalse(result["one"]["qualified"])
+        self.assertNotIn("old_partial_evidence", result["one"])
+        self.assertEqual(validate.await_count, 2)
+        for call in validate.await_args_list:
+            self.assertEqual(call.args, (None, "one", 5, "en0"))
+            self.assertEqual(call.kwargs, {"required_services": services, "required_exit_country": "RS"})
+
+    async def test_executed_browser_errors_and_transport_failures_are_not_blindly_retried(self):
+        for reason, started in (("browser-deadline", True), ("browser-queue-deferred-inconclusive", True),
+                                ("cloudflare-challenge-inconclusive", True), ("rate-limited-inconclusive", False)):
+            report = {"qualified": False, "browser_check": {"reason": reason, "browser_started": started}}
+            with self.subTest(reason=reason), patch.object(probe, "_validate_one", AsyncMock(return_value=report)) as validate:
+                result = await probe.validate_candidates(None, ["one"], 5)
+            validate.assert_awaited_once()
+            self.assertFalse(result["one"]["qualified"])
+
+    async def test_cancellation_during_recovery_propagates_and_unwinds_owned_validation(self):
+        started, cleaned = asyncio.Event(), asyncio.Event()
+        async def retry(*args, **kwargs):
+            started.set()
+            try:
+                await asyncio.Event().wait()
+            finally:
+                cleaned.set()
+        calls = 0
+        async def controlled(*args, **kwargs):
+            nonlocal calls
+            calls += 1
+            return self.deferred() if calls == 1 else await retry(*args, **kwargs)
+        with patch.object(probe, "_validate_one", side_effect=controlled):
+            task = asyncio.create_task(probe.validate_candidates(None, ["one"], 5))
+            await started.wait()
+            task.cancel()
+            with self.assertRaises(asyncio.CancelledError):
+                await task
+        self.assertTrue(cleaned.is_set())
+
+    async def test_bounded_admission_recovery_rotates_instead_of_always_favoring_same_entries(self):
+        selections = []
+        for hour in (100, 101):
+            calls, recovered = {}, []
+            async def validate(build, link, *args, **kwargs):
+                calls[link] = calls.get(link, 0) + 1
+                if calls[link] == 1:
+                    return self.deferred()
+                recovered.append(link)
+                # Another deferral gets no third attempt in this batch.
+                return self.deferred()
+            with patch.object(probe, "time") as clock, patch.object(probe, "_validate_one", side_effect=validate):
+                clock.time.return_value = hour * 3600
+                await probe.validate_candidates(None, [str(i) for i in range(20)], 5)
+            self.assertLessEqual(max(calls.values()), 2)
+            self.assertEqual(len(recovered), probe.MAX_BROWSER_ADMISSION_RETRIES)
+            selections.append(set(recovered))
+        self.assertNotEqual(*selections)
+
+
 if __name__ == "__main__":
     unittest.main()

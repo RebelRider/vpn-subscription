@@ -160,3 +160,89 @@ and (for Serbia) four-service/RS policy still apply; old partial results are
 discarded. Additional worst-case work is bounded to4×180s, with one browser.
 Executed browser failures, HTTP restrictions and challenges are not blindly
 retried. Recovery/cancellation/rotation have controlled regression coverage.
+
+## Evening follow-up and local Qwen research
+
+At19:03:21UTC (22:03:21MSK), an unattended main batch completed100 tests:
+0PASS/96FAIL/4INCONCLUSIVE. It contained85 configurations absent from the previous
+published batch, so collection/rotation was not stuck on the same small list.
+Collection obtained70 of72 feeds and8000 raw candidates; the persistent source
+registry contained64 URLs. The three most recent completed BuildBest50 runs
+before the new Qwen change were successful, including
+[42879047366](https://github.com/RebelRider/vpn-subscription/actions/runs/42879047366).
+
+The retained sole ES entry68.221.177.135 had passed its original five-round check
+at17:59:34UTC with median432.111ms and was published at18:01:57UTC. Its latest
+rank1 recheck failed YouTube withcurl28, Instagram withcurl97 and the latency
+request withcurl28. ChatGPT supplied only provisional HTTP evidence; no full
+application PASS was recorded. The nonempty failure fallback preserved the
+18:01 artifact and date instead of claiming a fresh successful list.
+
+Of100 current candidates,73 had SOCKS errors and21 had latency-request timeouts.
+Only one had any YouTubePASS and two anyInstagramPASS. The sole attempted
+browser check was inconclusive and its first latency sample exceeded2000ms;
+this batch did not exhibit browser-slot starvation. Physical en0 remained up;
+lightweight HTTPS204 controls succeeded through both the unchanged active route
+and explicitly bound en0. This is evidence of poor candidate-path availability,
+not proof of a globally disconnected physical interface.
+
+The feedback classifier nevertheless hid two independent mandatory-service
+transport failures behind provisional ChatGPT evidence. It now classifies this
+same frozen evidence as98FAIL/2INCONCLUSIVE, without turning an uncertain service
+intoPASS. Explicit shared control/isolation failures remain inconclusive. A
+cached top-level outcome no longer overrides underlying current evidence.
+
+Serbia's19:06:32UTC completed batch had0 qualifiers/100:95 unconfirmed exit
+countries,2 nonRS exits and3 DNS failures. Two previously observed RS configurations were
+separately retested at12:45UTC; all three egress observers and all four required
+services failed withcurl35. Earlier RS geography cannot certify a current exit
+or service PASS. Fresh public cached inputs with an observed RS history now get
+another strict test even when a healthy feed harvest omits them;24h input TTL
+and all current functional/geography checks remain mandatory.
+
+Read-only Happ subscription logs confirmed the exact uppercaseSerbia URL is
+configured. The zero-URI artifact is fetched but rejected by Happ3.3.6; diagnostic
+metadata now explicitly records this confirmed empty-import limitation. No dummy
+server or guessed Serbian egress is published.
+
+The new local researcher uses the existing MLX artifact
+`mlx-community/Qwen3.8-27B-4bit`, dynamically resolving LMStudio's actual load
+handle`qwen3.8-27b`. Loading the artifact path itself failed with model-not-found;
+inventory-based resolution fixes that mismatch. Broad natural-language GitHub
+AND queries also returned no repositories; bounded successful-empty query
+expansion now finds actual repository/feed links without evading rate limits.
+
+A controlled live model/tool run at19:13:28–19:21:48UTC completed in500.13s:
+two new public source URLs and two novel candidate fingerprints, after
+deterministic deduplication. Model-provided text did not create configurations.
+Production subscriptions, source admission and GitHub publication were withheld
+for that run. The owned model was unloaded and REST server stopped; live
+inventory then showed zero loaded models. Route, VPN-service, DNS and proxy
+snapshots exactly matched the pretest hashes. No visible browser was opened.
+
+The full macOS suite passed634 tests in157.732s; after subsequent narrow recovery
+and model-input fixes all88 Qwen tests passed separately. Fault coverage includes
+timezone/DST changes, missed-slot recovery, duplicate jobs, foreign model/server
+ownership, API/authentication failures, malformed model actions, corrupt private
+ownership journals, interrupted work, Git retries, data-only branch guards,
+durable source-admission budget deferrals and preserved production artifacts.
+These simulations do not certify live public VPN functionality or future model
+availability. Grok's latest real read-only review attempt still hit quota;
+future quota restoration is not claimed as verified.
+
+At19:22:28UTC the same durable, genuinely observed proposal completed the live
+data-only integration without reloading the model: two sources were independently
+refetched and added to the shared64-entry registry withQwen provenance. The
+verified discovery branch contains only`discovery/qwen/candidates.json` in
+[PR1](https://github.com/RebelRider/vpn-subscription/pull/1), commit
+`6cc7228078d37e90b9b5999914eda6a43442e684`. No subscription URI was published by
+the researcher. Successful private discovery/dedup history was adopted as the
+operationalQwen state so the next daily run does not repeat this controlled work.
+
+The existing regional bootstrap automatically fast-forwarded the clean runtime
+to implementation`2232c89103e5965f461a7b45920cd4756da34013`. The installer then
+enabled`com.rebelrider.best50-qwen-discovery`; its real launchdRunAtLoad poll was
+recorded at19:27:21UTC and correctly kept today's completed work idle. Its next
+daily slot is11November03:01Europe/Moscow (00:01UTC), with explicit timezone
+gating and wake/login catch-up. The future daily model invocation itself cannot
+be claimed as observed before that time.

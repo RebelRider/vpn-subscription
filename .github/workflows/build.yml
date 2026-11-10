@@ -138,9 +138,17 @@ jobs:
           git config user.name "best50-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           BUILD_SHA="$(git rev-parse HEAD)"
+          PUBLISH_BASE="$BUILD_SHA"
+          unchanged_inputs() {
+            # Only descendant documentation changes are independent of this
+            # tested build. Code, configuration and output advances still win.
+            git merge-base --is-ancestor "$BUILD_SHA" "$1" &&
+              git diff --quiet "$BUILD_SHA" "$1" -- . \
+                ':(top,exclude)docs/**' ':(top,exclude)README.md'
+          }
           git fetch origin main
-          if [ "$BUILD_SHA" != "$(git rev-parse origin/main)" ]; then
-            echo "Main changed during validation; preserving published output until the next build."
+          if ! unchanged_inputs "$(git rev-parse origin/main)"; then
+            echo "Build inputs or outputs changed during validation; preserving the newer main."
             exit 0
           fi
           git add output/qualified-all.txt output/best20.txt output/best50.txt \
@@ -151,15 +159,25 @@ jobs:
           fi
           git commit -m "chore: update Best50 subscription"
           # Explicit, non-forced push is atomic at the Git branch. A concurrent
-          # main update is never overwritten. Retry only temporary transport errors.
+          # main update is never overwritten. A docs-only advance can safely
+          # carry this single generated-output commit without discarding docs.
           for attempt in 1 2 3; do
-            if git push origin HEAD:main; then exit 0; fi
             git fetch origin main
-            if [ "$(git rev-parse origin/main)" = "$(git rev-parse HEAD)" ]; then exit 0; fi
-            if [ "$(git rev-parse origin/main)" != "$BUILD_SHA" ]; then
-              echo "Concurrent publication won; next scheduled build will refresh."
+            REMOTE_SHA="$(git rev-parse origin/main)"
+            if [ "$REMOTE_SHA" = "$(git rev-parse HEAD)" ]; then exit 0; fi
+            if ! unchanged_inputs "$REMOTE_SHA"; then
+              echo "Concurrent input/output publication won; next scheduled build will refresh."
               exit 0
             fi
+            if [ "$REMOTE_SHA" != "$PUBLISH_BASE" ]; then
+              if ! git rebase --onto "$REMOTE_SHA" "$PUBLISH_BASE"; then
+                git rebase --abort || true
+                echo "Documentation advance could not be applied safely; remote output preserved."
+                exit 1
+              fi
+              PUBLISH_BASE="$REMOTE_SHA"
+            fi
+            if git push origin HEAD:main; then exit 0; fi
             sleep "$((attempt * attempt * 5))"
           done
           echo "Publication failed after bounded retries; previous remote output is preserved."

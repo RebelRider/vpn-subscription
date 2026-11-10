@@ -246,3 +246,34 @@ recorded at19:27:21UTC and correctly kept today's completed work idle. Its next
 daily slot is11November03:01Europe/Moscow (00:01UTC), with explicit timezone
 gating and wake/login catch-up. The future daily model invocation itself cannot
 be claimed as observed before that time.
+
+The next completely unattended main batch finished at19:30:37UTC with100tested,
+0PASS/98FAIL/2INCONCLUSIVE. The corrected feedback classification was exercised
+on the retained ES entry; its new ChatGPT/YouTube requests timed out despite an
+Instagram success. Serbia then finished at19:34:06UTC with0/100:97 unconfirmed
+countries and3 nonRS exits. Both jobs completed and published diagnostic health;
+the nonempty main last-good fallback remained at18:01:57UTC.
+
+The Serbia collector actually consumed both new Qwen sources at19:31:04UTC:
+100 and411 extracted public configurations, both fetches successful. Its input
+manifest and completed diagnostics matched52 unique source-associated candidates;
+50 had unconfirmed current egress and2 were observed outsideRS. Thus registry
+admission, real fetch/extraction and local testing were exercised end to end,
+without confusing source novelty with verified Serbian availability. The earlier
+main collection did not yet contain these two source IDs; its consumption is not
+claimed from this particular batch.
+
+[CI42884532765](https://github.com/RebelRider/vpn-subscription/actions/runs/42884532765)
+passed635 tests in111.334s and built482 stable candidates/50Best50 from8000 raw
+and4806 parse-valid configurations. Its cloud publication was nevertheless
+withheld because the documentation-only follow-up commit advancedmain during
+validation. Green CI alone did not prove a new subscription publication.
+
+The primary publish guard now permits only descendant changes confined to
+`docs/**` and root`README.md`, rebasing the single generated-output commit onto
+that documentation head before its ordinary non-forced push. Code, configuration,
+tests, workflow or competing output advances still preserve the remote and
+withhold the older build. Real local bare-Git behavioral fixtures exercise these
+cases, rather than merely checking that the shell contains expected strings.
+All seven publisher fixtures passed independently onmacOS, including real
+mid-push documentation/configuration races and a temporary push rejection.

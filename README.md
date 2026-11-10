@@ -1,5 +1,10 @@
 # Best50 → BestLocal
 
+Optional autonomous local source research uses the existing LM Studio Qwen MLX
+installation at03:01 Moscow time. It supplements the shared source registry and
+produces a data-only discovery PR; it cannot certify or publish working servers.
+See [installation, ownership, scheduling and diagnostics](docs/qwen-local-discovery.md).
+
 Public-source discovery and primary proxy testing run in the existing GitHub
 Actions workflow. The existing macOS launch agent independently tests Best50,
 then publishes to the unchanged Happ subscription:

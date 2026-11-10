@@ -33,13 +33,35 @@ def classify_diagnostic(diagnostic) -> str:
     """Reduce bounded, credential-free local evidence to a ranking outcome.
 
     A failed qualification is not by itself proof that a candidate is dead.
-    Challenges, HTTP policy responses and unavailable controls take precedence
-    over transport errors elsewhere in the same inconclusive attempt.
+    Shared control failures remain inconclusive. An independent mandatory
+    service failure cannot be hidden by another service's unresolved challenge.
     """
     if not isinstance(diagnostic, dict):
         return "inconclusive"
     if diagnostic.get("qualified") is True:
         return "pass"
+    evidence = {key: value for key, value in diagnostic.items() if key != "outcome"}
+    uncertain, failed = _diagnostic_signals(evidence)
+    if not uncertain:
+        return "fail" if failed else "inconclusive"
+    # Ignore cached classification and aggregate engine/rejection summaries.
+    # Explicit shared browser/control/isolation failures still take precedence.
+    shared = {key: value for key, value in evidence.items()
+              if key not in {"services", "engine_errors", "transport_errors", "rejection_reasons", "qualified"}}
+    if _diagnostic_signals(shared)[0]:
+        return "inconclusive"
+    services = evidence.get("services")
+    if isinstance(services, dict):
+        for name in ("chatgpt", "youtube", "instagram", "spotify"):
+            service_uncertain, service_failed = _diagnostic_signals(services.get(name))
+            if service_failed and not service_uncertain:
+                return "fail"
+    return "inconclusive"
+
+
+def _diagnostic_signals(diagnostic) -> tuple[bool, bool]:
+    if not isinstance(diagnostic, dict):
+        return False, False
     strings = []
     codes = []
     curl_codes = []
@@ -90,7 +112,7 @@ def classify_diagnostic(diagnostic) -> str:
                 "browser-proof-missing", "browser-proof-unavailable", "control-unavailable",
                 "control-failed", "positive-control", "engine-unavailable", "request-process-failed",
             ))):
-        return "inconclusive"
+        return True, False
     if (any(code in {5, 6, 7, 28, 35, 51, 56, 60, 97} for code in curl_codes)
             or any(marker in text for marker in (
                 "invalid-or-unsafe-config", "invalid-config", "configuration-invalid",
@@ -104,8 +126,8 @@ def classify_diagnostic(diagnostic) -> str:
                 "socket-failed", "socket-error", "timeout", "latency-not-below-500ms",
                 "curl-5", "curl-6", "curl-7", "curl-28", "curl-35", "curl-51", "curl-56", "curl-60", "curl-97",
             ))):
-        return "fail"
-    return "inconclusive"
+        return False, True
+    return False, False
 
 
 def _valid_outcome(value, qualified):

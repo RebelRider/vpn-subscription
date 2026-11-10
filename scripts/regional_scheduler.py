@@ -103,7 +103,8 @@ def rotate_logs(directory: Path, limit: int = 5 * 1024 * 1024, *, names=None) ->
     # launchd opens the new path next run; the current descriptor keeps writing
     # its rotated inode. Only these two BestLocal-owned files are eligible.
     selected = ("regional-refresh.log", "regional-refresh-error.log") if names is None else names
-    allowed = {"regional-refresh.log", "regional-refresh-error.log", "source-research.log", "source-research-error.log"}
+    allowed = {"regional-refresh.log", "regional-refresh-error.log", "source-research.log", "source-research-error.log",
+               "qwen-discovery.log", "qwen-discovery-error.log"}
     if any(name not in allowed for name in selected):
         raise ValueError("Only BestLocal operational logs may be rotated")
     for name in selected:

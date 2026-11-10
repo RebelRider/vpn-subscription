@@ -51,8 +51,8 @@ def client_compatibility(entry_count: int) -> dict:
         raise ValueError("Invalid Serbia client entry count")
     return {"client": "Happ", "format": "proxy-share-uris", "entries": entry_count,
             "availability": "verified-rs" if entry_count else "awaiting-verified-rs",
-            "empty_subscription_import_supported": None, "import_verified": False,
-            "empty_import_evidence": "user-reported-parse-error"}
+            "empty_subscription_import_supported": False, "import_verified": False,
+            "empty_import_evidence": "user-confirmed-empty-uri-parse-error"}
 
 
 def _state(path: Path) -> dict:
@@ -189,11 +189,15 @@ def _validate_result(build, status: dict, *, now: float | None = None) -> None:
     if status.get("result") != ("qualified" if nodes else "empty"):
         raise ValueError("Invalid Serbia empty-result classification")
     compatibility = status.get("client_compatibility")
+    expected_compatibility = client_compatibility(len(nodes))
+    legacy_compatibility = {**expected_compatibility, "empty_subscription_import_supported": None,
+                            "empty_import_evidence": "user-reported-parse-error"}
     if "client_compatibility" in status and (
             not isinstance(compatibility, dict) or type(compatibility.get("entries")) is not int
-            or compatibility.get("empty_subscription_import_supported") is not None
+            or not (compatibility.get("empty_subscription_import_supported") is None
+                    or compatibility.get("empty_subscription_import_supported") is False)
             or compatibility.get("import_verified") is not False
-            or compatibility != client_compatibility(len(nodes))):
+            or compatibility not in (expected_compatibility, legacy_compatibility)):
         raise ValueError("Inconsistent Serbia client availability metadata")
 
 

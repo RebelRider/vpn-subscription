@@ -87,7 +87,11 @@ class SerbiaPolicyTests(unittest.TestCase):
             status['client_compatibility'] = serbia.client_compatibility(len(nodes))
             serbia._validate_result(build, status)
             self.assertIs(status['client_compatibility']['import_verified'], False)
-            self.assertIsNone(status['client_compatibility']['empty_subscription_import_supported'])
+            self.assertIs(status['client_compatibility']['empty_subscription_import_supported'], False)
+            old = copy.deepcopy(status)
+            old['client_compatibility'].update(empty_subscription_import_supported=None,
+                                               empty_import_evidence='user-reported-parse-error')
+            serbia._validate_result(build, old)
             for broken in (None, {}, {**status['client_compatibility'], 'entries': 99},
                            {**status['client_compatibility'], 'entries': bool(nodes)},
                            {**status['client_compatibility'], 'import_verified': True},

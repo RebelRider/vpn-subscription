@@ -30,6 +30,7 @@ MAX_SOURCES = 64
 MAX_PROPOSALS = 32
 MAX_AGE = 30 * 86400
 REFRESH_SECONDS = 24 * 3600
+QWEN_MODEL = "mlx-community/Qwen3.8-27B-4bit"
 
 
 class ResearchSourcesUnavailable(RuntimeError):
@@ -74,10 +75,12 @@ def parse_catalog(raw: bytes, now: float | None = None) -> dict:
             clean = {"url": url, "evidence_url": evidence, "first_seen": first,
                      "last_verified_at": verified, "enabled": record.get("enabled", True)}
             discoverer = record.get("discovered_by")
-            if discoverer in ("independent", "grok"):
+            if discoverer in ("independent", "grok", "qwen"):
                 clean["discovered_by"] = discoverer
                 model = record.get("discovery_model")
                 if discoverer == "grok" and isinstance(model, str) and re.fullmatch(r"(?:cursor-)?grok-\d+(?:\.\d+)*-xhigh", model):
+                    clean["discovery_model"] = model
+                elif discoverer == "qwen" and model == QWEN_MODEL:
                     clean["discovery_model"] = model
             if url not in records or records[url]["last_verified_at"] < verified:
                 records[url] = clean
@@ -243,10 +246,11 @@ def publish_catalog(repo: Path, state_dir: Path, updates: list[dict], now: float
 
 def process_research_result(result_text: str, repo: Path, state_dir: Path, now: float, *,
                             discovered_by: str | None = None, model_id: str | None = None) -> dict:
-    if discovered_by not in (None, "independent", "grok"):
+    if discovered_by not in (None, "independent", "grok", "qwen"):
         raise ValueError("invalid source discoverer")
-    if model_id is not None and (discovered_by != "grok" or not isinstance(model_id, str)
-                                 or not re.fullmatch(r"(?:cursor-)?grok-\d+(?:\.\d+)*-xhigh", model_id)):
+    if model_id is not None and not (
+            discovered_by == "grok" and isinstance(model_id, str) and re.fullmatch(r"(?:cursor-)?grok-\d+(?:\.\d+)*-xhigh", model_id)
+            or discovered_by == "qwen" and model_id == QWEN_MODEL):
         raise ValueError("invalid source discovery model")
     proposals, rejected = parse_proposal(result_text)
     reasons = Counter({"invalid-proposal": rejected} if rejected else {})

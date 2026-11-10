@@ -290,6 +290,23 @@ class DiagnosticClassifierTests(unittest.TestCase):
         }}
         self.assertEqual(feedback.classify_diagnostic(diagnostic), "fail")
 
+    def test_independent_mandatory_failure_is_not_hidden_by_provisional_chatgpt(self):
+        diagnostic = {"qualified": False, "services": {
+            "chatgpt": {"evidence": [{"outcome": "inconclusive", "reason": "browser-proof-missing"}]},
+            "youtube": {"evidence": [{"outcome": "fail", "reason": "proxy-request-timeout", "curl_exit": 28}]},
+            "instagram": {"evidence": [{"outcome": "fail", "reason": "socks-connection-failed", "curl_exit": 97}]}}}
+        self.assertEqual(feedback.classify_diagnostic(diagnostic), "fail")
+        diagnostic["outcome"] = "inconclusive"
+        self.assertEqual(feedback.classify_diagnostic(diagnostic), "fail")
+        diagnostic["control"] = {"reason": "positive-control-failed"}
+        self.assertEqual(feedback.classify_diagnostic(diagnostic), "inconclusive")
+
+    def test_optional_metadata_failure_does_not_override_service_uncertainty(self):
+        diagnostic = {"qualified": False, "services": {
+            "chatgpt": {"evidence": [{"http_status": 429}]}},
+            "metadata": {"curl_exit": 28}}
+        self.assertEqual(feedback.classify_diagnostic(diagnostic), "inconclusive")
+
     def test_unknown_or_malformed_diagnostics_remain_inconclusive(self):
         for value in (None, [], "failed", {}, {"qualified": False},
                       {"qualified": False, "services": []},

@@ -584,17 +584,23 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
         cached = _main_manifest_candidates(build, state_dir, now, private_connections)
         fallback_count = len(cached)
     replayed = {}
-    if partial_discovery:
-        for identifier, candidate in cached.items():
-            if identifier in candidates or identifier in by_id:
-                continue
-            candidates[identifier] = candidate
-            replayed[identifier] = candidate["_observed_at"]
-            previous = history["candidates"].get(identifier, {})
-            source_ids = _source_ids(set(candidate["source_ids"]) | set(previous.get("source_ids", [])))
-            candidate["source_ids"] = source_ids
-            history["candidates"][identifier] = {**previous, "last_seen": max(previous.get("last_seen", 0), candidate["_observed_at"]),
-                                                   "source_ids": source_ids, "last_tested": previous.get("last_tested", 0)}
+    for identifier, candidate in cached.items():
+        previous = history["candidates"].get(identifier, {})
+        # A healthy feed harvest can omit an earlier Serbian exit. Its still-
+        # fresh public input deserves another strict local test even when no
+        # source outage triggers the general cache fallback. Source flags alone
+        # cannot enable this path; no cached functional/country proof is reused.
+        observed_rs = preferred_country == "RS" and previous.get("last_exit_country") == "RS"
+        if not partial_discovery and not observed_rs:
+            continue
+        if identifier in candidates or identifier in by_id:
+            continue
+        candidates[identifier] = candidate
+        replayed[identifier] = candidate["_observed_at"]
+        source_ids = _source_ids(set(candidate["source_ids"]) | set(previous.get("source_ids", [])))
+        candidate["source_ids"] = source_ids
+        history["candidates"][identifier] = {**previous, "last_seen": max(previous.get("last_seen", 0), candidate["_observed_at"]),
+                                               "source_ids": source_ids, "last_tested": previous.get("last_tested", 0)}
     merged_cache = dict(cached)
     for identifier, candidate in fresh_cache.items():
         previous = merged_cache.get(identifier)

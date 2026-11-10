@@ -1,31 +1,27 @@
 # v6.0 — LOCAL NETWORK VERIFIED PROXIES
-#profile-title: BL VPN [10Nov2026 05:32]
+#profile-title: BL VPN [10Nov2026 07:11]
 #profile-update-interval: 1
 #subscription-ping-onopen-enabled: 1
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-11-10 02:32:38 UTC
+# generated: 2026-11-10 04:11:13 UTC
 #
 # Local filtering: ChatGPT cold-session application proof + YouTube video metadata + Instagram application HTML; median proxy HTTPS latency <500 ms
 # Local final stability: 5/5 complete rounds required
 # upstream_nodes: 100
-# local_qualified: 9
+# local_qualified: 5
 # local_ranking: stability, median latency, p95 latency
 #
 # Fresh entries were re-tested through the current local network; retained entries preserve historical evidence and are not currently verified.
 #
 # local_retained: 1
-# published_total: 10
+# published_total: 6
 #bestlocal-status: mixed; retained entries are not currently verified
 #bestlocal-health-url: https://raw.githubusercontent.com/RebelRider/vpn-subscription/regional/output/local-health.json
-vless://1653818d-532e-46be-b825-384107fb7c3a@89.105.195.151:443?type=grpc&serviceName=hub.v1.ObjectService&fp=firefox&security=tls&sni=edge.mediacorphub.org#🇳🇱%20NL%2C%20Enschede%20%20%7C1%7C%20%20%20%5B89.105.195.157%5D
-vless://d7ddade6-b7a0-4cab-a910-d5d5c378d98a@201.58.189.105:2083?encryption=none&fp=firefox&pbk=B7x5bYp-YhtLeH31zYcilpKFCkGTMe3jtSECSw-bMC4&security=reality&serviceName=google.storage.v2.Storage&sid=8bd80253&type=grpc&sni=dl.google.com#🇵🇱%20PL%2C%20Warsaw%20%20%7C2%7C%20%20%20%5B201.58.189.102%5D
-vless://1653818d-532e-46be-b825-384107fb7c3a@89.105.195.152:443?type=grpc&security=tls&fp=firefox&serviceName=api.v1.FeedService&sni=fetch.mediacorphub.org#🇳🇱%20NL%2C%20Enschede%20%20%7C3%7C%20%20%20%5B89.105.195.158%5D
-hysteria2://63b27e94-9aae-47f4-b92d-a5b0c736d9f3@45.88.12.188:443?sni=va.stream-room.com#🇩🇪%20DE%20%20%7C4%7C%20%20%20%5B45.88.12.15%5D
-vless://1653818d-532e-46be-b825-384107fb7c3a@89.105.195.152:443?alpn=h2&encryption=none&security=tls&serviceName=api.v1.FeedService&type=grpc&fp=ios&sni=rpc.mediacorphub.org#🇳🇱%20NL%2C%20Enschede%20%20%7C5%7C%20%20%20%5B89.105.195.158%5D
-vless://1653818d-532e-46be-b825-384107fb7c3a@89.105.195.150:443?type=grpc&security=tls&fp=firefox&serviceName=stats.v2.StreamService&sni=cdn.mediacorphub.org#🇳🇱%20NL%2C%20Enschede%20%20%7C6%7C%20%20%20%5B89.105.195.156%5D
-vless://74610801-c200-4b13-a10b-7076f879e293@201.58.139.66:443?encryption=none&fp=firefox&pbk=9gFDg7JnLoWPWy5_53PA8Mr3OgemFuCGWer5rnctRQQ&security=reality&sid=157df8dd7130ad40&type=tcp&sni=93594at.pl7.h1clayd.click#🇺🇸%20US%2C%20Orem%20%20%7C7%7C%20%20%20%5B201.58.139.66%5D
-vless://55458d10-24ab-4ea6-a522-13741b546f2a@195.206.235.45:443?encryption=none&fp=firefox&pbk=shUbIWcBJdXaDzO80KqTU9exgMarUCOiiZ56Dwl7XVU&security=reality&serviceName=43f41cd7fee0&sid=7a8e24da4eb2c1b5&type=grpc&sni=ec7a81g.de15.h1clayd.click#🇩🇪%20DE%2C%20Frankfurt%20am%20Main%20%20%7C8%7C%20%20%20%5B93.123.85.230%5D
-vless://4201786b-d99b-4147-a5f0-20d47acddb81@195.206.235.202:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=MzgB17ZFbKqs8pbC3EscTzHid_ENc-k_Cp6nXl-2knw&security=reality&sid=6976d670818644cc&type=tcp&sni=4935e4t.de25.h1clayd.click#🇩🇪%20DE%2C%20Potsdam%20%20%7C9%7C%20%20%20%5B185.255.115.75%5D
-ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.192:8080#🇳🇱%20NL%2C%20Amsterdam%20%20%7C10%7C%20%20%20%5B193.29.139.198%5D
+vless://d7ddade6-b7a0-4cab-a910-d5d5c378d98a@201.58.189.105:2083?encryption=none&fp=firefox&pbk=B7x5bYp-YhtLeH31zYcilpKFCkGTMe3jtSECSw-bMC4&security=reality&serviceName=google.storage.v2.Storage&sid=8bd80253&type=grpc&sni=dl.google.com#🇵🇱%20PL%2C%20Warsaw%20%20%7C1%7C%20%20%20%5B201.58.189.102%5D
+vless://1653818d-532e-46be-b825-384107fb7c3a@89.105.195.152:443?alpn=h2&encryption=none&security=tls&serviceName=api.v1.FeedService&type=grpc&fp=ios&sni=rpc.mediacorphub.org#🇳🇱%20NL%2C%20Enschede%20%20%7C2%7C%20%20%20%5B89.105.195.158%5D
+vless://55458d10-24ab-4ea6-a522-13741b546f2a@195.206.235.45:443?encryption=none&fp=firefox&pbk=shUbIWcBJdXaDzO80KqTU9exgMarUCOiiZ56Dwl7XVU&security=reality&serviceName=43f41cd7fee0&sid=7a8e24da4eb2c1b5&type=grpc&sni=ec7a81g.de15.h1clayd.click#🇩🇪%20DE%2C%20Frankfurt%20am%20Main%20%20%7C3%7C%20%20%20%5B93.123.85.230%5D
+vless://1653818d-532e-46be-b825-384107fb7c3a@89.105.195.148:443?alpn=h2&type=grpc&serviceName=gw.v2.PushService&fp=edge&security=tls&sni=api.mediacorphub.org#🇳🇱%20NL%2C%20Enschede%20%20%7C4%7C%20%20%20%5B89.105.195.154%5D
+trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@66.163.118.203:443?security=tls&sni=blog.discovergreatjobsandadvanceyourcareer.com#🇪🇸%20ES%2C%20Madrid%20%20%7C5%7C%20%20%20%5B66.163.118.251%5D
+ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTprMWRCT21PQjRvcWk3VW1wMzdhMWJR@82.38.31.192:8080#🇳🇱%20NL%2C%20Amsterdam%20%20%7C6%7C%20%20%20%5B193.29.139.198%5D

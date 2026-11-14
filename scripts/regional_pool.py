@@ -491,14 +491,22 @@ def collect_regional(build, best50_links, state_dir, now=None, limit=50, *, best
     if preferred_country not in (None, "RS"):
         raise ValueError("Unsupported regional exploration preference")
     now = time.time() if now is None else now
-    if not _number(now) or type(limit) is not int or not 0 <= limit <= MAX_EXPLORATION:
+    if not _number(now) or type(limit) is not int or not 0 <= limit <= (90 if preferred_country == "RS" else MAX_EXPLORATION):
         raise ValueError("Invalid regional collection limits")
     if not isinstance(best50_links, list) or not 1 <= len(best50_links) <= 50:
         raise ValueError("Best50 input must contain 1..50 entries")
     state_dir = _state_directory(state_dir)
     history = _load_history(state_dir, now)
     selected, by_id = [], {}
-    for link in best50_links:
+    # RS retains a rotating cloud control tranche, leaving 90 of 100
+    # slots for independent public source discovery. Full Best50 input still
+    # governs the frozen digest and freshness checks for publication.
+    cloud_inputs = best50_links
+    if preferred_country == "RS" and len(best50_links) > 10:
+        start = (int(now // 3600) * 10) % len(best50_links)
+        cloud_inputs = [best50_links[(start + offset) % len(best50_links)]
+                        for offset in range(10)]
+    for link in cloud_inputs:
         candidate = _candidate(build, link, origin="best50")
         if candidate is None:
             raise ValueError("Best50 input contains an invalid configuration")

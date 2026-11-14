@@ -355,7 +355,7 @@ async def _validate(repo: Path, state_dir: Path, runner: Runner, upstream_sha: s
     build.CFG["_probe_default_interface"] = "en0"
     _, order = _previous(repo, runner)
     links, manifest = await asyncio.to_thread(regional_pool.collect_regional, build, best50, state_dir,
-                                              best50_sha=upstream_sha, preferred_country=COUNTRY)
+                                              best50_sha=upstream_sha, preferred_country=COUNTRY, limit=90)
     _, status = await local_probe.run_local_probe(build, links, 5, 5, "origin/main Best50 + independent Serbia exploration",
                                                  required_services=SERVICES, required_exit_country=COUNTRY,
                                                  state_dir=state_dir, previous_order=order)

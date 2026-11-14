@@ -161,14 +161,6 @@
       "source_url": "https://raw.githubusercontent.com/Argh73/VpnConfigCollector/main/Base64/Sub104_base64.txt"
     },
     {
-      "id": "0dfdec686a8d81cbd0a5937fc17561103dd33553203b47eb7dc46ff2022fcac3",
-      "observed_at": 1794594513.021575,
-      "protocol": "shadowsocks",
-      "serbia_hint_unverified": false,
-      "source_body_sha256": "fb8cb496fdf4eaccbf9d0f684c8661d452cc30eb975254dad1916c56b544d4b7",
-      "source_url": "https://raw.githubusercontent.com/Argh73/VpnConfigCollector/main/Base64/Sub104_base64.txt"
-    },
-    {
       "id": "0f5ee9d46261419d6955b56de2fe554a6b6ec700623de216810f45c259021e41",
       "observed_at": 1794667151.7956579,
       "protocol": "shadowsocks",
@@ -1977,6 +1969,14 @@
       "source_url": "https://raw.githubusercontent.com/NiREvil/vless/main/edge/assets/SSTime.txt"
     },
     {
+      "id": "f711c510fca3774d32bf41aa90c098844545fd39945ae9a7af1a9392e6ca272d",
+      "observed_at": 1794678840.312361,
+      "protocol": "vless",
+      "serbia_hint_unverified": true,
+      "source_body_sha256": "e250a9cd42fc4587356dc0e245e4210f77ba7156adf8d81fe423038234def772",
+      "source_url": "https://raw.githubusercontent.com/SoliSpirit/SolVPN/main/Countrys/Serbia.txt"
+    },
+    {
       "id": "f80192db2ccead4704ac72308ba932190ca85a2b720960fdd2cab33bdc369819",
       "observed_at": 1794667151.7956579,
       "protocol": "shadowsocks",
@@ -2049,7 +2049,7 @@
       "source_url": "https://raw.githubusercontent.com/veilonhq/veilon/main/panel/internal/sub/testdata/golden_pre_advanced.txt"
     }
   ],
-  "generated_at": 1794677591.657001,
+  "generated_at": 1794678916.795166,
   "model": "mlx-community/gemma-4-31b-it-4bit",
   "schema": 1,
   "sources": [
@@ -2196,6 +2196,14 @@
       "fetched_at": 1794677591.6283252,
       "serbia_hint_unverified": false,
       "url": "https://raw.githubusercontent.com/SoliSpirit/SolVPN/main/Countrys/Armenia.txt"
+    },
+    {
+      "body_sha256": "e250a9cd42fc4587356dc0e245e4210f77ba7156adf8d81fe423038234def772",
+      "candidate_count": 1,
+      "evidence_url": "https://raw.githubusercontent.com/SoliSpirit/SolVPN/main/Countrys/Serbia.txt",
+      "fetched_at": 1794678840.312361,
+      "serbia_hint_unverified": true,
+      "url": "https://raw.githubusercontent.com/SoliSpirit/SolVPN/main/Countrys/Serbia.txt"
     },
     {
       "body_sha256": "8fd0bcb70d96cdeaf296abcafc751f9414b4f52e79f82a663bdc325e103009b6",

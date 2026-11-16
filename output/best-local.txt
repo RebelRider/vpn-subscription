@@ -1,19 +1,24 @@
 # v6.0 — LOCAL NETWORK VERIFIED PROXIES
-#profile-title: BL VPN [16Nov2026 12:27]
+#profile-title: BL VPN [16Nov2026 13:34]
 #profile-update-interval: 1
 #subscription-ping-onopen-enabled: 1
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-11-16 09:27:55 UTC
+# generated: 2026-11-16 10:34:47 UTC
 #
 # Local filtering: ChatGPT cold-session application proof + YouTube video metadata + Instagram application HTML; median proxy HTTPS latency <500 ms
 # Local final stability: 5/5 complete rounds required
 # upstream_nodes: 100
-# local_qualified: 2
+# local_qualified: 7
 # local_ranking: stability, median latency, p95 latency
 #
 # Fresh entries were re-tested through the current local network; retained entries preserve historical evidence and are not currently verified.
 #
 vless://2232d904-8e6a-4202-8240-6efd8aec02e9@84.32.100.247:443?flow=xtls-rprx-vision&encryption=none&security=tls&type=tcp&headerType=none&sni=app.streamru4.net#🇩🇪%20DE%2C%20Frankfurt%20am%20Main%20%20%7C1%7C%20%20%20%5B88.216.36.75%5D
-vless://0ed9418b-e687-4c2d-8869-7e368c44887e@144.31.3.105:8443?encryption=none&pbk=0f9tBNd1e0FjqakxfoGM_bGfYIAdE81XzXwPQgJkVDI&security=reality&serviceName=grpc&sid=1eb65c424decdb73&type=grpc&fp=edge&sni=pl105.homelab-cdn.cloud#🇵🇱%20PL%2C%20Warsaw%20%20%7C2%7C%20%20%20%5B144.31.2.24%5D
+vless://a30903dc-1bf0-4be5-8b1b-603a3a56211c@203.57.82.106:443?encryption=none&fp=firefox&pbk=drl7nndYdfzZY1aQ0eUAWmNV0nsHig2uDnu9siy9biQ&security=reality&sid=9a3f6c21d8e047b5&type=tcp&sni=api-gw-net.galioncc.com#🇬🇧%20GB%2C%20London%20%20%7C2%7C%20%20%20%5B203.57.82.110%5D
+vless://a30903dc-1bf0-4be5-8b1b-603a3a56211c@88.216.211.36:443?encryption=none&fp=firefox&pbk=drl7nndYdfzZY1aQ0eUAWmNV0nsHig2uDnu9siy9biQ&security=reality&sid=c4e7a1902b8d6f35&type=tcp&sni=de8.galioncc.com#🇩🇪%20DE%2C%20Frankfurt%20am%20Main%20%20%7C3%7C%20%20%20%5B84.32.98.235%5D
+vless://a30903dc-1bf0-4be5-8b1b-603a3a56211c@195.3.223.124:443?encryption=none&flow=xtls-rprx-vision&fp=firefox&pbk=drl7nndYdfzZY1aQ0eUAWmNV0nsHig2uDnu9siy9biQ&security=reality&sid=868419504747f6de&type=tcp&sni=tcppl6.lazeroe.com#🇵🇱%20PL%2C%20Warsaw%20%20%7C4%7C%20%20%20%5B195.3.223.53%5D
+vless://a30903dc-1bf0-4be5-8b1b-603a3a56211c@80.47.10.106:443?encryption=none&fp=firefox&pbk=drl7nndYdfzZY1aQ0eUAWmNV0nsHig2uDnu9siy9biQ&security=reality&sid=a7c92e4b10d6f835&type=tcp&sni=pl8.galioncc.com#🇵🇱%20PL%2C%20Warsaw%20%20%7C5%7C%20%20%20%5B80.47.11.123%5D
+vless://a30903dc-1bf0-4be5-8b1b-603a3a56211c@37.49.225.93:443?encryption=none&fp=firefox&pbk=drl7nndYdfzZY1aQ0eUAWmNV0nsHig2uDnu9siy9biQ&security=reality&sid=868419504747f6de&type=tcp&sni=net-rpc-api.galioncc.com#🇳🇱%20NL%2C%20Amsterdam%20%20%7C6%7C%20%20%20%5B37.49.225.52%5D
+trojan://t5ZTZ0bYgRLNmJKv-Wg2wmsMx21s6RhX@78.17.171.140:2053?alpn=http%2F1.1&fp=firefox&host=ra-p1.victorycloud.ru&path=%2F2fc2ec03a65d451dffa4592d68c43a29&security=tls&type=ws&sni=ra-p1.victorycloud.ru#🇵🇱%20PL%2C%20Warsaw%20%20%7C7%7C%20%20%20%5B78.17.171.140%5D

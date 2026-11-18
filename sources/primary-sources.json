@@ -1,5 +1,5 @@
 {
-  "generated_at": 1794949874.6176598,
+  "generated_at": 1794960402.2022772,
   "schema": 1,
   "sources": [
     {
@@ -508,6 +508,15 @@
       "url": "https://raw.githubusercontent.com/veilonhq/veilon/main/panel/internal/sub/testdata/golden_pre_advanced.txt"
     },
     {
+      "discovered_by": "gemma",
+      "discovery_model": "mlx-community/gemma-4-31b-it-4bit",
+      "enabled": true,
+      "evidence_url": "https://raw.githubusercontent.com/vladvarp/Prometheus/main/WhiteList/vless.txt",
+      "first_seen": 1794960402.2022772,
+      "last_verified_at": 1794960402.2022772,
+      "url": "https://raw.githubusercontent.com/vladvarp/Prometheus/main/WhiteList/vless.txt"
+    },
+    {
       "discovered_by": "independent",
       "enabled": true,
       "evidence_url": "https://raw.githubusercontent.com/wlunlocker/vpn-configs/main/blacklist_all.txt",
@@ -522,14 +531,6 @@
       "first_seen": 1794927630.838034,
       "last_verified_at": 1794927630.838034,
       "url": "https://raw.githubusercontent.com/yuesuizhengrong/proxy-subscriptions/main/subscription.txt"
-    },
-    {
-      "discovered_by": "independent",
-      "enabled": true,
-      "evidence_url": "https://yuesuizhengrong.github.io/proxy-subscriptions/shadowrocket.txt",
-      "first_seen": 1794751357.870572,
-      "last_verified_at": 1794751357.870572,
-      "url": "https://yuesuizhengrong.github.io/proxy-subscriptions/shadowrocket.txt"
     }
   ]
 }

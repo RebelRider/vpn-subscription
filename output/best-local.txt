@@ -1,16 +1,16 @@
 # v6.0 — LOCAL NETWORK VERIFIED PROXIES
-#profile-title: BL VPN [18Nov2026 04:20]
+#profile-title: BL VPN [18Nov2026 06:32]
 #profile-update-interval: 1
 #subscription-ping-onopen-enabled: 1
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-11-18 01:20:37 UTC
+# generated: 2026-11-18 03:32:28 UTC
 #
 # Local filtering: ChatGPT cold-session application proof + YouTube video metadata + Instagram application HTML; median proxy HTTPS latency <500 ms
 # Local final stability: 5/5 complete rounds required
 # upstream_nodes: 100
-# local_qualified: 3
+# local_qualified: 5
 # local_ranking: stability, median latency, p95 latency
 #
 # Fresh entries were re-tested through the current local network; retained entries preserve historical evidence and are not currently verified.
@@ -18,3 +18,5 @@
 vless://03786aa4-21a5-4e7c-83d6-873aafc41217@193.233.198.117:443?flow=xtls-rprx-vision&pbk=zT-G11tZiOO7DFJD23MCeZC3TwaUJr6NMDHW4CLif1Y&security=reality&sid=5eebb4b74e873b14&fp=edge&sni=de-03.neverspy.tech#🇩🇪%20DE%2C%20Frankfurt%20am%20Main%20%20%7C1%7C%20%20%20%5B193.233.198.117%5D
 vless://fd90e601-a56c-42b8-aab7-aa02d26fcb04@50.7.95.220:443?security=tls&flow=xtls-rprx-vision&fp=firefox&sni=app.streamru13.net#🇳🇱%20NL%2C%20Halfweg%20%20%7C2%7C%20%20%20%5B50.7.95.170%5D
 vless://fd90e601-a56c-42b8-aab7-aa02d26fcb04@179.253.101.162:443?flow=xtls-rprx-vision&security=tls&sni=app.streamru17.net#🇵🇱%20PL%2C%20Warsaw%20%20%7C3%7C%20%20%20%5B179.253.101.162%5D
+hysteria2://fa937345-6d3e-4ff4-8127-1a836987a0db@195.63.138.212:443?sni=cloudehouse24.ru#🇩🇪%20DE%2C%20Frankfurt%20am%20Main%20%20%7C4%7C%20%20%20%5B64.188.91.39%5D
+vless://12776e55-6230-48b9-b069-1bb8a04b4237@217.60.27.153:443?security=reality&type=tcp&flow=xtls-rprx-vision&fp=chrome&pbk=q4_o7NvD6vQg4hYsyO29Q6PVufjTJHDUbQTqstre9EQ&sni=music.3apes.online#🇩🇪%20DE%2C%20Frankfurt%20am%20Main%20%20%7C5%7C%20%20%20%5B217.60.27.153%5D

@@ -1,21 +1,20 @@
 # v6.0 — LOCAL NETWORK VERIFIED PROXIES
-#profile-title: BL VPN [25Nov2026 00:12]
+#profile-title: BL VPN [25Nov2026 02:22]
 #profile-update-interval: 1
 #subscription-ping-onopen-enabled: 1
 #ping-type: proxy
 #check-url-via-proxy: https://www.gstatic.com/generate_204
 #subscriptions-sort-type: ping
-# generated: 2026-11-24 21:12:08 UTC
+# generated: 2026-11-24 23:22:41 UTC
 #
 # Local filtering: ChatGPT cold-session application proof + YouTube video metadata + Instagram application HTML; median proxy HTTPS latency <500 ms
 # Local final stability: 5/5 complete rounds required
 # upstream_nodes: 100
-# local_qualified: 4
+# local_qualified: 3
 # local_ranking: stability, median latency, p95 latency
 #
 # Fresh entries were re-tested through the current local network; retained entries preserve historical evidence and are not currently verified.
 #
-vless://04920673-035c-410d-94e4-5b1469d3fb6f@171.22.183.167:443?security=tls&type=tcp&flow=xtls-rprx-vision&fp=chrome&sni=171.22.183.167#🇳🇱%20NL%2C%20Amsterdam%20%20%7C1%7C%20%20%20%5B171.22.183.175%5D
-vless://0209fe17-f29e-4384-93bc-a7d7ca83decb@31.59.179.210:443?type=tcp&security=tls&fp=firefox&alpn=h2%2Chttp%2F1.1&flow=xtls-rprx-vision&sni=gr3.xt-game.top#🇩🇪%20DE%2C%20Frankfurt%20am%20Main%20%20%7C2%7C%20%20%20%5B31.59.179.209%5D
+vless://0209fe17-f29e-4384-93bc-a7d7ca83decb@31.59.179.210:443?type=tcp&security=tls&fp=firefox&alpn=h2%2Chttp%2F1.1&flow=xtls-rprx-vision&sni=gr3.xt-game.top#🇩🇪%20DE%2C%20Frankfurt%20am%20Main%20%20%7C1%7C%20%20%20%5B31.59.179.209%5D
+vless://04920673-035c-410d-94e4-5b1469d3fb6f@171.22.183.167:443?security=tls&type=tcp&flow=xtls-rprx-vision&fp=chrome&sni=171.22.183.167#🇳🇱%20NL%2C%20Amsterdam%20%20%7C2%7C%20%20%20%5B171.22.183.175%5D
 vless://d7121b33-e335-4921-bb00-4c0b157e7fc1@94.183.167.172:443?security=tls&sni=s8k4.scan-cdn.com#🇵🇱%20PL%2C%20Warsaw%20%20%7C3%7C%20%20%20%5B94.183.167.123%5D
-hysteria2://d0975db4-e8c8-41f7-a5f3-a3d1d432e499@193.233.130.66:443?sni=app.vles.space#🇺🇸%20US%2C%20Charlotte%20%20%7C4%7C%20%20%20%5B2a01%3Ae5c0%3A9713%3A%3A2%5D

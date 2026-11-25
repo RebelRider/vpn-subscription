@@ -721,14 +721,6 @@
       "source_url": "https://raw.githubusercontent.com/Rezam61/Vpn-server/main/edge/assets/SSTime.txt"
     },
     {
-      "id": "8e878c64aa238485e47471834de1b6b6b32f8d95f42d4baa1530e131111b6cbc",
-      "observed_at": 1795575884.88746,
-      "protocol": "shadowsocks",
-      "serbia_hint_unverified": false,
-      "source_body_sha256": "06cb1e2a0a1fa2ac88b829e3f1696732cc9075c5535e6f3aa0d9255c1e5ebbed",
-      "source_url": "https://raw.githubusercontent.com/Rezam61/Vpn-server/main/edge/assets/SSTime.txt"
-    },
-    {
       "id": "8f792b58587e282bbf287a78b54f86821e9db974308cc786426b9dc3bd1c43d9",
       "observed_at": 1795583065.4956381,
       "protocol": "vless",
@@ -1311,6 +1303,14 @@
       "serbia_hint_unverified": false,
       "source_body_sha256": "c9d47bc631e0bd7b45f9df953b8f6d1b4945954869df768fc68be3405336e06c",
       "source_url": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/main/Export/Base64/PROXIES_ONLY/BLACK_SS%2BAll_RUS_base64.txt"
+    },
+    {
+      "id": "c527a6a1af11723a24ab8c2d12ee592b69931006577ff0d78d7e4a3949b4012d",
+      "observed_at": 1795590586.950877,
+      "protocol": "vless",
+      "serbia_hint_unverified": false,
+      "source_body_sha256": "79355d55db46e0168847e35515c97d871d3c5cc5302f0e2ecdd72930e22d3932",
+      "source_url": "https://raw.githubusercontent.com/Andrejewild/hiddify-singbox-configs-ru/main/sub.txt"
     },
     {
       "id": "c56820fd1ca634ba964bf6394d1fbbeef66c489d6cc63c3c3023fbd32852efd4",
@@ -2049,7 +2049,7 @@
       "source_url": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/main/BLACK_VLESS_RUS.txt"
     }
   ],
-  "generated_at": 1795583065.980376,
+  "generated_at": 1795590586.971373,
   "model": "mlx-community/gemma-4-31b-it-4bit",
   "schema": 1,
   "sources": [
@@ -2092,6 +2092,22 @@
       "fetched_at": 1794989120.1542761,
       "serbia_hint_unverified": true,
       "url": "https://raw.githubusercontent.com/10ium/ScrapeAndCategorize/main/output_configs/Serbia.txt"
+    },
+    {
+      "body_sha256": "660fb76d7deeed437c28a2b9540687af4e943006aa1a4f3d67d296c088de07f0",
+      "candidate_count": 1,
+      "evidence_url": "https://raw.githubusercontent.com/Andrejewild/hiddify-singbox-configs-ru/main/base64.txt",
+      "fetched_at": 1795590583.523294,
+      "serbia_hint_unverified": false,
+      "url": "https://raw.githubusercontent.com/Andrejewild/hiddify-singbox-configs-ru/main/base64.txt"
+    },
+    {
+      "body_sha256": "79355d55db46e0168847e35515c97d871d3c5cc5302f0e2ecdd72930e22d3932",
+      "candidate_count": 1,
+      "evidence_url": "https://raw.githubusercontent.com/Andrejewild/hiddify-singbox-configs-ru/main/sub.txt",
+      "fetched_at": 1795590586.950877,
+      "serbia_hint_unverified": false,
+      "url": "https://raw.githubusercontent.com/Andrejewild/hiddify-singbox-configs-ru/main/sub.txt"
     },
     {
       "body_sha256": "991aeead7953bd4914bdbc1220e8b86a4bb90a2a8074be579b3dd74a16038b9c",
@@ -2292,14 +2308,6 @@
       "fetched_at": 1795392932.1371021,
       "serbia_hint_unverified": false,
       "url": "https://raw.githubusercontent.com/cbusifabcap/daily_free_vpn/main/Z.txt"
-    },
-    {
-      "body_sha256": "1dd174aa54d4bbdaa7d78c89f2d4196f15739bb0cd9f2908110036f1518fd2fb",
-      "candidate_count": 234,
-      "evidence_url": "https://raw.githubusercontent.com/flaafix/AetrisVPN/main/AetrisVPN.txt",
-      "fetched_at": 1794980177.442896,
-      "serbia_hint_unverified": false,
-      "url": "https://raw.githubusercontent.com/flaafix/AetrisVPN/main/AetrisVPN.txt"
     },
     {
       "body_sha256": "f212cfeb6ae7cbd6b7e564377a74c6c461ab90adfc3ca75a940e5793d945843c",

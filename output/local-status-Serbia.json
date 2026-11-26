@@ -15,7 +15,7 @@
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "71e682c97f2c377c",
+          "address_id": "e9e6f3459bb888eb",
           "attempt": 1,
           "engine_errors": {
             "timeout": 1
@@ -33,23 +33,23 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5048.3,
+            "elapsed_ms": 5054.7,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:45:59.969106+00:00",
+        "checked_at": "2026-11-26T14:28:36.851531+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "e7ddec7b83ee8c81950b7ef71dc80f9f0054b879d451c3c577d8880b5d7f095a",
+      "id": "6affd26346c3a752ef85ae9be2d2f13a8c01becf91dd84189d90b6d25b3e6058",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
       "outcome": "inconclusive",
-      "protocol": "vless",
+      "protocol": "trojan",
       "qualified": false,
       "rejection_reasons": [
         "required-exit-country-unconfirmed-inconclusive"
@@ -80,14 +80,14 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "138.124.125.193",
+      "tested_server_ip": "66.163.112.31",
       "upstream_rank": 1
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "53a7053a3b872a5d",
+          "address_id": "4986e0bd681f2a3a",
           "attempt": 1,
           "engine_errors": {
             "timeout": 1
@@ -105,18 +105,18 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5037.0,
+            "elapsed_ms": 5067.7,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:00.001979+00:00",
+        "checked_at": "2026-11-26T14:28:36.876406+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "b01fd83c201b7b782a21c1b610fe5eabf65b2bb9ab1b8732b85e5f04e496a434",
+      "id": "30d9f7b7cacc5f4c62db118a4607e2ea3cf7c795f126cb83c0ca45bfd1a59bf7",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -152,14 +152,518 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "91.107.188.129",
+      "tested_server_ip": "45.138.100.248",
       "upstream_rank": 2
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "73efad65c1020853",
+          "address_id": "3e85815fccfad658",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5056.0,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:28:36.876632+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "99fd4c6d3465af9b1be34cce1cd37c7b97c9e6bc008c559e8361e2fc67236bed",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "172.236.231.45",
+      "upstream_rank": 3
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "b860510192b25dd2",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5046.0,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:28:36.881024+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "132bb7676e35e83f5e5d9efa13bf12f51acf8dfe86163e4b96516d662b1d1f8e",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "87.199.205.28",
+      "upstream_rank": 4
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "0d4e83b075a48bac",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5045.6,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:28:41.981058+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "0291b5494b7db66f5a5c26f6e4887b5165bd2a99182108a4fca4e914f5d150cf",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "69.48.201.136",
+      "upstream_rank": 5
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "7cbba79c7ff9d038",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5070.9,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:28:42.041071+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "5e28855ce833c01483e381a4cd5d3063673638ffaff8348427440a43df0631bb",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "66.163.122.113",
+      "upstream_rank": 6
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "96cd927f6f748146",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5053.0,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:28:42.042448+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "a1dd70f74290ed942be3e7643208d21193e405a80688c942d9241ede4b1ad6d6",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "172.235.49.52",
+      "upstream_rank": 7
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "b20bf52d429c5443",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5046.6,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:28:42.044895+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "17b39d2350115768ba8fefebdef0fd3735b540f47a5d20a92578cfac00bb6035",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "166.0.25.92",
+      "upstream_rank": 8
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "5399e07080ea4a78",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5074.0,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:28:47.298793+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "efaa1a81e71bab3d9a7470babe733408b3609d4501792bef4bb89d9cb2760345",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "193.108.119.193",
+      "upstream_rank": 9
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "8ebd509e2af4612d",
           "attempt": 1,
           "engine_errors": {
             "unclassified-error": 1
@@ -177,18 +681,18 @@
         "attempts": [
           {
             "curl_exit": 28,
-            "elapsed_ms": 5119.1,
+            "elapsed_ms": 5071.1,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "proxy-request-timeout"
           }
         ],
-        "checked_at": "2026-11-26T11:46:00.089866+00:00",
+        "checked_at": "2026-11-26T14:28:47.283185+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "8a92484bed6b3bcb127acd7395d78dcb7630c3cd86ee45121707aab476be2f90",
+      "id": "9dc06cc86c7c1aa7152713e3e88acaf95b5cbcd569ad2562d9777a0c8f0c8182",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -224,509 +728,7 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "171.22.183.167",
-      "upstream_rank": 3
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "4e426dcdf00c2f1e",
-          "attempt": 1,
-          "engine_errors": {
-            "timeout": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "timeout": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 97,
-            "elapsed_ms": 5052.4,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "socks-connection-failed"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:00.028940+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "b167a747df487d4d529f511e6edf2e20ee037b4420c56f0c76967d692b9dd408",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "shadowsocks",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "193.29.139.132",
-      "upstream_rank": 4
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "acf9d2ce705d4eae",
-          "attempt": 1,
-          "engine_errors": {
-            "timeout": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "timeout": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 97,
-            "elapsed_ms": 5068.3,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "socks-connection-failed"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:05.132924+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "de0c915914b3a4a4cb124afd6315f15dcfb5ee633b47716974819b558db4d584",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "hysteria2",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "82.27.90.72",
-      "upstream_rank": 5
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "a4646da47cdf09e7",
-          "attempt": 1,
-          "engine_errors": {
-            "timeout": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "timeout": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 97,
-            "elapsed_ms": 5065.3,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "socks-connection-failed"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:05.156528+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "7cc7c3a8f57dd236a5a5345e2f79b69a236f2dfc0fd4c494a18b6887691774d3",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "vless",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "146.103.42.119",
-      "upstream_rank": 6
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "ac9fd324f96bba69",
-          "attempt": 1,
-          "engine_errors": {
-            "timeout": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "timeout": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 97,
-            "elapsed_ms": 5049.7,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "socks-connection-failed"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:05.180584+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "36407ea7c67dbf4f1d66ef9ca2978a77594271e4281df6c7338dfd5585d0c0bc",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "hysteria2",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "194.87.224.137",
-      "upstream_rank": 7
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "d62e1b8612a22aca",
-          "attempt": 1,
-          "engine_errors": {},
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {},
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 28,
-            "elapsed_ms": 5117.3,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "proxy-request-timeout"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:05.299411+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "df8e8e1d4658be2d6b0d65d3a27a01588359b43fc868ae5b36fb0cd6b60990a3",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "shadowsocks",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "141.98.101.179",
-      "upstream_rank": 8
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "515791b1150dc064",
-          "attempt": 1,
-          "engine_errors": {
-            "timeout": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "timeout": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 97,
-            "elapsed_ms": 5096.4,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "socks-connection-failed"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:10.304522+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "4e0f0b58597ddef0a2fae3994e5eac8ce8b2545600c3b3256cab0551c31bd792",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "vless",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "79.182.70.192",
-      "upstream_rank": 9
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "9c99d7b363073227",
-          "attempt": 1,
-          "engine_errors": {},
-          "https_response": false,
-          "rejection_reasons": [
-            "observed-exit-country-mismatch"
-          ]
-        }
-      ],
-      "engine_errors": {},
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 0,
-            "elapsed_ms": 2605.7,
-            "endpoint": "cloudflare-trace",
-            "http_status": 200,
-            "reason": "ok"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:07.894356+00:00",
-        "country": "PL",
-        "observations": [
-          {
-            "country": "PL",
-            "ip": "48.102.207.169",
-            "source": "cloudflare-trace"
-          }
-        ],
-        "reason": "observed-exit-country-mismatch"
-      },
-      "id": "2788d81a2a8d500875957b599de160ce4992ba64980a064ac2eb8ef6640be677",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "fail",
-      "protocol": "vless",
-      "qualified": false,
-      "rejection_reasons": [
-        "observed-exit-country-mismatch"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "48.102.207.169",
+      "tested_server_ip": "185.134.203.106",
       "upstream_rank": 10
     },
     {
@@ -751,13 +753,13 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5042.4,
+            "elapsed_ms": 5085.1,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:10.366946+00:00",
+        "checked_at": "2026-11-26T14:28:47.323957+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -805,32 +807,36 @@
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "a78eb79b2571ca13",
+          "address_id": "7316c8570c825afc",
           "attempt": 1,
-          "engine_errors": {},
+          "engine_errors": {
+            "connection-refused": 1
+          },
           "https_response": false,
           "rejection_reasons": [
             "required-exit-country-unconfirmed-inconclusive"
           ]
         }
       ],
-      "engine_errors": {},
+      "engine_errors": {
+        "connection-refused": 1
+      },
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5131.1,
+            "curl_exit": 97,
+            "elapsed_ms": 167.7,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:10.514265+00:00",
+        "checked_at": "2026-11-26T14:28:42.434516+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "0052bd87c8c2a47083521714859457d44d3b5c8bd9ef03b8cec8e182be9e4975",
+      "id": "002610a7ad8f124fe72604f4319f9cda68997a87502db3025be3402bacdb1609",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -866,39 +872,43 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "185.170.211.187",
+      "tested_server_ip": "188.245.237.3",
       "upstream_rank": 12
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "67b2a59243c3e1a2",
+          "address_id": "2c7866581417d5cd",
           "attempt": 1,
-          "engine_errors": {},
+          "engine_errors": {
+            "tls-handshake-failed": 1
+          },
           "https_response": false,
           "rejection_reasons": [
             "required-exit-country-unconfirmed-inconclusive"
           ]
         }
       ],
-      "engine_errors": {},
+      "engine_errors": {
+        "tls-handshake-failed": 1
+      },
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5139.1,
+            "curl_exit": 97,
+            "elapsed_ms": 348.3,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:13.117252+00:00",
+        "checked_at": "2026-11-26T14:28:42.949720+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "0156d4a920a85bedf08c36b54241e246151faf858d5b2c886a94c451c162afa2",
+      "id": "018a938ed299bbd82d063adad09aa1c2d155752c8f3ffbebffad3efad32fd92e",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -934,7 +944,7 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "167.82.64.7",
+      "tested_server_ip": "104.16.239.254",
       "upstream_rank": 13
     },
     {
@@ -970,13 +980,13 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 171.3,
+            "elapsed_ms": 179.8,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:15.754164+00:00",
+        "checked_at": "2026-11-26T14:28:48.604431+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -1021,13 +1031,24 @@
       "upstream_rank": 14
     },
     {
-      "attempted_address_count": 1,
+      "attempted_address_count": 2,
       "endpoint_attempts": [
         {
-          "address_id": "4591ca75d4ead15a",
+          "address_id": "b7b5615aab0dc222",
           "attempt": 1,
           "engine_errors": {
-            "connection-refused": 1
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        },
+        {
+          "address_id": "ac569c3cd8bfdf3f",
+          "attempt": 2,
+          "engine_errors": {
+            "unclassified-error": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -1036,24 +1057,24 @@
         }
       ],
       "engine_errors": {
-        "connection-refused": 1
+        "unclassified-error": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 113.1,
+            "elapsed_ms": 229.6,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:10.571324+00:00",
+        "checked_at": "2026-11-26T14:28:48.247627+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "112ce70a059616d6b4aad237ce26fda2f0a52236fd8c4081e34446417c75891e",
+      "id": "04998cf9b0e7059e8515b4618bb05e0f0d881d432681a10add4ac4a1f619de3d",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -1089,14 +1110,14 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "45.38.198.25",
+      "tested_server_ip": "172.67.153.201",
       "upstream_rank": 15
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "bdc6f5aad55c7b54",
+          "address_id": "4e426dcdf00c2f1e",
           "attempt": 1,
           "engine_errors": {
             "timeout": 1
@@ -1113,19 +1134,19 @@
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 97,
-            "elapsed_ms": 5047.6,
+            "curl_exit": 28,
+            "elapsed_ms": 5058.9,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "socks-connection-failed"
+            "reason": "proxy-request-timeout"
           }
         ],
-        "checked_at": "2026-11-26T11:46:15.690829+00:00",
+        "checked_at": "2026-11-26T14:28:52.438132+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "13b779f859281261d7b755e11ff9a7e53439a9488c20fec91754748d653932c0",
+      "id": "0a31210b5cc5361562a7be9479efe1471890c9a70b3c10e9885a6f870449f7af",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -1161,24 +1182,53 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "8.211.131.30",
+      "tested_server_ip": "193.29.139.132",
       "upstream_rank": 16
     },
     {
-      "attempted_address_count": 0,
-      "endpoint_attempts": [],
-      "engine_errors": {
-        "dns-failed": 1
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "0e8431c50c38fcaf",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "observed-exit-country-mismatch"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 0,
+            "elapsed_ms": 1188.0,
+            "endpoint": "cloudflare-trace",
+            "http_status": 200,
+            "reason": "ok"
+          }
+        ],
+        "checked_at": "2026-11-26T14:28:48.590593+00:00",
+        "country": "BR",
+        "observations": [
+          {
+            "country": "BR",
+            "ip": "137.131.177.121",
+            "source": "cloudflare-trace"
+          }
+        ],
+        "reason": "observed-exit-country-mismatch"
       },
-      "id": "58b619a1c3b71e6e0ba3dd43b46bb9d3413f8cd4e1b813013e32d127a23acd02",
+      "id": "01c6e87184efcb99837b6e14cb8df5ece3166317374f8b58d777d7ee24690e9a",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
       "outcome": "fail",
-      "protocol": "socks",
+      "protocol": "hysteria2",
       "qualified": false,
       "rejection_reasons": [
-        "server-dns-failed"
+        "observed-exit-country-mismatch"
       ],
       "services": {
         "chatgpt": {
@@ -1206,13 +1256,14 @@
           "reasons": []
         }
       },
+      "tested_server_ip": "137.131.177.121",
       "upstream_rank": 17
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "579bf50e78c9ffe9",
+          "address_id": "8326dc6734e37807",
           "attempt": 1,
           "engine_errors": {
             "unclassified-error": 1
@@ -1229,19 +1280,19 @@
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5093.4,
+            "curl_exit": 97,
+            "elapsed_ms": 320.4,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:16.153114+00:00",
+        "checked_at": "2026-11-26T14:28:48.646353+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "00a4bbf1d2d43bf19314236022fae9b13ad99d045f6bdea492ad969797dc3b2d",
+      "id": "020a6a161cecb9d0a2178829dbb6f8fb04abae0e7874462b12c6db374a23d50f",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -1277,17 +1328,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "162.159.152.118",
+      "tested_server_ip": "167.82.0.1",
       "upstream_rank": 18
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "0e8431c50c38fcaf",
+          "address_id": "7cc3fe583cd8cd41",
           "attempt": 1,
           "engine_errors": {
-            "unclassified-error": 1
+            "connection-refused": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -1296,96 +1347,24 @@
         }
       ],
       "engine_errors": {
-        "unclassified-error": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 28,
-            "elapsed_ms": 5133.9,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "proxy-request-timeout"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:18.317428+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "01c6e87184efcb99837b6e14cb8df5ece3166317374f8b58d777d7ee24690e9a",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "hysteria2",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "137.131.177.121",
-      "upstream_rank": 19
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "6839a6c1e14b2e39",
-          "attempt": 1,
-          "engine_errors": {
-            "timeout": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "timeout": 1
+        "connection-refused": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5032.2,
+            "elapsed_ms": 322.5,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:20.804937+00:00",
+        "checked_at": "2026-11-26T14:28:49.161084+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "08c8d3700bc96d83d9375a4f1e9458bc65635b7be764c767bae84980977d9c05",
+      "id": "04f0b477c357ffdbd60e924d167ec03b43ab9ec38ced3ab4fd457cc0ab16e927",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -1421,17 +1400,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "35.156.70.183",
-      "upstream_rank": 20
+      "tested_server_ip": "95.85.94.140",
+      "upstream_rank": 19
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "548df3d68d9498d0",
+          "address_id": "54df42c16e76c704",
           "attempt": 1,
           "engine_errors": {
-            "routing-no-route": 1
+            "connection-refused": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -1440,96 +1419,24 @@
         }
       ],
       "engine_errors": {
-        "routing-no-route": 1
+        "connection-refused": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 4183.8,
+            "elapsed_ms": 251.2,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:20.008241+00:00",
+        "checked_at": "2026-11-26T14:28:48.929419+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "14b7118f1642267775b5efadb7704c45a56b5785f53163772477b9f98c5a425d",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "shadowsocks",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "149.34.244.82",
-      "upstream_rank": 21
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "2cd2a49d3ac3c453",
-          "attempt": 1,
-          "engine_errors": {
-            "unclassified-error": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "unclassified-error": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 28,
-            "elapsed_ms": 5102.5,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "proxy-request-timeout"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:21.336017+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "3c5af2ef8a96220b9bf10d7c877da0bbd385e2b585561d80bb649fa510267a9f",
+      "id": "06a1140ca26892d9a1679e39c2483b4b3dd07fc1c8d87cd1d9a24dfa64af6d36",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -1565,17 +1472,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "188.114.97.3",
-      "upstream_rank": 22
+      "tested_server_ip": "45.192.206.6",
+      "upstream_rank": 20
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "30c1cfd42c2389ca",
+          "address_id": "9782f381202f5cee",
           "attempt": 1,
           "engine_errors": {
-            "connection-reset": 1
+            "timeout": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -1584,24 +1491,96 @@
         }
       ],
       "engine_errors": {
-        "connection-reset": 1
+        "timeout": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 474.3,
+            "elapsed_ms": 5045.4,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:18.926934+00:00",
+        "checked_at": "2026-11-26T14:28:53.767896+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "019b0fa7c8f878a2328609fcd7975a1ab12d2a5f69d598a38cbd0fa11fc9ebad",
+      "id": "23113fde6ed6e81d2b2a44d31b601f672884f1bfe1356b9f12d3e7cc1443e570",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "47.91.15.175",
+      "upstream_rank": 21
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "bbf4dcd1b94c35dc",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 28,
+            "elapsed_ms": 5231.6,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "proxy-request-timeout"
+          }
+        ],
+        "checked_at": "2026-11-26T14:28:54.241755+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "020fdd5b5c8e9a3b9d6377431f489543caf4223bbe2bcb38fc303da2b1f54549",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -1637,8 +1616,8 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "199.232.112.11",
-      "upstream_rank": 23
+      "tested_server_ip": "185.227.137.69",
+      "upstream_rank": 22
     },
     {
       "attempted_address_count": 1,
@@ -1662,13 +1641,13 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5040.1,
+            "elapsed_ms": 5055.2,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:24.040233+00:00",
+        "checked_at": "2026-11-26T14:28:54.294727+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -1710,84 +1689,16 @@
         }
       },
       "tested_server_ip": "201.8.71.59",
-      "upstream_rank": 24
+      "upstream_rank": 23
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "a8aef2fbbde78ff1",
-          "attempt": 1,
-          "engine_errors": {},
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {},
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 35,
-            "elapsed_ms": 125.4,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "destination-tls-failed"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:20.211195+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "090e3ce280119377df9a839cbd64d53fff410cbb8d46a572557fd0ecf1beab6e",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "trojan",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "8.6.112.0",
-      "upstream_rank": 25
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "ed6816b02b387093",
+          "address_id": "bb4c13f680493072",
           "attempt": 1,
           "engine_errors": {
-            "timeout": 1
+            "tls-handshake-failed": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -1796,96 +1707,24 @@
         }
       ],
       "engine_errors": {
-        "timeout": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 28,
-            "elapsed_ms": 5676.7,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "proxy-request-timeout"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:25.966861+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "397944f16e7b8b356f5eb81b3e9f2887996f8b9f73362ba878556de278367ee4",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "shadowsocks",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "51.77.53.200",
-      "upstream_rank": 26
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "0e81110f14b6479a",
-          "attempt": 1,
-          "engine_errors": {
-            "unclassified-error": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "unclassified-error": 1
+        "tls-handshake-failed": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 184.3,
+            "elapsed_ms": 254.2,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:21.076737+00:00",
+        "checked_at": "2026-11-26T14:28:52.836777+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "4785130c87e631fb9e9654a2241efeb3d8327fed26d9f517675ca03d4ae609fa",
+      "id": "07dedc7daf4101b327b2c27d23a75ebfde6a87f26b9b00d0aef44173069d1588",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -1921,14 +1760,154 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "172.67.167.78",
-      "upstream_rank": 27
+      "tested_server_ip": "198.41.208.172",
+      "upstream_rank": 24
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "7799dbbdcdf8f24d",
+          "address_id": "37d4a02da703d539",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5083.0,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:28:58.066118+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "0c106087697fbd5954599e559144b518fd6208432fc05a3e18d4ec4122800f54",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "216.152.155.176",
+      "upstream_rank": 25
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "2968ae40cf965a32",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 28,
+            "elapsed_ms": 5241.5,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "proxy-request-timeout"
+          }
+        ],
+        "checked_at": "2026-11-26T14:28:59.322494+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "2b4f631e7df03dbd60b752ec1db0aa7c73278bf05bf624d91dd55c15e46e2862",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "146.19.196.142",
+      "upstream_rank": 26
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "b64c210bbc063bc1",
           "attempt": 1,
           "engine_errors": {
             "unclassified-error": 1
@@ -1946,18 +1925,18 @@
         "attempts": [
           {
             "curl_exit": 28,
-            "elapsed_ms": 5199.1,
+            "elapsed_ms": 5259.7,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "proxy-request-timeout"
           }
         ],
-        "checked_at": "2026-11-26T11:46:26.409152+00:00",
+        "checked_at": "2026-11-26T14:28:59.660906+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "0365268ce5c98307864a8373a694928256da74e15a4ad186f5bf44f7965de405",
+      "id": "023f7727fce9ed3282fef4aa1538aea1fa755f301fe5a645f4ebbe88f2dc43a4",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -1993,8 +1972,8 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "185.18.250.2",
-      "upstream_rank": 28
+      "tested_server_ip": "199.232.78.159",
+      "upstream_rank": 27
     },
     {
       "attempted_address_count": 1,
@@ -2018,13 +1997,13 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 131.6,
+            "elapsed_ms": 313.5,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:21.615249+00:00",
+        "checked_at": "2026-11-26T14:28:54.941214+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -2066,42 +2045,38 @@
         }
       },
       "tested_server_ip": "155.212.218.82",
-      "upstream_rank": 29
+      "upstream_rank": 28
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "c25d0cd04d7a4c58",
+          "address_id": "9a6994746f950942",
           "attempt": 1,
-          "engine_errors": {
-            "unclassified-error": 1
-          },
+          "engine_errors": {},
           "https_response": false,
           "rejection_reasons": [
             "required-exit-country-unconfirmed-inconclusive"
           ]
         }
       ],
-      "engine_errors": {
-        "unclassified-error": 1
-      },
+      "engine_errors": {},
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5329.1,
+            "curl_exit": 35,
+            "elapsed_ms": 290.2,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "destination-tls-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:27.206249+00:00",
+        "checked_at": "2026-11-26T14:28:55.530791+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "12401077b594de99bc18ca41323eaff658f8123cf85fbc73466da82f643a8e63",
+      "id": "1ebe8f7fa5079aa75bfa37b9455b0bbae18927404775f89c51cb337ee18801bc",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -2137,14 +2112,14 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "152.175.38.179",
-      "upstream_rank": 30
+      "tested_server_ip": "185.204.168.79",
+      "upstream_rank": 29
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "730d1d5990575c35",
+          "address_id": "b7a644452a9ac945",
           "attempt": 1,
           "engine_errors": {},
           "https_response": false,
@@ -2157,91 +2132,19 @@
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5100.3,
+            "curl_exit": 35,
+            "elapsed_ms": 577.8,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "destination-tls-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:29.217097+00:00",
+        "checked_at": "2026-11-26T14:28:56.293695+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "79d27a99d6d8e821b425c9d9c53f0cfc1bfae7021940e77580d1b8641bf11842",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "shadowsocks",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "147.15.115.239",
-      "upstream_rank": 31
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "427f012c75bc5545",
-          "attempt": 1,
-          "engine_errors": {
-            "unclassified-error": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "unclassified-error": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 97,
-            "elapsed_ms": 171.4,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "socks-connection-failed"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:26.312910+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "9918793bce9df598a23afc33188be1f62d6a6b987f0644a1a08443689aab3299",
+      "id": "306dbf15cd4beb4bbca3b52047a6641455b322840f581652cc3a87dd35e74117",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -2277,17 +2180,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "104.19.42.79",
-      "upstream_rank": 32
+      "tested_server_ip": "18.162.150.245",
+      "upstream_rank": 30
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "d8bdaff761766a8a",
+          "address_id": "425b11c7e9f67e86",
           "attempt": 1,
           "engine_errors": {
-            "unclassified-error": 1
+            "timeout": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -2296,24 +2199,96 @@
         }
       ],
       "engine_errors": {
-        "unclassified-error": 1
+        "timeout": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5085.8,
+            "curl_exit": 97,
+            "elapsed_ms": 5057.2,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:31.677802+00:00",
+        "checked_at": "2026-11-26T14:29:01.423302+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "04c541f7239b420e6fb5a6510f41f2a9720495128fb9bab64f83bedd9411acbe",
+      "id": "3a32e6d9c7ef3fa04a1a4a0668b8ff0695437f12ec18c4d5310b0ae556ba4a12",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "103.106.229.69",
+      "upstream_rank": 31
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "740c1aafaa29d88c",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5037.9,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:29:03.178961+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "032b3684f3a7de9bd9bda38a6b1ea6dd86e4c33a0dcc866be4b7f010661e5f45",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -2349,80 +2324,8 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "85.206.161.209",
-      "upstream_rank": 33
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "3f922dcfda0b01f8",
-          "attempt": 1,
-          "engine_errors": {
-            "unclassified-error": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "unclassified-error": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 28,
-            "elapsed_ms": 5612.0,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "proxy-request-timeout"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:32.254226+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "146a947fc4489bcb693e543fc47279b163e801d6cb5f01db232bcbd4e863f661",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "trojan",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "185.158.133.107",
-      "upstream_rank": 34
+      "tested_server_ip": "38.207.177.236",
+      "upstream_rank": 32
     },
     {
       "attempted_address_count": 1,
@@ -2446,13 +2349,13 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5052.7,
+            "elapsed_ms": 5042.4,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:32.344726+00:00",
+        "checked_at": "2026-11-26T14:29:04.442105+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -2494,16 +2397,84 @@
         }
       },
       "tested_server_ip": "91.211.27.231",
-      "upstream_rank": 35
+      "upstream_rank": 33
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "c2c33da240fce062",
+          "address_id": "ccc6c3d721e094e4",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 28,
+            "elapsed_ms": 5220.4,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "proxy-request-timeout"
+          }
+        ],
+        "checked_at": "2026-11-26T14:29:04.957727+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "2d9d1696ceae33361ef4f2b8a0cd56c10a73b58e6c92d27d1e4d215b92bbd857",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "209.250.236.93",
+      "upstream_rank": 34
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "0c03fce3022564c9",
           "attempt": 1,
           "engine_errors": {
-            "unclassified-error": 1
+            "timeout": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -2512,24 +2483,24 @@
         }
       ],
       "engine_errors": {
-        "unclassified-error": 1
+        "timeout": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5119.6,
+            "curl_exit": 97,
+            "elapsed_ms": 5046.4,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:34.473225+00:00",
+        "checked_at": "2026-11-26T14:29:06.606539+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "a60fe7a69b53b15cb11879cc486c5e7a66e670791cc7b49fd60782622cb94548",
+      "id": "4d7ef93262eb9c59d1dc3f3f421d4434477fde8849295bd675e38540a1ae9205",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -2565,53 +2536,51 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "141.193.213.20",
-      "upstream_rank": 36
+      "tested_server_ip": "47.250.135.244",
+      "upstream_rank": 35
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "16fc6bd7abc91500",
+          "address_id": "77fdc643f13cc155",
           "attempt": 1,
-          "engine_errors": {},
+          "engine_errors": {
+            "timeout": 1
+          },
           "https_response": false,
           "rejection_reasons": [
-            "observed-exit-country-mismatch"
+            "required-exit-country-unconfirmed-inconclusive"
           ]
         }
       ],
-      "engine_errors": {},
+      "engine_errors": {
+        "timeout": 1
+      },
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 0,
-            "elapsed_ms": 777.8,
+            "curl_exit": 97,
+            "elapsed_ms": 5048.2,
             "endpoint": "cloudflare-trace",
-            "http_status": 200,
-            "reason": "ok"
+            "http_status": null,
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:32.594340+00:00",
-        "country": "JP",
-        "observations": [
-          {
-            "country": "JP",
-            "ip": "8.216.10.204",
-            "source": "cloudflare-trace"
-          }
-        ],
-        "reason": "observed-exit-country-mismatch"
+        "checked_at": "2026-11-26T14:29:08.363708+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "149aa6bcbd96c60da1f594be230773fa6c7199c0fb6cf26afd4efbf5dbf48e28",
+      "id": "540d619dc808eea681915f69738c2e1efc80e59d73388e6ffc7ab5d59b6f47fe",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
-      "outcome": "fail",
+      "outcome": "inconclusive",
       "protocol": "shadowsocks",
       "qualified": false,
       "rejection_reasons": [
-        "observed-exit-country-mismatch"
+        "required-exit-country-unconfirmed-inconclusive"
       ],
       "services": {
         "chatgpt": {
@@ -2639,17 +2608,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "8.216.10.204",
-      "upstream_rank": 37
+      "tested_server_ip": "138.197.89.234",
+      "upstream_rank": 36
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "b0bcac1a776224d7",
+          "address_id": "ded9639261d2a26d",
           "attempt": 1,
           "engine_errors": {
-            "timeout": 1
+            "tls-handshake-failed": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -2658,24 +2627,24 @@
         }
       ],
       "engine_errors": {
-        "timeout": 1
+        "tls-handshake-failed": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5050.8,
+            "elapsed_ms": 330.0,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:37.449695+00:00",
+        "checked_at": "2026-11-26T14:29:04.915834+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "0544188a53e509d0cddf05abbaec645d7bc170ee7e185768099dd05ec773548f",
+      "id": "0354ab5df9a0adf83fc7b9690cacae98cbd16552874f9c3feeb087c9a897eb2d",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -2711,8 +2680,8 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "15.224.71.113",
-      "upstream_rank": 38
+      "tested_server_ip": "188.114.99.91",
+      "upstream_rank": 37
     },
     {
       "attempted_address_count": 2,
@@ -2747,13 +2716,13 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 289.4,
+            "elapsed_ms": 425.2,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:37.912709+00:00",
+        "checked_at": "2026-11-26T14:29:10.766037+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -2795,13 +2764,57 @@
         }
       },
       "tested_server_ip": "202.146.222.54",
+      "upstream_rank": 38
+    },
+    {
+      "attempted_address_count": 0,
+      "endpoint_attempts": [],
+      "engine_errors": {
+        "dns-failed": 1
+      },
+      "id": "60a317d1782bca0f16c5926761b8776cd50f3c2d1135cbdce07b61f7c5c7294c",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "fail",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "server-dns-failed"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
       "upstream_rank": 39
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "d8d333770b89cee2",
+          "address_id": "9d6c60c189e2fd18",
           "attempt": 1,
           "engine_errors": {},
           "https_response": false,
@@ -2814,19 +2827,19 @@
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 35,
-            "elapsed_ms": 205.1,
+            "curl_exit": 28,
+            "elapsed_ms": 5217.4,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "destination-tls-failed"
+            "reason": "proxy-request-timeout"
           }
         ],
-        "checked_at": "2026-11-26T11:46:32.873807+00:00",
+        "checked_at": "2026-11-26T14:29:10.477685+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "3c233f6590e7b8086e6d081566af17abda9265bb0681c3cab3e4b21c294e61ae",
+      "id": "7201499dc1b69dce9d9f049804ac06c3a544f4a9e285b09bdf892d9c4d6dfecc",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -2862,7 +2875,7 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "185.178.208.167",
+      "tested_server_ip": "188.253.12.93",
       "upstream_rank": 40
     },
     {
@@ -2871,7 +2884,7 @@
       "engine_errors": {
         "dns-failed": 1
       },
-      "id": "a8a6ce72cc9e163a169173f16e1281f64758fc39594d88b71a15e99a176d6321",
+      "id": "a3d4e6811558fa7f971e4d5f68984ee2222d61bdede5ce06a09e337bd71b4a41",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -2913,10 +2926,10 @@
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "f47a5649fa14fa54",
+          "address_id": "0912e8e3b030033a",
           "attempt": 1,
           "engine_errors": {
-            "connection-refused": 1
+            "unclassified-error": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -2925,96 +2938,24 @@
         }
       ],
       "engine_errors": {
-        "connection-refused": 1
+        "unclassified-error": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 97,
-            "elapsed_ms": 87.3,
+            "curl_exit": 28,
+            "elapsed_ms": 5223.5,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "socks-connection-failed"
+            "reason": "proxy-request-timeout"
           }
         ],
-        "checked_at": "2026-11-26T11:46:33.137214+00:00",
+        "checked_at": "2026-11-26T14:29:12.070292+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "1889276947b7b057148aad9ee1da04b02323d1dae4eddb0a4ac1c7d5f01cd00a",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "shadowsocks",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "178.18.244.2",
-      "upstream_rank": 42
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "6723b794b30fc24b",
-          "attempt": 1,
-          "engine_errors": {
-            "timeout": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "timeout": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 97,
-            "elapsed_ms": 5032.7,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "socks-connection-failed"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:38.242803+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "05d18375f9638c813225cbf5cc85e041ab854c5b59cd1f2328482b0a697e31bd",
+      "id": "04f3a3b1f08742f3cbe27e935c91aa4793519413ca7388e12cd4a6a7ee14f1fc",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -3050,8 +2991,8 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "84.201.140.155",
-      "upstream_rank": 43
+      "tested_server_ip": "104.16.0.1",
+      "upstream_rank": 42
     },
     {
       "attempted_address_count": 1,
@@ -3075,13 +3016,13 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5042.7,
+            "elapsed_ms": 5050.6,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:39.589895+00:00",
+        "checked_at": "2026-11-26T14:29:13.604884+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -3123,16 +3064,16 @@
         }
       },
       "tested_server_ip": "156.224.78.11",
-      "upstream_rank": 44
+      "upstream_rank": 43
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "78fa03da309c9f79",
+          "address_id": "3d7134f53d3f8b22",
           "attempt": 1,
           "engine_errors": {
-            "unclassified-error": 1
+            "connection-refused": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -3141,168 +3082,24 @@
         }
       ],
       "engine_errors": {
-        "unclassified-error": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 28,
-            "elapsed_ms": 5139.3,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "proxy-request-timeout"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:42.669544+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "3c4f8c46e933dfa2b4a52c470f21065d4e0af190f87ca987ec5f1074d159aa0e",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "trojan",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "199.232.78.160",
-      "upstream_rank": 45
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "3d1522e8181ea559",
-          "attempt": 1,
-          "engine_errors": {
-            "timeout": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "timeout": 1
+        "connection-refused": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5041.0,
+            "elapsed_ms": 203.3,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:43.032312+00:00",
+        "checked_at": "2026-11-26T14:29:10.761655+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "fcb4dbbd8d830bbf5b04c8a9beee37aac422957dda7f753007497c0f41a0b5f1",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "vmess",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "185.212.149.7",
-      "upstream_rank": 46
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "76020ea9db27f767",
-          "attempt": 1,
-          "engine_errors": {
-            "timeout": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "timeout": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 97,
-            "elapsed_ms": 5054.3,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "socks-connection-failed"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:43.431007+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "23f0756f868b37ed23713f73f3dca416797453eacb898f0e5753e00ed36893cd",
+      "id": "a4c3a0623924b64315a08d502f192aa7ecca188b2e2bcc60b86b2eeacf0de138",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -3338,17 +3135,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "185.88.140.204",
-      "upstream_rank": 47
+      "tested_server_ip": "85.208.108.94",
+      "upstream_rank": 44
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "e9d1066c14bea8c8",
+          "address_id": "baba981237380a98",
           "attempt": 1,
           "engine_errors": {
-            "tls-handshake-failed": 1
+            "timeout": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -3357,24 +3154,168 @@
         }
       ],
       "engine_errors": {
-        "tls-handshake-failed": 1
+        "timeout": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 133.6,
+            "elapsed_ms": 5036.4,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:39.862198+00:00",
+        "checked_at": "2026-11-26T14:29:15.873586+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "0603f776b9ffab2b4997f49a8b4fe5608b2e6c6360c93a56c7d1f33f636798cf",
+      "id": "f7b6ff6912a689c7ae08c995927703129813bb56a565bdfe4c697daa4d180b24",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "66.163.127.9",
+      "upstream_rank": 45
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "d521193c04dbfa84",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 28,
+            "elapsed_ms": 5055.8,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "proxy-request-timeout"
+          }
+        ],
+        "checked_at": "2026-11-26T14:29:15.905195+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "fa62e59de1e72d5d1c88835d4a9c9871612db14f544651fa066904c785aa5f78",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "47.87.64.133",
+      "upstream_rank": 46
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "456d2d9cb55839b7",
+          "attempt": 1,
+          "engine_errors": {
+            "unclassified-error": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "unclassified-error": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 28,
+            "elapsed_ms": 5100.0,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "proxy-request-timeout"
+          }
+        ],
+        "checked_at": "2026-11-26T14:29:17.307482+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "0588fd650e5fa011e8fff7486406b4d3bacb1380dc07a2a81e8ee17664ffea77",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -3410,8 +3351,8 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "104.18.151.170",
-      "upstream_rank": 48
+      "tested_server_ip": "172.67.178.143",
+      "upstream_rank": 47
     },
     {
       "attempted_address_count": 1,
@@ -3435,13 +3376,13 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5047.6,
+            "elapsed_ms": 5086.2,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:45.043444+00:00",
+        "checked_at": "2026-11-26T14:29:18.843762+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -3483,16 +3424,16 @@
         }
       },
       "tested_server_ip": "154.40.49.216",
-      "upstream_rank": 49
+      "upstream_rank": 48
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "bd3ae0de8cc572d5",
+          "address_id": "4b0f3e8c4f781148",
           "attempt": 1,
           "engine_errors": {
-            "timeout": 1
+            "tls-handshake-failed": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -3501,24 +3442,24 @@
         }
       ],
       "engine_errors": {
-        "timeout": 1
+        "tls-handshake-failed": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5036.0,
+            "elapsed_ms": 376.0,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:47.805138+00:00",
+        "checked_at": "2026-11-26T14:29:16.337703+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "d80b71904a7a40004a3cb658f7ba35b40ddf3d800aadf9eb40a0f0e8a75a4a6a",
+      "id": "03719026e1d30f07b3e3a561eeab62314fc274b009d07cce0745288b7ff56fea",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -3554,24 +3495,51 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "216.152.147.79",
-      "upstream_rank": 50
+      "tested_server_ip": "104.17.114.140",
+      "upstream_rank": 49
     },
     {
-      "attempted_address_count": 0,
-      "endpoint_attempts": [],
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "cdd6b0473ab4b32a",
+          "attempt": 1,
+          "engine_errors": {
+            "connection-refused": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
       "engine_errors": {
-        "dns-failed": 1
+        "connection-refused": 1
       },
-      "id": "0893991159e4f7da4cb1600e794ef5f4a0bbc6103a70b655f4e6d8f0b428f41a",
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 254.4,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:29:16.239229+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "04b31cf43d48967fe1e42d9eeeac5d18359fb3fe4b5f810241f0e3a2cc2bb5bc",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
-      "outcome": "fail",
+      "outcome": "inconclusive",
       "protocol": "vmess",
       "qualified": false,
       "rejection_reasons": [
-        "server-dns-failed"
+        "required-exit-country-unconfirmed-inconclusive"
       ],
       "services": {
         "chatgpt": {
@@ -3599,42 +3567,39 @@
           "reasons": []
         }
       },
-      "upstream_rank": 51
+      "tested_server_ip": "45.155.249.101",
+      "upstream_rank": 50
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "f96babf93f625239",
+          "address_id": "ea7ea3f358d2c98a",
           "attempt": 1,
-          "engine_errors": {
-            "timeout": 1
-          },
+          "engine_errors": {},
           "https_response": false,
           "rejection_reasons": [
             "required-exit-country-unconfirmed-inconclusive"
           ]
         }
       ],
-      "engine_errors": {
-        "timeout": 1
-      },
+      "engine_errors": {},
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 97,
-            "elapsed_ms": 5033.5,
+            "curl_exit": 28,
+            "elapsed_ms": 5152.4,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "socks-connection-failed"
+            "reason": "proxy-request-timeout"
           }
         ],
-        "checked_at": "2026-11-26T11:46:48.532876+00:00",
+        "checked_at": "2026-11-26T14:29:21.473462+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "247a06d6dedd0853f3a3358e01b63f8a2fdf33ced82cc0bf4677e33c1d49186f",
+      "id": "252faaeaf302874e27bde255e1621e881514fdd05952de2b5933be4b14adc334",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -3670,14 +3635,14 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "62.60.216.61",
-      "upstream_rank": 52
+      "tested_server_ip": "8.209.236.164",
+      "upstream_rank": 51
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "dd56dc5eeca552d2",
+          "address_id": "e682114fca339b01",
           "attempt": 1,
           "engine_errors": {
             "unclassified-error": 1
@@ -3694,19 +3659,19 @@
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5125.3,
+            "curl_exit": 97,
+            "elapsed_ms": 352.0,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:49.177128+00:00",
+        "checked_at": "2026-11-26T14:29:16.765588+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "061a892ced02159549bb05a38897846552ab97b15fc2f0f715a9e474c4fb22ef",
+      "id": "0a259af39eb0dbf90088039d78cb9ed5046694f0e56065aff83ec8ae48aaa198",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -3742,8 +3707,8 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "194.113.235.66",
-      "upstream_rank": 53
+      "tested_server_ip": "185.146.173.58",
+      "upstream_rank": 52
     },
     {
       "attempted_address_count": 1,
@@ -3766,14 +3731,14 @@
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5031.6,
+            "curl_exit": 97,
+            "elapsed_ms": 5048.3,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:50.142612+00:00",
+        "checked_at": "2026-11-26T14:29:21.887779+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -3815,16 +3780,16 @@
         }
       },
       "tested_server_ip": "179.254.127.159",
-      "upstream_rank": 54
+      "upstream_rank": 53
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "da41320b7a6837cf",
+          "address_id": "60cdacb6a1b9dc8e",
           "attempt": 1,
           "engine_errors": {
-            "timeout": 1
+            "tls-handshake-failed": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -3833,24 +3798,24 @@
         }
       ],
       "engine_errors": {
-        "timeout": 1
+        "tls-handshake-failed": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5051.1,
+            "elapsed_ms": 103.2,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:52.988570+00:00",
+        "checked_at": "2026-11-26T14:29:17.487720+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "e1298230098bbb0be3ff584d2b6580323ae7400e6c90fe924cdbd13781b19836",
+      "id": "049221c4ad9d047dacef3a5976d7c36aef635432ecbc607de1905f2b37e4420c",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -3886,14 +3851,14 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "183.236.51.6",
-      "upstream_rank": 55
+      "tested_server_ip": "188.114.97.6",
+      "upstream_rank": 54
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "a1ec30928d241bca",
+          "address_id": "a44ecc18b82077ef",
           "attempt": 1,
           "engine_errors": {
             "timeout": 1
@@ -3911,90 +3876,18 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5045.9,
+            "elapsed_ms": 5159.2,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:53.791131+00:00",
+        "checked_at": "2026-11-26T14:29:23.820686+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "40a904ad5b06046f50ac2ec00617df966d9d915d2d8159a28ec97784247115a9",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "shadowsocks",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "62.238.41.102",
-      "upstream_rank": 56
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "9d8a7ec52f0199cd",
-          "attempt": 1,
-          "engine_errors": {
-            "tls-handshake-failed": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "tls-handshake-failed": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 97,
-            "elapsed_ms": 122.7,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "socks-connection-failed"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:49.433834+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "731e48970c35b5aa76cab51a143efb0caaeb6607de4e03f2211685de4bdf33cf",
+      "id": "0a4a4395a2382f760ded110f80a8e407e9d8935c08f839e0c42b248c0be6935f",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -4030,17 +3923,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "172.67.71.160",
-      "upstream_rank": 57
+      "tested_server_ip": "46.224.150.114",
+      "upstream_rank": 55
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "e3cc9895c80934f0",
+          "address_id": "3739ecbed97c45de",
           "attempt": 1,
           "engine_errors": {
-            "connection-refused": 1
+            "timeout": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -4049,24 +3942,92 @@
         }
       ],
       "engine_errors": {
-        "connection-refused": 1
+        "timeout": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 253.6,
+            "elapsed_ms": 5065.3,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:50.141730+00:00",
+        "checked_at": "2026-11-26T14:29:24.054403+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "06e77ca03bb88380ddba6427e023076e9318c7079f1f12798a57c0fcf6c7e675",
+      "id": "28b9f45f9cc5d7ef3a8b80d508c032af507fa27fcd4324c0d7099523ed5162d0",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "100.42.182.21",
+      "upstream_rank": 56
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "622b3eec7b6aff2d",
+          "attempt": 1,
+          "engine_errors": {},
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {},
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 35,
+            "elapsed_ms": 159.5,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "destination-tls-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:29:21.712787+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "0ade236fe838d8db13afcc3eef8e99f7f0359bdd63a7e484324a83edc8eed35b",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -4102,8 +4063,8 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "195.172.138.26",
-      "upstream_rank": 58
+      "tested_server_ip": "87.242.102.222",
+      "upstream_rank": 57
     },
     {
       "attempted_address_count": 1,
@@ -4127,13 +4088,13 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5039.0,
+            "elapsed_ms": 5046.5,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:55.356349+00:00",
+        "checked_at": "2026-11-26T14:29:26.924088+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -4175,16 +4136,16 @@
         }
       },
       "tested_server_ip": "130.49.161.70",
-      "upstream_rank": 59
+      "upstream_rank": 58
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "25ddf4fe7dde4788",
+          "address_id": "013f4521f38f4a1c",
           "attempt": 1,
           "engine_errors": {
-            "timeout": 1
+            "unclassified-error": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -4193,24 +4154,24 @@
         }
       ],
       "engine_errors": {
-        "timeout": 1
+        "unclassified-error": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 28,
-            "elapsed_ms": 5032.6,
+            "elapsed_ms": 5048.0,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "proxy-request-timeout"
           }
         ],
-        "checked_at": "2026-11-26T11:46:55.305505+00:00",
+        "checked_at": "2026-11-26T14:29:27.013333+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "15cbdc90d098eb88044935a1b890065d4338d090aad22589e601225a80611a96",
+      "id": "3477bfb463ea373d5335bb9cc368b8eb0fbf14f14bae665ba0437fffddc07bec",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -4246,17 +4207,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "216.24.57.1",
-      "upstream_rank": 60
+      "tested_server_ip": "154.31.114.10",
+      "upstream_rank": 59
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "5af3c43aa5641ba1",
+          "address_id": "a1ec30928d241bca",
           "attempt": 1,
           "engine_errors": {
-            "unclassified-error": 1
+            "timeout": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -4265,92 +4226,24 @@
         }
       ],
       "engine_errors": {
-        "unclassified-error": 1
+        "timeout": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 112.2,
+            "elapsed_ms": 5048.0,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:53.175145+00:00",
+        "checked_at": "2026-11-26T14:29:29.031942+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "b00492c19e351bb2c8c4e30afcc1e7321268c0cb4a4c7a20e7bb4a45a3b00274",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "vmess",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "104.19.47.104",
-      "upstream_rank": 61
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "4431792e1a6fb6e2",
-          "attempt": 1,
-          "engine_errors": {},
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {},
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 28,
-            "elapsed_ms": 5057.0,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "proxy-request-timeout"
-          }
-        ],
-        "checked_at": "2026-11-26T11:46:58.304840+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "1b11bbf0646c5633932af6cd98566895d5e349e2754df8b9c80186b89abecf65",
+      "id": "3e5e47653c8a6ea5ccc2042f7d090476cb815430d29351e0b78d681283b2d516",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -4386,39 +4279,115 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "47.74.49.154",
-      "upstream_rank": 62
+      "tested_server_ip": "62.238.41.102",
+      "upstream_rank": 60
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "5ef7bf3f72a22cea",
+          "address_id": "b523a0e602726a81",
           "attempt": 1,
-          "engine_errors": {},
+          "engine_errors": {
+            "timeout": 1
+          },
           "https_response": false,
           "rejection_reasons": [
             "required-exit-country-unconfirmed-inconclusive"
           ]
         }
       ],
-      "engine_errors": {},
+      "engine_errors": {
+        "timeout": 1
+      },
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5136.9,
+            "curl_exit": 97,
+            "elapsed_ms": 5046.9,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:59.006010+00:00",
+        "checked_at": "2026-11-26T14:29:29.178842+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "070092cde8560c4ef709e858de5970aa963ac3e2a790673ab13640558f5d6c59",
+      "id": "5137dfc0e46a4ca6dcbce3519deab6264ed907e0b40a019b0623b61df33ec7c9",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "46.105.222.157",
+      "upstream_rank": 61
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "762e7a459dad2e0c",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5042.6,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:29:32.044207+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "0b0429711b2ba7bf031467e10a77073afd4d6f416e87a4bb2925807d11d0d73d",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -4454,8 +4423,8 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "37.202.231.38",
-      "upstream_rank": 63
+      "tested_server_ip": "193.160.32.36",
+      "upstream_rank": 62
     },
     {
       "attempted_address_count": 1,
@@ -4479,13 +4448,13 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 475.5,
+            "elapsed_ms": 592.4,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:55.856662+00:00",
+        "checked_at": "2026-11-26T14:29:27.679446+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -4527,38 +4496,42 @@
         }
       },
       "tested_server_ip": "48.103.144.118",
-      "upstream_rank": 64
+      "upstream_rank": 63
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "3b246386d34fe12d",
+          "address_id": "b1a360a6a1bc130e",
           "attempt": 1,
-          "engine_errors": {},
+          "engine_errors": {
+            "unclassified-error": 1
+          },
           "https_response": false,
           "rejection_reasons": [
             "required-exit-country-unconfirmed-inconclusive"
           ]
         }
       ],
-      "engine_errors": {},
+      "engine_errors": {
+        "unclassified-error": 1
+      },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 28,
-            "elapsed_ms": 5121.1,
+            "elapsed_ms": 5213.1,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "proxy-request-timeout"
           }
         ],
-        "checked_at": "2026-11-26T11:47:00.553414+00:00",
+        "checked_at": "2026-11-26T14:29:32.973516+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "3de19bf88e8033f8208dc6efa3e5fc7e9c1c97db4b190b5b8816403692ae08e7",
+      "id": "3db5162d0527c27626f24c574bbb163c305f70dcd307ded88028cb7bc0a2b19b",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -4594,17 +4567,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "172.67.194.6",
-      "upstream_rank": 65
+      "tested_server_ip": "151.101.56.255",
+      "upstream_rank": 64
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "b33ac492fdba845f",
+          "address_id": "7b2e570d528c9b85",
           "attempt": 1,
           "engine_errors": {
-            "connection-refused": 1
+            "unclassified-error": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -4613,24 +4586,24 @@
         }
       ],
       "engine_errors": {
-        "connection-refused": 1
+        "unclassified-error": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 97,
-            "elapsed_ms": 230.6,
+            "curl_exit": 28,
+            "elapsed_ms": 5044.2,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "socks-connection-failed"
+            "reason": "proxy-request-timeout"
           }
         ],
-        "checked_at": "2026-11-26T11:46:56.156795+00:00",
+        "checked_at": "2026-11-26T14:29:34.156180+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "b4de8f9ca96814f06c04d2d9b24f3cb5d01346171caab3b4fa5a2be188fcb397",
+      "id": "a599bb25a9a7148271eed49390c1d4f62785d8ae0c057ae99627c153ea779272",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -4666,17 +4639,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "128.199.243.157",
-      "upstream_rank": 66
+      "tested_server_ip": "104.21.4.14",
+      "upstream_rank": 65
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "d5f855d116901902",
+          "address_id": "a63b42d1e856c462",
           "attempt": 1,
           "engine_errors": {
-            "connection-refused": 1
+            "timeout": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -4685,24 +4658,24 @@
         }
       ],
       "engine_errors": {
-        "connection-refused": 1
+        "timeout": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 89.2,
+            "elapsed_ms": 5057.1,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:56.571494+00:00",
+        "checked_at": "2026-11-26T14:29:34.368572+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "2c01dcd6239c48f9d9a00e244bbbaaa82d6769d231ab97b327b2cfc81e8f9589",
+      "id": "e8fe93d1294102234d49da5070ff648cc39f4beda63b103a6c35a2d138ac8843",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -4738,17 +4711,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "64.190.63.222",
-      "upstream_rank": 67
+      "tested_server_ip": "134.195.196.231",
+      "upstream_rank": 66
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "0678f4bc1daa2869",
+          "address_id": "862f058f77e2c423",
           "attempt": 1,
           "engine_errors": {
-            "unclassified-error": 1
+            "timeout": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -4757,24 +4730,24 @@
         }
       ],
       "engine_errors": {
-        "unclassified-error": 1
+        "timeout": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5125.4,
+            "curl_exit": 97,
+            "elapsed_ms": 5043.0,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:01.797635+00:00",
+        "checked_at": "2026-11-26T14:29:37.225915+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "07fcd7dbe31254a244da7c8eda3e9bf511e6c8a9dc011acfd23007cdaa5f9197",
+      "id": "0b76ed86f9623593ecb416d81786c3384aa471a10e6d414bd54da636b2c1ff5e",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -4810,8 +4783,8 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "185.255.115.103",
-      "upstream_rank": 68
+      "tested_server_ip": "70.34.200.37",
+      "upstream_rank": 67
     },
     {
       "attempted_address_count": 1,
@@ -4835,13 +4808,13 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 109.5,
+            "elapsed_ms": 1568.8,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:46:58.550883+00:00",
+        "checked_at": "2026-11-26T14:29:34.639337+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -4883,16 +4856,16 @@
         }
       },
       "tested_server_ip": "185.42.212.207",
-      "upstream_rank": 69
+      "upstream_rank": 68
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "81ba40653a3593d2",
+          "address_id": "f8a495aed37d93d8",
           "attempt": 1,
           "engine_errors": {
-            "unclassified-error": 1
+            "timeout": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -4901,24 +4874,24 @@
         }
       ],
       "engine_errors": {
-        "unclassified-error": 1
+        "timeout": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 28,
-            "elapsed_ms": 5058.5,
+            "elapsed_ms": 5068.8,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "proxy-request-timeout"
           }
         ],
-        "checked_at": "2026-11-26T11:47:03.741072+00:00",
+        "checked_at": "2026-11-26T14:29:39.456582+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "49032deb2cf6a9bdbb5d4b77521c89b7a06240715a3932b7dd3e06a1938d29fa",
+      "id": "c5816879d8d758fc6d52672229b6b0b606bdfc067a11f197af499c4aff9c1287",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -4954,51 +4927,24 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "151.101.56.90",
-      "upstream_rank": 70
+      "tested_server_ip": "170.101.101.67",
+      "upstream_rank": 69
     },
     {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "21e810eb9964212a",
-          "attempt": 1,
-          "engine_errors": {
-            "timeout": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
+      "attempted_address_count": 0,
+      "endpoint_attempts": [],
       "engine_errors": {
-        "timeout": 1
+        "dns-failed": 1
       },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 97,
-            "elapsed_ms": 5044.6,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "socks-connection-failed"
-          }
-        ],
-        "checked_at": "2026-11-26T11:47:04.128728+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "122907b3d237dfbf16a2daaec023569628a31cd16e5316539102315bc93cd31b",
+      "id": "082ecf9fb2cd4dd581ee93714362c95523275fa764b713c4ecd2727400d50873",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
-      "outcome": "inconclusive",
+      "outcome": "fail",
       "protocol": "vmess",
       "qualified": false,
       "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
+        "server-dns-failed"
       ],
       "services": {
         "chatgpt": {
@@ -5026,14 +4972,13 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "35.79.166.8",
-      "upstream_rank": 71
+      "upstream_rank": 70
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "8bbdf17fbca04195",
+          "address_id": "0cb91f024cb3a13d",
           "attempt": 1,
           "engine_errors": {
             "timeout": 1
@@ -5051,18 +4996,18 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5049.1,
+            "elapsed_ms": 5078.7,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:05.741818+00:00",
+        "checked_at": "2026-11-26T14:29:39.770451+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "39c96fdd01a2c119f0dc4ab1b63786400086dfd0558826d898634ff2e7a49d88",
+      "id": "2a71deac67859f611eac3ec1d36b7852ced2202532fcf5b9560a1472a97ad10c",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -5098,17 +5043,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "18.185.97.90",
-      "upstream_rank": 72
+      "tested_server_ip": "157.173.109.231",
+      "upstream_rank": 71
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "4c6df8d907249fbd",
+          "address_id": "5edadac0a0191635",
           "attempt": 1,
           "engine_errors": {
-            "unclassified-error": 1
+            "connection-refused": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -5117,24 +5062,24 @@
         }
       ],
       "engine_errors": {
-        "unclassified-error": 1
+        "connection-refused": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5087.8,
+            "curl_exit": 97,
+            "elapsed_ms": 176.6,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:06.978755+00:00",
+        "checked_at": "2026-11-26T14:29:34.996272+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "0adbcc9439625ab0bc1ae25f23ab6a44f9f2228ddf9e3e59620b972fa69eb74c",
+      "id": "1149494c66cd171e4dd230e30779af2f37fa9b2610563542767b54313691cd81",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -5170,8 +5115,8 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "104.24.225.89",
-      "upstream_rank": 73
+      "tested_server_ip": "81.26.179.105",
+      "upstream_rank": 72
     },
     {
       "attempted_address_count": 1,
@@ -5195,13 +5140,13 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 93.9,
+            "elapsed_ms": 227.8,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:03.919484+00:00",
+        "checked_at": "2026-11-26T14:29:35.711520+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -5243,13 +5188,13 @@
         }
       },
       "tested_server_ip": "185.42.212.207",
-      "upstream_rank": 74
+      "upstream_rank": 73
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "15ee7420b1eb791b",
+          "address_id": "e480975ba1e790f5",
           "attempt": 1,
           "engine_errors": {
             "unclassified-error": 1
@@ -5267,18 +5212,18 @@
         "attempts": [
           {
             "curl_exit": 28,
-            "elapsed_ms": 5126.0,
+            "elapsed_ms": 5045.0,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "proxy-request-timeout"
           }
         ],
-        "checked_at": "2026-11-26T11:47:09.115571+00:00",
+        "checked_at": "2026-11-26T14:29:40.832085+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "09a4ba0185b965ecc377b7cda9f170f79ed4052a096b1f70f24d14382e6642d8",
+      "id": "04e0af8a6ee084873af1e94ea209b415861ea87ca18cc3a8b5b3ee0d9bb8918b",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -5314,14 +5259,14 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "104.16.72.70",
-      "upstream_rank": 75
+      "tested_server_ip": "141.98.41.28",
+      "upstream_rank": 74
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "d0da4fed038a3ce1",
+          "address_id": "562eb528fc866189",
           "attempt": 1,
           "engine_errors": {
             "timeout": 1
@@ -5339,18 +5284,18 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5038.7,
+            "elapsed_ms": 5042.7,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:09.242260+00:00",
+        "checked_at": "2026-11-26T14:29:42.345871+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "2d17bd03fd49d2d81a0d61901998a4ce35f4cbaf56fbecfb44332f46f532391d",
+      "id": "0924d4343480b5c74be47c95f2edef0d9fb4c2e904a0b3c218b37e37ccccefcc",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -5386,19 +5331,19 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "217.197.162.28",
-      "upstream_rank": 76
+      "tested_server_ip": "36.133.78.37",
+      "upstream_rank": 75
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "3ab42770c8912d93",
+          "address_id": "4c8630151d4a5889",
           "attempt": 1,
           "engine_errors": {},
           "https_response": false,
           "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
+            "observed-exit-country-mismatch"
           ]
         }
       ],
@@ -5406,27 +5351,33 @@
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5109.8,
+            "curl_exit": 0,
+            "elapsed_ms": 1090.4,
             "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "proxy-request-timeout"
+            "http_status": 200,
+            "reason": "ok"
           }
         ],
-        "checked_at": "2026-11-26T11:47:10.924269+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
+        "checked_at": "2026-11-26T14:29:40.628121+00:00",
+        "country": "JP",
+        "observations": [
+          {
+            "country": "JP",
+            "ip": "8.209.196.11",
+            "source": "cloudflare-trace"
+          }
+        ],
+        "reason": "observed-exit-country-mismatch"
       },
-      "id": "41dde3bc71411cdd8293ffedb5075301ff696d9e67d2222d190b2e8a3e441739",
+      "id": "35062943f5b70021b7fb8a406be8bba9300c36fb181ccc0f977ae1e49f484783",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
-      "outcome": "inconclusive",
+      "outcome": "fail",
       "protocol": "shadowsocks",
       "qualified": false,
       "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
+        "observed-exit-country-mismatch"
       ],
       "services": {
         "chatgpt": {
@@ -5454,14 +5405,14 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "95.173.218.203",
-      "upstream_rank": 77
+      "tested_server_ip": "8.209.196.11",
+      "upstream_rank": 76
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "b860510192b25dd2",
+          "address_id": "91e4e6de4b7266c3",
           "attempt": 1,
           "engine_errors": {
             "timeout": 1
@@ -5478,19 +5429,19 @@
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 97,
-            "elapsed_ms": 5037.0,
+            "curl_exit": 28,
+            "elapsed_ms": 5044.3,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "socks-connection-failed"
+            "reason": "proxy-request-timeout"
           }
         ],
-        "checked_at": "2026-11-26T11:47:12.083665+00:00",
+        "checked_at": "2026-11-26T14:29:44.897346+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "132bb7676e35e83f5e5d9efa13bf12f51acf8dfe86163e4b96516d662b1d1f8e",
+      "id": "12133226d261065a4af6e32286232b89a2487a0e5d710e881013871a1085f98b",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -5526,8 +5477,340 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "87.199.205.28",
+      "tested_server_ip": "72.56.55.45",
+      "upstream_rank": 77
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "ded23a2b5261dce0",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5056.6,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:29:46.230131+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "82b8b42cdb229857d947f819808214af481fd6df87b04f0ffc856f82c3a203fd",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "hysteria2",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "85.159.228.22",
       "upstream_rank": 78
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "61200db2289f2d87",
+          "attempt": 1,
+          "engine_errors": {
+            "tls-handshake-failed": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "tls-handshake-failed": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 285.6,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:29:41.256420+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "0ac751b2c1f94c32841543701e619e1634acc131461a32db966643b9232d6fa1",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "trojan",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "104.27.44.212",
+      "upstream_rank": 79
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "ac481139b2a2e028",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5078.4,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:29:46.471530+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "3f189d0f21396988b7d27921feba543e22b999e6787489dc491b075398ca803d",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "172.99.190.149",
+      "upstream_rank": 80
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "2fd469f8d14e876e",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5050.6,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:29:47.539095+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "51fa9bd005d73d904c485cd3ed47d88982b2897495101fcd25ddb55487bb40fe",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "vmess",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "129.154.61.196",
+      "upstream_rank": 81
+    },
+    {
+      "attempted_address_count": 0,
+      "endpoint_attempts": [],
+      "engine_errors": {
+        "dns-failed": 1
+      },
+      "id": "1c0989c4dd415931a16b1340fa52fca65cd383635dbd31baa2461c47ddffe4e3",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "fail",
+      "protocol": "vless",
+      "qualified": false,
+      "rejection_reasons": [
+        "server-dns-failed"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "upstream_rank": 82
     },
     {
       "attempted_address_count": 1,
@@ -5551,13 +5834,13 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5048.5,
+            "elapsed_ms": 5045.5,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:14.240315+00:00",
+        "checked_at": "2026-11-26T14:29:50.134660+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -5599,16 +5882,16 @@
         }
       },
       "tested_server_ip": "109.70.74.213",
-      "upstream_rank": 79
+      "upstream_rank": 83
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "9c55f1555db82537",
+          "address_id": "5e5277616adb5d1d",
           "attempt": 1,
           "engine_errors": {
-            "unclassified-error": 1
+            "timeout": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -5617,24 +5900,24 @@
         }
       ],
       "engine_errors": {
-        "unclassified-error": 1
+        "timeout": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5124.2,
+            "curl_exit": 97,
+            "elapsed_ms": 5045.0,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:14.529642+00:00",
+        "checked_at": "2026-11-26T14:29:51.412997+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "163c806843bc76303d22195bd42d4162eb59f211ed0d5fa389fc7d05b50b36ed",
+      "id": "34adaf761e3baaf73961ba52177f4679ae281672b2e0b945172b4d478aab2cfe",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -5670,17 +5953,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "152.175.38.196",
-      "upstream_rank": 80
+      "tested_server_ip": "92.118.149.85",
+      "upstream_rank": 84
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "c29768ee68b789a7",
+          "address_id": "9521612e10058914",
           "attempt": 1,
           "engine_errors": {
-            "tls-handshake-failed": 1
+            "timeout": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -5689,24 +5972,96 @@
         }
       ],
       "engine_errors": {
-        "tls-handshake-failed": 1
+        "timeout": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 69.2,
+            "elapsed_ms": 5048.1,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:11.130785+00:00",
+        "checked_at": "2026-11-26T14:29:51.722277+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "9a2ac03db1842c1643d8d4c36fee5ef617f5f49018887ef8c6801e6abc5098fb",
+      "id": "8c9aa3c56fcf82eed8cfb45b5776f1c7481c5cf120116f11e2f2c9946e356633",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "85.155.226.213",
+      "upstream_rank": 85
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "25d9bc99dc79a25f",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5052.0,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:29:52.902240+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "ad167ebd104fe6de6ea9cab7b3a532025af035bdf32c474be0ff9c54e14853ce",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -5742,88 +6097,14 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "162.159.135.79",
-      "upstream_rank": 81
+      "tested_server_ip": "45.89.104.42",
+      "upstream_rank": 86
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "0cb6f81c889e9d82",
-          "attempt": 1,
-          "engine_errors": {},
-          "https_response": false,
-          "rejection_reasons": [
-            "observed-exit-country-mismatch"
-          ]
-        }
-      ],
-      "engine_errors": {},
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 0,
-            "elapsed_ms": 736.6,
-            "endpoint": "cloudflare-trace",
-            "http_status": 200,
-            "reason": "ok"
-          }
-        ],
-        "checked_at": "2026-11-26T11:47:11.947829+00:00",
-        "country": "JP",
-        "observations": [
-          {
-            "country": "JP",
-            "ip": "8.216.6.19",
-            "source": "cloudflare-trace"
-          }
-        ],
-        "reason": "observed-exit-country-mismatch"
-      },
-      "id": "1b9389d104932ec424abf2275c204fd2bb0f33b5b3d8f5b9dfbac2a33bb32da9",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "fail",
-      "protocol": "shadowsocks",
-      "qualified": false,
-      "rejection_reasons": [
-        "observed-exit-country-mismatch"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "8.216.6.19",
-      "upstream_rank": 82
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "9dd77881cd14adb3",
+          "address_id": "23aa6c7b88a60304",
           "attempt": 1,
           "engine_errors": {
             "timeout": 1
@@ -5841,18 +6122,18 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5036.9,
+            "elapsed_ms": 5045.2,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:17.121225+00:00",
+        "checked_at": "2026-11-26T14:29:55.309294+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "18249dbe4c9178a71f8efaa6605bd5eb62ab9a41948e70f61b026b4b3184e91f",
+      "id": "1cf37d7533c64e8ddebbeac6fdebece52dac8676dbdf63985766049a7aca9ad2",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -5888,8 +6169,8 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "3.114.220.22",
-      "upstream_rank": 83
+      "tested_server_ip": "57.129.41.216",
+      "upstream_rank": 87
     },
     {
       "attempted_address_count": 1,
@@ -5913,13 +6194,13 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5035.8,
+            "elapsed_ms": 5046.2,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:17.254399+00:00",
+        "checked_at": "2026-11-26T14:29:56.703162+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
@@ -5961,272 +6242,16 @@
         }
       },
       "tested_server_ip": "185.42.212.207",
-      "upstream_rank": 84
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "bb604e3e707ead29",
-          "attempt": 1,
-          "engine_errors": {},
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {},
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 28,
-            "elapsed_ms": 5051.4,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "proxy-request-timeout"
-          }
-        ],
-        "checked_at": "2026-11-26T11:47:19.369256+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "3fcb913295e4dac36f7487e8e03f5bb5fa9cc4da3f63575b70b22c9fc8ba1ebe",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "trojan",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "172.67.219.63",
-      "upstream_rank": 85
-    },
-    {
-      "attempted_address_count": 0,
-      "endpoint_attempts": [],
-      "engine_errors": {
-        "dns-failed": 1
-      },
-      "id": "b535a4a7232335d0b960b48546094b98e2d14c3ead9a6bc13c5a1c523e62810c",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "fail",
-      "protocol": "vmess",
-      "qualified": false,
-      "rejection_reasons": [
-        "server-dns-failed"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "upstream_rank": 86
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "e5b766acf0fbc465",
-          "attempt": 1,
-          "engine_errors": {
-            "timeout": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "timeout": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 97,
-            "elapsed_ms": 5027.8,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "socks-connection-failed"
-          }
-        ],
-        "checked_at": "2026-11-26T11:47:20.024847+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "3c212ba5fa5ce79a8735283db511f9a8d7e9ef8058b13264d0314c0ad8e47f7d",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "shadowsocks",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "185.135.86.86",
-      "upstream_rank": 87
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "a616d40f534205db",
-          "attempt": 1,
-          "engine_errors": {
-            "timeout": 1
-          },
-          "https_response": false,
-          "rejection_reasons": [
-            "required-exit-country-unconfirmed-inconclusive"
-          ]
-        }
-      ],
-      "engine_errors": {
-        "timeout": 1
-      },
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 97,
-            "elapsed_ms": 5038.0,
-            "endpoint": "cloudflare-trace",
-            "http_status": null,
-            "reason": "socks-connection-failed"
-          }
-        ],
-        "checked_at": "2026-11-26T11:47:22.232687+00:00",
-        "country": null,
-        "observations": [],
-        "reason": "required-exit-country-unconfirmed-inconclusive"
-      },
-      "id": "1be904985c58f1cf42ad32e83b2cc8f948cdecdaa4a9607740cf3e0fbc457870",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "inconclusive",
-      "protocol": "vless",
-      "qualified": false,
-      "rejection_reasons": [
-        "required-exit-country-unconfirmed-inconclusive"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "87.228.92.112",
       "upstream_rank": 88
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "0c2ff5374d9b772a",
+          "address_id": "83710cf829a040c3",
           "attempt": 1,
           "engine_errors": {
-            "protocol-authentication-failed": 1
+            "timeout": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -6235,29 +6260,29 @@
         }
       ],
       "engine_errors": {
-        "protocol-authentication-failed": 1
+        "timeout": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 227.0,
+            "elapsed_ms": 5046.8,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:17.559083+00:00",
+        "checked_at": "2026-11-26T14:29:56.903796+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "11786bfd1f8f38113df1f2ffaafe63a9c674fe47f8b43189262d980d6a952077",
+      "id": "715cef514be222310a3d3c417e16d0ccbe9d9d0e2b50f451d8e331d483a4fb4f",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
       "outcome": "inconclusive",
-      "protocol": "hysteria2",
+      "protocol": "trojan",
       "qualified": false,
       "rejection_reasons": [
         "required-exit-country-unconfirmed-inconclusive"
@@ -6288,14 +6313,14 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "194.87.224.8",
+      "tested_server_ip": "18.199.218.181",
       "upstream_rank": 89
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "697f5d22e567fc0c",
+          "address_id": "f9a074663f671bec",
           "attempt": 1,
           "engine_errors": {
             "unclassified-error": 1
@@ -6313,23 +6338,23 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 2708.1,
+            "elapsed_ms": 1333.6,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:20.346166+00:00",
+        "checked_at": "2026-11-26T14:29:54.319048+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "6754dd856b720949ee91f51bfa880bf5f10888f23d00e9012256e70d7b12da7a",
+      "id": "ae8b2a1c14ade6b7905968742e8fd0dcc57c5993557b1e705249a02904205693",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
       "outcome": "inconclusive",
-      "protocol": "trojan",
+      "protocol": "vmess",
       "qualified": false,
       "rejection_reasons": [
         "required-exit-country-unconfirmed-inconclusive"
@@ -6360,91 +6385,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "190.93.244.202",
+      "tested_server_ip": "104.16.60.8",
       "upstream_rank": 90
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "da613131961e7ef7",
-          "attempt": 1,
-          "engine_errors": {},
-          "https_response": false,
-          "rejection_reasons": [
-            "observed-exit-country-mismatch"
-          ]
-        }
-      ],
-      "engine_errors": {},
-      "exit_country_evidence": {
-        "attempts": [
-          {
-            "curl_exit": 0,
-            "elapsed_ms": 2968.6,
-            "endpoint": "cloudflare-trace",
-            "http_status": 200,
-            "reason": "ok"
-          }
-        ],
-        "checked_at": "2026-11-26T11:47:22.473351+00:00",
-        "country": "US",
-        "observations": [
-          {
-            "country": "US",
-            "ip": "207.244.230.92",
-            "source": "cloudflare-trace"
-          }
-        ],
-        "reason": "observed-exit-country-mismatch"
-      },
-      "id": "c5a424a89ea849739d0b6812dbe1176ee4c91b1b9c382bff9b0c056f10307872",
-      "latency_checks": [],
-      "latency_samples_ms": [],
-      "median_latency": null,
-      "outcome": "fail",
-      "protocol": "vmess",
-      "qualified": false,
-      "rejection_reasons": [
-        "observed-exit-country-mismatch"
-      ],
-      "services": {
-        "chatgpt": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "instagram": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "spotify": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        },
-        "youtube": {
-          "attempts": 0,
-          "evidence": [],
-          "passed": 0,
-          "reasons": []
-        }
-      },
-      "tested_server_ip": "104.24.0.1",
-      "upstream_rank": 91
-    },
-    {
-      "attempted_address_count": 1,
-      "endpoint_attempts": [
-        {
-          "address_id": "fa97817ba40983b6",
+          "address_id": "ee72c3d9acdc6dda",
           "attempt": 1,
           "engine_errors": {
-            "connection-refused": 1
+            "timeout": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -6453,24 +6404,24 @@
         }
       ],
       "engine_errors": {
-        "connection-refused": 1
+        "timeout": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 175.9,
+            "elapsed_ms": 5051.0,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:20.648787+00:00",
+        "checked_at": "2026-11-26T14:29:59.507501+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "43e57fa413b80830844bc61bd09aa5f92a3776d7140060f10e351c939485c7b5",
+      "id": "1ff21e9a808c474832e9c41a0fa05d9bb44df0a0c02733ffadd87e43f8fe47ff",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -6506,17 +6457,17 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "147.90.234.133",
-      "upstream_rank": 92
+      "tested_server_ip": "194.87.216.79",
+      "upstream_rank": 91
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "94a8f99dedae1669",
+          "address_id": "e321c67328d39b8e",
           "attempt": 1,
           "engine_errors": {
-            "unclassified-error": 1
+            "timeout": 1
           },
           "https_response": false,
           "rejection_reasons": [
@@ -6525,24 +6476,24 @@
         }
       ],
       "engine_errors": {
-        "unclassified-error": 1
+        "timeout": 1
       },
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5148.5,
+            "curl_exit": 97,
+            "elapsed_ms": 5051.5,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:25.647784+00:00",
+        "checked_at": "2026-11-26T14:30:00.433256+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "1d21529719f3f5591a63c4b431d01b933e2ebeddd3c36a985fa42ee47430ab34",
+      "id": "1fb1ed13d98e174f58e707d015505710a2dbf9bedf755db72780658b90719115",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -6578,14 +6529,14 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "69.46.46.113",
-      "upstream_rank": 93
+      "tested_server_ip": "195.133.93.179",
+      "upstream_rank": 92
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "fe6953fa8f342b10",
+          "address_id": "6864a08dd9569659",
           "attempt": 1,
           "engine_errors": {
             "timeout": 1
@@ -6603,18 +6554,18 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5054.1,
+            "elapsed_ms": 5073.6,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:25.839892+00:00",
+        "checked_at": "2026-11-26T14:30:01.852240+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "4b1620dbe63a7d8d901ebea0a86e3cbb901f269b6761a9deae2a202877d85a4e",
+      "id": "dd936c2013425082aad83bf59ffc2e9df2e6c8b2dfe8fbbb7aede5bd1aaa6a49",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -6650,39 +6601,43 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "193.233.130.66",
-      "upstream_rank": 94
+      "tested_server_ip": "192.142.23.46",
+      "upstream_rank": 93
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "c6db4a7a21d614d7",
+          "address_id": "62626adf233bd1af",
           "attempt": 1,
-          "engine_errors": {},
+          "engine_errors": {
+            "timeout": 1
+          },
           "https_response": false,
           "rejection_reasons": [
             "required-exit-country-unconfirmed-inconclusive"
           ]
         }
       ],
-      "engine_errors": {},
+      "engine_errors": {
+        "timeout": 1
+      },
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5083.9,
+            "curl_exit": 97,
+            "elapsed_ms": 5055.6,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:27.458039+00:00",
+        "checked_at": "2026-11-26T14:30:02.036549+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "0760821d583ea3843f0d54c86ca482f49f3917f4d30c20d59801aa4a5f1a0890",
+      "id": "0725f7054376f89cb69ab1338c1e38629927504ab1aca90f86ef8c931218a206",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -6718,14 +6673,14 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "104.17.148.22",
-      "upstream_rank": 95
+      "tested_server_ip": "45.38.3.25",
+      "upstream_rank": 94
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "09c59b9eb4df4a72",
+          "address_id": "8d162f759f465d1c",
           "attempt": 1,
           "engine_errors": {
             "timeout": 1
@@ -6743,18 +6698,18 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 5028.1,
+            "elapsed_ms": 5045.8,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:27.573711+00:00",
+        "checked_at": "2026-11-26T14:30:04.634276+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "2a53e3dc9c948ff6fdffee4178b22b7f551d33dec1b97468fde3d993408c114c",
+      "id": "097fd98248495ed598ac93a507f9f2fbf4766ef1ab985eed54548e5bc2b85be5",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -6790,14 +6745,14 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "116.203.243.238",
-      "upstream_rank": 96
+      "tested_server_ip": "38.33.55.71",
+      "upstream_rank": 95
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "01ee855419d343b6",
+          "address_id": "fb21b29532308da8",
           "attempt": 1,
           "engine_errors": {
             "timeout": 1
@@ -6814,19 +6769,19 @@
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 97,
-            "elapsed_ms": 5036.4,
+            "curl_exit": 28,
+            "elapsed_ms": 5073.3,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "socks-connection-failed"
+            "reason": "proxy-request-timeout"
           }
         ],
-        "checked_at": "2026-11-26T11:47:30.760021+00:00",
+        "checked_at": "2026-11-26T14:30:05.591847+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "493b5967eec404e15d18104386b0c9750de206b1e3c2fdb1ac9903283821b338",
+      "id": "2e73de61168138eb42569e310711e1cf5bcf956e8962cd75a100066e58743f11",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -6862,14 +6817,14 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "89.23.103.21",
-      "upstream_rank": 97
+      "tested_server_ip": "94.131.110.115",
+      "upstream_rank": 96
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "1a31daa3b1325bb4",
+          "address_id": "626b53b59fcf795e",
           "attempt": 1,
           "engine_errors": {},
           "https_response": false,
@@ -6883,18 +6838,18 @@
         "attempts": [
           {
             "curl_exit": 28,
-            "elapsed_ms": 5130.8,
+            "elapsed_ms": 5236.7,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "proxy-request-timeout"
           }
         ],
-        "checked_at": "2026-11-26T11:47:31.057672+00:00",
+        "checked_at": "2026-11-26T14:30:07.163620+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "1fe4ea59927dc6deb81db963ab724c03701825d0f3ce24968214108550ba5255",
+      "id": "2482c957d93ae24323fa82035ff40cc31373ac46f1bc305d7d78fff62edda824",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -6930,14 +6885,14 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "72.56.238.135",
-      "upstream_rank": 98
+      "tested_server_ip": "189.30.65.203",
+      "upstream_rank": 97
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "e24a0433284fd6e4",
+          "address_id": "883e74e3e80bf915",
           "attempt": 1,
           "engine_errors": {
             "protocol-authentication-failed": 1
@@ -6955,18 +6910,18 @@
         "attempts": [
           {
             "curl_exit": 97,
-            "elapsed_ms": 85.4,
+            "elapsed_ms": 460.1,
             "endpoint": "cloudflare-trace",
             "http_status": null,
             "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:27.631925+00:00",
+        "checked_at": "2026-11-26T14:30:02.819068+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "a7039335bcfb1b3bd6580940e0082d96c60916c2805606a3cd9d6c5bb18bf11f",
+      "id": "2056d7b7dae3d4fcfd175f1546bf3be5b6fec9e111b39b4b2bf506e534b17a12",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -7002,39 +6957,43 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "136.234.179.32",
-      "upstream_rank": 99
+      "tested_server_ip": "2.27.5.163",
+      "upstream_rank": 98
     },
     {
       "attempted_address_count": 1,
       "endpoint_attempts": [
         {
-          "address_id": "434babca20a9aa91",
+          "address_id": "57e461f804fad926",
           "attempt": 1,
-          "engine_errors": {},
+          "engine_errors": {
+            "tls-handshake-failed": 1
+          },
           "https_response": false,
           "rejection_reasons": [
             "required-exit-country-unconfirmed-inconclusive"
           ]
         }
       ],
-      "engine_errors": {},
+      "engine_errors": {
+        "tls-handshake-failed": 1
+      },
       "exit_country_evidence": {
         "attempts": [
           {
-            "curl_exit": 28,
-            "elapsed_ms": 5126.0,
+            "curl_exit": 97,
+            "elapsed_ms": 221.3,
             "endpoint": "cloudflare-trace",
             "http_status": null,
-            "reason": "proxy-request-timeout"
+            "reason": "socks-connection-failed"
           }
         ],
-        "checked_at": "2026-11-26T11:47:32.770251+00:00",
+        "checked_at": "2026-11-26T14:30:03.186225+00:00",
         "country": null,
         "observations": [],
         "reason": "required-exit-country-unconfirmed-inconclusive"
       },
-      "id": "18310683c10f7fbef83268f8af685ea60c8dc49d497b610f8583198ae410b31f",
+      "id": "0addbbf6d41216091c44f9907a942784a22cfd75dff54625126e4b62581624cb",
       "latency_checks": [],
       "latency_samples_ms": [],
       "median_latency": null,
@@ -7070,7 +7029,79 @@
           "reasons": []
         }
       },
-      "tested_server_ip": "104.16.174.22",
+      "tested_server_ip": "104.18.108.137",
+      "upstream_rank": 99
+    },
+    {
+      "attempted_address_count": 1,
+      "endpoint_attempts": [
+        {
+          "address_id": "a08e212ddbc75702",
+          "attempt": 1,
+          "engine_errors": {
+            "timeout": 1
+          },
+          "https_response": false,
+          "rejection_reasons": [
+            "required-exit-country-unconfirmed-inconclusive"
+          ]
+        }
+      ],
+      "engine_errors": {
+        "timeout": 1
+      },
+      "exit_country_evidence": {
+        "attempts": [
+          {
+            "curl_exit": 97,
+            "elapsed_ms": 5062.9,
+            "endpoint": "cloudflare-trace",
+            "http_status": null,
+            "reason": "socks-connection-failed"
+          }
+        ],
+        "checked_at": "2026-11-26T14:30:08.321905+00:00",
+        "country": null,
+        "observations": [],
+        "reason": "required-exit-country-unconfirmed-inconclusive"
+      },
+      "id": "35feabbf42f005f32784728936fdbd6026c8f029b1e63e4414696543b9386a67",
+      "latency_checks": [],
+      "latency_samples_ms": [],
+      "median_latency": null,
+      "outcome": "inconclusive",
+      "protocol": "shadowsocks",
+      "qualified": false,
+      "rejection_reasons": [
+        "required-exit-country-unconfirmed-inconclusive"
+      ],
+      "services": {
+        "chatgpt": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "instagram": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "spotify": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        },
+        "youtube": {
+          "attempts": 0,
+          "evidence": [],
+          "passed": 0,
+          "reasons": []
+        }
+      },
+      "tested_server_ip": "8.216.18.170",
       "upstream_rank": 100
     }
   ],
@@ -7083,40 +7114,39 @@
     },
     "preliminary": {}
   },
-  "generated_at": "2026-11-26T11:47:32.874755+00:00",
+  "generated_at": "2026-11-26T14:30:08.502670+00:00",
   "input": {
-    "best50_digest": "6b983fc64e0b4865f1ed72be379b6718f93c236ff54c18cc56952cc472d5fb55",
+    "best50_digest": "12b3e323621cc0aa84538e85bf19d55bcbab7f377c0d78e81356caa233afdc00",
     "nodes": 100,
     "path": "origin/main Best50 + independent Serbia exploration",
     "regional_manifest": {
-      "digest": "3d8f9e74b6d3d7729e78ddd5c9bd22215d4723eeaece37db78da8cc1ee4dadcc"
+      "digest": "cbeb1fe2f4c6ee960c7d71015f34ffe0ad9a536745488f90f626b8150ea18760"
     },
     "regional_summary": {
       "best50": 10,
       "browser_retry": 0,
       "candidate_cache": {
-        "available": 1958,
+        "available": 2000,
         "fallback_main_manifest": 0,
-        "fresh": 3253,
-        "offered": 1320,
-        "oldest_used_age_seconds": 68235.3150138855,
+        "fresh": 3709,
+        "offered": 1236,
+        "oldest_used_age_seconds": 78024.0192399025,
         "persistence": "saved",
         "status": "available",
         "stored": 2000,
-        "used": 57,
-        "youngest_used_age_seconds": 2047.734218120575
+        "used": 43,
+        "youngest_used_age_seconds": 9788.704226016998
       },
       "collected": 8000,
       "discovery": {
-        "discovered_sources": 0,
+        "discovered_sources": 5,
         "dormant_reprobes": 2,
-        "exploration_replacements": 3,
-        "fetched_sources": 70,
+        "fetched_sources": 69,
         "rate_limited": false,
-        "source_failures": 2
+        "source_failures": 3
       },
       "exploration": 90,
-      "invalid": 3435,
+      "invalid": 3039,
       "local_recheck": 0,
       "managed": 0,
       "provenance_persistence": "saved",
@@ -7127,10 +7157,10 @@
       "source_count": 72,
       "source_counts": {
         "attempted": 72,
-        "deferred": 88,
-        "failed": 2,
-        "fetched": 70,
-        "registered": 160
+        "deferred": 83,
+        "failed": 3,
+        "fetched": 69,
+        "registered": 155
       }
     }
   },
@@ -7147,11 +7177,11 @@
     "subscription_path": "output/best-local-Serbia.txt"
   },
   "regional_source_feedback": {
-    "definitive_failure": 8,
-    "inconclusive": 92,
+    "definitive_failure": 6,
+    "inconclusive": 94,
     "persisted": true,
     "qualified": 0,
-    "sources_updated": 62
+    "sources_updated": 60
   },
   "required_services": [
     "chatgpt",
@@ -7174,5 +7204,5 @@
     ],
     "rounds": 5
   },
-  "upstream_sha": "62c0724f0c1249b0ccd13b5a5474cc427e1de417"
+  "upstream_sha": "5bc52d0e52e157202913efe4261c067eb175052c"
 }
